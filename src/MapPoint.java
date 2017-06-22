@@ -17,8 +17,5 @@ public class MapPoint {
 	
 	public String toString() {
 		return "<" + String.format(format,x) + "," + String.format(format,y) + ">";
-	}
-	
-	
-	
+	}	
 }

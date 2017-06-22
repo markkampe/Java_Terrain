@@ -24,7 +24,7 @@ public class MapPoints {
 	}
 	
 	/**
-	 * represent a set of points a s a string
+	 * represent a set of points as a string
 	 */
 	public String toString() {
 		String result = "";

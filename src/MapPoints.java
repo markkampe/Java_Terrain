@@ -23,6 +23,17 @@ public class MapPoints {
 		}
 	}
 	
+	public int length() {
+		return set.length;
+	}
+	
+	public MapPoint point(int n) {
+		if (n < set.length)
+			return set[n];
+		else
+			return null;
+	}
+	
 	/**
 	 * represent a set of points as a string
 	 */

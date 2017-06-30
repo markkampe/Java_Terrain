@@ -72,10 +72,10 @@ public class PointsDisplay extends JPanel {
 	 * @param shape ... shape to be used for these points
 	 * @param color ... color to be used for these points
 	 */
-	public void addPoints(Point[] pointset, Shape shape, Color color ) {
+	public void addPoints(MapPoint[] pointset, Shape shape, Color color ) {
 		frame.setVisible(false);	// prevent display during update
-		for( Point p: pointset) {
-			points.add(new DisplayPoint((p.x + 0.5) * width, (p.y + 0.5) * height, shape, color));
+		for( int i = 0; i < pointset.length; i++ ) {
+			points.add(new DisplayPoint((pointset[i].x + 0.5) * width, (pointset[i].y + 0.5) * height, shape, color));
 		}
 		frame.setVisible(true);
 	}

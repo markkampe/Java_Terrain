@@ -55,11 +55,11 @@ public class Mesh {
 		this.y_extent = y_extent;
 
 		// create a set of random points
-		Point points[] = new Point[num_points];
+		MapPoint points[] = new MapPoint[num_points];
 		for (int i = 0; i < num_points; i++) {
 			double x = x_extent * (Math.random() - 0.5);
 			double y = y_extent * (Math.random() - 0.5);
-			points[i] = new Point(x, y);
+			points[i] = new MapPoint(x, y);
 		}
 		
 		// even out the distribution a little
@@ -89,13 +89,13 @@ public class Mesh {
 	 * O'Leary did this by computing the Vornoi polygons surrounding the
 	 * chosen points, and then taking the centroids of those polygons.
 	 */
-	private Point[] improve( Point[] points) {
-		Point newPoints[] = new Point[points.length];
+	private MapPoint[] improve( MapPoint[] points) {
+		MapPoint newPoints[] = new MapPoint[points.length];
 
 		// create the Voronoi tesselation
 		VoronoiDiagram vd = new VoronoiDiagram();
 		for (int i = 0; i < points.length; i++) {
-			vd.insert_point_site(points[i]);
+			vd.insert_point_site(new Point(points[i].x, points[i].y));
 		}
 		HalfEdgeDiagram g = vd.get_graph_reference();
 		
@@ -132,14 +132,18 @@ public class Mesh {
 				y_sum += truncate(e.source.position.y, y_extent);
 				numPoints++;
 			}
-			newPoints[i++] = new Point(x_sum/numPoints, y_sum/numPoints);
+			newPoints[i++] = new MapPoint(x_sum/numPoints, y_sum/numPoints);
 			// System.out.println("initial point <" + v.position + "> -> <" + newPoints[i-1] + ">");
 		}
 		return(newPoints);
 	}
 	
-	private void triangles() {
-		// compute the Voronoi teselation
+	private void makeMesh() {
+		// compute the Voronoi teselation of the current point set
+		// for each edge
+			// get the vertex ID of each end
+			// note that each is a neighbor of the other
+		
 		// accumulate and label the vertices
 		// identify the neighbors
 	}

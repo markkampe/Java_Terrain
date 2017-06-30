@@ -84,13 +84,16 @@ public class Mesh {
 	}
 
 	/**
-	 * even out a set of random points
+	 * even out (the spacing of) a set of random points
 	 * 
 	 * O'Leary did this by computing the Vornoi polygons surrounding the
 	 * chosen points, and then taking the centroids of those polygons.
 	 */
 	private MapPoint[] improve( MapPoint[] points) {
 		MapPoint newPoints[] = new MapPoint[points.length];
+		
+		// sort the points (left to right)	??? WHY ???
+		MapPoint.quickSort(points, 0, points.length-1);
 
 		// create the Voronoi tesselation
 		VoronoiDiagram vd = new VoronoiDiagram();

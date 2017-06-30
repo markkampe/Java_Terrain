@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/home/git/Java_Terrain/lib/commons-math3-3.4.1.jar"/>
-	<classpathentry kind="lib" path="/home/git/Java_Terrain/lib/aspectjrt-1.8.5.jar"/>
-	<classpathentry kind="lib" path="/home/git/Java_Terrain/lib/OpenVoronoi.jar"/>
+	<classpathentry kind="lib" path="lib/aspectjrt-1.8.5.jar"/>
+	<classpathentry kind="lib" path="lib/commons-math3-3.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/OpenVoronoi.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

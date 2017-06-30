@@ -1,15 +1,12 @@
 
 public class Main {
+	static private double x_extent = 1; // X map diameter
+	static private double y_extent = 1; // Y map diameter
+	static private final int POINTS = 200; // number of points
+
 	public static void main(String[] args) {
 
-		MapPoints eight = new MapPoints(8);
-		System.out.println("set = " + eight);
-		MapPoint center = eight.centroid();
-		System.out.println("center = " + center);
-		
-		PointsDisplay me = new PointsDisplay("Raw Points", eight);
+		// create a set of random points
+		Mesh m = new Mesh(POINTS, x_extent, y_extent, 1);
 	}
-	
-
-	// TODO find and import a voronoi package
 }

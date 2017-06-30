@@ -23,6 +23,7 @@ public class PointsDisplay extends JPanel {
 	private Color background;
 	private int width;
 	private int height;
+	private JFrame frame;
 	private static final long serialVersionUID = 0;
 
 	private class DisplayPoint {
@@ -54,11 +55,10 @@ public class PointsDisplay extends JPanel {
 	 * @param background color
 	 */
 	public PointsDisplay(String title, int width, int height, Color background) {
-		JFrame frame = new JFrame(title);
+		frame = new JFrame(title);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(this);
 		frame.setSize(width, height);
-		frame.setVisible(true);
 
 		this.background = background;
 		this.width = width;
@@ -73,9 +73,11 @@ public class PointsDisplay extends JPanel {
 	 * @param color ... color to be used for these points
 	 */
 	public void addPoints(Point[] pointset, Shape shape, Color color ) {
+		frame.setVisible(false);	// prevent display during update
 		for( Point p: pointset) {
 			points.add(new DisplayPoint((p.x + 0.5) * width, (p.y + 0.5) * height, shape, color));
 		}
+		frame.setVisible(true);
 	}
 
 	/**

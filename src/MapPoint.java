@@ -5,17 +5,41 @@
  *
  */
 public class MapPoint {
-	public double x;		// X coordinate
-	public double y;		// Y coordinate
-	public int index;		// point index #
-	public int neighbors[];	// neighbor's index #s
+	public double x;			// X coordinate
+	public double y;			// Y coordinate
+	public int index;			// point index #
+	private int neighbors;		// number of neighbors
+	private MapPoint[] nearby;	// neighboring points
+	private int numPaths;		// number of paths (should == neighbors)
+	private Path[] paths;		// connecting paths
 	
 	private static final String format="%7.5f";
 	
 	public MapPoint(double x,double y) {
 		this.x = x;
 		this.y = y;
-		neighbors = new int[3];
+		nearby = new MapPoint[3];
+		paths = new Path[3];
+		neighbors = 0;
+		numPaths = 0;
+	}
+	
+	/**
+	 * note that we have a neighbor
+	 * @param p ... address of new neighbor
+	 */
+	void addNeighbor(MapPoint p) {
+		assert(neighbors < 3);
+		nearby[neighbors++] = p;
+	}
+	
+	/**
+	 * note a path into/out of this node
+	 * @param p
+	 */
+	void addPath(Path p) {
+		assert(numPaths < 3);
+		paths[numPaths++] = p;
 	}
 	
 	/**

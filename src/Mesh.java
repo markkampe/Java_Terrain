@@ -74,7 +74,7 @@ public class Mesh {
 	/**
 	 * constrain coordinates to legal values
 	 */
-	private double truncate(double value, double extent) {
+	private static double truncate(double value, double extent) {
 		if (value < -extent/2)
 			return(-extent/2);
 		else if (value > extent/2)
@@ -82,7 +82,25 @@ public class Mesh {
 		else
 			return(value);
 	}
+	
+	/**
+	 * is a point within the arena
+	 */
+	private boolean inTheBox(Vertex v) {
+		if (v.position.x < -x_extent/2 || v.position.x > x_extent/2)
+			return false;
+		if (v.position.y < -y_extent/2 || v.position.y > y_extent/2)
+			return false;
+		return true;
+	}
 
+	/**
+	 * maintain a map from points to numbers
+	 */
+	private MapPoint addPoint(double x, double y) {
+		return null;	// FIX
+	}
+	
 	/**
 	 * even out (the spacing of) a set of random points
 	 * 
@@ -141,13 +159,39 @@ public class Mesh {
 		return(newPoints);
 	}
 	
-	private void makeMesh() {
+	/**
+	 * turn a set of points into a mesh
+	 */
+	private void makeMesh( MapPoint[] points ) {
 		// compute the Voronoi teselation of the current point set
-		// for each edge
-			// get the vertex ID of each end
-			// note that each is a neighbor of the other
+		VoronoiDiagram vd = new VoronoiDiagram();
+		for (int i = 0; i < points.length; i++) {
+			vd.insert_point_site(new Point(points[i].x, points[i].y));
+		}
+		HalfEdgeDiagram g = vd.get_graph_reference();
 		
-		// accumulate and label the vertices
-		// identify the neighbors
+		// locate all the vertices and edges
+		for( Edge e: g.edges ) {
+			// ignore edges that are not entirely within the arena
+			Vertex v1 = e.source;
+			if (!inTheBox(v1))
+				continue;
+			Vertex v2 = e.target;
+			if (!inTheBox(v2))
+				continue;
+			
+			// assign/get the vertex ID of each end
+			MapPoint p1 = addPoint(v1.position.x, v1.position.y);
+			MapPoint p2 = addPoint(v2.position.x, v2.position.y);
+			
+			// note that each is a neighbor of the other
+			p1.addNeighbor(p2);
+			p2.addNeighbor(p1);
+			
+			// add this to my own list of edges
+			Path p = new Path(p1, p2);
+			p1.addPath(p);
+			p2.addPath(p);
+		}
 	}
 }

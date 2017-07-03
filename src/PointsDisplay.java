@@ -1,6 +1,5 @@
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,14 +7,12 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.rogach.jopenvoronoi.Point;
-
 /**
  * displays a set of MapPoints in a pop-up window
  */
 public class PointsDisplay extends JPanel {
 
-	public enum Shape {
+	public static enum Shape {
 		CIRCLE, CROSS, DIAMOND, SQUARE
 	};
 

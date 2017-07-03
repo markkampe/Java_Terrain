@@ -13,13 +13,8 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
 /**
  * @module mesh ... functions to generate the basic map
  *
- *         a mesh is a triangular tessalation of the map. a mesh includes: pts
- *         ... the original well spaced points vor ... Voronoi tesselation of
- *         those points vxs ... <x,y> coordinate of each Voronoi vertex adj ...
- *         list of vertex indices of neighors of each vertex tris ... list of
- *         <x,y> coordinates neighbors of each vertex
- *
- *         edges ... list of [index, index, <x,y>, <x,y>] tupples
+ *         a mesh is a triangular tessalation of the map. a mesh includes:
+ *         
  *
  *         O'Leary observed that a map created on a square grid never loses its
  *         regularity, so he wanted to build the map on an irregular grid. But
@@ -39,9 +34,12 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
  */
 public class Mesh {
 
-	private double x_extent;
-	private double y_extent;
-
+	private double x_extent;	// arena width
+	private double y_extent;	// arena height
+	
+	private MapPoint[] vertices;	// grid vertices
+	private int numVertices;		// number of vertices
+	
 	/**
 	 * create an initial set of points
 	 * 
@@ -62,17 +60,20 @@ public class Mesh {
 			points[i] = new MapPoint(x, y);
 		}
 		
-		// even out the distribution a little
+		// even out the distribution
 		PointsDisplay pd = new PointsDisplay("Grid Points", 800, 800, Color.BLACK);
 		pd.addPoints(points, PointsDisplay.Shape.CIRCLE, Color.GRAY);
 		for( int i = 0; i < improvements; i++ )
 			points = improve(points);
 		pd.addPoints(points, PointsDisplay.Shape.DIAMOND, Color.WHITE);
 		pd.repaint();
+		
+		// create a Voronoi mesh around them
+		makeMesh(points);
 	}
 
 	/**
-	 * constrain coordinates to legal values
+	 * truncate values outside the extent box to the edge of the box
 	 */
 	private static double truncate(double value, double extent) {
 		if (value < -extent/2)
@@ -169,6 +170,20 @@ public class Mesh {
 			vd.insert_point_site(new Point(points[i].x, points[i].y));
 		}
 		HalfEdgeDiagram g = vd.get_graph_reference();
+		
+		// allocate vertex array
+		int n = g.num_vertices();
+		vertices = new MapPoint[n];
+		for (int i = 0; i < n; i++)
+			vertices[i] = null;
+		
+		// allocate an array we can use to track already-known points
+		int hash(double x, double y) {
+			
+		}
+		
+		int h = n * 2 / 3;
+		hashTable = new int[h];
 		
 		// locate all the vertices and edges
 		for( Edge e: g.edges ) {

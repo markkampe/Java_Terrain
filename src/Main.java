@@ -1,12 +1,11 @@
 
 public class Main {
-	static private double x_extent = 1; // X map diameter
-	static private double y_extent = 1; // Y map diameter
-	static private final int POINTS = 200; // number of points
 
 	public static void main(String[] args) {
 
+		Parameters parms = Parameters.getInstance();
+		
 		// create a set of random points
-		Mesh m = new Mesh(POINTS, x_extent, y_extent, 1);
+		Mesh m = new Mesh(parms.points, parms.x_extent, parms.y_extent, parms.improvements);
 	}
 }

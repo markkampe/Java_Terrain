@@ -2,44 +2,44 @@
 
 /**
  * a MapPoint has an X and Y coordinate
- *
+ * 		if part of a grid, it has an index and neighbors
  */
 public class MapPoint {
 	public double x;			// X coordinate
 	public double y;			// Y coordinate
 	public int index;			// point index #
-	private int neighbors;		// number of neighbors
-	private MapPoint[] nearby;	// neighboring points
-	private int numPaths;		// number of paths (should == neighbors)
-	private Path[] paths;		// connecting paths
+	public int neighbors;		// number of neighbors
+	public MapPoint[] neighbor;	// neighboring points
 	
 	private static final String format="%7.5f";
 	
 	public MapPoint(double x,double y) {
 		this.x = x;
 		this.y = y;
-		nearby = new MapPoint[3];
-		paths = new Path[3];
-		neighbors = 0;
-		numPaths = 0;
+	}
+	
+	public MapPoint(double x,double y, int index) {
+		this.x = x;
+		this.y = y;
+		this.index = index;
 	}
 	
 	/**
 	 * note that we have a neighbor
 	 * @param p ... address of new neighbor
 	 */
-	void addNeighbor(MapPoint p) {
+	void addNeighbor(MapPoint p) { 
+		if (neighbors == 0) {
+			// allocate array on first add
+			neighbor = new MapPoint[3];
+		} else {
+			// make sure this neighbor isn't already known
+			for(int i = 0; i < neighbors; i++)
+				if (neighbor[i] == p)
+					return;
+		}
 		assert(neighbors < 3);
-		nearby[neighbors++] = p;
-	}
-	
-	/**
-	 * note a path into/out of this node
-	 * @param p
-	 */
-	void addPath(Path p) {
-		assert(numPaths < 3);
-		paths[numPaths++] = p;
+		neighbor[neighbors++] = p;
 	}
 	
 	/**

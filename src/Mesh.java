@@ -15,7 +15,6 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
  *
  *         a mesh is a triangular tessalation of the map. a mesh includes:
  *         
- *
  *         O'Leary observed that a map created on a square grid never loses its
  *         regularity, so he wanted to build the map on an irregular grid. But
  *         he found randomly chosen grids to be too irregular. Mesh generation
@@ -34,11 +33,12 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
  */
 public class Mesh {
 
-	private double x_extent;	// arena width
-	private double y_extent;	// arena height
-	
+	private double x_extent;		// arena width
+	private double y_extent;		// arena height
 	private MapPoint[] vertices;	// grid vertices
 	private int numVertices;		// number of vertices
+	
+	private Parameters parms;		// global options
 	
 	/**
 	 * create an initial set of points
@@ -51,6 +51,7 @@ public class Mesh {
 	public Mesh(int num_points, double x_extent, double y_extent, int improvements) {
 		this.x_extent = x_extent;
 		this.y_extent = y_extent;
+		parms = Parameters.getInstance();
 
 		// create a set of random points
 		MapPoint points[] = new MapPoint[num_points];
@@ -60,20 +61,32 @@ public class Mesh {
 			points[i] = new MapPoint(x, y);
 		}
 		
+		// diagnostic display of original points
+		PointsDisplay pd = parms.show_points ? new PointsDisplay("Grid Points", 800, 800, Color.BLACK) : null;
+		if (pd != null)
+			pd.addPoints(points, PointsDisplay.Shape.CIRCLE, Color.GRAY);
+			
 		// even out the distribution
-		PointsDisplay pd = new PointsDisplay("Grid Points", 800, 800, Color.BLACK);
-		pd.addPoints(points, PointsDisplay.Shape.CIRCLE, Color.GRAY);
 		for( int i = 0; i < improvements; i++ )
 			points = improve(points);
-		pd.addPoints(points, PointsDisplay.Shape.DIAMOND, Color.WHITE);
-		pd.repaint();
 		
-		// create a Voronoi mesh around them
+		// diagnostic display of improved points
+		if (pd != null) {
+			pd.addPoints(points, PointsDisplay.Shape.DIAMOND, Color.WHITE);
+			pd.repaint();
+		}
+		
+		// create a Voronoi mesh around the improved points
 		makeMesh(points);
+		if (parms.show_grid) {
+			new MeshDisplay("Raw Grid", vertices, 800, 800, Color.BLACK, Color.GRAY);
+		}
 	}
 
 	/**
 	 * truncate values outside the extent box to the edge of the box
+	 * 
+	 * FIX - should interpolate rather than flatten
 	 */
 	private static double truncate(double value, double extent) {
 		if (value < -extent/2)
@@ -86,6 +99,11 @@ public class Mesh {
 	
 	/**
 	 * is a point within the arena
+	 * 
+	 * @param OpenVoronoi vertex
+	 * @return if that point is within the box
+	 * 
+	 * 	(necessary because OpenVoronoi generates points outside the box)
 	 */
 	private boolean inTheBox(Vertex v) {
 		if (v.position.x < -x_extent/2 || v.position.x > x_extent/2)
@@ -94,18 +112,11 @@ public class Mesh {
 			return false;
 		return true;
 	}
-
-	/**
-	 * maintain a map from points to numbers
-	 */
-	private MapPoint addPoint(double x, double y) {
-		return null;	// FIX
-	}
 	
 	/**
 	 * even out (the spacing of) a set of random points
 	 * 
-	 * O'Leary did this by computing the Vornoi polygons surrounding the
+	 * O'Leary did this by computing the Voronoi polygons surrounding the
 	 * chosen points, and then taking the centroids of those polygons.
 	 */
 	private MapPoint[] improve( MapPoint[] points) {
@@ -161,7 +172,62 @@ public class Mesh {
 	}
 	
 	/**
+	 * This class is used to generate a single unique MapPoint
+	 * for every vertex coordinate, and find the already 
+	 * allocated point when coordinates are repeated.
+	 */
+	private class MapPointHasher {
+		public MapPoint vertices[];	// known unique vertices
+		public int numVertices;		// # unique vertices
+		private int tableSize;		// size of hash table
+		private int[] hashTable;	// index into vertices array
+		
+		/**
+		 * allocate a hash table amd vertex list
+		 * @param max ... max # of vertices
+		 */
+		public MapPointHasher(int max) {
+			vertices = new MapPoint[max];
+			numVertices = 0;
+			tableSize = max * 3 / 2;	// hash table efficiency
+			hashTable = new int[tableSize];
+			for( int i = 0; i < tableSize; i++ )
+				hashTable[i] = -1;
+		}
+		
+		/**
+		 * find or create reference to MapPoint(x,y)
+		 * 
+		 * 	We use an open hash table to note the index associated
+		 *  with a particular hash value
+		 * 		
+		 * @param x  x coordinate
+		 * @param y  y coordinate
+		 * @return   associated MapPoint
+		 */
+		public MapPoint findPoint(double x, double y) {
+			double value = ((x + x_extent/2) + (y + y_extent/2)) * tableSize;
+			int guess = ((int) value) % tableSize;
+			while(hashTable[guess] != -1) {
+				MapPoint m = vertices[hashTable[guess]];
+				if (m.x == x && m.y == y)
+					return m;	// this one is already known
+				guess = (guess == tableSize - 1) ? 0 : guess + 1;
+			}
+			// add a new MapPoint to the list
+			MapPoint m = new MapPoint(x,y,numVertices);
+			hashTable[guess] = numVertices;
+			vertices[numVertices++] = m;
+			return m;
+		}
+	}
+	
+	/**
 	 * turn a set of points into a mesh
+	 * 		compute the Voronoi tesselation
+	 * 		for each edge (that is within the box)
+	 * 			add each new end to our vertex list
+	 * 			add the edge as path in/out of each vertex
 	 */
 	private void makeMesh( MapPoint[] points ) {
 		// compute the Voronoi teselation of the current point set
@@ -171,20 +237,10 @@ public class Mesh {
 		}
 		HalfEdgeDiagram g = vd.get_graph_reference();
 		
-		// allocate vertex array
+		// allocate hash table to track known vertices
 		int n = g.num_vertices();
-		vertices = new MapPoint[n];
-		for (int i = 0; i < n; i++)
-			vertices[i] = null;
-		
-		// allocate an array we can use to track already-known points
-		int hash(double x, double y) {
-			
-		}
-		
-		int h = n * 2 / 3;
-		hashTable = new int[h];
-		
+		MapPointHasher hash = new MapPointHasher(n);
+
 		// locate all the vertices and edges
 		for( Edge e: g.edges ) {
 			// ignore edges that are not entirely within the arena
@@ -196,17 +252,23 @@ public class Mesh {
 				continue;
 			
 			// assign/get the vertex ID of each end
-			MapPoint p1 = addPoint(v1.position.x, v1.position.y);
-			MapPoint p2 = addPoint(v2.position.x, v2.position.y);
+			MapPoint p1 = hash.findPoint(v1.position.x, v1.position.y);
+			MapPoint p2 = hash.findPoint(v2.position.x, v2.position.y);
 			
 			// note that each is a neighbor of the other
 			p1.addNeighbor(p2);
 			p2.addNeighbor(p1);
-			
+		
 			// add this to my own list of edges
-			Path p = new Path(p1, p2);
-			p1.addPath(p);
-			p2.addPath(p);
-		}
+			Path.addPath(p1, p2);
+		} 
+		
+		// copy out the list of unique vertices
+		vertices = new MapPoint[hash.numVertices];
+		for(int i = 0; i < hash.numVertices; i++)
+			vertices[i] = hash.vertices[i];
+		numVertices = hash.numVertices;
+		System.out.println(points.length + " points-> " + numVertices + "/" + n + " mesh vertices");
+		System.out.println("->" + Path.added + "/" + Path.adds + " paths");
 	}
 }

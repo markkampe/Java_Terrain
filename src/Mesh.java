@@ -35,8 +35,9 @@ public class Mesh {
 
 	private double x_extent;		// arena width
 	private double y_extent;		// arena height
-	private MapPoint[] vertices;	// grid vertices
-	private int numVertices;		// number of vertices
+	
+	private MapPoint[] vertices;	// grid vertices	
+	private Path[] edges;			// mesh connections
 	
 	private Parameters parms;		// global options
 	
@@ -79,7 +80,7 @@ public class Mesh {
 		// create a Voronoi mesh around the improved points
 		makeMesh(points);
 		if (parms.show_grid) {
-			new MeshDisplay("Raw Grid", vertices, 800, 800, Color.BLACK, Color.GRAY);
+			new MeshDisplay("Raw Grid", edges, 800, 800, Color.BLACK, Color.GRAY);
 		}
 	}
 
@@ -166,61 +167,13 @@ public class Mesh {
 				numPoints++;
 			}
 			newPoints[i++] = new MapPoint(x_sum/numPoints, y_sum/numPoints);
-			// System.out.println("initial point <" + v.position + "> -> <" + newPoints[i-1] + ">");
+			
+			if (parms.debug_level > 2)
+				System.out.println("initial point <" + v.position + "> -> <" + newPoints[i-1] + ">");
 		}
 		return(newPoints);
 	}
 	
-	/**
-	 * This class is used to generate a single unique MapPoint
-	 * for every vertex coordinate, and find the already 
-	 * allocated point when coordinates are repeated.
-	 */
-	private class MapPointHasher {
-		public MapPoint vertices[];	// known unique vertices
-		public int numVertices;		// # unique vertices
-		private int tableSize;		// size of hash table
-		private int[] hashTable;	// index into vertices array
-		
-		/**
-		 * allocate a hash table amd vertex list
-		 * @param max ... max # of vertices
-		 */
-		public MapPointHasher(int max) {
-			vertices = new MapPoint[max];
-			numVertices = 0;
-			tableSize = max * 3 / 2;	// hash table efficiency
-			hashTable = new int[tableSize];
-			for( int i = 0; i < tableSize; i++ )
-				hashTable[i] = -1;
-		}
-		
-		/**
-		 * find or create reference to MapPoint(x,y)
-		 * 
-		 * 	We use an open hash table to note the index associated
-		 *  with a particular hash value
-		 * 		
-		 * @param x  x coordinate
-		 * @param y  y coordinate
-		 * @return   associated MapPoint
-		 */
-		public MapPoint findPoint(double x, double y) {
-			double value = ((x + x_extent/2) + (y + y_extent/2)) * tableSize;
-			int guess = ((int) value) % tableSize;
-			while(hashTable[guess] != -1) {
-				MapPoint m = vertices[hashTable[guess]];
-				if (m.x == x && m.y == y)
-					return m;	// this one is already known
-				guess = (guess == tableSize - 1) ? 0 : guess + 1;
-			}
-			// add a new MapPoint to the list
-			MapPoint m = new MapPoint(x,y,numVertices);
-			hashTable[guess] = numVertices;
-			vertices[numVertices++] = m;
-			return m;
-		}
-	}
 	
 	/**
 	 * turn a set of points into a mesh
@@ -238,8 +191,8 @@ public class Mesh {
 		HalfEdgeDiagram g = vd.get_graph_reference();
 		
 		// allocate hash table to track known vertices
-		int n = g.num_vertices();
-		MapPointHasher hash = new MapPointHasher(n);
+		MapPointHasher pointhash = new MapPointHasher(g.num_vertices(), x_extent, y_extent);
+		PathHasher pathhash = new PathHasher(g.num_edges());
 
 		// locate all the vertices and edges
 		for( Edge e: g.edges ) {
@@ -252,23 +205,29 @@ public class Mesh {
 				continue;
 			
 			// assign/get the vertex ID of each end
-			MapPoint p1 = hash.findPoint(v1.position.x, v1.position.y);
-			MapPoint p2 = hash.findPoint(v2.position.x, v2.position.y);
+			MapPoint p1 = pointhash.findPoint(v1.position.x, v1.position.y);
+			MapPoint p2 = pointhash.findPoint(v2.position.x, v2.position.y);
 			
 			// note that each is a neighbor of the other
 			p1.addNeighbor(p2);
 			p2.addNeighbor(p1);
-		
-			// add this to my own list of edges
-			Path.addPath(p1, p2);
+			
+			// and note the path that connects them
+			pathhash.findPath(p1, p2);
 		} 
 		
-		// copy out the list of unique vertices
-		vertices = new MapPoint[hash.numVertices];
-		for(int i = 0; i < hash.numVertices; i++)
-			vertices[i] = hash.vertices[i];
-		numVertices = hash.numVertices;
-		System.out.println(points.length + " points-> " + numVertices + "/" + n + " mesh vertices");
-		System.out.println("->" + Path.added + "/" + Path.adds + " paths");
+		// copy out the list of unique Vertices
+		vertices = new MapPoint[pointhash.numVertices];
+		for(int i = 0; i < pointhash.numVertices; i++)
+			vertices[i] = pointhash.vertices[i];
+	
+		// copy out the list of unique Edges
+		edges = new Path[pathhash.numPaths];
+		for(int i = 0; i < pathhash.numPaths; i++)
+			edges[i] = pathhash.paths[i];
+		
+		if (parms.debug_level > 0)
+			System.out.println(points.length + " points-> " + vertices.length + "/" + g.num_vertices() + 
+					" mesh vertices, " + edges.length + "/" + g.num_edges() + " mesh paths");
 	}
 }

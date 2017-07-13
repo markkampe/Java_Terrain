@@ -14,7 +14,7 @@ public class MeshDisplay extends JPanel {
 	private JFrame frame;
 	private static final long serialVersionUID = 0;
 	
-	private MapPoint[] mesh;
+	private Path[] mesh;
 	private Color color;
 
 	/**
@@ -27,7 +27,7 @@ public class MeshDisplay extends JPanel {
 	 * @param background color
 	 * @param foreground color
 	 */
-	public MeshDisplay(String title, MapPoint[] pointset, int width, int height, Color background, Color foreground) {
+	public MeshDisplay(String title, Path[] paths, int width, int height, Color background, Color foreground) {
 		frame = new JFrame(title);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(this);
@@ -38,7 +38,7 @@ public class MeshDisplay extends JPanel {
 		this.color = foreground;
 		this.width = width;
 		this.height = height;
-		this.mesh = pointset;
+		this.mesh = paths;
 	}
 
 	/**
@@ -49,18 +49,13 @@ public class MeshDisplay extends JPanel {
 		setBackground(background);
 		g.setColor(color);
 		
-		// for every point in the map
 		for(int i = 0; i < mesh.length; i++) {
-			MapPoint m = mesh[i];
-			double myX = (m.x+0.5) * width;
-			double myY = (m.y+0.5) * height;
-			// for each neighbor
-			// FIX this is redundant
-			for(int j = 0; j < m.neighbors; j++) {
-				double hisX = (m.neighbor[j].x + 0.5) * width;
-				double hisY = (m.neighbor[j].y + 0.5) * height;
-				g.drawLine((int) myX,  (int) myY,  (int) hisX,  (int) hisY);
-			}
+			Path p = mesh[i];
+			double x1 = (p.source.x + 0.5) * width;
+			double y1 = (p.source.y + 0.5) * height;
+			double x2 = (p.target.x + 0.5) * width;
+			double y2 = (p.target.y + 0.5) * height;
+			g.drawLine((int) x1,  (int) y1,  (int) x2,  (int) y2);
 		}
 	}
 }

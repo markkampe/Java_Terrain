@@ -16,6 +16,7 @@
 	// diagnostic options
 	public boolean show_points = false;	// display original and improved points
 	public boolean show_grid = true;	// display final grid
+	public int debug_level = 1;			// level of verbosity
 	
 	private static Parameters singleton = null;
 	private Parameters() {}
@@ -25,5 +26,4 @@
 			singleton = new Parameters();
 		return singleton;
 	}
-
 }

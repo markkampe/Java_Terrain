@@ -43,6 +43,26 @@ public class MapPoint {
 	}
 	
 	/**
+	 * compute the distance between two points
+	 * 
+	 * @param other
+	 * @return distance
+	 */
+	double distance(MapPoint other) {
+		double dx = this.x - other.x;
+		double dy = this.y - other.y;
+		return Math.sqrt((dx*dx) + (dy*dy));
+	}
+	
+	
+	/**
+	 * is a point on the edge
+	 */
+	boolean isOnEdge() {
+		return neighbors < 3;
+	}
+	
+	/**
 	 * (recursive) QuickSort an array of MapPoints
 	 * @param arr ... array to be sorted
 	 * @param left ... left most index of sort region

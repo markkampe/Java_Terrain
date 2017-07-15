@@ -1,15 +1,18 @@
 /**
- * This class is used to generate a single unique MapPoint for every vertex
- * coordinate, and find the already allocated point when coordinates are
- * repeated.
+ * This class is used to generate a single unique MapPoint for 
+ * each unique coordinate pair, and find the already allocated 
+ * point when coordinates are repeated.
+ * 
+ * I have chosen to do this with an open hash table for time
+ * efficiency.
  */
 public class MapPointHasher {
-	public MapPoint[] vertices;
-	public int numVertices;
-	private int tableSize;
-	private int[] hashTable;
-	private double x_extent;
-	private double y_extent;
+	public MapPoint[] vertices;	// list of known vertices
+	public int numVertices;		// number of vertices in list
+	private int tableSize;		// total size of hash table
+	private int[] hashTable;	// index known vertices (or -1)
+	private double x_extent;	// needed to normalize hash values
+	private double y_extent;	// needed to normalize hash values
 
 	/**
 	 * allocate a hash table and vertex list

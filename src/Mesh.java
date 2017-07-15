@@ -1,6 +1,7 @@
 
 import java.awt.Color;
 
+// note: this is the only class that knows about Voronoi
 import org.rogach.jopenvoronoi.Edge;
 import org.rogach.jopenvoronoi.Face;
 import org.rogach.jopenvoronoi.HalfEdgeDiagram;
@@ -13,7 +14,7 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
 /**
  * @module mesh ... functions to generate the basic map
  *
- *         a mesh is a triangular tessalation of the map. a mesh includes:
+ *         a mesh is a Voronoi tesselation of a two-dimensional map.
  *         
  *         O'Leary observed that a map created on a square grid never loses its
  *         regularity, so he wanted to build the map on an irregular grid. But
@@ -27,75 +28,68 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
  *
  *         2. He uses those (improved) points as the centers for a second
  *         Voronoi tesselation, whose vertices become the map points, and
- *         whose edges become a triangular mesh.
+ *         whose edges become a connected mesh (each internal point has
+ *         three neighbors).
  *
- *         NOTE: <x,y> coordinates are relative to the center of the map
+ *         NOTES: <x,y> coordinates are relative to the center of the map
  */
 public class Mesh {
-
-	private double x_extent;		// arena width
-	private double y_extent;		// arena height
-	
-	private MapPoint[] vertices;	// grid vertices	
-	private Path[] edges;			// mesh connections
+	public MapPoint[] vertices;	// grid vertices	
+	public Path[] edges;			// mesh connections
 	
 	private Parameters parms;		// global options
 	
 	/**
 	 * create an initial set of points
 	 * 
-	 * @param number of points
-	 * @param x range
-	 * @param y range
-	 * @param number of improvement iterations
 	 */
-	public Mesh(int num_points, double x_extent, double y_extent, int improvements) {
-		this.x_extent = x_extent;
-		this.y_extent = y_extent;
+	public Mesh() {
 		parms = Parameters.getInstance();
 
 		// create a set of random points
-		MapPoint points[] = new MapPoint[num_points];
-		for (int i = 0; i < num_points; i++) {
-			double x = x_extent * (Math.random() - 0.5);
-			double y = y_extent * (Math.random() - 0.5);
+		MapPoint points[] = new MapPoint[parms.points];
+		for (int i = 0; i < points.length; i++) {
+			double x = parms.x_extent * (Math.random() - 0.5);
+			double y = parms.y_extent * (Math.random() - 0.5);
 			points[i] = new MapPoint(x, y);
 		}
-		
-		// diagnostic display of original points
-		PointsDisplay pd = parms.show_points ? new PointsDisplay("Grid Points", 800, 800, Color.BLACK) : null;
-		if (pd != null)
-			pd.addPoints(points, PointsDisplay.Shape.CIRCLE, Color.GRAY);
 			
 		// even out the distribution
-		for( int i = 0; i < improvements; i++ )
+		for( int i = 0; i < parms.improvements; i++ )
 			points = improve(points);
-		
-		// diagnostic display of improved points
-		if (pd != null) {
-			pd.addPoints(points, PointsDisplay.Shape.DIAMOND, Color.WHITE);
-			pd.repaint();
-		}
 		
 		// create a Voronoi mesh around the improved points
 		makeMesh(points);
-		if (parms.show_grid) {
-			new MeshDisplay("Raw Grid", edges, 800, 800, Color.BLACK, Color.GRAY);
-		}
 	}
+	
+	
+	/**
+	 * is a point near the edge
+	 * 
+	 * @param point
+	 */
+	boolean isNearEdege(MapPoint p) {
+		return false;
+	}
+
 
 	/**
 	 * truncate values outside the extent box to the edge of the box
-	 * 
-	 * FIX - should interpolate rather than flatten
 	 */
-	private static double truncate(double value, double extent) {
-		if (value < -extent/2)
-			return(-extent/2);
-		else if (value > extent/2)
-			return(extent/2);
-		else
-			return(value);
+	private Point truncate(Point p) {
+		double x = p.x;
+		if (x < -parms.x_extent/2)
+			x = -parms.x_extent/2;
+		else if (x > parms.x_extent/2)
+			x = parms.x_extent/2;
+		
+		double y = p.y;
+		if (y < -parms.y_extent/2)
+			y = -parms.y_extent/2;
+		else if (y > parms.y_extent/2)
+			y = parms.y_extent/2;
+		
+		return new Point(x,y);
 	}
 	
 	/**
@@ -106,10 +100,10 @@ public class Mesh {
 	 * 
 	 * 	(necessary because OpenVoronoi generates points outside the box)
 	 */
-	private boolean inTheBox(Vertex v) {
-		if (v.position.x < -x_extent/2 || v.position.x > x_extent/2)
+	private boolean inTheBox(Point p) {
+		if (p.x < -parms.x_extent/2 || p.x > parms.x_extent/2)
 			return false;
-		if (v.position.y < -y_extent/2 || v.position.y > y_extent/2)
+		if (p.y < -parms.y_extent/2 || p.y > parms.y_extent/2)
 			return false;
 		return true;
 	}
@@ -119,11 +113,14 @@ public class Mesh {
 	 * 
 	 * O'Leary did this by computing the Voronoi polygons surrounding the
 	 * chosen points, and then taking the centroids of those polygons.
+	 * He also sorted the list of random points (left to right).  He
+	 * did not explain this, but it might have been to optimize the
+	 * (later) use of the Planchon-Darboux water-level algorithm. 
 	 */
 	private MapPoint[] improve( MapPoint[] points) {
 		MapPoint newPoints[] = new MapPoint[points.length];
 		
-		// sort the points (left to right)	??? WHY ???
+		// sort the points (left to right)
 		MapPoint.quickSort(points, 0, points.length-1);
 
 		// create the Voronoi tesselation
@@ -141,10 +138,8 @@ public class Mesh {
 				continue;
 			
 			// ignoring "infinity" points OpenVoronoi added
-			if (v.position.x > x_extent / 2 || v.position.x < -x_extent / 2 || v.position.y > y_extent / 2
-					|| v.position.y < -y_extent / 2) {
+			if (!inTheBox(v.position))
 				continue;
-			}
 
 			// find the face that owns the point
 			Face chosenFace = null;
@@ -162,8 +157,9 @@ public class Mesh {
 			double y_sum = 0;
 			int numPoints = 0;
 			for (Edge e: g.face_edges(chosenFace)) {
-				x_sum += truncate(e.source.position.x, x_extent);
-				y_sum += truncate(e.source.position.y, y_extent);
+				Point p = truncate(e.source.position);
+				x_sum += p.x;
+				y_sum += p.y;
 				numPoints++;
 			}
 			newPoints[i++] = new MapPoint(x_sum/numPoints, y_sum/numPoints);
@@ -181,6 +177,9 @@ public class Mesh {
 	 * 		for each edge (that is within the box)
 	 * 			add each new end to our vertex list
 	 * 			add the edge as path in/out of each vertex
+	 * 
+	 * NOTE: that the original points are replaced with the
+	 * 		 vertices of the corresponding Voronoi polygons.
 	 */
 	private void makeMesh( MapPoint[] points ) {
 		// compute the Voronoi teselation of the current point set
@@ -191,29 +190,32 @@ public class Mesh {
 		HalfEdgeDiagram g = vd.get_graph_reference();
 		
 		// allocate hash table to track known vertices
-		MapPointHasher pointhash = new MapPointHasher(g.num_vertices(), x_extent, y_extent);
+		MapPointHasher pointhash = new MapPointHasher(g.num_vertices(), parms.x_extent, parms.y_extent);
 		PathHasher pathhash = new PathHasher(g.num_edges());
 
 		// locate all the vertices and edges
 		for( Edge e: g.edges ) {
-			// ignore edges that are not entirely within the arena
-			Vertex v1 = e.source;
-			if (!inTheBox(v1))
+			Point p1 = e.source.position;
+			Point p2 = e.target.position;
+
+			// OpenVoronoi creates vertices outside of the box
+			//    for now, I am just ignoring them
+			//	  later I should connect their orphans
+			if (!inTheBox(p1))
 				continue;
-			Vertex v2 = e.target;
-			if (!inTheBox(v2))
-				continue;
+			if (!inTheBox(p2))
+				continue;		
 			
 			// assign/get the vertex ID of each end
-			MapPoint p1 = pointhash.findPoint(v1.position.x, v1.position.y);
-			MapPoint p2 = pointhash.findPoint(v2.position.x, v2.position.y);
+			MapPoint mp1 = pointhash.findPoint(p1.x, p1.y);
+			MapPoint mp2 = pointhash.findPoint(p2.x, p2.y);
 			
 			// note that each is a neighbor of the other
-			p1.addNeighbor(p2);
-			p2.addNeighbor(p1);
+			mp1.addNeighbor(mp2);
+			mp2.addNeighbor(mp1);
 			
 			// and note the path that connects them
-			pathhash.findPath(p1, p2);
+			pathhash.findPath(mp1, mp2);
 		} 
 		
 		// copy out the list of unique Vertices

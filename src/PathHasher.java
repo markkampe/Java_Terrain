@@ -3,12 +3,15 @@
  * This class is used to generate a single unique Path for every 
  * pair of connected MapPoints, and find the already allocated 
  * Path if it already exists.
+ * 
+ * This is done with an open hash table, to optimize time
+ * over space.
  */
 public class PathHasher {
-	public Path[] paths;
-	public int numPaths;
-	private int tableSize;
-	private int[] hashTable;
+	public Path[] paths;		// list of known paths
+	public int numPaths;		// number of known paths
+	private int tableSize;		// total size of hash table
+	private int[] hashTable;	// index of know path, or -1
 
 	/**
 	 * allocate a hash table and vertex list

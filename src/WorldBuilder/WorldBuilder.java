@@ -255,7 +255,10 @@ public class WorldBuilder  extends JFrame
 			System.out.println("implement edit:Mountain");
 			selectType = Map.SEL_LINEAR;
 		} else if (o == editSlope) {
-				System.out.println("implement edit:Slope");
+				Mesh m = map.getMesh();
+				Slope.incline(m, 0, 1.0);
+				map.setDisplay(Map.SHOW_ALL, false);
+				map.setDisplay(Map.SHOW_TOPO, true);
 		} else if (o == editRain) {
 			System.out.println("implement edit:Rain");
 			selectType = Map.SEL_LINEAR;

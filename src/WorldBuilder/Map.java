@@ -10,18 +10,20 @@ public class Map extends JPanel {
 	 */
 
 	// types of displays
-	public static final int POINTS = 0x01;
-	public static final int MESH = 0x02;
-	public static final int TOPO = 0x04;
-	public static final int RAIN = 0x08;
-	public static final int WATER = 0x10;
-	public static final int SOIL = 0x20;
-	private int display = MESH;
+	public static final int SHOW_ALL = 0xff;
+	public static final int SHOW_POINTS = 0x01;
+	public static final int SHOW_MESH = 0x02;
+	public static final int SHOW_TOPO = 0x04;
+	public static final int SHOW_RAIN = 0x08;
+	public static final int SHOW_WATER = 0x10;
+	public static final int SHOW_SOIL = 0x20;
+	private int display = SHOW_MESH;
 	
 	// types of select
-	public static final int POINT = 1;
-	public static final int LINEAR = 2;
-	public static final int RECTANGULAR = 3;
+	public static final int SE_NONE = 0;
+	public static final int SEL_POINT = 1;
+	public static final int SEL_LINEAR = 2;
+	public static final int SEL_RECTANGULAR = 3;
 	private int selectX;
 	private int selectY;
 	private int selectDx;
@@ -69,19 +71,18 @@ public class Map extends JPanel {
 	/**
 	 * enable/disable display elements
 	 * 
-	 * @param view
-	 *            to be enabled/disabled
+	 * @param view to be enabled/disabled
 	 * @param on/off
 	 * @return current sense of that view
 	 */
-	public boolean setDisplay(int view, boolean on) {
+	public int setDisplay(int view, boolean on) {
 		if (on)
 			display |= view;
 		else
 			display &= ~view;
 		if (mesh != null)
 			repaint();
-		return (display & view) == 0 ? false : true;
+		return display & view;
 	}
 
 	/**
@@ -132,10 +133,9 @@ public class Map extends JPanel {
 		setBackground(background);
 		
 		// see if we are rendering points
-		if ((display & POINTS) != 0) {
+		if ((display & SHOW_POINTS) != 0) {
 			g.setColor(POINT_COLOR);
 			MapPoint[] points = mesh.vertices;
-			System.out.println("drawing " + points.length + "points");
 			for (int i = 0; i < points.length; i++) {
 				MapPoint p = points[i];
 				double x = ((p.x + x_extent / 2) * width) - POINT_WIDTH / 2;
@@ -145,7 +145,7 @@ public class Map extends JPanel {
 		}
 
 		// see if we are rendering the mesh
-		if ((display & MESH) != 0) {
+		if ((display & SHOW_MESH) != 0) {
 			g.setColor(MESH_COLOR);
 			Path paths[] = mesh.edges;
 			for (int i = 0; i < paths.length; i++) {
@@ -166,7 +166,7 @@ public class Map extends JPanel {
 			int dy = selectDy;
 			
 			g.setColor(SELECT_COLOR);
-			if (selectType == RECTANGULAR) {
+			if (selectType == SEL_RECTANGULAR) {
 				if (selectDx < 0) {
 					x += selectDx;
 					dx = -dx;
@@ -176,7 +176,7 @@ public class Map extends JPanel {
 					dy = -dy;
 				}
 				g.drawRect(x, y, dx, dy);
-			} else if (selectType == LINEAR) {
+			} else if (selectType == SEL_LINEAR) {
 				g.drawLine(x,  y,  x+dx, y+dy);
 			}
 		}

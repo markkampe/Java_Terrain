@@ -19,12 +19,12 @@ public class WorldBuilder  extends JFrame
 	private int selectY;	// start of select
 	
 	// view status
-	private boolean viewing_points = false;
-	private boolean viewing_mesh = false;
-	private boolean viewing_topo = false;
-	private boolean viewing_rain = false;
-	private boolean viewing_water = false;
-	private boolean viewing_soil = false;
+	private int viewing_points;
+	private int viewing_mesh;
+	private int viewing_topo;
+	private int viewing_rain;
+	private int viewing_water;
+	private int viewing_soil;
 	
 	// menu bar items
 	private JMenuItem fileOpen;
@@ -36,6 +36,8 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem editMountain;
 	private JMenuItem editSlope;
 	private JMenuItem editRain;
+	private JMenuItem editCity;
+	private JMenuItem editRoads;
 	private JMenuItem viewPoints;
 	private JMenuItem viewMesh;
 	private JMenuItem viewTopo;
@@ -120,16 +122,23 @@ public class WorldBuilder  extends JFrame
 		fileMenu.add(fileExit);
 		
 		// create our edit menu
-		editMountain = new JMenuItem("mountains");
+		editMountain = new JMenuItem("add mountain");
 		editMountain.addActionListener(this);
-		editRain = new JMenuItem("rain");
-		editSlope = new JMenuItem("slope");
+		editSlope = new JMenuItem("define slope");
 		editSlope.addActionListener(this);
+		editRain = new JMenuItem("configure rain");
 		editRain.addActionListener(this);
+		editCity = new JMenuItem("add city");
+		editCity.addActionListener(this);
+		editRoads = new JMenuItem("draw roads");
+		editRoads.addActionListener(this);
 		JMenu editMenu = new JMenu("Edit");
 		editMenu.add(editMountain);
 		editMenu.add(editSlope);
 		editMenu.add(editRain);
+		editMenu.add(new JSeparator());
+		editMenu.add(editCity);
+		editMenu.add(editRoads);
 		
 		// create our view menu
 		viewPoints = new JMenuItem("Points");
@@ -236,7 +245,7 @@ public class WorldBuilder  extends JFrame
 			selectType = 0;
 		} else if (o == fileExport) {
 			System.out.println("implement file:Export");
-			selectType = Map.RECTANGULAR;
+			selectType = Map.SEL_RECTANGULAR;
 		} else if (o == fileExit) {
 			shutdown();
 		} 
@@ -244,34 +253,37 @@ public class WorldBuilder  extends JFrame
 		// edit menus pop up the corresponding dialogs
 		else if (o == editMountain) {
 			System.out.println("implement edit:Mountain");
-			selectType = Map.LINEAR;
+			selectType = Map.SEL_LINEAR;
 		} else if (o == editSlope) {
-				System.out.println("implement edit:Mountain");
-				selectType = Map.LINEAR;
+				System.out.println("implement edit:Slope");
 		} else if (o == editRain) {
 			System.out.println("implement edit:Rain");
-			selectType = Map.LINEAR;
+			selectType = Map.SEL_LINEAR;
+		} else if (o == editCity) {
+			System.out.println("implement edit:City");
+		} else if (o == editRoads) {
+			System.out.println("implement edit:Roads");
 		}
 		
-		// view menu toggles views on and off
+		// view menu toggles individual views on and off
 		else if (o == viewPoints) {
-			viewing_points = map.setDisplay(Map.POINTS, !viewing_points);
-			viewPoints.setText(viewing_points ? "~points" : "Points");
+			viewing_points = map.setDisplay(Map.SHOW_POINTS, viewing_points == 0);
+			viewPoints.setText(viewing_points != 0 ? "~points" : "Points");
 		} else if (o == viewMesh) {
-			viewing_mesh = map.setDisplay(Map.MESH, !viewing_mesh);
-			viewMesh.setText(viewing_mesh ? "~mesh" : "Mesh");
+			viewing_mesh = map.setDisplay(Map.SHOW_MESH, viewing_mesh == 0);
+			viewMesh.setText(viewing_mesh != 0 ? "~mesh" : "Mesh");
 		} else if (o == viewTopo) {
-			viewing_topo = map.setDisplay(Map.TOPO, !viewing_topo);
-			viewMesh.setText(viewing_mesh ? "~topo" : "Topo");
+			viewing_topo = map.setDisplay(Map.SHOW_TOPO, viewing_topo == 0);
+			viewTopo.setText(viewing_topo != 0 ? "~topo" : "Topo");
 		} else if (o == viewRain) {
-			viewing_rain = map.setDisplay(Map.RAIN, !viewing_rain);
-			viewMesh.setText(viewing_mesh ? "~rain" : "Rain");
+			viewing_rain = map.setDisplay(Map.SHOW_RAIN, viewing_rain == 0);
+			viewRain.setText(viewing_rain != 0 ? "~rain" : "Rain");
 		} else if (o == viewWater) {
-			viewing_water = map.setDisplay(Map.WATER, !viewing_water);
-			viewMesh.setText(viewing_mesh ? "~water" : "Water");
+			viewing_water = map.setDisplay(Map.SHOW_WATER, viewing_water == 0);
+			viewWater.setText(viewing_water != 0 ? "~water" : "Water");
 		} else if (o == viewSoil) {
-			viewing_soil = map.setDisplay(Map.SOIL, !viewing_soil);
-			viewMesh.setText(viewing_mesh ? "~soil" : "Soil");
+			viewing_soil = map.setDisplay(Map.SHOW_SOIL, viewing_soil == 0);
+			viewSoil.setText(viewing_soil != 0 ? "~soil" : "Soil");
 		}
 		
 		// help menu just shows info
@@ -371,7 +383,7 @@ public class WorldBuilder  extends JFrame
 		// create and display an initial mesh
 		Mesh m = new Mesh();
 		w.map.setMesh(m);
-		w.viewing_mesh = w.map.setDisplay(Map.MESH, true);
+		w.viewing_mesh = w.map.setDisplay(Map.SHOW_MESH, true);
 		w.viewMesh.setText("~mesh");
 	}
 

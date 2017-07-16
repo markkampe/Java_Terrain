@@ -14,6 +14,7 @@ package WorldBuilder;
 	// map generation parameters
 	public double x_extent = 1.0;	// Xmax - Xmin
 	public double y_extent = 1.0;	// Ymax - Ymin
+	public double z_extent = 1.0;	// Zmax - Zmin
 	public int improvements = 1;	// number of smoothing iterations
 	public int points = 2048;		// desired number of grid points
 	

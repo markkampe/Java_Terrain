@@ -8,6 +8,8 @@ package WorldBuilder;
 public class MapPoint {
 	public double x;			// X coordinate
 	public double y;			// Y coordinate
+	public double z;			// Z coordinate
+	
 	public int index;			// point index #
 	public int neighbors;		// number of neighbors
 	public MapPoint[] neighbor;	// neighboring points
@@ -17,11 +19,13 @@ public class MapPoint {
 	public MapPoint(double x,double y) {
 		this.x = x;
 		this.y = y;
+		this.z = 0;
 	}
 	
 	public MapPoint(double x,double y, int index) {
 		this.x = x;
 		this.y = y;
+		this.z = 0;
 		this.index = index;
 	}
 	
@@ -55,6 +59,16 @@ public class MapPoint {
 		return Math.sqrt((dx*dx) + (dy*dy));
 	}
 	
+	/**
+	 * compute the distance to a line defined by
+	 * 		ax + by + c = 0
+	 *
+	 * @param ... coefficents of the line
+	 * @return distance (which can be positive or negative)
+	 */
+	double distanceLine(double a, double b, double c) {
+		return (a*this.x + b*this.y + c) / Math.sqrt(a*a + b*b);
+	}
 	
 	/**
 	 * is a point on the edge

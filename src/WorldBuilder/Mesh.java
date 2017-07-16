@@ -1,3 +1,4 @@
+package WorldBuilder;
 
 import java.awt.Color;
 

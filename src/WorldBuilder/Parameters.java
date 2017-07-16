@@ -1,3 +1,4 @@
+package WorldBuilder;
 
 /**
  * This is a singleton class containing global program parameters.

@@ -1,3 +1,4 @@
+package WorldBuilder;
 
 /**
  * A Path is a connection between two adjacent vertices

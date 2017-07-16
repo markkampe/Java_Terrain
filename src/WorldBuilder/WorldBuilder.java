@@ -1,3 +1,4 @@
+package WorldBuilder;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -13,6 +14,7 @@ public class WorldBuilder  extends JFrame
 	private Container mainPane;
 	private Map map;	
 	
+	private int selectType;	// type of selection area
 	private int selectX;	// start of select
 	private int selectY;	// start of select
 	
@@ -24,34 +26,38 @@ public class WorldBuilder  extends JFrame
 	private boolean viewing_water = false;
 	private boolean viewing_soil = false;
 	
-	// menu items
+	// menu bar items
 	private JMenuItem fileOpen;
 	private JMenuItem fileSave;
 	private JMenuItem fileSaveAs;
 	private JMenuItem fileClose;
+	private JMenuItem fileExport;
 	private JMenuItem fileExit;
-	private JMenuItem editHeight;
+	private JMenuItem editMountain;
+	private JMenuItem editSlope;
 	private JMenuItem editRain;
-	private JMenuItem editErode;
-	private JMenuItem editSealevel;
 	private JMenuItem viewPoints;
 	private JMenuItem viewMesh;
 	private JMenuItem viewTopo;
 	private JMenuItem viewRain;
 	private JMenuItem viewWater;
 	private JMenuItem viewSoil;
+	private JMenuItem helpInfo;
 	
-	// controls
-	private JButton button1;
-	private JButton button2;
-	private JComboBox combo1;
-	private JSlider slider1;
-	private JSlider slider2;
+	// control widgets
+	// private JButton button1;
+	// private JButton button2;
+	// private JComboBox combo1;
+	private JSlider rainfall;
+	private JSlider erosion;
+	private JSlider seaLevel;
+
+	// messages
+	private static String infoMessage = "WorldBuilder 0.1\nBased on Martin O'Leary's Uncharted Atlas terrain generator (mewo2.com)";
 	
-	
+	// configuration
 	private static Parameters parms;						// global program parameters
-	
-	private static final int BORDER_WIDTH = 10;
+	private static final int BORDER_WIDTH = 10;				// window border
 	private static final String ICON_IMAGE = "images/world-32.png";
 	private static final String SWITCH_CHAR = "-";			// command line switches
 	private static final long serialVersionUID = 0xdeadbeef;	// this is stupid
@@ -60,7 +66,6 @@ public class WorldBuilder  extends JFrame
 	 * instantiate a map and control panel
 	 */
 	public WorldBuilder() {
-		
 		
 		// set our window icon
 		//Image myIcon = getToolkit().getImage(getClass().getResource(ICON_IMAGE));
@@ -79,11 +84,9 @@ public class WorldBuilder  extends JFrame
 		map.addMouseListener(this);
 		map.addMouseMotionListener(this);
 		
-		// create the menus and widgets
+		// create menus and widgets, put up the display
 		createMenus();
 		createWidgets();
-		
-		// validate widgets and display
 		pack();
 		setVisible(true);
 	}
@@ -103,6 +106,8 @@ public class WorldBuilder  extends JFrame
 		fileSaveAs.addActionListener(this);
 		fileClose = new JMenuItem("Close file");
 		fileClose.addActionListener(this);
+		fileExport = new JMenuItem("Export");
+		fileExport.addActionListener(this);
 		fileExit = new JMenuItem("Exit");
 		fileExit.addActionListener(this);
 		JMenu fileMenu = new JMenu("File");
@@ -110,23 +115,21 @@ public class WorldBuilder  extends JFrame
 		fileMenu.add(fileSave);
 		fileMenu.add(fileSaveAs);
 		fileMenu.add(fileClose);
+		fileMenu.add(fileExport);
 		fileMenu.add( new JSeparator() );
 		fileMenu.add(fileExit);
 		
 		// create our edit menu
-		editHeight = new JMenuItem("Height");
-		editHeight.addActionListener(this);
-		editRain = new JMenuItem("Rain");
+		editMountain = new JMenuItem("mountains");
+		editMountain.addActionListener(this);
+		editRain = new JMenuItem("rain");
+		editSlope = new JMenuItem("slope");
+		editSlope.addActionListener(this);
 		editRain.addActionListener(this);
-		editErode = new JMenuItem("erosion");
-		editErode.addActionListener(this);
-		editSealevel = new JMenuItem("sea level");
-		editSealevel.addActionListener(this);
 		JMenu editMenu = new JMenu("Edit");
-		editMenu.add(editHeight);
+		editMenu.add(editMountain);
+		editMenu.add(editSlope);
 		editMenu.add(editRain);
-		editMenu.add(editErode);
-		editMenu.add(editSealevel);
 		
 		// create our view menu
 		viewPoints = new JMenuItem("Points");
@@ -149,11 +152,18 @@ public class WorldBuilder  extends JFrame
 		viewMenu.add(viewWater);
 		viewMenu.add(viewSoil);
 		
+		// create help menu
+		helpInfo = new JMenuItem("about WorldBuilder");
+		helpInfo.addActionListener(this);
+		JMenu helpMenu = new JMenu("Help");
+		helpMenu.add(helpInfo);
+		
 		// assemble the menu bar
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.add(fileMenu);
 		menuBar.add( editMenu );
 		menuBar.add( viewMenu );
+		menuBar.add( helpMenu );
 		setJMenuBar( menuBar );	
 	}
 	
@@ -162,47 +172,51 @@ public class WorldBuilder  extends JFrame
 	 */
 	private void createWidgets() {
 		// create some buttons in panel #1
-		button1 = new JButton("Button 1");
-		button2 = new JButton("Button 2");
-		JPanel buttons = new JPanel();	// horizontal, no-stretch
-		buttons.add(button1);
-		buttons.add(button2);
+		// button1 = new JButton("Button 1");
+		// button2 = new JButton("Button 2");
+		// JPanel buttons = new JPanel();	// horizontal, no-stretch
+		// buttons.add(button1);
+		// buttons.add(button2);
 		
 		// create a combobox in panel #2
-		combo1 = new JComboBox();
-		combo1.addItem("choice #1");
-		combo1.addItem("choice #2");
-		combo1.addItem("choice #3");
-		JPanel comboPanel = new JPanel(new GridLayout(2,1));
-		comboPanel.add(combo1);
-		comboPanel.add(new JLabel("combo box"));
-		JPanel combos = new JPanel();	// no stretch
-		combos.add(comboPanel);
+		// combo1 = new JComboBox();
+		// combo1.addItem("choice #1");
+		// combo1.addItem("choice #2");
+		// combo1.addItem("choice #3");
+		// JPanel comboPanel = new JPanel(new GridLayout(2,1));
+		// comboPanel.add(combo1);
+		// comboPanel.add(new JLabel("combo box"));
+		// JPanel combos = new JPanel();	// no stretch
+		// combos.add(comboPanel);
 		
 		// create some sliders in panel #3
-		slider1 = new JSlider();
-		slider2 = new JSlider();
-		JPanel sliderPanel = new JPanel(new GridLayout(2,2));
-		sliderPanel.add(slider1);
-		sliderPanel.add(slider2);
-		sliderPanel.add(new JLabel("slider #1"));
-		sliderPanel.add(new JLabel("slider #2"));
+		rainfall = new JSlider();
+		erosion = new JSlider();
+		seaLevel = new JSlider();
+		JPanel sliderPanel = new JPanel(new GridLayout(2,3));
+		sliderPanel.add(rainfall);
+		sliderPanel.add(erosion);
+		sliderPanel.add(seaLevel);
+		sliderPanel.add(new JLabel("Rainfall", JLabel.CENTER));
+		sliderPanel.add(new JLabel("Erosion", JLabel.CENTER));
+		sliderPanel.add(new JLabel("Sea Level", JLabel.CENTER));
 		JPanel sliders = new JPanel();	// no stretch
 		sliders.add(sliderPanel);
 		
 		// add those three panels to a control panel
 		JPanel controls = new JPanel(new GridLayout(3,1));
-		controls.add(buttons);
-		controls.add(combos);
+		// controls.add(buttons);
+		// controls.add(combos);
 		controls.add(sliders);
 		add(controls, BorderLayout.SOUTH);
 		
 		// register the action listeners
-		button1.addActionListener(this);
-		button2.addActionListener(this);
-		combo1.addActionListener(this);;
-		slider1.addChangeListener(this);
-		slider2.addChangeListener(this);
+		// button1.addActionListener(this);
+		// button2.addActionListener(this);
+		// combo1.addActionListener(this);;
+		rainfall.addChangeListener(this);
+		erosion.addChangeListener(this);
+		seaLevel.addChangeListener(this);
 	}
 	
 	public void actionPerformed( ActionEvent e ) {
@@ -210,24 +224,34 @@ public class WorldBuilder  extends JFrame
 		
 		if (o == fileOpen) {
 			System.out.println("implement file:open");
+			selectType = 0;
 		} else if (o == fileSave) {
 			System.out.println("implement file:Save");
+			selectType = 0;
 		} else if (o == fileSaveAs) {
 			System.out.println("implement file:SaveAs");
+			selectType = 0;
 		} else if (o == fileClose) {
 			System.out.println("implement file:Close");
+			selectType = 0;
+		} else if (o == fileExport) {
+			System.out.println("implement file:Export");
+			selectType = Map.RECTANGULAR;
 		} else if (o == fileExit) {
 			shutdown();
 		} 
 		
 		// edit menus pop up the corresponding dialogs
-		else if (o == editHeight) {
-			System.out.println("implement edit:Height");
+		else if (o == editMountain) {
+			System.out.println("implement edit:Mountain");
+			selectType = Map.LINEAR;
+		} else if (o == editSlope) {
+				System.out.println("implement edit:Mountain");
+				selectType = Map.LINEAR;
 		} else if (o == editRain) {
 			System.out.println("implement edit:Rain");
-		} else if (o == editErode) {
-			System.out.println("implement edit:Erode");
-		} 
+			selectType = Map.LINEAR;
+		}
 		
 		// view menu toggles views on and off
 		else if (o == viewPoints) {
@@ -248,25 +272,32 @@ public class WorldBuilder  extends JFrame
 		} else if (o == viewSoil) {
 			viewing_soil = map.setDisplay(Map.SOIL, !viewing_soil);
 			viewMesh.setText(viewing_mesh ? "~soil" : "Soil");
-		} 
+		}
+		
+		// help menu just shows info
+		else if (o == helpInfo) {
+			JOptionPane.showMessageDialog(new JFrame(), infoMessage, "Information", JOptionPane.INFORMATION_MESSAGE);
+		}
 		
 		// buttons are currently dummies
-		else if (o == button1) {
-			System.out.println("button1 pressed");		
-		} else if (o == button2) {
-				System.out.println("button2 pressed");
-		} else if (o == combo1) {
-				System.out.println("Selected " + combo1.getSelectedItem());
-		}
+		// else if (o == button1) {
+		// 	System.out.println("button1 pressed");		
+		// } else if (o == button2) {
+		// 		System.out.println("button2 pressed");
+		// } else if (o == combo1) {
+		// 		System.out.println("Selected " + combo1.getSelectedItem());
+		// }
 	}
 	
 	public void stateChanged(ChangeEvent e) {
 		Object o = e.getSource();
 		
-		if (o == slider1) {
-			System.out.println("slider 1 changed to " + slider1.getValue());
-		} else if (o == slider2) {
-			System.out.println("slider 2 changed to " + slider2.getValue());
+		if (o == erosion) {
+			System.out.println("Erosion changed to " + erosion.getValue());
+		} else if (o == seaLevel) {
+			System.out.println("seaLevel changed to " + seaLevel.getValue());
+		} else if (o == rainfall) {
+			System.out.println("rainfall changed to " + seaLevel.getValue());
 		}
 	}
 	
@@ -274,17 +305,21 @@ public class WorldBuilder  extends JFrame
 	 * note the start of a selection operation
 	 */
 	public void mousePressed(MouseEvent e) {
-		selectX = e.getX();
-		selectY = e.getY();
+		if (selectType != 0) {
+			selectX = e.getX();
+			selectY = e.getY();
+		}
 	}
 	
 	/**
 	 * area selection
 	 */
 	public void mouseDragged(MouseEvent e) {
-		int dx = e.getX() - selectX;
-		int dy = e.getY() - selectY;
-		map.select(selectX, selectY, dx, dy);
+		if (selectType != 0) {
+			int dx = e.getX() - selectX;
+			int dy = e.getY() - selectY;
+			map.select(selectX, selectY, dx, dy, selectType);
+		}
 	}
 	
 	/**
@@ -292,7 +327,8 @@ public class WorldBuilder  extends JFrame
 	 */
 	public void mouseReleased(MouseEvent e) {
 		// take down the selection rectangle
-		map.select(0, 0,  0,  0);
+		map.select(0, 0,  0,  0, 0);
+		selectType = 0;
 	}
 	
 

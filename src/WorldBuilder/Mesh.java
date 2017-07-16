@@ -1,7 +1,5 @@
 package WorldBuilder;
 
-import java.awt.Color;
-
 // note: this is the only class that knows about Voronoi
 import org.rogach.jopenvoronoi.Edge;
 import org.rogach.jopenvoronoi.Face;
@@ -63,6 +61,30 @@ public class Mesh {
 		makeMesh(points);
 	}
 	
+	/**
+	 * create a copy of an existing mesh
+	 * 		with copies of all of the MapPoints and Paths
+	 * 		so that we can change them w/o affecting original
+	 * 
+	 * @param	Mesh to copy
+	 */
+	public Mesh( Mesh m ) {
+		parms = Parameters.getInstance();
+		
+		// create an entirely new list of mapPoints
+		vertices = new MapPoint[m.vertices.length];
+		for(int i = 0; i < m.vertices.length; i++) {
+			MapPoint p = m.vertices[i];
+			vertices[i] = new MapPoint(p.x, p.y, i);
+		}
+		
+		// create a corresponding list of edges
+		edges = new Path[m.edges.length];
+		for(int i = 0; i < m.edges.length; i++) {
+			Path p = m.edges[i];
+			edges[i] = new Path(vertices[p.source.index], vertices[p.target.index], i);
+		}
+	}
 	
 	/**
 	 * is a point near the edge
@@ -218,6 +240,9 @@ public class Mesh {
 			// and note the path that connects them
 			pathhash.findPath(mp1, mp2);
 		} 
+		
+		// FIX OpenVoronoi is returning midpoints as well as vertices
+		//	identify and remove these before copying them out
 		
 		// copy out the list of unique Vertices
 		vertices = new MapPoint[pointhash.numVertices];

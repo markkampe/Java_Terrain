@@ -31,18 +31,22 @@ public class Map extends JPanel {
 	private int selectType;
 	
 	// map size (in pixels)
-	private static final int MIN_WIDTH = 400;
-	private static final int MIN_HEIGHT = 400;
-	private static final int POINT_WIDTH = 2;
+	private static final int MIN_WIDTH = 400;	// min screen width
+	private static final int MIN_HEIGHT = 400;	// min scren height
+	private static final int SMALL_POINT = 2;	// width of a small point
+	private static final int LARGE_POINT = 4;	// width of a large point
 	private Dimension size;
 
 	// display colors
-	private static Color SELECT_COLOR = Color.WHITE;
-	private static Color POINT_COLOR = Color.PINK;
-	private static Color MESH_COLOR = Color.GREEN;
-	private static Color WATER_COLOR = Color.BLUE;
-	private static Color RAIN_COLOR = Color.CYAN;
-	private static Color SOIL_COLOR = Color.YELLOW;
+	private static final Color SELECT_COLOR = Color.WHITE;
+	private static final Color POINT_COLOR = Color.PINK;
+	private static final Color MESH_COLOR = Color.GREEN;
+	private static final Color WATER_COLOR = Color.BLUE;
+	private static final Color RAIN_COLOR = Color.CYAN;
+	private static final Color SOIL_COLOR = Color.YELLOW;
+	// topographic lines are shades of gray
+	private static final int TOPO_DIM = 10;
+	private static final int TOPO_BRITE = 255;
 	private Color background;
 	
 	// the underlying collection of points and edges
@@ -94,6 +98,13 @@ public class Map extends JPanel {
 		setVisible(true);
 		repaint();
 	}
+	
+	/**
+	 * @return reference to current mesh
+	 */
+	public Mesh getMesh() {
+		return this.mesh;
+	}
 
 	/**
 	 * create or update a selection 
@@ -119,6 +130,7 @@ public class Map extends JPanel {
 		// get scaling factors
 		double x_extent = parms.x_extent;
 		double y_extent = parms.y_extent;
+		double z_extent = parms.z_extent;
 		int height = getHeight();
 		int width = getWidth();
 
@@ -138,9 +150,9 @@ public class Map extends JPanel {
 			MapPoint[] points = mesh.vertices;
 			for (int i = 0; i < points.length; i++) {
 				MapPoint p = points[i];
-				double x = ((p.x + x_extent / 2) * width) - POINT_WIDTH / 2;
-				double y = ((p.y + y_extent / 2) * height) - POINT_WIDTH / 2;
-				g.drawOval((int) x, (int) y, POINT_WIDTH, POINT_WIDTH);
+				double x = ((p.x + x_extent / 2) * width) - SMALL_POINT / 2;
+				double y = ((p.y + y_extent / 2) * height) - SMALL_POINT / 2;
+				g.drawOval((int) x, (int) y, SMALL_POINT, SMALL_POINT);
 			}
 		}
 
@@ -155,6 +167,20 @@ public class Map extends JPanel {
 				double x2 = (p.target.x + x_extent / 2) * width;
 				double y2 = (p.target.y + y_extent / 2) * height;
 				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+			}
+		}
+		
+		// see if we are rendering topology
+		if ((display & SHOW_TOPO) != 0) {
+			MapPoint[] points = mesh.vertices;
+			for (int i = 0; i < points.length; i++) {
+				MapPoint p = points[i];
+				double x = ((p.x + x_extent / 2) * width) - LARGE_POINT / 2;
+				double y = ((p.y + y_extent / 2) * height) - LARGE_POINT / 2;
+				double z = ((p.z + z_extent / 2)) * (TOPO_BRITE - TOPO_DIM);
+				int c = TOPO_DIM + (int) z;
+				g.setColor(new Color(c,c,c));
+				g.drawOval((int) x, (int) y, LARGE_POINT, LARGE_POINT);
 			}
 		}
 		

@@ -1,23 +1,9 @@
 package WorldBuilder;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
 
 /**
  * SlopeDialog allows the user to choose an axis and inclination to
@@ -33,6 +19,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	private JSlider inclination;
 	private JButton accept;
 	private JButton cancel;
+	
+	private int x0, y0, x1, y1;		// chosen slope axis
 	
 	private static final int BORDER_WIDTH = 5;
 	
@@ -52,29 +40,73 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
-		// create the widgets
+		// create the basic widgets
+		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
+		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		accept = new JButton("ACCEPT");
-		accept.addActionListener(this);
 		cancel = new JButton("CANCEL");
-		cancel.addActionListener(this);
-		axis = new JSlider();
-		axis.addChangeListener(this);
-		inclination = new JSlider();
-		inclination.addChangeListener(this);
 		
-		// assemble them all into a dialog box
-		JPanel controls = new JPanel(new GridLayout(3,2));
-		controls.add(axis);
-		controls.add(inclination);
-		controls.add(new JLabel("Axis", JLabel.CENTER));
-		controls.add(new JLabel("Inclination", JLabel.CENTER));
-		controls.add(cancel);
-		controls.add(accept);
-		mainPane.add(controls);
+		axis = new JSlider(JSlider.HORIZONTAL, -90, 90, 0);
+		axis.setMajorTickSpacing(45);
+		axis.setMinorTickSpacing(10);
+		axis.setFont(fontSmall);
+		axis.setPaintTicks(true);
+		axis.setPaintLabels(true);
+		JLabel axisLabel = new JLabel("Axis", JLabel.CENTER);
+		axisLabel.setFont(fontLarge);
+
 		
-		// display the dialog ox
+		inclination = new JSlider(JSlider.HORIZONTAL, -50, 50, 0);
+		inclination.setMajorTickSpacing(25);
+		inclination.setMinorTickSpacing(10);
+		inclination.setFont(fontSmall);
+		inclination.setPaintTicks(true);
+		inclination.setPaintLabels(true);
+		JLabel inclinationLabel = new JLabel("Inclination", JLabel.CENTER);
+		inclinationLabel.setFont(fontLarge);
+		
+		/*
+		 * Pack them into:
+		 * 		a vertical Box layout containing sliders and buttons
+		 * 		sliders are a 1x2 grid layout
+		 * 			each being a vertical Box w/label and slider
+		 * 		buttons a horizontal Box layout
+		 */
+		JPanel axisPanel = new JPanel();
+		axisPanel.setLayout(new BoxLayout(axisPanel, BoxLayout.PAGE_AXIS));
+		axisPanel.add(axisLabel);
+		axisPanel.add(axis);
+		
+		JPanel inclinationPanel = new JPanel();
+		inclinationPanel.setLayout(new BoxLayout(inclinationPanel, BoxLayout.PAGE_AXIS));
+		inclinationPanel.add(inclinationLabel);
+		inclinationPanel.add(inclination);
+
+		JPanel sliders = new JPanel();
+		sliders.setLayout(new BoxLayout(sliders, BoxLayout.LINE_AXIS));
+		axisPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
+		inclinationPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
+		sliders.add(axisPanel);
+		sliders.add(inclinationPanel);
+		
+		JPanel buttons = new JPanel();
+		buttons.setLayout(new BoxLayout(buttons, BoxLayout.LINE_AXIS));
+		buttons.add(cancel);
+		buttons.add(Box.createRigidArea(new Dimension(40,0)));
+		buttons.add(accept);
+		buttons.setBorder(BorderFactory.createEmptyBorder(20,100, 20, 10));
+
+		mainPane.add(sliders);
+		mainPane.add(buttons, BorderLayout.SOUTH);
+		
 		pack();
 		setVisible(true);
+		
+		// add the action listeners
+		axis.addChangeListener(this);
+		inclination.addChangeListener(this);
+		accept.addActionListener(this);
+		cancel.addActionListener(this);
 		
 		// initialize the slope axis
 		setAxis(0);
@@ -113,18 +145,45 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	/**
 	 * display slope axis as a select line
 	 * 
-	 * @param slope
+	 * @param angle (0 = horizontal)
 	 */
-	private void setAxis(double slope) {
-		int x_mid = map.getWidth()/2;
-		int y_mid = map.getHeight()/2;
-		// FIX this is broken
-		int x_start = x_mid/2;
-		int dx = x_mid;
-		int y_start = y_mid;
-		int dy = 0;
+	private void setAxis(int degrees) {
 		
-		map.select(x_start,  y_start, dx, dy, Map.SEL_LINEAR);
+		// figure out the corners of my box
+		int x_left = map.getWidth()/6;
+		int x_right = 5 * x_left;
+		int x_center = (x_left + x_right)/2;
+		int x_len = 4 * x_left;
+		int y_top = map.getHeight()/6;
+		int y_bot = 5 * y_top;
+		int y_center = (y_top + y_bot)/2;
+		int y_len = 4 * y_top;
+		
+		// vertical lines are a special case
+		if (degrees == -90 || degrees == 90) {
+			x0 = x_center;
+			x1 = x_center;
+			y0 = y_top;
+			y1 = y_bot;
+		} else if (degrees == 0){
+			x0 = x_left;
+			x1 = x_right;
+			y0 = x_center;
+			y1 = x_center;
+		} else {
+			double radians = Math.PI * ((double) degrees)/180;
+			double sin = Math.sin(radians);
+			double cos = Math.cos(radians);
+			double dy = -sin * y_len / (2 * cos);
+			double dx = cos * x_len / (2 * sin);
+			x0 = x_center - (int) dx;
+			x1 = x_center + (int) dx;
+			y0 = y_center - (int) dy;
+			y1 = y_center + (int) dy;
+		}
+	
+		// display the slope axis
+		map.select(x0, y0, x1-x0, y1-y0, Map.SEL_LINEAR);
 	}
 	
 	/**
@@ -141,7 +200,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == axis) {
-			System.out.println("axis = " + axis.getValue());
+				setAxis(axis.getValue());
 		} else if (e.getSource() == inclination) {
 			System.out.println("inclination = " + inclination.getValue());
 		}	

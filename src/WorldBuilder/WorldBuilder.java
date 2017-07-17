@@ -6,17 +6,11 @@ import javax.swing.event.*;
 
 
 public class WorldBuilder  extends JFrame 
-						   implements ActionListener, ChangeListener, 
-						   MouseListener, MouseMotionListener,
-						   WindowListener {
+						   implements ActionListener, ChangeListener,  WindowListener {
 	
 	// 2D canvas
 	private Container mainPane;
 	private Map map;	
-	
-	private int selectType;	// type of selection area
-	private int selectX;	// start of select
-	private int selectY;	// start of select
 	
 	// view status
 	private int viewing_points;
@@ -47,9 +41,6 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem helpInfo;
 	
 	// control widgets
-	// private JButton button1;
-	// private JButton button2;
-	// private JComboBox combo1;
 	private JSlider rainfall;
 	private JSlider erosion;
 	private JSlider seaLevel;
@@ -83,8 +74,7 @@ public class WorldBuilder  extends JFrame
 		// create the main map panel, capture mouse events within it
 		map = new Map(parms.width, parms.height, Color.BLACK);
 		mainPane.add(map, BorderLayout.CENTER);
-		map.addMouseListener(this);
-		map.addMouseMotionListener(this);
+	
 		
 		// create menus and widgets, put up the display
 		createMenus();
@@ -233,35 +223,26 @@ public class WorldBuilder  extends JFrame
 		
 		if (o == fileOpen) {
 			System.out.println("implement file:open");
-			selectType = 0;
+
 		} else if (o == fileSave) {
 			System.out.println("implement file:Save");
-			selectType = 0;
 		} else if (o == fileSaveAs) {
 			System.out.println("implement file:SaveAs");
-			selectType = 0;
 		} else if (o == fileClose) {
 			System.out.println("implement file:Close");
-			selectType = 0;
 		} else if (o == fileExport) {
 			System.out.println("implement file:Export");
-			selectType = Map.SEL_RECTANGULAR;
 		} else if (o == fileExit) {
 			shutdown();
 		} 
 		
 		// edit menus pop up the corresponding dialogs
 		else if (o == editMountain) {
-			System.out.println("implement edit:Mountain");
-			selectType = Map.SEL_LINEAR;
+			new MountainDialog(map);
 		} else if (o == editSlope) {
-				Mesh m = map.getMesh();
-				Slope.incline(m, 0, 1.0);
-				map.setDisplay(Map.SHOW_ALL, false);
-				map.setDisplay(Map.SHOW_TOPO, true);
+			new SlopeDialog(map);
 		} else if (o == editRain) {
 			System.out.println("implement edit:Rain");
-			selectType = Map.SEL_LINEAR;
 		} else if (o == editCity) {
 			System.out.println("implement edit:City");
 		} else if (o == editRoads) {
@@ -293,15 +274,6 @@ public class WorldBuilder  extends JFrame
 		else if (o == helpInfo) {
 			JOptionPane.showMessageDialog(new JFrame(), infoMessage, "Information", JOptionPane.INFORMATION_MESSAGE);
 		}
-		
-		// buttons are currently dummies
-		// else if (o == button1) {
-		// 	System.out.println("button1 pressed");		
-		// } else if (o == button2) {
-		// 		System.out.println("button2 pressed");
-		// } else if (o == combo1) {
-		// 		System.out.println("Selected " + combo1.getSelectedItem());
-		// }
 	}
 	
 	public void stateChanged(ChangeEvent e) {
@@ -316,38 +288,6 @@ public class WorldBuilder  extends JFrame
 		}
 	}
 	
-	/**
-	 * note the start of a selection operation
-	 */
-	public void mousePressed(MouseEvent e) {
-		if (selectType != 0) {
-			selectX = e.getX();
-			selectY = e.getY();
-		}
-	}
-	
-	/**
-	 * area selection
-	 */
-	public void mouseDragged(MouseEvent e) {
-		if (selectType != 0) {
-			int dx = e.getX() - selectX;
-			int dy = e.getY() - selectY;
-			map.select(selectX, selectY, dx, dy, selectType);
-		}
-	}
-	
-	/**
-	 * Note the end of a selection operation
-	 */
-	public void mouseReleased(MouseEvent e) {
-		// take down the selection rectangle
-		map.select(0, 0,  0,  0, 0);
-		selectType = 0;
-	}
-	
-
-
 
 	void shutdown() {
 		// TODO prompt to save
@@ -355,10 +295,6 @@ public class WorldBuilder  extends JFrame
 		System.exit(0);
 	}
 
-	public void mouseClicked(MouseEvent e) {}
-	public void mouseEntered(MouseEvent e) {}
-	public void mouseExited(MouseEvent e) {}
-	public void mouseMoved(MouseEvent arg0) {}
 	public void windowClosing(WindowEvent e) { shutdown(); }	
 	public void windowActivated(WindowEvent arg0) {	}
 	public void windowClosed(WindowEvent arg0) {}
@@ -389,8 +325,4 @@ public class WorldBuilder  extends JFrame
 		w.viewing_mesh = w.map.setDisplay(Map.SHOW_MESH, true);
 		w.viewMesh.setText("~mesh");
 	}
-
-
-
-
 }

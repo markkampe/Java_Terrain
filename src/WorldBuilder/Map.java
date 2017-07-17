@@ -20,7 +20,7 @@ public class Map extends JPanel {
 	private int display = SHOW_MESH;
 	
 	// types of select
-	public static final int SE_NONE = 0;
+	public static final int SEL_NONE = 0;
 	public static final int SEL_POINT = 1;
 	public static final int SEL_LINEAR = 2;
 	public static final int SEL_RECTANGULAR = 3;

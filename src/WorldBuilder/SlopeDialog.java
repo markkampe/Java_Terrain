@@ -7,7 +7,7 @@ import javax.swing.event.*;
 
 /**
  * SlopeDialog allows the user to choose an axis and inclination to
- * cause a uniform slope to the entire map.
+ * cause a uniform slope to the entire map.  
  */
 public class SlopeDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
 	private Map map;
@@ -31,8 +31,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		// pick up references
 		this.map = map;
 		this.oldMesh = map.getMesh();
-		this.newMesh = this.oldMesh;
-		//this.newMesh = new Mesh(this.oldMesh);
+		this.newMesh = new Mesh(this.oldMesh);
+		map.setMesh(newMesh);
 		this.parms = Parameters.getInstance();
 		
 		// create the dialog box
@@ -182,6 +182,10 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	public void windowClosing(WindowEvent e) {
 		System.out.println("Closing Slope Dialog");
 		map.select(0, 0, 0, 0,  Map.SEL_NONE);
+		if (oldMesh != null) {
+			map.setMesh(oldMesh);
+			map.repaint();
+		}
 		this.dispose();
 	}
 	
@@ -203,11 +207,13 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			map.select(0,0,0,0, Map.SEL_NONE);
-			System.out.println("CANCEL slope");
+			map.setMesh(oldMesh);
+			map.repaint();
+			oldMesh = null;
 			this.dispose();
 		} else if (e.getSource() == accept) {
 			map.select(0,0,0,0, Map.SEL_NONE);
-			System.out.println("ACCEPT slope");
+			oldMesh = null;	// don't need this anymore
 			this.dispose();
 		}
 	}

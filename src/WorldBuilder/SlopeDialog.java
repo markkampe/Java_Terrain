@@ -21,6 +21,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	private JButton cancel;
 	
 	private int x0, y0, x1, y1;		// chosen slope axis
+	private double Zscale = 0;		// chosen inclineation
 	
 	private static final int BORDER_WIDTH = 5;
 	
@@ -30,7 +31,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		// pick up references
 		this.map = map;
 		this.oldMesh = map.getMesh();
-		this.newMesh = new Mesh(this.oldMesh);
+		this.newMesh = this.oldMesh;
+		//this.newMesh = new Mesh(this.oldMesh);
 		this.parms = Parameters.getInstance();
 		
 		// create the dialog box
@@ -114,32 +116,28 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	
 	/**
 	 * incline the entire map plane
-	 * @param m		coordinate mesh
-	 * @param slope (dy/dx)
-	 * @param inclination (0-1.0)
+	 *
+	 * @param inclination (-1.0 ... +1.0)
 	 */
-	public static void incline(Mesh m, double slope, double inclination) {
+	public void incline(double inclination) {
+		Zscale = (double) inclination;
 		Parameters parms = Parameters.getInstance();
-		
-		// FIX ... for now, the axis is a horizontal line
-		double a, b, c = 0;
-		if (slope == 0) {
-			a = 0;
-			b = 1;
-		} else if (slope > 1) {
-			a = slope;
-			b = -1;
-		} else {
-			a = -1;
-			b = slope;
-		}
+		int width = map.getWidth();
+		int height = map.getHeight();
+		double Xmid = parms.x_extent/2;
+		double Ymid = parms.y_extent/2;
+		double Zmid = parms.z_extent/2;
 		
 		// height of every point is its distance (+/-) from the axis
-		for(int i = 0; i < m.vertices.length; i++) {
-			double z = m.vertices[i].distanceLine(a, b, c);
-			z *= inclination * (parms.z_extent/2);
-			m.vertices[i].z = z;
+		for(int i = 0; i < newMesh.vertices.length; i++) {
+			double X0 = (double) x0/width - Xmid;
+			double Y0 = (double) y0/height - Ymid;
+			double X1 = (double) x1/width - Xmid;
+			double Y1 = (double) y1/height - Ymid;
+			double d = newMesh.vertices[i].distanceLine(X0, Y0, X1, Y1);
+			newMesh.vertices[i].z = Zscale * d;
 		}
+		map.repaint();
 	}
 
 	/**
@@ -149,41 +147,33 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	private void setAxis(int degrees) {
 		
-		// figure out the corners of my box
-		int x_left = map.getWidth()/6;
-		int x_right = 5 * x_left;
-		int x_center = (x_left + x_right)/2;
-		int x_len = 4 * x_left;
-		int y_top = map.getHeight()/6;
-		int y_bot = 5 * y_top;
-		int y_center = (y_top + y_bot)/2;
-		int y_len = 4 * y_top;
+		// figure out line center and length
+		int x_center = map.getWidth()/2;
+		int x_len = 3 * x_center / 2;
+		int y_center = map.getHeight()/2;
+		int y_len = 3 * y_center / 2;
 		
 		// vertical lines are a special case
 		if (degrees == -90 || degrees == 90) {
 			x0 = x_center;
 			x1 = x_center;
-			y0 = y_top;
-			y1 = y_bot;
-		} else if (degrees == 0){
-			x0 = x_left;
-			x1 = x_right;
-			y0 = x_center;
-			y1 = x_center;
+			y0 = 0;
+			y1 = map.getHeight();
 		} else {
 			double radians = Math.PI * ((double) degrees)/180;
 			double sin = Math.sin(radians);
 			double cos = Math.cos(radians);
-			double dy = -sin * y_len / (2 * cos);
-			double dx = cos * x_len / (2 * sin);
+			double dy = sin * y_len / 2;
+			double dx = cos * x_len / 2;
 			x0 = x_center - (int) dx;
-			x1 = x_center + (int) dx;
 			y0 = y_center - (int) dy;
+			x1 = x_center + (int) dx;
 			y1 = y_center + (int) dy;
 		}
-	
+		
 		// display the slope axis
 		map.select(x0, y0, x1-x0, y1-y0, Map.SEL_LINEAR);
+		incline(Zscale);
 	}
 	
 	/**
@@ -202,7 +192,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		if (e.getSource() == axis) {
 				setAxis(axis.getValue());
 		} else if (e.getSource() == inclination) {
-			System.out.println("inclination = " + inclination.getValue());
+				double i = inclination.getValue();
+				incline(i/50);
 		}	
 	}
 

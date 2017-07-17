@@ -66,9 +66,9 @@ public class Map extends JPanel {
 	 * @param background
 	 *            ... background color
 	 */
-	public Map(int width, int height, Color background) {
+	public Map(int width, int height) {
 		size = new Dimension(width, height);
-		this.background = background;
+		this.background = new Color(128, 128, 128);
 		parms = Parameters.getInstance();
 	}
 

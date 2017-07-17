@@ -60,14 +60,14 @@ public class MapPoint {
 	}
 	
 	/**
-	 * compute the distance to a line defined by
-	 * 		ax + by + c = 0
+	 * compute the distance to a line defined by <x0,y0>-<x1,y1>
 	 *
-	 * @param ... coefficents of the line
+	 * @param ... two points on the line
 	 * @return distance (which can be positive or negative)
 	 */
-	double distanceLine(double a, double b, double c) {
-		return (a*this.x + b*this.y + c) / Math.sqrt(a*a + b*b);
+	double distanceLine(double x1, double y1, double x2, double y2) {
+		double d = ((y2 - y1)*this.x - (x2 - x1)*this.y + x2*y1 - y2*x1) / Math.sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1));
+		return d;
 	}
 	
 	/**

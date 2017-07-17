@@ -72,7 +72,7 @@ public class WorldBuilder  extends JFrame
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
 		// create the main map panel, capture mouse events within it
-		map = new Map(parms.width, parms.height, Color.BLACK);
+		map = new Map(parms.width, parms.height);
 		mainPane.add(map, BorderLayout.CENTER);
 	
 		

@@ -15,13 +15,15 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	private Mesh newMesh;
 	private Parameters parms;
 	
+	private int i_max;			// maximum inclination angle
+	
 	private JSlider axis;
 	private JSlider inclination;
 	private JButton accept;
 	private JButton cancel;
 	
 	private int x0, y0, x1, y1;		// chosen slope axis
-	private double Zscale = 0;		// chosen inclineation
+	private double Zscale = 0;		// chosen inclination
 	
 	private static final int BORDER_WIDTH = 5;
 	
@@ -34,6 +36,9 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		this.newMesh = new Mesh(this.oldMesh);
 		map.setMesh(newMesh);
 		this.parms = Parameters.getInstance();
+		
+		// figure out the maximum allowable slope
+		i_max = (parms.z_range + parms.x_range - 1)/ parms.x_range;
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -54,17 +59,17 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		axis.setFont(fontSmall);
 		axis.setPaintTicks(true);
 		axis.setPaintLabels(true);
-		JLabel axisLabel = new JLabel("Axis", JLabel.CENTER);
+		JLabel axisLabel = new JLabel("Axis(deg)", JLabel.CENTER);
 		axisLabel.setFont(fontLarge);
 
 		
-		inclination = new JSlider(JSlider.HORIZONTAL, -50, 50, 0);
-		inclination.setMajorTickSpacing(25);
-		inclination.setMinorTickSpacing(10);
+		inclination = new JSlider(JSlider.HORIZONTAL, -i_max, i_max, 0);
+		inclination.setMajorTickSpacing(i_max/2);
+		inclination.setMinorTickSpacing(i_max/10);
 		inclination.setFont(fontSmall);
 		inclination.setPaintTicks(true);
 		inclination.setPaintLabels(true);
-		JLabel inclinationLabel = new JLabel("Inclination", JLabel.CENTER);
+		JLabel inclinationLabel = new JLabel("Slope(m/km)", JLabel.CENTER);
 		inclinationLabel.setFont(fontLarge);
 		
 		/*
@@ -197,7 +202,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 				setAxis(axis.getValue());
 		} else if (e.getSource() == inclination) {
 				double i = inclination.getValue();
-				incline(i/50);
+				incline(i/i_max);
 		}	
 	}
 

@@ -22,7 +22,11 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private JButton cancel;
 	
 	private boolean selecting;		// selection in progress
+	private boolean selected;		// selection completed
 	private int x_start, x_end, y_start, y_end;		// selection start/end coordinates
+	
+	private int d_max;				// diameter: full scale
+	private int a_max;				// altitude: full scale
 	
 	private static final int BORDER_WIDTH = 5;
 	
@@ -35,6 +39,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		this.newMesh = new Mesh(this.oldMesh);
 		map.setMesh(newMesh);
 		this.parms = Parameters.getInstance();
+		
+		// calibrate full scale on the sliders
+		this.a_max = parms.z_range/2;
+		this.d_max = parms.x_range/5;
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -49,22 +57,22 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		accept = new JButton("ACCEPT");
 		cancel = new JButton("CANCEL");
 		
-		altitude = new JSlider(JSlider.HORIZONTAL, -5000, 5000, 0);
+		altitude = new JSlider(JSlider.HORIZONTAL, -this.a_max, this.a_max, 0);
 		altitude.setMajorTickSpacing(5000);
 		altitude.setMinorTickSpacing(1000);
 		altitude.setFont(fontSmall);
 		altitude.setPaintTicks(true);
 		altitude.setPaintLabels(true);
-		JLabel altitudeLabel = new JLabel("Altitude", JLabel.CENTER);
+		JLabel altitudeLabel = new JLabel("Altitude(m)", JLabel.CENTER);
 		altitudeLabel.setFont(fontLarge);
 
-		diameter = new JSlider(JSlider.HORIZONTAL, 0, 500, 50);
-		diameter.setMajorTickSpacing(100);
-		diameter.setMinorTickSpacing(50);
+		diameter = new JSlider(JSlider.HORIZONTAL, 0, d_max, d_max/5);
+		diameter.setMajorTickSpacing(d_max/4);
+		diameter.setMinorTickSpacing(d_max/10);
 		diameter.setFont(fontSmall);
 		diameter.setPaintTicks(true);
 		diameter.setPaintLabels(true);
-		JLabel diameterLabel = new JLabel("Diameter", JLabel.CENTER);
+		JLabel diameterLabel = new JLabel("Diameter(km)", JLabel.CENTER);
 		diameterLabel.setFont(fontLarge);
 		
 		/*
@@ -113,6 +121,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		map.addMouseMotionListener(this);
 		
 		selecting = false;
+		selected = false;
 	}
 	
 	/**
@@ -128,12 +137,12 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		int width = map.getWidth();
 		int height = map.getHeight();
 		
-		double X0 = x_start/width - x_mid;
-		double Y0 = y_start/height - y_mid;
-		double X1 = x_end/width - x_mid;
-		double Y1 = y_end/width - y_mid;
-		double A = altitude.getValue()/10000;
-		double D = diameter.getValue()/1000;
+		double X0 = (double) x_start/width - x_mid;
+		double Y0 = (double) y_start/height - y_mid;
+		double X1 = (double) x_end/width - x_mid;
+		double Y1 = (double)y_end/width - y_mid;
+		double A = (double) altitude.getValue()/(2*a_max);
+		double D = (double) diameter.getValue()/parms.x_range;
 		orogeny(X0, Y0, X1, Y1, A, D);
 	}
 	
@@ -154,6 +163,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			x_end = e.getX();
 			y_end = e.getY();
 			selecting = false;
+			selected = true;
 			redraw();
 		}
 		
@@ -185,7 +195,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * updates to the axis/inclination sliders
 	 */
 	public void stateChanged(ChangeEvent e) {
-		if (e.getSource() == altitude || e.getSource() == diameter) {
+		if (selected && (e.getSource() == altitude || e.getSource() == diameter)) {
 				redraw();
 		} 
 	}

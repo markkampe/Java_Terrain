@@ -217,13 +217,31 @@ public class Mesh {
 		PathHasher pathhash = new PathHasher(g.num_edges());
 
 		// locate all the vertices and edges
+		//	NOTE: unfortunate OpenVoronoi behavior
+		//		  1. it returns not only vertices, but edge mid-points
+		//		  2. it returns vertices that are outside of the box
 		for( Edge e: g.edges ) {
+			// ignore APEX (mid-line) points when they are sources
+			if (e.source.type == VertexType.APEX)
+				continue;
 			Point p1 = e.source.position;
-			Point p2 = e.target.position;
-
-			// OpenVoronoi creates vertices outside of the box
-			//    for now, I am just ignoring them
-			//	  later I should connect their orphans
+			
+			// bypass APEX points when they are targets
+			Point p2 = null;
+			if (e.target.type == VertexType.APEX) {
+				// find the target at the other end
+				for(Edge e1: e.target.out_edges) {
+					if (e1.target != e.source) {
+						p2 = e1.target.position;
+						assert(e1.target.type == VertexType.NORMAL);
+					}
+				}
+				assert(p2 != null);
+			} else
+				p2 = e.target.position;
+			
+			// ignore out of the box vertices
+			// TODO: short-circuit edges that leave the box
 			if (!inTheBox(p1))
 				continue;
 			if (!inTheBox(p2))
@@ -240,10 +258,7 @@ public class Mesh {
 			// and note the path that connects them
 			pathhash.findPath(mp1, mp2);
 		} 
-		
-		// FIX OpenVoronoi is returning midpoints as well as vertices
-		//	identify and remove these before copying them out
-		
+			
 		// copy out the list of unique Vertices
 		vertices = new MapPoint[pointhash.numVertices];
 		for(int i = 0; i < pointhash.numVertices; i++)

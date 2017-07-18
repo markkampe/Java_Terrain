@@ -22,7 +22,7 @@ package WorldBuilder;
 	public double y_extent = 1.0;	// Ymax - Ymin
 	public double z_extent = 1.0;	// Zmax - Zmin
 	public int improvements = 1;	// number of smoothing iterations
-	public int points = 2048;		// desired number of grid points
+	public int points = 4096;		// desired number of grid points
 	
 	// diagnostic options
 	public int debug_level = 1;			// level of verbosity

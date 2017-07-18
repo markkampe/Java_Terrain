@@ -170,23 +170,6 @@ public class WorldBuilder  extends JFrame
 	 * create a panel of control widgets
 	 */
 	private void createWidgets() {
-		// create some buttons in panel #1
-		// button1 = new JButton("Button 1");
-		// button2 = new JButton("Button 2");
-		// JPanel buttons = new JPanel();	// horizontal, no-stretch
-		// buttons.add(button1);
-		// buttons.add(button2);
-		
-		// create a combobox in panel #2
-		// combo1 = new JComboBox();
-		// combo1.addItem("choice #1");
-		// combo1.addItem("choice #2");
-		// combo1.addItem("choice #3");
-		// JPanel comboPanel = new JPanel(new GridLayout(2,1));
-		// comboPanel.add(combo1);
-		// comboPanel.add(new JLabel("combo box"));
-		// JPanel combos = new JPanel();	// no stretch
-		// combos.add(comboPanel);
 		
 		// create some sliders in panel #3
 		rainfall = new JSlider();
@@ -210,9 +193,6 @@ public class WorldBuilder  extends JFrame
 		add(controls, BorderLayout.SOUTH);
 		
 		// register the action listeners
-		// button1.addActionListener(this);
-		// button2.addActionListener(this);
-		// combo1.addActionListener(this);;
 		rainfall.addChangeListener(this);
 		erosion.addChangeListener(this);
 		seaLevel.addChangeListener(this);
@@ -231,7 +211,7 @@ public class WorldBuilder  extends JFrame
 		} else if (o == fileClose) {
 			System.out.println("implement file:Close");
 		} else if (o == fileExport) {
-			System.out.println("implement file:Export");
+			new ExportDialog(map);
 		} else if (o == fileExit) {
 			shutdown();
 		} 

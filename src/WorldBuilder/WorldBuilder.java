@@ -8,6 +8,25 @@ import javax.swing.event.*;
 public class WorldBuilder  extends JFrame 
 						   implements ActionListener, ChangeListener,  WindowListener {
 	
+	// identification information
+	private static final String version = "WorldBuilder 0.1";
+	private static final String author = "Author: Mark Kampe (mark.kampe@gmail.com)";
+	private static final String credit = "Based on Martin O'Leary's Uncharted Atlas terrain generator (mewo2.com)";
+	private static final String license = "";	// TBD
+	
+	// active file
+	private String filename;	// name of current input/output file
+	private boolean modified;	// should this file be saved
+	private static final String DEFAULT_MAP = "default_4096.json";
+	
+	private static final String INPUT_TYPE = "*.json";
+	private static final String EXPORT_TYPE = "*.json";
+
+	// exit codes
+	private static final int EXIT_OK = 0;
+	private static final int EXIT_ARGS = 1;
+	private static final int EXIT_ERROR = 2;
+	
 	// 2D canvas
 	private Container mainPane;
 	private Map map;	
@@ -21,6 +40,7 @@ public class WorldBuilder  extends JFrame
 	private int viewing_soil;
 	
 	// menu bar items
+	private JMenuItem fileNew;
 	private JMenuItem fileOpen;
 	private JMenuItem fileSave;
 	private JMenuItem fileSaveAs;
@@ -45,8 +65,7 @@ public class WorldBuilder  extends JFrame
 	private JSlider erosion;
 	private JSlider seaLevel;
 
-	// messages
-	private static String infoMessage = "WorldBuilder 0.1\nBased on Martin O'Leary's Uncharted Atlas terrain generator (mewo2.com)";
+	
 	
 	// configuration
 	private static Parameters parms;						// global program parameters
@@ -58,7 +77,7 @@ public class WorldBuilder  extends JFrame
 	/**
 	 * instantiate a map and control panel
 	 */
-	public WorldBuilder() {
+	public WorldBuilder(String filename) {
 		
 		// set our window icon
 		//Image myIcon = getToolkit().getImage(getClass().getResource(ICON_IMAGE));
@@ -73,14 +92,21 @@ public class WorldBuilder  extends JFrame
 		
 		// create the main map panel, capture mouse events within it
 		map = new Map(parms.width, parms.height);
-		mainPane.add(map, BorderLayout.CENTER);
-	
+		mainPane.add(map, BorderLayout.CENTER);	
 		
 		// create menus and widgets, put up the display
 		createMenus();
 		createWidgets();
 		pack();
 		setVisible(true);
+		
+		// if we were given an input file, use it
+		if (filename != null) {
+			Mesh m = new Mesh();
+			m.read(filename);
+			map.setMesh(m);
+		}
+		modified = false;
 	}
 	
 	/**
@@ -90,6 +116,8 @@ public class WorldBuilder  extends JFrame
 	private void createMenus() {
 		
 		// create File menu
+		fileNew = new JMenuItem("New");
+		fileNew.addActionListener(this);
 		fileOpen = new JMenuItem("Open");
 		fileOpen.addActionListener(this);
 		fileSave = new JMenuItem("Save");
@@ -103,6 +131,7 @@ public class WorldBuilder  extends JFrame
 		fileExit = new JMenuItem("Exit");
 		fileExit.addActionListener(this);
 		JMenu fileMenu = new JMenu("File");
+		fileMenu.add(fileNew);
 		fileMenu.add(fileOpen);
 		fileMenu.add(fileSave);
 		fileMenu.add(fileSaveAs);
@@ -198,22 +227,86 @@ public class WorldBuilder  extends JFrame
 		seaLevel.addChangeListener(this);
 	}
 	
+	/**
+	 * save the current map
+	 */
+	private void doSave(String filename) {
+		String title = (filename == null) ? "Save As" : "Save";
+		FileDialog d = new FileDialog(this, title, FileDialog.SAVE);
+		d.setFile(filename == null ? INPUT_TYPE : filename);
+		d.setVisible(true);
+		filename = d.getFile();
+		if (filename != null) {
+			String dir = d.getDirectory();
+			if (dir != null)
+				filename = dir + filename;
+			map.getMesh().write(filename);
+			modified = false;
+		}
+	}
+	
+	/**
+	 * see the current map should be saved
+	 */
+	private void checkSave() {
+		if (JOptionPane.showConfirmDialog(new JFrame(), "Save current map?", "Save?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+			doSave(filename);
+		}	
+	}
+
 	public void actionPerformed( ActionEvent e ) {
 		Object o = e.getSource();
 		
-		if (o == fileOpen) {
-			System.out.println("implement file:open");
-
+		// file menu opens, closes, saves, and exports files
+		if (o == fileNew) {
+			if (modified)
+				checkSave();
+			filename = null;
+			Mesh m = new Mesh();
+			// TODO: add Mesh parameters dialog
+			m.create();
+			modified = true;
+			map.setMesh(m);
+		} else if (o == fileOpen) {
+			if (modified)
+				checkSave();
+			FileDialog d = new FileDialog(this, "Choose input file", FileDialog.LOAD);
+			d.setFile(INPUT_TYPE);
+			d.setVisible(true);
+			filename = d.getFile();
+			if (filename != null) {
+				Mesh m = new Mesh();
+				String dir = d.getDirectory();
+				if (dir != null)
+					filename = dir + filename;
+				m.read(filename);
+				modified = false;
+				map.setMesh(m);
+			}
 		} else if (o == fileSave) {
-			System.out.println("implement file:Save");
+			doSave(filename);
 		} else if (o == fileSaveAs) {
-			System.out.println("implement file:SaveAs");
+			doSave(null);
 		} else if (o == fileClose) {
-			System.out.println("implement file:Close");
+			if (modified)
+				checkSave();
+			map.setMesh(null);
+			modified = false;
 		} else if (o == fileExport) {
-			new ExportDialog(map);
+			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
+			d.setFile(EXPORT_TYPE);
+			d.setVisible(true);
+			String export_file = d.getFile();
+			if (export_file != null) {
+				String dir = d.getDirectory();
+				if (dir != null)
+					export_file = dir + export_file;
+				new ExportDialog(map, export_file);
+			}
 		} else if (o == fileExit) {
-			shutdown();
+			if (modified)
+				checkSave();
+			shutdown(EXIT_OK);
 		} 
 		
 		// edit menus pop up the corresponding dialogs
@@ -252,10 +345,13 @@ public class WorldBuilder  extends JFrame
 		
 		// help menu just shows info
 		else if (o == helpInfo) {
-			JOptionPane.showMessageDialog(new JFrame(), infoMessage, "Information", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(new JFrame(), 
+					version +"\n" + author + "\n" + credit + "\n" + license, 
+					"Information", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
+	// these may all be just place holders
 	public void stateChanged(ChangeEvent e) {
 		Object o = e.getSource();
 		
@@ -269,13 +365,11 @@ public class WorldBuilder  extends JFrame
 	}
 	
 
-	void shutdown() {
-		// TODO prompt to save
-		// TODO have an exit code
-		System.exit(0);
+	void shutdown(int exitCode) {
+		System.exit(exitCode);
 	}
 
-	public void windowClosing(WindowEvent e) { shutdown(); }	
+	public void windowClosing(WindowEvent e) { shutdown(EXIT_OK); }	
 	public void windowActivated(WindowEvent arg0) {	}
 	public void windowClosed(WindowEvent arg0) {}
 	public void windowDeactivated(WindowEvent arg0) {}
@@ -286,6 +380,7 @@ public class WorldBuilder  extends JFrame
 	public static void main(String[] args) {
 		// instantiate a parameters singleton
 		parms = Parameters.getInstance();
+		String filename = null;
 		
 		// process the arguments
 		for( int i = 0; i < args.length; i++ ) {
@@ -297,11 +392,11 @@ public class WorldBuilder  extends JFrame
 		}
 		
 		// create our display
-		WorldBuilder w = new WorldBuilder();
+		if (filename == null)
+			filename = DEFAULT_MAP;
+		WorldBuilder w = new WorldBuilder(filename);
 		
-		// create and display an initial mesh
-		Mesh m = new Mesh();
-		w.map.setMesh(m);
+		// initialize the display type
 		w.viewing_mesh = w.map.setDisplay(Map.SHOW_MESH, true);
 		w.viewMesh.setText("~mesh");
 	}

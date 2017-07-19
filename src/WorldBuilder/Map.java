@@ -6,7 +6,9 @@ import javax.swing.*;
 
 public class Map extends JPanel {
 	/**
-	 * a Map is the displayable form of a collection of MapPoints
+	 * a Map is the displayable form of a collection of MapPoints.
+	 * The map window is resizable, and the mesh is unaware of the
+	 * display window size.
 	 */
 
 	// types of displays
@@ -138,7 +140,7 @@ public class Map extends JPanel {
 		if (mesh == null) {
 			setBackground(Color.WHITE);
 			g.setColor(Color.BLACK);
-			g.drawString("Generating Grid", width / 2, height / 2);
+			g.drawString("use menu File:New or File:Open to create a mesh", width / 4, height / 2);
 			return;
 		}
 		

@@ -13,7 +13,9 @@ import javax.swing.event.*;
 public class ExportDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, WindowListener {	
 	private Map map;
 	private Parameters parms;
+	private String filename;
 	
+	private JLabel sel_file;
 	private JLabel sel_pixels;
 	private JLabel sel_meters;
 	private JLabel sel_points;
@@ -31,8 +33,9 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	
 	private static final long serialVersionUID = 1L;
 	
-	public ExportDialog(Map map)  {
+	public ExportDialog(Map map, String filename)  {
 		// pick up references
+		this.filename = filename;
 		this.map = map;
 		this.parms = Parameters.getInstance();
 		
@@ -63,6 +66,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		JLabel resolutionLabel = new JLabel("Resolution (m*2^n)", JLabel.CENTER);
 		resolutionLabel.setFont(fontLarge);
 		
+		sel_file = new JLabel("File: " + filename);
 		sel_pixels = new JLabel();
 		sel_meters = new JLabel();
 		sel_points = new JLabel("Select the area to be exported");
@@ -75,7 +79,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		 * 			each being a vertical Box w/label and slider
 		 * 		buttons a horizontal Box layout
 		 */
-		JPanel descPanel = new JPanel(new GridLayout(3,1));
+		JPanel descPanel = new JPanel(new GridLayout(4,1));
+		descPanel.add(sel_file);
 		descPanel.add(sel_pixels);
 		descPanel.add(sel_meters);
 		descPanel.add(sel_points);
@@ -189,14 +194,29 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 * click events on ACCEPT/CANCEL buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == cancel) {
-			map.select(0,0,0,0, Map.SEL_NONE);
-			this.dispose();
-		} else if (e.getSource() == accept) {
-			map.select(0,0,0,0, Map.SEL_NONE);
-			System.out.println("FIX: implement export");
-			this.dispose();
+		// clear the selection
+		map.select(0,0,0,0, Map.SEL_NONE);
+		
+		if (e.getSource() == accept && selected) {
+			
+			// figure out the selected region
+			double x = (double) x_start/map.getWidth() - parms.x_extent/2;
+			double y = (double) y_start/map.getHeight() - parms.y_extent/2;
+			double dx = (double) (x_end - x_start)/map.getWidth();
+			double dy = (double) (y_end - y_start)/map.getHeight();
+			
+			// figure out the selected granularity
+			int grain = 1;
+			int res = resolution.getValue();
+			while(res > 0) {
+				grain *=2;
+				res--;
+			}
+			map.getMesh().export(filename, x, y, dx, dy, grain);
 		}
+		
+		// discard the window
+		this.dispose();
 	}
 
 	public void mouseClicked(MouseEvent arg0) {}

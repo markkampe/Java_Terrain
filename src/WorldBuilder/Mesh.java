@@ -44,21 +44,6 @@ public class Mesh {
 	 */
 	public Mesh() {
 		parms = Parameters.getInstance();
-
-		// create a set of random points
-		MapPoint points[] = new MapPoint[parms.points];
-		for (int i = 0; i < points.length; i++) {
-			double x = parms.x_extent * (Math.random() - 0.5);
-			double y = parms.y_extent * (Math.random() - 0.5);
-			points[i] = new MapPoint(x, y);
-		}
-			
-		// even out the distribution
-		for( int i = 0; i < parms.improvements; i++ )
-			points = improve(points);
-		
-		// create a Voronoi mesh around the improved points
-		makeMesh(points);
 	}
 	
 	/**
@@ -84,6 +69,50 @@ public class Mesh {
 			Path p = m.edges[i];
 			edges[i] = new Path(vertices[p.source.index], vertices[p.target.index], i);
 		}
+	}
+	
+	/**
+	 * create a new mesh
+	 */
+	public void create() {
+		// create a set of random points
+		MapPoint points[] = new MapPoint[parms.points];
+		for (int i = 0; i < points.length; i++) {
+			double x = parms.x_extent * (Math.random() - 0.5);
+			double y = parms.y_extent * (Math.random() - 0.5);
+			points[i] = new MapPoint(x, y);
+		}
+			
+		// even out the distribution
+		for( int i = 0; i < parms.improvements; i++ )
+			points = improve(points);
+		
+		// create a Voronoi mesh around the improved points
+		makeMesh(points);
+	}
+	
+	/**
+	 * read a set of mesh points in from a file
+	 */
+	public void read(String filename) {
+		System.out.println("Implement Mesh.read(" + filename + ")");
+		vertices = new MapPoint[0];
+		edges = new Path[0];
+		// TODO implement Mesh:read
+	}
+	
+	/**
+	 * write a set of mesh points to an output file
+	 */
+	public void write(String filename) {
+		System.out.println("Implement Mesh.write(" + filename + ")");
+		// TODO implement Mesh:write
+	}
+	
+
+	public void export(String filename, double x, double y, double dx, double dy, int meters) {
+		System.out.println("Implement Mesh.export to file " + filename + ", <" + x + "," + y + ">, " + dx + "x" + dy + ", grain=" + meters + "m");
+		// TODO implement Mesh:export
 	}
 	
 	/**

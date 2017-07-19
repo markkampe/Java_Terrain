@@ -3,7 +3,7 @@ package WorldBuilder;
 /**
  * This is a singleton class containing global program parameters.
  * 
- * values may be default or overridden from command line
+ * values may be default or overridden from command line or dialogs
  */
  
  public class Parameters {
@@ -18,12 +18,14 @@ package WorldBuilder;
 	public int r_range = 500;	// rain (cm/y)
 	
 	// map generation parameters
-	public double x_extent = 1.0;	// Xmax - Xmin
-	public double y_extent = 1.0;	// Ymax - Ymin
-	public double z_extent = 1.0;	// Zmax - Zmin
 	public int improvements = 1;	// number of smoothing iterations
 	public int points = 4096;		// desired number of grid points
 	
+	// coordinate ranges (probably don't want to change)
+	public double x_extent = 1.0;	// Xmax - Xmin
+	public double y_extent = 1.0;	// Ymax - Ymin
+	public double z_extent = 1.0;	// Zmax - Zmin
+
 	// diagnostic options
 	public int debug_level = 1;			// level of verbosity
 	

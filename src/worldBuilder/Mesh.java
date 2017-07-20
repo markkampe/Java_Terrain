@@ -13,12 +13,25 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
 /**
  * @module mesh ... functions to generate the basic map
  *
- *         a mesh is a Voronoi tesselation of a two-dimensional map.
+ *  A mesh is a set of irregularly spaced interconnected points:
+ *      all <x,y,z> coordinates are relative to the center
+ *      all <x,y,z> coordinates fit within a unit cube (-0.5 to +0.5)
+ *  	operations on the mesh are agnostic to real-world size 
+ *  
+ *  Once created, the mesh (collection of connected points) does not
+ *  change, but the attributes of the individual points (e.g. altitude
+ *  and hydration) do evolve over time).
+ *  
+ *  The intent is that all other maps, even though much more detailed
+ *  than the mesh, should be deterministically derivable from the
+ *  mesh and its parameters.
+ *  
+ *  Notes on generation:
  *         
- *         O'Leary observed that a map created on a square grid never loses its
- *         regularity, so he wanted to build the map on an irregular grid. But
- *         he found randomly chosen grids to be too irregular. Mesh generation
- *         implements his compromise.
+ *     O'Leary observed that a map created on a square grid never loses its
+ *     regularity, so he wanted to build the map on an irregular grid. But
+ *     he found randomly chosen grids to be too irregular. Mesh generation
+ *     implements his compromise.
  *
  *         1. He starts by generating N completely randomly chosen points. But
  *         these turn out to be a little to clumpy, so he smoothes them out
@@ -29,8 +42,6 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
  *         Voronoi tesselation, whose vertices become the map points, and
  *         whose edges become a connected mesh (each internal point has
  *         three neighbors).
- *
- *         NOTES: <x,y> coordinates are relative to the center of the map
  */
 public class Mesh {
 	public MapPoint[] vertices;	// grid vertices	
@@ -92,27 +103,27 @@ public class Mesh {
 	}
 	
 	/**
-	 * read a set of mesh points in from a file
+	 * read mesh of MapPoints from a file
 	 */
 	public void read(String filename) {
-		System.out.println("Implement Mesh.read(" + filename + ")");
+		System.out.println("TODO: Implement Mesh.read(" + filename + ")");
 		vertices = new MapPoint[0];
 		edges = new Path[0];
 		// TODO implement Mesh:read
 	}
 	
 	/**
-	 * write a set of mesh points to an output file
+	 * write a mesh of MapPoints out to a file
 	 */
 	public void write(String filename) {
-		System.out.println("Implement Mesh.write(" + filename + ")");
+		System.out.println("TODO: Implement Mesh.write(" + filename + ")");
 		// TODO implement Mesh:write
 	}
 	
 
 	public void export(String filename, double x, double y, double dx, double dy, int meters) {
-		System.out.println("Implement Mesh.export to file " + filename + ", <" + x + "," + y + ">, " + dx + "x" + dy + ", grain=" + meters + "m");
-		// TODO implement Mesh:export
+		System.out.println("TODO: Implement Mesh.export to file " + filename + ", <" + x + "," + y + ">, " + dx + "x" + dy + ", grain=" + meters + "m");
+		// TODO implement Mesh:export ... maybe move it to Map:export
 	}
 	
 	/**

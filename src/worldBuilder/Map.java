@@ -6,7 +6,13 @@ import javax.swing.*;
 
 public class Map extends JPanel {
 	/**
-	 * a Map is the displayable form of a collection of MapPoints.
+	 * a Map is the displayable form of a Mesh.
+	 * 
+	 *   it may include more continuous maps of height and 
+	 *   other attributes, but all of those are deterministic
+	 *   functions, computed from the Mesh.
+	 * 
+	 *   
 	 * The map window is resizable, and the mesh is unaware of the
 	 * display window size.
 	 */
@@ -34,7 +40,7 @@ public class Map extends JPanel {
 	
 	// map size (in pixels)
 	private static final int MIN_WIDTH = 400;	// min screen width
-	private static final int MIN_HEIGHT = 400;	// min scren height
+	private static final int MIN_HEIGHT = 400;	// min screen height
 	private static final int SMALL_POINT = 2;	// width of a small point
 	private static final int LARGE_POINT = 4;	// width of a large point
 	private Dimension size;
@@ -47,7 +53,7 @@ public class Map extends JPanel {
 	private static final Color RAIN_COLOR = Color.CYAN;
 	private static final Color SOIL_COLOR = Color.YELLOW;
 	// topographic lines are shades of gray
-	private static final int TOPO_DIM = 10;
+	private static final int TOPO_DIM = 0;
 	private static final int TOPO_BRITE = 255;
 	private Color background;
 	

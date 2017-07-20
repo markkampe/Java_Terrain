@@ -1,4 +1,4 @@
-package WorldBuilder;
+package worldBuilder;
 
 /**
  * This class is used to generate a single unique Path for every 

@@ -1,4 +1,4 @@
-package WorldBuilder;
+package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -38,7 +38,10 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		this.parms = Parameters.getInstance();
 		
 		// figure out the maximum allowable slope
-		i_max = (parms.z_range + parms.x_range - 1)/ parms.x_range;
+		i_max = (parms.z_range + parms.xy_range - 1)/ parms.xy_range;
+		if (i_max % 2 != 0)
+			i_max++;
+		int i_tic = (i_max % 5 == 0) ? 10 : 8;
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -65,7 +68,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		
 		inclination = new JSlider(JSlider.HORIZONTAL, -i_max, i_max, 0);
 		inclination.setMajorTickSpacing(i_max/2);
-		inclination.setMinorTickSpacing(i_max/10);
+		inclination.setMinorTickSpacing(i_max/i_tic);
 		inclination.setFont(fontSmall);
 		inclination.setPaintTicks(true);
 		inclination.setPaintLabels(true);
@@ -185,7 +188,6 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		System.out.println("Closing Slope Dialog");
 		map.select(0, 0, 0, 0,  Map.SEL_NONE);
 		if (oldMesh != null) {
 			map.setMesh(oldMesh);

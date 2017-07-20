@@ -1,4 +1,4 @@
-package WorldBuilder;
+package worldBuilder;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -209,7 +209,7 @@ public class Map extends JPanel {
 			}
 		}
 	}
-
+	
 	/**
 	 * @return minimum acceptable canvas size
 	 */

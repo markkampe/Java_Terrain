@@ -1,7 +1,8 @@
-package WorldBuilder;
+package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Hashtable;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -17,7 +18,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	
 	private JLabel sel_file;
 	private JLabel sel_pixels;
-	private JLabel sel_meters;
+	private JLabel sel_km;
+	private JLabel sel_t_size;
 	private JLabel sel_points;
 	private JSlider resolution;
 	private JButton accept;
@@ -27,7 +29,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	private boolean selected;		// selection completed
 	private int x_start, x_end, y_start, y_end;		// selection start/end coordinates
 	
-	private int res_min, res_max;	// supported export resolutions
+	private static final int tile_sizes[] = {1, 5, 10, 50, 100, 500, 1000, 5000, 10000};
 	
 	private static final int BORDER_WIDTH = 5;
 	
@@ -38,11 +40,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		this.filename = filename;
 		this.map = map;
 		this.parms = Parameters.getInstance();
-		
-		res_min = 0;	// finest resolution: 1m
-		res_max = 0;	// coarsest resolution: 1% of map
-		for (int res = 1; res < parms.x_range * 10; res *= 2)
-			res_max++;	
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -57,18 +54,28 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		accept = new JButton("EXPORT");
 		cancel = new JButton("CANCEL");
 		
-		resolution = new JSlider(JSlider.HORIZONTAL, res_min, res_max, res_min + 1);
-		resolution.setMajorTickSpacing(4);
+		resolution = new JSlider(JSlider.HORIZONTAL, 0, 8, 2);
+		resolution.setMajorTickSpacing(2);
 		resolution.setMinorTickSpacing(1);
 		resolution.setFont(fontSmall);
 		resolution.setPaintTicks(true);
+
+		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
+		labels.put(0, new JLabel("1"));
+		labels.put(2, new JLabel("10"));
+		labels.put(4, new JLabel("100"));
+		labels.put(6, new JLabel("1km"));
+		labels.put(8, new JLabel("10km"));
+		resolution.setLabelTable(labels);
 		resolution.setPaintLabels(true);
-		JLabel resolutionLabel = new JLabel("Resolution (m*2^n)", JLabel.CENTER);
+		
+		JLabel resolutionLabel = new JLabel("Tile size(m)", JLabel.CENTER);
 		resolutionLabel.setFont(fontLarge);
 		
 		sel_file = new JLabel("File: " + filename);
 		sel_pixels = new JLabel();
-		sel_meters = new JLabel();
+		sel_km = new JLabel();
+		sel_t_size = new JLabel();
 		sel_points = new JLabel("Select the area to be exported");
 
 		/*
@@ -79,10 +86,11 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		 * 			each being a vertical Box w/label and slider
 		 * 		buttons a horizontal Box layout
 		 */
-		JPanel descPanel = new JPanel(new GridLayout(4,1));
+		JPanel descPanel = new JPanel(new GridLayout(5,1));
 		descPanel.add(sel_file);
 		descPanel.add(sel_pixels);
-		descPanel.add(sel_meters);
+		descPanel.add(sel_km);
+		descPanel.add(sel_t_size);
 		descPanel.add(sel_points);
 		
 		JPanel resPanel = new JPanel();
@@ -124,21 +132,22 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 * describe the selected area
 	 */
 	private void select(int x0, int y0, int x1, int y1, int res) {
+		// selected area in pixels
 		int x_pixels = Math.abs(x1-x0);
 		int y_pixels = Math.abs(y1-y0);
-		int x_meters = x_pixels * parms.x_range * 1000 / map.getWidth();
-		int y_meters = y_pixels * parms.y_range * 1000 / map.getHeight();
-		int grain = 1;
-		while(res > 0) {
-			grain *=2;
-			res--;
-		}
-		int x_points = x_meters/grain;
-		int y_points = y_meters/grain;
 		
-		sel_pixels.setText("Pixels: " + x_pixels + "x" + y_pixels);
-		sel_meters.setText("Meters: " + x_meters + "x" + y_meters);
-		sel_points.setText("Output  " + x_points + "x" + y_points + "points");
+		// selected area in km
+		double scale = parms.xy_range;
+		scale /= map.getWidth() > map.getHeight() ? map.getWidth() : map.getHeight();
+		double x_km = x_pixels * scale;
+		double y_km = y_pixels * scale;
+		int x_points = (int) x_km * 1000/res;
+		int y_points = (int) y_km * 1000/res;
+		
+		sel_pixels.setText("Pixels:    " + x_pixels + "x" + y_pixels);
+		sel_km.setText("Kilometers:" + (int) x_km + "x" + (int) y_km);
+		sel_t_size.setText("Tile Size: " + res + " meters");
+		sel_points.setText("Output:    " + x_points + "x" + y_points + " tiles");
 	}
 	
 	/**
@@ -159,7 +168,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			y_end = e.getY();
 			selecting = false;
 			selected = true;
-			select(x_start, y_start, x_end, y_end, resolution.getValue());
+			select(x_start, y_start, x_end, y_end, tile_sizes[resolution.getValue()]);
 		}
 	}
 	
@@ -169,7 +178,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	public void mouseDragged(MouseEvent e) {
 		if (selecting) {
 			map.select(x_start,  y_start,  e.getX()-x_start,  e.getY()-y_start, Map.SEL_RECTANGULAR);
-			select(x_start, y_start, e.getX(), e.getY(), resolution.getValue());
+			select(x_start, y_start, e.getX(), e.getY(), tile_sizes[resolution.getValue()]);
 		}	
 	}
 	
@@ -186,7 +195,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (selected && e.getSource() == resolution) {
-				select(x_start, y_start, x_end, y_end, resolution.getValue());
+				select(x_start, y_start, x_end, y_end, tile_sizes[resolution.getValue()]);
 		} 
 	}
 
@@ -204,15 +213,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			double y = (double) y_start/map.getHeight() - parms.y_extent/2;
 			double dx = (double) (x_end - x_start)/map.getWidth();
 			double dy = (double) (y_end - y_start)/map.getHeight();
-			
-			// figure out the selected granularity
-			int grain = 1;
-			int res = resolution.getValue();
-			while(res > 0) {
-				grain *=2;
-				res--;
-			}
-			map.getMesh().export(filename, x, y, dx, dy, grain);
+			map.getMesh().export(filename, x, y, dx, dy, tile_sizes[resolution.getValue()]);
 		}
 		
 		// discard the window

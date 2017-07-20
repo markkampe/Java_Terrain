@@ -1,4 +1,4 @@
-package WorldBuilder;
+package worldBuilder;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -6,7 +6,7 @@ import javax.swing.event.*;
 
 
 public class WorldBuilder  extends JFrame 
-						   implements ActionListener, ChangeListener,  WindowListener {
+						   implements ActionListener, ChangeListener,  WindowListener, ComponentListener {
 	
 	// identification information
 	private static final String version = "WorldBuilder 0.1";
@@ -47,6 +47,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem fileClose;
 	private JMenuItem fileExport;
 	private JMenuItem fileExit;
+	private JMenuItem editWorld;
 	private JMenuItem editMountain;
 	private JMenuItem editSlope;
 	private JMenuItem editRain;
@@ -88,6 +89,7 @@ public class WorldBuilder  extends JFrame
 		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
 		setTitle("World Builder");
 		addWindowListener( this );
+		addComponentListener(this);
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
 		// create the main map panel, capture mouse events within it
@@ -141,7 +143,9 @@ public class WorldBuilder  extends JFrame
 		fileMenu.add(fileExit);
 		
 		// create our edit menu
-		editMountain = new JMenuItem("add mountain");
+		editWorld = new JMenuItem("world size");
+		editWorld.addActionListener(this);
+		editMountain = new JMenuItem("add mountain(s)");
 		editMountain.addActionListener(this);
 		editSlope = new JMenuItem("define slope");
 		editSlope.addActionListener(this);
@@ -152,6 +156,7 @@ public class WorldBuilder  extends JFrame
 		editRoads = new JMenuItem("draw roads");
 		editRoads.addActionListener(this);
 		JMenu editMenu = new JMenu("Edit");
+		editMenu.add(editWorld);
 		editMenu.add(editMountain);
 		editMenu.add(editSlope);
 		editMenu.add(editRain);
@@ -310,7 +315,9 @@ public class WorldBuilder  extends JFrame
 		} 
 		
 		// edit menus pop up the corresponding dialogs
-		else if (o == editMountain) {
+		else if (o == editWorld) {
+			new WorldDialog(map);
+		} else if (o == editMountain) {
 			new MountainDialog(map);
 		} else if (o == editSlope) {
 			new SlopeDialog(map);
@@ -364,11 +371,22 @@ public class WorldBuilder  extends JFrame
 		}
 	}
 	
-
+	/**
+	 * window resize
+	 */
+	public void componentResized(ComponentEvent e) {
+	}
+	
+	/**
+	 * shut down the program
+	 * 
+	 * @param exitCode
+	 */
 	void shutdown(int exitCode) {
 		System.exit(exitCode);
 	}
 
+	// perfunctory event handlers
 	public void windowClosing(WindowEvent e) { shutdown(EXIT_OK); }	
 	public void windowActivated(WindowEvent arg0) {	}
 	public void windowClosed(WindowEvent arg0) {}
@@ -376,6 +394,9 @@ public class WorldBuilder  extends JFrame
 	public void windowDeiconified(WindowEvent arg0) {}
 	public void windowIconified(WindowEvent arg0) {}
 	public void windowOpened(WindowEvent arg0) {}
+	public void componentShown(ComponentEvent arg0) {}
+	public void componentHidden(ComponentEvent arg0) {}
+	public void componentMoved(ComponentEvent arg0) {}
 
 	public static void main(String[] args) {
 		// instantiate a parameters singleton

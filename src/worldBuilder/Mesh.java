@@ -1,4 +1,4 @@
-package WorldBuilder;
+package worldBuilder;
 
 // note: this is the only class that knows about Voronoi
 import org.rogach.jopenvoronoi.Edge;
@@ -269,10 +269,10 @@ public class Mesh {
 			} else
 				p2 = e.target.position;
 			
-			// ignore out of the box vertices
-			// TODO: short-circuit edges that leave the box
+			// ignore paths originating outside the box
 			if (!inTheBox(p1))
 				continue;
+			// TODO short-circuit paths ending outside the box
 			if (!inTheBox(p2))
 				continue;		
 			
@@ -287,7 +287,9 @@ public class Mesh {
 			// and note the path that connects them
 			pathhash.findPath(mp1, mp2);
 		} 
-			
+		
+		// TODO stitch together out-of-the-box paths
+		
 		// copy out the list of unique Vertices
 		vertices = new MapPoint[pointhash.numVertices];
 		for(int i = 0; i < pointhash.numVertices; i++)

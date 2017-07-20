@@ -1,4 +1,4 @@
-package WorldBuilder;
+package worldBuilder;
 
 
 /**

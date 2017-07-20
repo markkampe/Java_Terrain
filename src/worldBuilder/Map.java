@@ -25,18 +25,7 @@ public class Map extends JPanel {
 	public static final int SHOW_RAIN = 0x08;
 	public static final int SHOW_WATER = 0x10;
 	public static final int SHOW_SOIL = 0x20;
-	private int display = SHOW_MESH;
-	
-	// types of select
-	public static final int SEL_NONE = 0;
-	public static final int SEL_POINT = 1;
-	public static final int SEL_LINEAR = 2;
-	public static final int SEL_RECTANGULAR = 3;
-	private int selectX;
-	private int selectY;
-	private int selectDx;
-	private int selectDy;
-	private int selectType;
+	private int display;
 	
 	// map size (in pixels)
 	private static final int MIN_WIDTH = 400;	// min screen width
@@ -78,6 +67,7 @@ public class Map extends JPanel {
 		size = new Dimension(width, height);
 		this.background = new Color(128, 128, 128);
 		parms = Parameters.getInstance();
+		selectNone();
 	}
 
 	/**
@@ -114,23 +104,72 @@ public class Map extends JPanel {
 		return this.mesh;
 	}
 
+	// description of the area to be highlighted
+	private int sel_x0, sel_y0, sel_x1, sel_y1;
+	private int sel_height, sel_width;
+	private int sel_radius;
+	private enum Selection {NONE, CIRCLE, LINE, RECTANGLE};
+	private Selection sel_type;
+	
 	/**
-	 * create or update a selection 
-	 * @param	initial X
-	 * @param	initial Y
-	 * @param 	x distance
-	 * @param 	y distance
-	 * @param 	linear/rectangular
+	 * highlight a rectangular selection
+	 * 
+	 * @param x0	
+	 * @param y0	
+	 * @param x1	
+	 * @param y1	
 	 */
-	public void select(int xStart, int yStart, int dx, int dy, int selection) {
-		selectX = xStart;
-		selectY = yStart;
-		selectDx = dx;
-		selectDy = dy;
-		selectType = selection;
+	public void selectLine(int x0, int y0, int x1, int y1) {
+		sel_x0 = x0;
+		sel_y0 = y0;
+		sel_x1 = x1;
+		sel_y1 = y1;
+		sel_type = Selection.LINE;
 		
 		repaint();
 	}
+	/**
+	 * highlight a rectangular selection
+	 * 
+	 * @param x0	
+	 * @param y0	
+	 * @param x1	
+	 * @param y1	
+	 */
+	public void selectRect(int x0, int y0, int width, int height) {
+		sel_x0 = x0;
+		sel_y0 = y0;
+		sel_width = width;
+		sel_height = height;
+		sel_type = Selection.RECTANGLE;
+		
+		repaint();
+	}
+	
+	/**
+	 * highlight a circular selection
+	 * 
+	 * @param x
+	 * @param y
+	 * @param radius
+	 */
+	public void selectCircle(int x, int y, int radius) {
+		sel_x0 = x;
+		sel_y0 = y;
+		sel_radius = radius;
+		sel_type = Selection.CIRCLE;
+		
+		repaint();
+	}
+	
+	/**
+	 * clear selection highlight
+	 */
+	public void selectNone() {
+		sel_type = Selection.NONE;
+		repaint();
+	}
+
 	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -193,26 +232,19 @@ public class Map extends JPanel {
 		}
 		
 		// see if we have a selection area to draw
-		if (selectDx != 0 || selectDy != 0) {
-			int x = selectX;
-			int dx = selectDx;
-			int y = selectY;
-			int dy = selectDy;
-			
+		switch(sel_type) {
+		case LINE:
 			g.setColor(SELECT_COLOR);
-			if (selectType == SEL_RECTANGULAR) {
-				if (selectDx < 0) {
-					x += selectDx;
-					dx = -dx;
-				}
-				if (dy < 0) {
-					y += selectDy;
-					dy = -dy;
-				}
-				g.drawRect(x, y, dx, dy);
-			} else if (selectType == SEL_LINEAR) {
-				g.drawLine(x,  y,  x+dx, y+dy);
-			}
+			g.drawLine(sel_x0,  sel_y0,  sel_x1,  sel_y1);
+			break;
+		case CIRCLE:
+			g.setColor(SELECT_COLOR);
+			g.drawOval(sel_x0, sel_y0, sel_radius, sel_radius);
+			break;
+		case RECTANGLE:
+			g.setColor(SELECT_COLOR);
+			g.drawRect(sel_x0, sel_y0, sel_width, sel_height);
+			break;
 		}
 	}
 	

@@ -24,6 +24,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private boolean selecting;		// selection in progress
 	private boolean selected;		// selection completed
 	private int x_start, x_end, y_start, y_end;		// selection start/end coordinates
+	private int width;				// width of mountain range
 	
 	private int d_max;				// diameter: full scale
 	private int a_max;				// altitude: full scale
@@ -202,7 +203,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	public void mouseDragged(MouseEvent e) {
 		if (selecting) {
-			map.select(x_start,  y_start,  e.getX()-x_start,  e.getY()-y_start, Map.SEL_LINEAR);
+			map.selectLine(x_start,  y_start,  e.getX(),  e.getY());
 		}	
 	}
 	
@@ -211,7 +212,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	public void windowClosing(WindowEvent e) {
 		System.out.println("Closing Slope Dialog");
-		map.select(0, 0, 0, 0,  Map.SEL_NONE);
+		map.selectNone();
 		if (oldMesh != null) {
 			map.setMesh(oldMesh);
 			map.repaint();
@@ -233,13 +234,13 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
-			map.select(0,0,0,0, Map.SEL_NONE);
+			map.selectNone();
 			map.setMesh(oldMesh);
 			map.repaint();
 			oldMesh = null;
 			this.dispose();
 		} else if (e.getSource() == accept) {
-			map.select(0,0,0,0, Map.SEL_NONE);
+			map.selectNone();
 			oldMesh = null;	// don't need this anymore
 			this.dispose();
 		}

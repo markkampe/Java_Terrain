@@ -180,7 +180,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		}
 		
 		// display the slope axis
-		map.select(x0, y0, x1-x0, y1-y0, Map.SEL_LINEAR);
+		map.selectLine(x0, y0, x1, y1);
 		incline(Zscale);
 	}
 	
@@ -188,7 +188,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.select(0, 0, 0, 0,  Map.SEL_NONE);
+		map.selectNone();
 		if (oldMesh != null) {
 			map.setMesh(oldMesh);
 			map.repaint();
@@ -213,13 +213,13 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
-			map.select(0,0,0,0, Map.SEL_NONE);
+			map.selectNone();
 			map.setMesh(oldMesh);
 			map.repaint();
 			oldMesh = null;
 			this.dispose();
 		} else if (e.getSource() == accept) {
-			map.select(0,0,0,0, Map.SEL_NONE);
+			map.selectNone();
 			oldMesh = null;	// don't need this anymore
 			this.dispose();
 		}

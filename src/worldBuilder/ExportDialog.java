@@ -164,6 +164,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	public void mouseReleased(MouseEvent e) {
 		if (selecting) {
+			// XXX rectangles must be defined down-right
 			x_end = e.getX();
 			y_end = e.getY();
 			selecting = false;
@@ -177,7 +178,10 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	public void mouseDragged(MouseEvent e) {
 		if (selecting) {
-			map.select(x_start,  y_start,  e.getX()-x_start,  e.getY()-y_start, Map.SEL_RECTANGULAR);
+			// XXX rectangles must be defined down-right
+			map.selectRect(x_start, y_start, e.getX()-x_start, e.getY()-y_start);
+			int y_mid = (y_start + e.getY()) / 2;
+			int y_width = Math.abs(e.getY() - y_start);
 			select(x_start, y_start, e.getX(), e.getY(), tile_sizes[resolution.getValue()]);
 		}	
 	}
@@ -186,7 +190,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.select(0, 0, 0, 0, Map.SEL_NONE);
+		map.selectNone();
 		this.dispose();
 	}
 	
@@ -204,7 +208,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	public void actionPerformed(ActionEvent e) {
 		// clear the selection
-		map.select(0,0,0,0, Map.SEL_NONE);
+		map.selectNone();
 		
 		if (e.getSource() == accept && selected) {
 			

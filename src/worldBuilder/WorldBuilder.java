@@ -59,6 +59,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem viewRain;
 	private JMenuItem viewWater;
 	private JMenuItem viewSoil;
+	private JMenuItem viewZoom;
 	private JMenuItem helpInfo;
 	
 	// control widgets
@@ -177,6 +178,8 @@ public class WorldBuilder  extends JFrame
 		viewWater.addActionListener(this);
 		viewSoil = new JMenuItem("Soil");
 		viewSoil.addActionListener(this);
+		viewZoom = new JMenuItem("Zoom");
+		viewZoom.addActionListener(this);
 		JMenu viewMenu = new JMenu("View");
 		viewMenu.add(viewPoints);
 		viewMenu.add(viewMesh);
@@ -184,6 +187,7 @@ public class WorldBuilder  extends JFrame
 		viewMenu.add(viewRain);
 		viewMenu.add(viewWater);
 		viewMenu.add(viewSoil);
+		viewMenu.add(viewZoom);
 		
 		// create help menu
 		helpInfo = new JMenuItem("about WorldBuilder");
@@ -348,6 +352,8 @@ public class WorldBuilder  extends JFrame
 		} else if (o == viewSoil) {
 			viewing_soil = map.setDisplay(Map.SHOW_SOIL, viewing_soil == 0);
 			viewSoil.setText(viewing_soil != 0 ? "~soil" : "Soil");
+		} else if (o == viewZoom) {
+			new ZoomDialog(map);
 		}
 		
 		// help menu just shows info

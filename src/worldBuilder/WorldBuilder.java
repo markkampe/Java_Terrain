@@ -271,11 +271,8 @@ public class WorldBuilder  extends JFrame
 			if (modified)
 				checkSave();
 			filename = null;
-			Mesh m = new Mesh();
-			// TODO: add Mesh parameters dialog
-			m.create();
+			MeshDialog d = new MeshDialog(map);
 			modified = true;
-			map.setMesh(m);
 		} else if (o == fileOpen) {
 			if (modified)
 				checkSave();

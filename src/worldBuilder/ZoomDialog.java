@@ -57,7 +57,7 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		buttons.add(cancel);
 		buttons.add(Box.createRigidArea(new Dimension(40,0)));
 		buttons.add(accept);
-		buttons.setBorder(BorderFactory.createEmptyBorder(20,40, 20, 10));
+		buttons.setBorder(BorderFactory.createEmptyBorder(20,20,20,10));
 
 		mainPane.add(descPanel);
 		mainPane.add(buttons, BorderLayout.SOUTH);

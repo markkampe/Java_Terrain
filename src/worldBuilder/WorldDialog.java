@@ -17,10 +17,11 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		private JSlider altitude;
 		
 		// limits on world sizes
-		private static final int WORLD_SCALE = 100;
+		private static final int WORLD_SCALE = 100;	// slider labeling unit
 		private static final int WORLD_MIN = 0;		// min world diameter (km x100)
 		private static final int WORLD_MAX = 50;	// max world diameter (km x100)
-		private static final int ALT_SCALE = 1000;
+		private static final int WORLD_GRAIN = 500;	// multiple of 500 km
+		private static final int ALT_SCALE = 1000;	// slider labeling unit
 		private static final int ALT_MIN = 0;		// min altitude (m x 1000)
 		private static final int ALT_MAX = 10;		// max altitude (m x 1000)
 		
@@ -48,14 +49,14 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			
 			diameter = new JSlider(JSlider.HORIZONTAL, WORLD_MIN, WORLD_MAX, parms.xy_range/WORLD_SCALE);
 			diameter.setMajorTickSpacing(WORLD_MAX/5);
-			diameter.setMinorTickSpacing(WORLD_MAX/20);
+			diameter.setMinorTickSpacing(WORLD_GRAIN/WORLD_SCALE);
 			diameter.setFont(fontSmall);
 			diameter.setPaintTicks(true);
 			diameter.setPaintLabels(true);
 			JLabel diameterLabel = new JLabel("Diameter (km x 100)", JLabel.CENTER);
 			diameterLabel.setFont(fontLarge);
 			
-			altitude = new JSlider(JSlider.HORIZONTAL, ALT_MIN, ALT_MAX, parms.z_range/(2* ALT_SCALE));
+			altitude = new JSlider(JSlider.HORIZONTAL, ALT_MIN, ALT_MAX, parms.z_range/(2*ALT_SCALE));
 			altitude.setMajorTickSpacing(ALT_MAX/5);
 			altitude.setMinorTickSpacing(ALT_MAX/10);
 			altitude.setFont(fontSmall);
@@ -119,13 +120,20 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		 * click events on ACCEPT/CANCEL buttons
 		 */
 		public void actionPerformed(ActionEvent e) {
-			// TODO force diameter/altitude to round numbers
 			// on acceptance, copy values into parameters
 			if (e.getSource() == accept) {
-				if (diameter.getValue() > 0)
-					parms.xy_range = diameter.getValue() * WORLD_SCALE;
-				if (altitude.getValue() > 0)
-					parms.z_range = altitude.getValue() * ALT_SCALE * 2;
+				if (diameter.getValue() > 0) {
+					int v = diameter.getValue() * WORLD_SCALE;
+					if (v < WORLD_GRAIN)	// minimum legal value
+						v = WORLD_GRAIN;
+					else					// force it to a round number
+						v = ((v + WORLD_GRAIN-1) / WORLD_GRAIN) * WORLD_GRAIN;
+					parms.xy_range = v;
+				}
+				if (altitude.getValue() > 0) {
+					int v = altitude.getValue() * ALT_SCALE;
+					parms.z_range = 2*v;		// from -v to +v
+				}
 			}
 			// discard the window
 			this.dispose();

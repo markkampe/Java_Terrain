@@ -12,7 +12,7 @@ package worldBuilder;
 	public int width = 800;			// screen width
 	
 	// map scaling parameters
-	public int xy_range = 100;	// X/Y range (km)
+	public int xy_range = 500;	// X/Y range (km)
 	public int z_range = 10000;	// Z range (m)
 	public int r_range = 500;	// rain (cm/y)
 	

@@ -15,7 +15,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	private Mesh newMesh;
 	private Parameters parms;
 	
-	private int i_max;			// maximum inclination angle
+	private int i_max;			// maximum inclination
 	
 	private JSlider axis;
 	private JSlider inclination;
@@ -37,11 +37,11 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		map.setMesh(newMesh);
 		this.parms = Parameters.getInstance();
 		
-		// figure out the maximum allowable slope
-		i_max = (parms.z_range + parms.xy_range - 1)/ parms.xy_range;
-		if (i_max % 2 != 0)
-			i_max++;
-		int i_tic = (i_max % 5 == 0) ? 10 : 8;
+		// figure out max slope and reasonable units
+		i_max = (parms.z_range)/ parms.xy_range;
+		if ((i_max % 10) != 0)
+			i_max = ((i_max + 9)/10)*10;
+		int i_tic = 10;
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -165,8 +165,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		if (degrees == -90 || degrees == 90) {
 			x0 = x_center;
 			x1 = x_center;
-			y0 = 0;
-			y1 = map.getHeight();
+			y0 = map.getHeight()/8;
+			y1 = map.getHeight()*7/8;
 		} else {
 			double radians = Math.PI * ((double) degrees)/180;
 			double sin = Math.sin(radians);

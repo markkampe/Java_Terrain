@@ -142,8 +142,17 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 			double Y0 = (double) y0/height - Ymid;
 			double X1 = (double) x1/width - Xmid;
 			double Y1 = (double) y1/height - Ymid;
-			double d = newMesh.vertices[i].distanceLine(X0, Y0, X1, Y1);
-			newMesh.vertices[i].z = Zscale * d;
+			MapPoint p = newMesh.vertices[i];
+			double d = p.distanceLine(X0, Y0, X1, Y1);
+			
+			// make sure the new height is legal
+			double newZ = Zscale * d;
+			if (newZ > parms.z_extent/2)
+				p.z = parms.z_extent/2;
+			else if (newZ < -parms.z_extent/2)
+				p.z = -parms.z_extent/2;
+			else
+				p.z = newZ;
 		}
 		map.repaint();
 	}

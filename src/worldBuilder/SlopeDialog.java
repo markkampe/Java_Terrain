@@ -146,7 +146,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 			double d = p.distanceLine(X0, Y0, X1, Y1);
 			
 			// make sure the new height is legal
-			double newZ = Zscale * d;
+			double newZ = Zscale * d + oldMesh.vertices[i].z;
 			if (newZ > parms.z_extent/2)
 				p.z = parms.z_extent/2;
 			else if (newZ < -parms.z_extent/2)

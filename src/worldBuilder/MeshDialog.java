@@ -89,6 +89,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 			mainPane.add(buttons, BorderLayout.SOUTH);
 			
 			pack();
+			setLocation(parms.dialogDX, parms.dialogDY);
 			setVisible(true);
 			
 			// add the action listeners

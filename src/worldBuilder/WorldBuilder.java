@@ -243,6 +243,7 @@ public class WorldBuilder  extends JFrame
 		String title = (filename == null) ? "Save As" : "Save";
 		FileDialog d = new FileDialog(this, title, FileDialog.SAVE);
 		d.setFile(filename == null ? INPUT_TYPE : filename);
+		d.setLocation(parms.dialogDX, parms.dialogDY);
 		d.setVisible(true);
 		filename = d.getFile();
 		if (filename != null) {
@@ -278,6 +279,7 @@ public class WorldBuilder  extends JFrame
 				checkSave();
 			FileDialog d = new FileDialog(this, "Choose input file", FileDialog.LOAD);
 			d.setFile(INPUT_TYPE);
+			d.setLocation(parms.dialogDX, parms.dialogDY);
 			d.setVisible(true);
 			filename = d.getFile();
 			if (filename != null) {
@@ -301,6 +303,7 @@ public class WorldBuilder  extends JFrame
 		} else if (o == fileExport) {
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(EXPORT_TYPE);
+			d.setLocation(parms.dialogDX, parms.dialogDY);
 			d.setVisible(true);
 			String export_file = d.getFile();
 			if (export_file != null) {

@@ -133,6 +133,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		mainPane.add(buttons, BorderLayout.SOUTH);
 		
 		pack();
+		setLocation(parms.dialogDX, parms.dialogDY);
 		setVisible(true);
 		
 		// add the action listeners

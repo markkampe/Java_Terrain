@@ -107,6 +107,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		mainPane.add(buttons, BorderLayout.SOUTH);
 		
 		pack();
+		setLocation(parms.dialogDX, parms.dialogDY);
 		setVisible(true);
 		
 		// add the action listeners

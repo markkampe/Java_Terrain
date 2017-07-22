@@ -10,6 +10,8 @@ package worldBuilder;
 	// display parameters
 	public int height = 800;		// screen height
 	public int width = 800;			// screen width
+	public int dialogDX = 200;		// X offset for dialog boxes
+	public int dialogDY = 350;		// Y offset for dialog boxes
 	
 	// map scaling parameters
 	public int xy_range = 500;	// X/Y range (km)

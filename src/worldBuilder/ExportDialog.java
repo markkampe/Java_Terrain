@@ -164,7 +164,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	public void mouseReleased(MouseEvent e) {
 		if (selecting) {
-			// XXX rectangles must be defined down-right
 			x_end = e.getX();
 			y_end = e.getY();
 			selecting = false;
@@ -178,7 +177,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	public void mouseDragged(MouseEvent e) {
 		if (selecting) {
-			// XXX rectangles must be defined down-right
 			map.selectRect(x_start, y_start, e.getX()-x_start, e.getY()-y_start);
 			int y_mid = (y_start + e.getY()) / 2;
 			int y_width = Math.abs(e.getY() - y_start);
@@ -215,6 +213,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		if (e.getSource() == accept && selected) {
 			
 			// figure out the selected region
+			// TODO normalize negative distances
 			double x = (double) x_start/map.getWidth() - parms.x_extent/2;
 			double y = (double) y_start/map.getHeight() - parms.y_extent/2;
 			double dx = (double) (x_end - x_start)/map.getWidth();

@@ -107,7 +107,6 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	 */
 	public void mouseReleased(MouseEvent e) {
 		if (selecting) {
-			// XXX rectangles must be defined down-right
 			x_end = e.getX();
 			y_end = e.getY();
 			map.selectRect(x_start, y_start, e.getX()-x_start, e.getY()-y_start);
@@ -122,7 +121,6 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	 */
 	public void mouseDragged(MouseEvent e) {
 		if (selecting) {
-			// XXX rectangles must be defined down-right
 			map.selectRect(x_start, y_start, e.getX()-x_start, e.getY()-y_start);
 		}	
 	}

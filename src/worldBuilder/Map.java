@@ -137,12 +137,22 @@ public class Map extends JPanel {
 	 * @param y1	
 	 */
 	public void selectRect(int x0, int y0, int width, int height) {
-		sel_x0 = x0;
-		sel_y0 = y0;
-		sel_width = width;
-		sel_height = height;
+		// normalize boxes defined upwards or to the left
+		if (width > 0) {
+			sel_x0 = x0;
+			sel_width = width;
+		} else {
+			sel_x0 = x0 + width;
+			sel_width = -width;
+		}
+		if (height > 0) {
+			sel_y0 = y0;
+			sel_height = height;
+		} else {
+			sel_y0 = y0 + height;
+			sel_height = -height;
+		}
 		sel_type = Selection.RECTANGLE;
-		
 		repaint();
 	}
 	

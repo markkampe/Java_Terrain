@@ -133,6 +133,8 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	public void windowClosing(WindowEvent e) {
 		map.selectNone();
 		this.dispose();
+		map.removeMouseListener(this);
+		map.removeMouseMotionListener(this);
 	}
 
 	/**
@@ -150,6 +152,8 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		
 		// discard the window
 		this.dispose();
+		map.removeMouseListener(this);
+		map.removeMouseMotionListener(this);
 	}
 
 	public void mouseClicked(MouseEvent arg0) {}

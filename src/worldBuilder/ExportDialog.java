@@ -192,6 +192,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	public void windowClosing(WindowEvent e) {
 		map.selectNone();
 		this.dispose();
+		map.removeMouseListener(this);
+		map.removeMouseMotionListener(this);
 	}
 	
 	/**
@@ -222,6 +224,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		
 		// discard the window
 		this.dispose();
+		map.removeMouseListener(this);
+		map.removeMouseMotionListener(this);
 	}
 
 	public void mouseClicked(MouseEvent arg0) {}

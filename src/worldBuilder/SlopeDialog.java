@@ -38,10 +38,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		this.parms = Parameters.getInstance();
 		
 		// figure out max slope and reasonable units
-		i_max = (parms.z_range)/ parms.xy_range;
-		if ((i_max % 10) != 0)
-			i_max = ((i_max + 9)/10)*10;
-		int i_tic = 10;
+		
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -57,18 +54,18 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		cancel = new JButton("CANCEL");
 		
 		axis = new JSlider(JSlider.HORIZONTAL, -90, 90, 0);
-		axis.setMajorTickSpacing(45);
-		axis.setMinorTickSpacing(10);
+		axis.setMajorTickSpacing(parms.niceTics(-90, 90, true));
+		axis.setMinorTickSpacing(parms.niceTics(-90, 90, false));
 		axis.setFont(fontSmall);
 		axis.setPaintTicks(true);
 		axis.setPaintLabels(true);
 		JLabel axisLabel = new JLabel("Axis(deg)", JLabel.CENTER);
 		axisLabel.setFont(fontLarge);
 
-		
+		i_max = (parms.z_range)/ parms.xy_range;
 		inclination = new JSlider(JSlider.HORIZONTAL, -i_max, i_max, 0);
-		inclination.setMajorTickSpacing(i_max/2);
-		inclination.setMinorTickSpacing(i_max/i_tic);
+		inclination.setMajorTickSpacing(parms.niceTics(-i_max, i_max, true));
+		inclination.setMinorTickSpacing(parms.niceTics(-i_max, i_max, false));
 		inclination.setFont(fontSmall);
 		inclination.setPaintTicks(true);
 		inclination.setPaintLabels(true);

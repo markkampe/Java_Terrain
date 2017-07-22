@@ -48,8 +48,8 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			cancel = new JButton("CANCEL");
 			
 			diameter = new JSlider(JSlider.HORIZONTAL, WORLD_MIN, WORLD_MAX, parms.xy_range/WORLD_SCALE);
-			diameter.setMajorTickSpacing(WORLD_MAX/5);
-			diameter.setMinorTickSpacing(WORLD_GRAIN/WORLD_SCALE);
+			diameter.setMajorTickSpacing(parms.niceTics(WORLD_MIN, WORLD_MAX, true));
+			diameter.setMinorTickSpacing(parms.niceTics(WORLD_MIN, WORLD_MAX, false));
 			diameter.setFont(fontSmall);
 			diameter.setPaintTicks(true);
 			diameter.setPaintLabels(true);
@@ -57,8 +57,8 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			diameterLabel.setFont(fontLarge);
 			
 			altitude = new JSlider(JSlider.HORIZONTAL, ALT_MIN, ALT_MAX, parms.z_range/(2*ALT_SCALE));
-			altitude.setMajorTickSpacing(ALT_MAX/5);
-			altitude.setMinorTickSpacing(ALT_MAX/10);
+			altitude.setMajorTickSpacing(parms.niceTics(ALT_MIN, ALT_MAX, true));
+			altitude.setMinorTickSpacing(parms.niceTics(ALT_MIN, ALT_MAX, false));
 			altitude.setFont(fontSmall);
 			altitude.setPaintTicks(true);
 			altitude.setPaintLabels(true);

@@ -62,8 +62,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		cancel = new JButton("CANCEL");
 		
 		altitude = new JSlider(JSlider.HORIZONTAL, -this.a_max, this.a_max, 0);
-		altitude.setMajorTickSpacing(niceTic(2*a_max,1));
-		altitude.setMinorTickSpacing(niceTic(2*a_max,2));
+		altitude.setMajorTickSpacing(parms.niceTics(-a_max, a_max, true));
+		altitude.setMinorTickSpacing(parms.niceTics(-a_max, a_max, false));
 		altitude.setFont(fontSmall);
 		altitude.setPaintTicks(true);
 		altitude.setPaintLabels(true);
@@ -71,8 +71,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		altitudeLabel.setFont(fontLarge);
 
 		diameter = new JSlider(JSlider.HORIZONTAL, 0, d_max, d_max/5);
-		diameter.setMajorTickSpacing(niceTic(d_max,1));
-		diameter.setMinorTickSpacing(niceTic(d_max,2));
+		diameter.setMajorTickSpacing(parms.niceTics(0, d_max,true));
+		diameter.setMinorTickSpacing(parms.niceTics(0, d_max,false));
 		diameter.setFont(fontSmall);
 		diameter.setPaintTicks(true);
 		diameter.setPaintLabels(true);
@@ -148,36 +148,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		selecting = false;
 		selected = false;
-	}
-	
-	/**
-	 * figure out an attractive JSlider tic spacing
-	 */
-	int niceTic(int full_scale, int level) {
-		// TODO: niceTic sucks
-		int mult = 1;
-		while((full_scale/mult) % 10 == 0)
-			mult *= 10;
-		if (full_scale % 5 == 0)
-			mult *= 5;
-		else if (full_scale %3 == 0)
-			mult *= 3;
-		else if (full_scale %2 == 0)
-			mult *= 2;
-		if (level == 1)
-			return mult;
-		
-		// second level
-		if (mult % 5 == 0)
-			return mult/5;
-		else if (mult % 4 == 0)
-			return (mult/4);
-		else if (mult % 3 == 0)
-			return (mult/3);
-		else if (mult % 2 == 0)
-			return (mult/2);
-		else
-			return mult;
 	}
 
 	/**

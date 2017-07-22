@@ -38,6 +38,28 @@ package worldBuilder;
 	}
 	
 	/**
+	 * attractive slider calibration
+	 * 
+	 * @param min value
+	 * @param max_value
+	 * @param major ...	major tics (vs minor)
+	 */
+	public static int niceTics(int min, int max, boolean major) {
+		int full_scale = max - min;
+		if (major) {
+			if (min == -max)
+				return full_scale/4;
+			else
+				return full_scale/5;
+		} else {
+			if ((min == -max) && (full_scale % 8) == 0)
+				return full_scale/8;
+			else
+				return full_scale/10;
+		}
+	}
+	
+	/**
 	 * parse a switch specification and set options accordingly
 	 * 
 	 * @param arg	String to be parsed (less the switch character)

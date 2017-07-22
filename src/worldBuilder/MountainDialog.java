@@ -29,8 +29,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	
 	private int d_max;				// diameter: full scale
 	private int a_max;				// altitude: full scale
-	private static final int MIN_ROUND = 0;
-	private static final int MAX_ROUND = 6;
 	
 	private static final int BORDER_WIDTH = 5;
 	
@@ -46,7 +44,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		// calibrate full scale on the sliders
 		this.a_max = parms.z_range/2;
-		this.d_max = parms.xy_range/5;
+		this.d_max = parms.maxDiameter();
 	
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -61,25 +59,25 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		accept = new JButton("ACCEPT");
 		cancel = new JButton("CANCEL");
 		
-		altitude = new JSlider(JSlider.HORIZONTAL, -this.a_max, this.a_max, 0);
-		altitude.setMajorTickSpacing(parms.niceTics(-a_max, a_max, true));
-		altitude.setMinorTickSpacing(parms.niceTics(-a_max, a_max, false));
+		altitude = new JSlider(JSlider.HORIZONTAL, -this.a_max, this.a_max, parms.dAltitude);
+		altitude.setMajorTickSpacing(Parameters.niceTics(-a_max, a_max, true));
+		altitude.setMinorTickSpacing(Parameters.niceTics(-a_max, a_max, false));
 		altitude.setFont(fontSmall);
 		altitude.setPaintTicks(true);
 		altitude.setPaintLabels(true);
 		JLabel altitudeLabel = new JLabel("Altitude(m)", JLabel.CENTER);
 		altitudeLabel.setFont(fontLarge);
 
-		diameter = new JSlider(JSlider.HORIZONTAL, 0, d_max, d_max/5);
-		diameter.setMajorTickSpacing(parms.niceTics(0, d_max,true));
-		diameter.setMinorTickSpacing(parms.niceTics(0, d_max,false));
+		diameter = new JSlider(JSlider.HORIZONTAL, 0, d_max, parms.dDiameter);
+		diameter.setMajorTickSpacing(Parameters.niceTics(0, d_max,true));
+		diameter.setMinorTickSpacing(Parameters.niceTics(0, d_max,false));
 		diameter.setFont(fontSmall);
 		diameter.setPaintTicks(true);
 		diameter.setPaintLabels(true);
 		JLabel diameterLabel = new JLabel("Diameter(km)", JLabel.CENTER);
 		diameterLabel.setFont(fontLarge);
 		
-		rounding = new JSlider(JSlider.HORIZONTAL, MIN_ROUND, MAX_ROUND, (MAX_ROUND+MIN_ROUND)/2);
+		rounding = new JSlider(JSlider.HORIZONTAL, Parameters.CONICAL, Parameters.SPHERICAL, parms.dShape);
 		rounding.setMajorTickSpacing(4);
 		rounding.setMinorTickSpacing(1);
 		rounding.setFont(fontSmall);
@@ -88,8 +86,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		roundLabel.setFont(fontLarge);
 		
 		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
-		labels.put(MIN_ROUND, new JLabel("cone"));
-		labels.put(MAX_ROUND, new JLabel("circle"));
+		labels.put(Parameters.CONICAL, new JLabel("cone"));
+		labels.put(Parameters.SPHERICAL, new JLabel("circle"));
 		rounding.setLabelTable(labels);
 		rounding.setPaintLabels(true);
 		
@@ -158,7 +156,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private void placeMountain(double x, double y) {
 		// note the mountain parameters
 		double alt = (double) altitude.getValue() / (parms.z_range/2) * parms.z_extent;
-		int Fcone = MAX_ROUND - rounding.getValue();
+		int Fcone = Parameters.SPHERICAL - rounding.getValue();
 		int Fcirc = rounding.getValue();
 		double diam = (double) diameter.getValue();
 		if (diam == 0)
@@ -176,7 +174,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			// calculate the deltaH for this point
 			double dh_cone = (diam - d) * alt / diam;
 			double dh_circ = Math.cos(Math.PI*d/(4*diam)) * alt;
-			double delta_h = ((Fcone * dh_cone) + (Fcirc * dh_circ))/MAX_ROUND;
+			double delta_h = ((Fcone * dh_cone) + (Fcirc * dh_circ))/Parameters.SPHERICAL;
 
 			// make sure the new height is legal
 			double newZ = p.z + delta_h;
@@ -300,14 +298,22 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
-			map.selectNone();
+			// revert to previous height map
 			map.setMesh(oldMesh);
 			map.repaint();
 			oldMesh = null;
+			// clean up the graphics
+			map.selectNone();
 			this.dispose();
 		} else if (e.getSource() == accept) {
+			// save the current values as defaults
+			parms.dDiameter = diameter.getValue();
+			parms.dAltitude = altitude.getValue();
+			parms.dShape = rounding.getValue();
+			// discard previous height map
+			oldMesh = null;
+			// clean up the graphics
 			map.selectNone();
-			oldMesh = null;	// don't need this anymore
 			this.dispose();
 		}
 		map.removeMouseListener(this);

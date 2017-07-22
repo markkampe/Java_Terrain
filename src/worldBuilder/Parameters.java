@@ -16,6 +16,13 @@ package worldBuilder;
 	public int z_range = 10000;	// Z range (m)
 	public int r_range = 500;	// rain (cm/y)
 	
+	// persistent defaults
+	public int dDiameter;		// mountain diameter
+	public int dAltitude;		// mountain altitude
+	public int dShape;			// mountain shape
+	public static final int CONICAL = 0;
+	public static final int SPHERICAL = 6;
+	
 	// map generation parameters
 	public int improvements = 1;	// number of smoothing iterations
 	public int points = 4096;		// desired number of grid points
@@ -29,12 +36,24 @@ package worldBuilder;
 	public int debug_level = 1;			// level of verbosity
 	
 	private static Parameters singleton = null;
-	private Parameters() {}
+	private Parameters() {
+		dDiameter = maxDiameter()/2;
+		dAltitude = z_range/4;
+		dShape = (CONICAL + SPHERICAL)/2;
+		
+	}
 	
 	public static Parameters getInstance() {
 		if (singleton == null)
 			singleton = new Parameters();
 		return singleton;
+	}
+	
+	/**
+	 * the largest legal mountain diameter
+	 */
+	public int maxDiameter() {
+		return(xy_range/5);
 	}
 	
 	/**

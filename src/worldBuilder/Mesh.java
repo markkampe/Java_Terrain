@@ -72,6 +72,7 @@ public class Mesh {
 		for(int i = 0; i < m.vertices.length; i++) {
 			MapPoint p = m.vertices[i];
 			vertices[i] = new MapPoint(p.x, p.y, i);
+			vertices[i].z = p.z;
 		}
 		
 		// create a corresponding list of edges

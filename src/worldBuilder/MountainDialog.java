@@ -2,6 +2,7 @@ package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Hashtable;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -18,16 +19,18 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	
 	private JSlider altitude;
 	private JSlider diameter;
+	private JSlider rounding;
 	private JButton accept;
 	private JButton cancel;
 	
 	private boolean selecting;		// selection in progress
 	private boolean selected;		// selection completed
 	private int x_start, x_end, y_start, y_end;		// selection start/end coordinates
-	private int width;				// width of mountain range
 	
 	private int d_max;				// diameter: full scale
 	private int a_max;				// altitude: full scale
+	private static final int MIN_ROUND = 0;
+	private static final int MAX_ROUND = 6;
 	
 	private static final int BORDER_WIDTH = 5;
 	
@@ -76,6 +79,20 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		JLabel diameterLabel = new JLabel("Diameter(km)", JLabel.CENTER);
 		diameterLabel.setFont(fontLarge);
 		
+		rounding = new JSlider(JSlider.HORIZONTAL, MIN_ROUND, MAX_ROUND, (MAX_ROUND+MIN_ROUND)/2);
+		rounding.setMajorTickSpacing(4);
+		rounding.setMinorTickSpacing(1);
+		rounding.setFont(fontSmall);
+		rounding.setPaintTicks(true);
+		JLabel roundLabel = new JLabel("Profile", JLabel.CENTER);
+		roundLabel.setFont(fontLarge);
+		
+		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
+		labels.put(MIN_ROUND, new JLabel("cone"));
+		labels.put(MAX_ROUND, new JLabel("circle"));
+		rounding.setLabelTable(labels);
+		rounding.setPaintLabels(true);
+		
 		/*
 		 * Pack them into:
 		 * 		a vertical Box layout containing sliders and buttons
@@ -92,13 +109,20 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		diaPanel.setLayout(new BoxLayout(diaPanel, BoxLayout.PAGE_AXIS));
 		diaPanel.add(diameterLabel);
 		diaPanel.add(diameter);
+		
+		JPanel rndPanel = new JPanel();
+		rndPanel.setLayout(new BoxLayout(rndPanel, BoxLayout.PAGE_AXIS));
+		rndPanel.add(roundLabel);
+		rndPanel.add(rounding);
 
 		JPanel sliders = new JPanel();
 		sliders.setLayout(new BoxLayout(sliders, BoxLayout.LINE_AXIS));
 		altPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
-		diaPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
+		diaPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 15));
+		rndPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
 		sliders.add(altPanel);
 		sliders.add(diaPanel);
+		sliders.add(rndPanel);
 		
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new BoxLayout(buttons, BoxLayout.LINE_AXIS));
@@ -116,6 +140,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// add the action listeners
 		altitude.addChangeListener(this);
 		diameter.addChangeListener(this);
+		rounding.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		map.addMouseListener(this);
@@ -129,6 +154,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * figure out an attractive JSlider tic spacing
 	 */
 	int niceTic(int full_scale, int level) {
+		// TODO: niceTic sucks
 		int mult = 1;
 		while((full_scale/mult) % 10 == 0)
 			mult *= 10;
@@ -153,27 +179,96 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		else
 			return mult;
 	}
-	
+
 	/**
-	 * add mountains to the specified area
+	 * compute the delta_h associated with placing one mountain
+	 * 	find all points within the effective diameter
+	 * 	compute the height as a function of the distance from center
 	 */
-	private void orogeny(double x0, double y0, double x1, double y1, double altitude, double diameter) {
-		System.out.println("create mountains from <" + x0 + "," + y0 + "> to <" + x1 + "," + y1 + "> w/A=" + altitude + ", D=" + diameter);
+	private void placeMountain(double x, double y) {
+		// note the mountain parameters
+		double alt = (double) altitude.getValue() / (parms.z_range/2) * parms.z_extent;
+		int Fcone = MAX_ROUND - rounding.getValue();
+		int Fcirc = rounding.getValue();
+		double diam = (double) diameter.getValue();
+		if (diam == 0)
+				diam = 1;
+		diam /= parms.xy_range * parms.x_extent;
+		
+		// see which points are within the scope of this mountain
+		MapPoint centre = new MapPoint(x,y);
+		for(int i = 0; i < newMesh.vertices.length; i++) {
+			MapPoint p = newMesh.vertices[i];
+			double d = centre.distance(p);
+			if (d > diam)
+				continue;
+			
+			// calculate the deltaH for this point
+			double dh_cone = (diam - d) * alt / diam;
+			double dh_circ = Math.cos(Math.PI*d/(4*diam)) * alt;
+			double delta_h = ((Fcone * dh_cone) + (Fcirc * dh_circ))/MAX_ROUND;
+
+			// make sure the new height is legal
+			double newZ = p.z + delta_h;
+			if (newZ > parms.z_extent/2)
+				p.z = parms.z_extent/2;
+			else if (newZ < -parms.z_extent/2)
+				p.z = -parms.z_extent/2;
+			else
+				p.z = newZ;
+		}
 	}
-	
+
+	/**
+	 * compute the delta_h associated with this mountain range
+	 * 	1. reset the height map to its initial value
+	 * 	2. figure out how long the mountain range is
+	 * 	3. figure out how many mountains it contains
+	 *  4. place the mountains along the range
+	 *  5. map.repaint
+	 */
 	private void redraw() {
+		// reset to the height map we started with
+		for(int i = 0; i < oldMesh.vertices.length; i++)
+			newMesh.vertices[i].z = oldMesh.vertices[i].z;
+		
+		// convert screen coordinates into map coordinates
 		double x_mid = parms.x_extent/2;
 		double y_mid = parms.y_extent/2;
 		int width = map.getWidth();
 		int height = map.getHeight();
-		
 		double X0 = (double) x_start/width - x_mid;
 		double Y0 = (double) y_start/height - y_mid;
 		double X1 = (double) x_end/width - x_mid;
-		double Y1 = (double)y_end/width - y_mid;
-		double A = (double) altitude.getValue()/(2*a_max);
-		double D = (double) diameter.getValue()/parms.xy_range;
-		orogeny(X0, Y0, X1, Y1, A, D);
+		double Y1 = (double) y_end/height - y_mid;
+
+		// figure out how long the mountain range is (in map coordinates)
+		double l = Math.sqrt(((X1-X0)*(X1-X0)) + (Y1-Y0)*(Y1-Y0));
+		double d = (double) diameter.getValue();
+		if (d == 0)
+			d = 1;
+		d /= parms.xy_range;
+		double m = l/d;
+		int mountains = (int) (m + 0.5);
+		
+		// how many mountains can we create
+		if (mountains < 2) {
+			// one mountain goes in the center
+			placeMountain((X0+X1)/2, (Y0+Y1)/2);
+		} else {
+			// multiple mountains are evenly spaced along the line
+			double X = X0;
+			double Y = Y0;
+			double dx = (X1 - X0)/mountains;
+			double dy = (Y1 - Y0)/mountains;
+			while( mountains >= 0 ) {
+				placeMountain(X, Y);
+				X += dx;
+				Y += dy;
+				mountains -= 1;
+			}
+		}
+		map.repaint();
 	}
 	
 	/**
@@ -189,14 +284,14 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * finish defining a mountain range
 	 */
 	public void mouseReleased(MouseEvent e) {
-		if (selecting) {
-			x_end = e.getX();
-			y_end = e.getY();
-			selecting = false;
-			selected = true;
-			redraw();
-		}	
+		x_end = e.getX();
+		y_end = e.getY();
+		selecting = false;
+		selected = true;
+		redraw();	
 	}
+	
+	public void mouseClicked(MouseEvent e) {}
 	
 	/**
 	 * progress in region selection
@@ -211,22 +306,23 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		System.out.println("Closing Slope Dialog");
 		map.selectNone();
 		if (oldMesh != null) {
 			map.setMesh(oldMesh);
 			map.repaint();
+			oldMesh = null;
 		}
 		this.dispose();
+		map.removeMouseListener(this);
+		map.removeMouseMotionListener(this);
 	}
 	
 	/**
-	 * updates to the axis/inclination sliders
+	 * updates to the axis/inclination/profile sliders
 	 */
 	public void stateChanged(ChangeEvent e) {
-		if (selected && (e.getSource() == altitude || e.getSource() == diameter)) {
+			if (selected)
 				redraw();
-		} 
 	}
 
 	/**
@@ -244,9 +340,11 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			oldMesh = null;	// don't need this anymore
 			this.dispose();
 		}
+		map.removeMouseListener(this);
+		map.removeMouseMotionListener(this);
 	}
-
-	public void mouseClicked(MouseEvent arg0) {}
+	
+	// perfunctory methods
 	public void mouseMoved(MouseEvent arg0) {}
 	public void mouseEntered(MouseEvent arg0) {}
 	public void mouseExited(MouseEvent arg0) {}

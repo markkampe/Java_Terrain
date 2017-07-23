@@ -27,7 +27,7 @@ public class Map extends JPanel {
 	public static final int SHOW_RAIN = 0x08;
 	public static final int SHOW_WATER = 0x10;
 	public static final int SHOW_SOIL = 0x20;
-	private int display;
+	private int display;		// bitmask for enabled SHOWs
 	
 	// map size (in pixels)
 	private static final int MIN_WIDTH = 400;	// min screen width
@@ -38,6 +38,7 @@ public class Map extends JPanel {
 	private Dimension size;
 
 	// display colors
+	private Color background;	// default background color
 	private static final Color SELECT_COLOR = Color.WHITE;
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
@@ -47,13 +48,11 @@ public class Map extends JPanel {
 	// topographic lines are shades of gray
 	private static final int TOPO_DIM = 0;
 	private static final int TOPO_BRITE = 255;
-	private Color background;
+	
 	
 	// the interesting data
 	private Mesh mesh;				// mesh of Voronoi points
 	private MeshRef cartesian[][];	// Voronoi to Cartesian translation
-	
-	private Parameters parms;
 	
 	private static final long serialVersionUID = 1L;
 
@@ -70,7 +69,6 @@ public class Map extends JPanel {
 	public Map(int width, int height) {
 		size = new Dimension(width, height);
 		this.background = new Color(128, 128, 128);
-		parms = Parameters.getInstance();
 		selectNone();
 	}
 
@@ -274,6 +272,13 @@ public class Map extends JPanel {
 		}
 	}
 	
+	private double topoMajor = 0.1;		// Z range for major line
+	private int topoMinors = 5;			// minor lines per major line
+	
+	public void setTopoLines(double major, int minorPerMajor) {
+		topoMajor = major;
+		topoMinors = minorPerMajor;
+	}
 	
 	/**
 	 * render a topographical map
@@ -282,17 +287,37 @@ public class Map extends JPanel {
 	 */
 	private void paint_topo(Graphics g) {
 		
-		// for each cell in the displayable grid
+		// for generate a height for each cell in the grid
+		double zMap[][] = new double[cartesian.length][cartesian[0].length];
 		for(int r = 0; r < cartesian.length; r++)
 			for(int c = 0; c < cartesian[0].length; c++) {
 				// interpolate height (from surrounding MeshPoints)
 				double z = cartesian[r][c].height();
+				zMap[r][c] = z;
 				
 				// shade a rectangle for that altitude
 				double shade = TOPO_DIM + ((z + Parameters.z_extent/2) * (TOPO_BRITE - TOPO_DIM));
 				g.setColor(new Color((int) shade, (int) shade, (int) shade));
 				g.drawRect(c * TOPO_CELL, r * TOPO_CELL, TOPO_CELL, TOPO_CELL);
 			}
+		
+		// allocate an over-under bitmap
+		boolean over_under[][] = new boolean[cartesian.length][cartesian[0].length];
+		
+		// figure out how many topographic lines we have to render
+		double deltaH = topoMajor / topoMinors;
+		int maxLines = (int) (1 + Parameters.z_extent/deltaH);
+		for (int line = 0; line < maxLines; line++) {
+			double z = line * deltaH - Parameters.z_extent/2;
+			boolean major = (line % topoMinors) == 0;
+			
+			// create an over/under bitmap for this line
+			for(int r = 0; r < cartesian.length; r++)
+				for(int c = 0; c < cartesian[0].length; c++)
+					over_under[r][c] = zMap[r][c] > z;
+			
+			// TODO: Marching squares
+		}
 	}
 	
 	/**

@@ -7,8 +7,8 @@ package worldBuilder;
  * I have chosen to do this with an open hash table for time
  * efficiency.
  */
-public class MapPointHasher {
-	public MapPoint[] vertices;	// list of known vertices
+public class MeshPointHasher {
+	public MeshPoint[] vertices;	// list of known vertices
 	public int numVertices;		// number of vertices in list
 	private int tableSize;		// total size of hash table
 	private int[] hashTable;	// index known vertices (or -1)
@@ -22,8 +22,8 @@ public class MapPointHasher {
 	 * @param x_extent ... x diameter
 	 * @param y_extent ... y_diameter
 	 */
-	public MapPointHasher(int max, double x_extent, double y_extent) {
-		vertices = new MapPoint[max];
+	public MeshPointHasher(int max, double x_extent, double y_extent) {
+		vertices = new MeshPoint[max];
 		numVertices = 0;
 		tableSize = max * 3 / 2; // hash table efficiency
 		hashTable = new int[tableSize];
@@ -45,17 +45,17 @@ public class MapPointHasher {
 	 *            y coordinate
 	 * @return associated MapPoint
 	 */
-	public MapPoint findPoint(double x, double y) {
+	public MeshPoint findPoint(double x, double y) {
 		double value = ((x + x_extent / 2) + (y + y_extent / 2)) * tableSize;
 		int guess = ((int) value) % tableSize;
 		while (hashTable[guess] != -1) {
-			MapPoint m = vertices[hashTable[guess]];
+			MeshPoint m = vertices[hashTable[guess]];
 			if (m.x == x && m.y == y)
 				return m; // this one is already known
 			guess = (guess == tableSize - 1) ? 0 : guess + 1;
 		}
 		// add a new MapPoint to the list
-		MapPoint m = new MapPoint(x, y, numVertices);
+		MeshPoint m = new MeshPoint(x, y, numVertices);
 		hashTable[guess] = numVertices;
 		vertices[numVertices++] = m;
 		return m;

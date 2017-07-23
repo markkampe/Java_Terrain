@@ -6,11 +6,11 @@ package worldBuilder;
  * this class also maintains a list of known paths
  */
 public class Path {
-	public MapPoint source;
-	public MapPoint target;
+	public MeshPoint source;
+	public MeshPoint target;
 	public int index;
 	
-	public Path(MapPoint p1, MapPoint p2, int index) {	
+	public Path(MeshPoint p1, MeshPoint p2, int index) {	
 		source = p1;
 		target = p2;
 		this.index = index;

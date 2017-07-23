@@ -44,7 +44,7 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
  *         three neighbors).
  */
 public class Mesh {
-	public MapPoint[] vertices;	// grid vertices	
+	public MeshPoint[] vertices;	// grid vertices	
 	public Path[] edges;			// mesh connections
 	
 	private Parameters parms;		// global options
@@ -68,10 +68,10 @@ public class Mesh {
 		parms = Parameters.getInstance();
 		
 		// create an entirely new list of mapPoints
-		vertices = new MapPoint[m.vertices.length];
+		vertices = new MeshPoint[m.vertices.length];
 		for(int i = 0; i < m.vertices.length; i++) {
-			MapPoint p = m.vertices[i];
-			vertices[i] = new MapPoint(p.x, p.y, i);
+			MeshPoint p = m.vertices[i];
+			vertices[i] = new MeshPoint(p.x, p.y, i);
 			vertices[i].z = p.z;
 		}
 		
@@ -88,11 +88,11 @@ public class Mesh {
 	 */
 	public void create() {
 		// create a set of random points
-		MapPoint points[] = new MapPoint[parms.points];
+		MeshPoint points[] = new MeshPoint[parms.points];
 		for (int i = 0; i < points.length; i++) {
 			double x = parms.x_extent * (Math.random() - 0.5);
 			double y = parms.y_extent * (Math.random() - 0.5);
-			points[i] = new MapPoint(x, y);
+			points[i] = new MeshPoint(x, y);
 		}
 			
 		// even out the distribution
@@ -108,7 +108,7 @@ public class Mesh {
 	 */
 	public void read(String filename) {
 		System.out.println("TODO: Implement Mesh.read(" + filename + ")");
-		vertices = new MapPoint[0];
+		vertices = new MeshPoint[0];
 		edges = new Path[0];
 		// TODO implement Mesh:read
 	}
@@ -132,7 +132,7 @@ public class Mesh {
 	 * 
 	 * @param point
 	 */
-	boolean isNearEdege(MapPoint p) {
+	boolean isNearEdege(MeshPoint p) {
 		return false;
 	}
 
@@ -181,11 +181,11 @@ public class Mesh {
 	 * did not explain this, but it might have been to optimize the
 	 * (later) use of the Planchon-Darboux water-level algorithm. 
 	 */
-	private MapPoint[] improve( MapPoint[] points) {
-		MapPoint newPoints[] = new MapPoint[points.length];
+	private MeshPoint[] improve( MeshPoint[] points) {
+		MeshPoint newPoints[] = new MeshPoint[points.length];
 		
 		// sort the points (left to right)
-		MapPoint.quickSort(points, 0, points.length-1);
+		MeshPoint.quickSort(points, 0, points.length-1);
 
 		// create the Voronoi tesselation
 		VoronoiDiagram vd = new VoronoiDiagram();
@@ -226,7 +226,7 @@ public class Mesh {
 				y_sum += p.y;
 				numPoints++;
 			}
-			newPoints[i++] = new MapPoint(x_sum/numPoints, y_sum/numPoints);
+			newPoints[i++] = new MeshPoint(x_sum/numPoints, y_sum/numPoints);
 			
 			if (parms.debug_level > 2)
 				System.out.println("initial point <" + v.position + "> -> <" + newPoints[i-1] + ">");
@@ -245,7 +245,7 @@ public class Mesh {
 	 * NOTE: that the original points are replaced with the
 	 * 		 vertices of the corresponding Voronoi polygons.
 	 */
-	private void makeMesh( MapPoint[] points ) {
+	private void makeMesh( MeshPoint[] points ) {
 		// compute the Voronoi teselation of the current point set
 		VoronoiDiagram vd = new VoronoiDiagram();
 		for (int i = 0; i < points.length; i++) {
@@ -254,7 +254,7 @@ public class Mesh {
 		HalfEdgeDiagram g = vd.get_graph_reference();
 		
 		// allocate hash table to track known vertices
-		MapPointHasher pointhash = new MapPointHasher(g.num_vertices(), parms.x_extent, parms.y_extent);
+		MeshPointHasher pointhash = new MeshPointHasher(g.num_vertices(), parms.x_extent, parms.y_extent);
 		PathHasher pathhash = new PathHasher(g.num_edges());
 
 		// locate all the vertices and edges
@@ -289,8 +289,8 @@ public class Mesh {
 				continue;		
 			
 			// assign/get the vertex ID of each end
-			MapPoint mp1 = pointhash.findPoint(p1.x, p1.y);
-			MapPoint mp2 = pointhash.findPoint(p2.x, p2.y);
+			MeshPoint mp1 = pointhash.findPoint(p1.x, p1.y);
+			MeshPoint mp2 = pointhash.findPoint(p2.x, p2.y);
 			
 			// note that each is a neighbor of the other
 			mp1.addNeighbor(mp2);
@@ -303,7 +303,7 @@ public class Mesh {
 		// TODO stitch together out-of-the-box paths
 		
 		// copy out the list of unique Vertices
-		vertices = new MapPoint[pointhash.numVertices];
+		vertices = new MeshPoint[pointhash.numVertices];
 		for(int i = 0; i < pointhash.numVertices; i++)
 			vertices[i] = pointhash.vertices[i];
 	

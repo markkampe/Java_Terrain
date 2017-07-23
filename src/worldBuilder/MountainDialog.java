@@ -165,9 +165,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		diam /= parms.xy_range * parms.x_extent;
 		
 		// see which points are within the scope of this mountain
-		MapPoint centre = new MapPoint(x,y);
+		MeshPoint centre = new MeshPoint(x,y);
 		for(int i = 0; i < newMesh.vertices.length; i++) {
-			MapPoint p = newMesh.vertices[i];
+			MeshPoint p = newMesh.vertices[i];
 			double d = centre.distance(p);
 			if (d > diam)
 				continue;

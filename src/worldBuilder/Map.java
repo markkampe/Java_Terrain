@@ -49,6 +49,11 @@ public class Map extends JPanel {
 	// the underlying collection of points and edges
 	private Mesh mesh;
 	
+	// the height map we use to generate topographical displays
+	private int heightMap[][];
+	private static final int UNKNOWN = 666666;
+	private double diminimus;	// minimum distance between separate points
+	
 	private Parameters parms;
 	
 	private static final long serialVersionUID = 1L;
@@ -185,9 +190,9 @@ public class Map extends JPanel {
 		super.paintComponent(g);
 
 		// get scaling factors
-		double x_extent = parms.x_extent;
-		double y_extent = parms.y_extent;
-		double z_extent = parms.z_extent;
+		double x_extent = Parameters.x_extent;
+		double y_extent = Parameters.y_extent;
+		double z_extent = Parameters.z_extent;
 		int height = getHeight();
 		int width = getWidth();
 
@@ -204,9 +209,9 @@ public class Map extends JPanel {
 		// see if we are rendering points
 		if ((display & SHOW_POINTS) != 0) {
 			g.setColor(POINT_COLOR);
-			MapPoint[] points = mesh.vertices;
+			MeshPoint[] points = mesh.vertices;
 			for (int i = 0; i < points.length; i++) {
-				MapPoint p = points[i];
+				MeshPoint p = points[i];
 				double x = ((p.x + x_extent / 2) * width) - SMALL_POINT / 2;
 				double y = ((p.y + y_extent / 2) * height) - SMALL_POINT / 2;
 				g.drawOval((int) x, (int) y, SMALL_POINT, SMALL_POINT);
@@ -228,18 +233,8 @@ public class Map extends JPanel {
 		}
 		
 		// see if we are rendering topology
-		if ((display & SHOW_TOPO) != 0) {
-			MapPoint[] points = mesh.vertices;
-			for (int i = 0; i < points.length; i++) {
-				MapPoint p = points[i];
-				double x = ((p.x + x_extent / 2) * width) - LARGE_POINT / 2;
-				double y = ((p.y + y_extent / 2) * height) - LARGE_POINT / 2;
-				double z = ((p.z + z_extent / 2)) * (TOPO_BRITE - TOPO_DIM);
-				int c = TOPO_DIM + (int) z;
-				g.setColor(new Color(c,c,c));
-				g.drawOval((int) x, (int) y, LARGE_POINT, LARGE_POINT);
-			}
-		}
+		if ((display & SHOW_TOPO) != 0)
+				paint_topo(g);
 		
 		// see if we have a selection area to draw
 		switch(sel_type) {
@@ -256,6 +251,16 @@ public class Map extends JPanel {
 			g.drawRect(sel_x0, sel_y0, sel_width, sel_height);
 			break;
 		}
+	}
+	
+	
+	/**
+	 * render a topographical map
+	 * 
+	 *   create a cell resolution height map 
+	 */
+	private void paint_topo(Graphics g) {
+		
 	}
 	
 	/**

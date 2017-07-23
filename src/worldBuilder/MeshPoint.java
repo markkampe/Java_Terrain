@@ -5,24 +5,24 @@ package worldBuilder;
  * a MapPoint has an X and Y coordinate
  * 		if part of a grid, it has an index and neighbors
  */
-public class MapPoint {
+public class MeshPoint {
 	public double x;			// X coordinate
 	public double y;			// Y coordinate
 	public double z;			// Z coordinate
 	
 	public int index;			// point index #
 	public int neighbors;		// number of neighbors
-	public MapPoint[] neighbor;	// neighboring points
+	public MeshPoint[] neighbor;	// neighboring points
 	
 	private static final String format="%7.5f";
 	
-	public MapPoint(double x,double y) {
+	public MeshPoint(double x,double y) {
 		this.x = x;
 		this.y = y;
 		this.z = 0;
 	}
 	
-	public MapPoint(double x,double y, int index) {
+	public MeshPoint(double x,double y, int index) {
 		this.x = x;
 		this.y = y;
 		this.z = 0;
@@ -33,10 +33,10 @@ public class MapPoint {
 	 * note that we have a neighbor
 	 * @param p ... address of new neighbor
 	 */
-	public void addNeighbor(MapPoint p) { 
+	public void addNeighbor(MeshPoint p) { 
 		if (neighbors == 0) {
 			// allocate array on first add
-			neighbor = new MapPoint[3];
+			neighbor = new MeshPoint[3];
 		} else {
 			// make sure this neighbor isn't already known
 			for(int i = 0; i < neighbors; i++)
@@ -53,7 +53,7 @@ public class MapPoint {
 	 * @param other
 	 * @return distance
 	 */
-	public double distance(MapPoint other) {
+	public double distance(MeshPoint other) {
 		double dx = this.x - other.x;
 		double dy = this.y - other.y;
 		return Math.sqrt((dx*dx) + (dy*dy));
@@ -83,7 +83,7 @@ public class MapPoint {
 	 * @param left ... left most index of sort region
 	 * @param right ... right most index of sort region
 	 */
-	static public void quickSort(MapPoint[] arr, int left, int right) {
+	static public void quickSort(MeshPoint[] arr, int left, int right) {
 		// find the X coordinate of my middle element
         int pivotIndex = left + (right - left) / 2;
         double pivotValue = arr[pivotIndex].x;
@@ -101,7 +101,7 @@ public class MapPoint {
             // swap them
             if(i <= j) {
             	if (i < j) {
-	                MapPoint tmp = arr[i];
+	                MeshPoint tmp = arr[i];
 	                arr[i] = arr[j];
 	                arr[j] = tmp;
             	}

@@ -39,7 +39,7 @@ public class PathHasher {
 
 	 * @return associated Path
 	 */
-	public Path findPath(MapPoint p1, MapPoint p2) {
+	public Path findPath(MeshPoint p1, MeshPoint p2) {
 		int guess = (p1.index + p2.index) % tableSize;
 		while (hashTable[guess] != -1) {
 			Path p = paths[hashTable[guess]];

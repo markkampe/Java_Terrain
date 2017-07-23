@@ -413,7 +413,7 @@ public class WorldBuilder  extends JFrame
 			if (args[i].startsWith(SWITCH_CHAR)) {	
 				parms.parseSwitch( args[i].substring(1));
 			} else {
-				String fileName = args[i];		// Do I have non-switch args?
+				filename = args[i];		// Do I have non-switch args?
 			}
 		}
 		

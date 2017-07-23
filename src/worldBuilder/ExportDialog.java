@@ -215,8 +215,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			
 			// figure out the selected region
 			// TODO normalize negative distances
-			double x = (double) x_start/map.getWidth() - parms.x_extent/2;
-			double y = (double) y_start/map.getHeight() - parms.y_extent/2;
+			double x = (double) x_start/map.getWidth() - Parameters.x_extent/2;
+			double y = (double) y_start/map.getHeight() - Parameters.y_extent/2;
 			double dx = (double) (x_end - x_start)/map.getWidth();
 			double dy = (double) (y_end - y_start)/map.getHeight();
 			map.getMesh().export(filename, x, y, dx, dy, tile_sizes[resolution.getValue()]);

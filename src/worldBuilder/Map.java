@@ -290,7 +290,7 @@ public class Map extends JPanel {
 				double z = cartesian[r][c].height();
 				
 				// shade a rectangle for that altitude
-				double shade = TOPO_DIM + ((z + parms.z_extent/2) * (TOPO_BRITE - TOPO_DIM));
+				double shade = TOPO_DIM + ((z + Parameters.z_extent/2) * (TOPO_BRITE - TOPO_DIM));
 				g.setColor(new Color((int) shade, (int) shade, (int) shade));
 				g.drawRect(c * TOPO_CELL, r * TOPO_CELL, TOPO_CELL, TOPO_CELL);
 			}
@@ -331,9 +331,9 @@ public class Map extends JPanel {
 		
 		cartesian = new MeshRef[h][w];
 		for(int r = 0; r < h; r++) {
-			double y = (double) r/h - parms.y_extent/2;
+			double y = (double) r/h - Parameters.y_extent/2;
 			for(int c = 0; c < w; c++) {
-				double x =  (double)c/w - parms.x_extent/2;
+				double x =  (double)c/w - Parameters.x_extent/2;
 				MeshPoint m = new MeshPoint(x,y);
 				MeshRef ref = new MeshRef();
 				cartesian[r][c] = ref;

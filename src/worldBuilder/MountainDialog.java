@@ -156,13 +156,13 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	private void placeMountain(double x, double y) {
 		// note the mountain parameters
-		double alt = (double) altitude.getValue() / (parms.z_range/2) * parms.z_extent;
+		double alt = (double) altitude.getValue() / (parms.z_range/2) * Parameters.z_extent;
 		int Fcone = Parameters.SPHERICAL - rounding.getValue();
 		int Fcirc = rounding.getValue();
 		double diam = (double) diameter.getValue();
 		if (diam == 0)
 				diam = 1;
-		diam /= parms.xy_range * parms.x_extent;
+		diam /= parms.xy_range * Parameters.x_extent;
 		
 		// see which points are within the scope of this mountain
 		MeshPoint centre = new MeshPoint(x,y);
@@ -179,10 +179,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 
 			// make sure the new height is legal
 			double newZ = p.z + delta_h;
-			if (newZ > parms.z_extent/2)
-				p.z = parms.z_extent/2;
-			else if (newZ < -parms.z_extent/2)
-				p.z = -parms.z_extent/2;
+			if (newZ > Parameters.z_extent/2)
+				p.z = Parameters.z_extent/2;
+			else if (newZ < -Parameters.z_extent/2)
+				p.z = -Parameters.z_extent/2;
 			else
 				p.z = newZ;
 		}
@@ -202,8 +202,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			newMesh.vertices[i].z = oldMesh.vertices[i].z;
 		
 		// convert screen coordinates into map coordinates
-		double x_mid = parms.x_extent/2;
-		double y_mid = parms.y_extent/2;
+		double x_mid = Parameters.x_extent/2;
+		double y_mid = Parameters.y_extent/2;
 		int width = map.getWidth();
 		int height = map.getHeight();
 		double X0 = (double) x_start/width - x_mid;

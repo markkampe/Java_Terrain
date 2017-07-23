@@ -54,8 +54,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		cancel = new JButton("CANCEL");
 		
 		axis = new JSlider(JSlider.HORIZONTAL, -90, 90, 0);
-		axis.setMajorTickSpacing(parms.niceTics(-90, 90, true));
-		axis.setMinorTickSpacing(parms.niceTics(-90, 90, false));
+		axis.setMajorTickSpacing(Parameters.niceTics(-90, 90, true));
+		axis.setMinorTickSpacing(Parameters.niceTics(-90, 90, false));
 		axis.setFont(fontSmall);
 		axis.setPaintTicks(true);
 		axis.setPaintLabels(true);
@@ -64,8 +64,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 
 		i_max = (parms.z_range)/ parms.xy_range;
 		inclination = new JSlider(JSlider.HORIZONTAL, -i_max, i_max, 0);
-		inclination.setMajorTickSpacing(parms.niceTics(-i_max, i_max, true));
-		inclination.setMinorTickSpacing(parms.niceTics(-i_max, i_max, false));
+		inclination.setMajorTickSpacing(Parameters.niceTics(-i_max, i_max, true));
+		inclination.setMinorTickSpacing(Parameters.niceTics(-i_max, i_max, false));
 		inclination.setFont(fontSmall);
 		inclination.setPaintTicks(true);
 		inclination.setPaintLabels(true);
@@ -130,9 +130,9 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		Parameters parms = Parameters.getInstance();
 		int width = map.getWidth();
 		int height = map.getHeight();
-		double Xmid = parms.x_extent/2;
-		double Ymid = parms.y_extent/2;
-		double Zmid = parms.z_extent/2;
+		double Xmid = Parameters.x_extent/2;
+		double Ymid = Parameters.y_extent/2;
+		double Zmid = Parameters.z_extent/2;
 		
 		// height of every point is its distance (+/-) from the axis
 		for(int i = 0; i < newMesh.vertices.length; i++) {
@@ -145,10 +145,10 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 			
 			// make sure the new height is legal
 			double newZ = Zscale * d + oldMesh.vertices[i].z;
-			if (newZ > parms.z_extent/2)
-				p.z = parms.z_extent/2;
-			else if (newZ < -parms.z_extent/2)
-				p.z = -parms.z_extent/2;
+			if (newZ > Parameters.z_extent/2)
+				p.z = Parameters.z_extent/2;
+			else if (newZ < -Parameters.z_extent/2)
+				p.z = -Parameters.z_extent/2;
 			else
 				p.z = newZ;
 		}

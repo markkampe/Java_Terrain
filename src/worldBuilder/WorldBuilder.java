@@ -271,7 +271,7 @@ public class WorldBuilder  extends JFrame
 			if (modified)
 				checkSave();
 			filename = null;
-			MeshDialog d = new MeshDialog(map);
+			new MeshDialog(map);
 			modified = true;
 		} else if (o == fileOpen) {
 			if (modified)
@@ -319,7 +319,7 @@ public class WorldBuilder  extends JFrame
 		
 		// edit menus pop up the corresponding dialogs
 		else if (o == editWorld) {
-			new WorldDialog(map);
+			new WorldDialog();
 		} else if (o == editMountain) {
 			new MountainDialog(map);
 		} else if (o == editSlope) {

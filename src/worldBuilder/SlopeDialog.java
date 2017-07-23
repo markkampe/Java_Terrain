@@ -127,12 +127,10 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void incline(double inclination) {
 		Zscale = (double) inclination;
-		Parameters parms = Parameters.getInstance();
 		int width = map.getWidth();
 		int height = map.getHeight();
 		double Xmid = Parameters.x_extent/2;
 		double Ymid = Parameters.y_extent/2;
-		double Zmid = Parameters.z_extent/2;
 		
 		// height of every point is its distance (+/-) from the axis
 		for(int i = 0; i < newMesh.vertices.length; i++) {

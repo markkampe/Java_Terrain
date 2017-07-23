@@ -179,8 +179,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	public void mouseDragged(MouseEvent e) {
 		if (selecting) {
 			map.selectRect(x_start, y_start, e.getX()-x_start, e.getY()-y_start);
-			int y_mid = (y_start + e.getY()) / 2;
-			int y_width = Math.abs(e.getY() - y_start);
 			select(x_start, y_start, e.getX(), e.getY(), tile_sizes[resolution.getValue()]);
 		}	
 	}

@@ -212,7 +212,6 @@ public class Map extends JPanel {
 		// get scaling factors
 		double x_extent = Parameters.x_extent;
 		double y_extent = Parameters.y_extent;
-		double z_extent = Parameters.z_extent;
 		int height = getHeight();
 		int width = getWidth();
 

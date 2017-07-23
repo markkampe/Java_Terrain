@@ -33,7 +33,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			
 			// create the basic widgets
-			Font fontSmall = new Font("Serif", Font.ITALIC, 10);
+			// Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 			Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 			pointsChooser = new JComboBox<Integer>();
 			JLabel pointsLabel = new JLabel("Points", JLabel.CENTER);

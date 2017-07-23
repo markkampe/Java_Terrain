@@ -8,7 +8,6 @@ import javax.swing.event.*;
 
 public class WorldDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
 		private Parameters parms;
-		private Map map;
 	
 		// control widgets
 		private JButton accept;
@@ -29,10 +28,9 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		
 		private static final long serialVersionUID = 1L;
 		
-		public WorldDialog(Map map)  {
+		public WorldDialog()  {
 			// pick up references
 			this.parms = Parameters.getInstance();
-			this.map = map;
 			
 			// create the dialog box
 			Container mainPane = getContentPane();
@@ -48,8 +46,8 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			cancel = new JButton("CANCEL");
 			
 			diameter = new JSlider(JSlider.HORIZONTAL, WORLD_MIN, WORLD_MAX, parms.xy_range/WORLD_SCALE);
-			diameter.setMajorTickSpacing(parms.niceTics(WORLD_MIN, WORLD_MAX, true));
-			diameter.setMinorTickSpacing(parms.niceTics(WORLD_MIN, WORLD_MAX, false));
+			diameter.setMajorTickSpacing(Parameters.niceTics(WORLD_MIN, WORLD_MAX, true));
+			diameter.setMinorTickSpacing(Parameters.niceTics(WORLD_MIN, WORLD_MAX, false));
 			diameter.setFont(fontSmall);
 			diameter.setPaintTicks(true);
 			diameter.setPaintLabels(true);
@@ -57,8 +55,8 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			diameterLabel.setFont(fontLarge);
 			
 			altitude = new JSlider(JSlider.HORIZONTAL, ALT_MIN, ALT_MAX, parms.z_range/(2*ALT_SCALE));
-			altitude.setMajorTickSpacing(parms.niceTics(ALT_MIN, ALT_MAX, true));
-			altitude.setMinorTickSpacing(parms.niceTics(ALT_MIN, ALT_MAX, false));
+			altitude.setMajorTickSpacing(Parameters.niceTics(ALT_MIN, ALT_MAX, true));
+			altitude.setMinorTickSpacing(Parameters.niceTics(ALT_MIN, ALT_MAX, false));
 			altitude.setFont(fontSmall);
 			altitude.setPaintTicks(true);
 			altitude.setPaintLabels(true);

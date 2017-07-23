@@ -33,7 +33,7 @@ public class MapPoint {
 	 * note that we have a neighbor
 	 * @param p ... address of new neighbor
 	 */
-	void addNeighbor(MapPoint p) { 
+	public void addNeighbor(MapPoint p) { 
 		if (neighbors == 0) {
 			// allocate array on first add
 			neighbor = new MapPoint[3];
@@ -53,7 +53,7 @@ public class MapPoint {
 	 * @param other
 	 * @return distance
 	 */
-	double distance(MapPoint other) {
+	public double distance(MapPoint other) {
 		double dx = this.x - other.x;
 		double dy = this.y - other.y;
 		return Math.sqrt((dx*dx) + (dy*dy));
@@ -65,7 +65,7 @@ public class MapPoint {
 	 * @param ... two points on the line
 	 * @return distance (which can be positive or negative)
 	 */
-	double distanceLine(double x1, double y1, double x2, double y2) {
+	public double distanceLine(double x1, double y1, double x2, double y2) {
 		double d = ((y2 - y1)*this.x - (x2 - x1)*this.y + x2*y1 - y2*x1) / Math.sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1));
 		return d;
 	}

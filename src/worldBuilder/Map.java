@@ -53,6 +53,7 @@ public class Map extends JPanel {
 	// the interesting data
 	private Mesh mesh;				// mesh of Voronoi points
 	private MeshRef cartesian[][];	// Voronoi to Cartesian translation
+	private Dimension cartSize;		// size for last Cartesian
 	
 	private static final long serialVersionUID = 1L;
 
@@ -116,8 +117,6 @@ public class Map extends JPanel {
 		newMap();			// recreate Voronoi-to-Cartesian map
 		setVisible(true);
 		repaint();
-		
-		// FIX: need to call newMap() when window resizes
 	}
 	
 	/**
@@ -286,6 +285,8 @@ public class Map extends JPanel {
 	 *   1. create a dense height map
 	 */
 	private void paint_topo(Graphics g) {
+		// make sure the Cartesian translation is up-to-date
+		checkMap();
 		
 		// for generate a height for each cell in the grid
 		double zMap[][] = new double[cartesian.length][cartesian[0].length];
@@ -367,6 +368,20 @@ public class Map extends JPanel {
 				}
 			}
 		}
+		
+		cartSize = new Dimension(w, h);	// note the map size
+	}
+	
+	/**
+	 * make sure the Cartesian translation matrix is still correct
+	 * (i.e. has the screen been resized).
+	 */
+	public void checkMap() {
+		int h = getHeight()/TOPO_CELL;
+		int w = getWidth()/TOPO_CELL;
+		
+		if (h != cartSize.getHeight() || w != cartSize.getWidth())
+			newMap();
 	}
 	
 	/**

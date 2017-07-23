@@ -255,7 +255,7 @@ public class Map extends JPanel {
 		if ((display & SHOW_TOPO) != 0)
 				paint_topo(g);
 		
-		// see if we have a selection area to draw
+		// see if we have a selection area to highlight
 		switch(sel_type) {
 		case LINE:
 			g.setColor(SELECT_COLOR);
@@ -406,21 +406,21 @@ public class Map extends JPanel {
 		
 		/**
 		 * @return proximity weighted average height
+		 * 
+		 * 	for each neighbor, sum the height/distance
+		 * 	re-normalize that sum to the original scale
+		 * 		sum of 1.0/distance
 		 */
 		public double height() {
-			double z[] = new double[NUM_NEIGHBORS];
-			double d[] = new double[NUM_NEIGHBORS];
-			for(int n = 0; n < NUM_NEIGHBORS; n++) {
-				z[n] = mesh.vertices[neighbors[n]].z;
-				d[n] = distances[n];
-			}
+			double norm = 0;
+			double zSum = 0;
 			
-			double zAvg = 0;
 			for(int n = 0; n < NUM_NEIGHBORS; n++) {
-				zAvg += z[n]/3;		// FIX: compute proximity weighted height
+				double dist = distances[n];
+				zSum += mesh.vertices[neighbors[n]].z/dist;
+				norm += 1/dist;
 			}
-			
-			return zAvg;
+			return zSum / norm;
 		}
 	}
 }

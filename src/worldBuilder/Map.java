@@ -33,7 +33,7 @@ public class Map extends JPanel {
 	private static final int MIN_WIDTH = 400;	// min screen width
 	private static final int MIN_HEIGHT = 400;	// min screen height
 	private static final int SMALL_POINT = 2;	// width of a small point
-	private static final int LARGE_POINT = 4;	// width of a large point
+	//private static final int LARGE_POINT = 4;	// width of a large point
 	private static final int TOPO_CELL = 4;		// width of a topographic cell
 	private Dimension size;
 
@@ -41,9 +41,9 @@ public class Map extends JPanel {
 	private static final Color SELECT_COLOR = Color.WHITE;
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
-	private static final Color WATER_COLOR = Color.BLUE;
-	private static final Color RAIN_COLOR = Color.CYAN;
-	private static final Color SOIL_COLOR = Color.YELLOW;
+	//private static final Color WATER_COLOR = Color.BLUE;
+	//private static final Color RAIN_COLOR = Color.CYAN;
+	//private static final Color SOIL_COLOR = Color.YELLOW;
 	// topographic lines are shades of gray
 	private static final int TOPO_DIM = 0;
 	private static final int TOPO_BRITE = 255;

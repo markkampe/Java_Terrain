@@ -17,15 +17,12 @@ public class WorldBuilder  extends JFrame
 	// active file
 	private String filename;	// name of current input/output file
 	private boolean modified;	// should this file be saved
-	private static final String DEFAULT_MAP = "default_4096.json";
 	
-	private static final String INPUT_TYPE = "*.json";
-	private static final String EXPORT_TYPE = "*.json";
-
+	
 	// exit codes
 	private static final int EXIT_OK = 0;
-	private static final int EXIT_ARGS = 1;
-	private static final int EXIT_ERROR = 2;
+	// private static final int EXIT_ARGS = 1;
+	// private static final int EXIT_ERROR = 2;
 	
 	// 2D canvas
 	private Container mainPane;
@@ -66,14 +63,18 @@ public class WorldBuilder  extends JFrame
 	private JSlider rainfall;
 	private JSlider erosion;
 	private JSlider seaLevel;
-
-	
 	
 	// configuration
 	private static Parameters parms;						// global program parameters
 	private static final int BORDER_WIDTH = 10;				// window border
-	private static final String ICON_IMAGE = "images/world-32.png";
+	
+	// private static final String ICON_IMAGE = "images/world-32.png";
+	private static final String DEFAULT_MAP = "default_4096.json";
+	private static final String INPUT_TYPE = "*.json";
+	private static final String EXPORT_TYPE = "*.json";
+
 	private static final String SWITCH_CHAR = "-";			// command line switches
+	
 	private static final long serialVersionUID = 0xdeadbeef;	// this is stupid
 	
 	/**

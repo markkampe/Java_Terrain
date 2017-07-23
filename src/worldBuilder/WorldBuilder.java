@@ -107,7 +107,6 @@ public class WorldBuilder  extends JFrame
 		if (filename != null) {
 			Mesh m = new Mesh();
 			m.read(filename);
-			map.setMesh(m);
 		}
 		modified = false;
 	}
@@ -288,8 +287,8 @@ public class WorldBuilder  extends JFrame
 				if (dir != null)
 					filename = dir + filename;
 				m.read(filename);
+				map.newMesh(m);
 				modified = false;
-				map.setMesh(m);
 			}
 		} else if (o == fileSave) {
 			doSave(filename);
@@ -298,7 +297,7 @@ public class WorldBuilder  extends JFrame
 		} else if (o == fileClose) {
 			if (modified)
 				checkSave();
-			map.setMesh(null);
+			map.newMesh(null);
 			modified = false;
 		} else if (o == fileExport) {
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);

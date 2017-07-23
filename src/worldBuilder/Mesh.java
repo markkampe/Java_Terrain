@@ -90,8 +90,8 @@ public class Mesh {
 		// create a set of random points
 		MeshPoint points[] = new MeshPoint[parms.points];
 		for (int i = 0; i < points.length; i++) {
-			double x = parms.x_extent * (Math.random() - 0.5);
-			double y = parms.y_extent * (Math.random() - 0.5);
+			double x = Parameters.x_extent * (Math.random() - 0.5);
+			double y = Parameters.y_extent * (Math.random() - 0.5);
 			points[i] = new MeshPoint(x, y);
 		}
 			
@@ -142,16 +142,16 @@ public class Mesh {
 	 */
 	private Point truncate(Point p) {
 		double x = p.x;
-		if (x < -parms.x_extent/2)
-			x = -parms.x_extent/2;
-		else if (x > parms.x_extent/2)
-			x = parms.x_extent/2;
+		if (x < -Parameters.x_extent/2)
+			x = -Parameters.x_extent/2;
+		else if (x > Parameters.x_extent/2)
+			x = Parameters.x_extent/2;
 		
 		double y = p.y;
-		if (y < -parms.y_extent/2)
-			y = -parms.y_extent/2;
-		else if (y > parms.y_extent/2)
-			y = parms.y_extent/2;
+		if (y < -Parameters.y_extent/2)
+			y = -Parameters.y_extent/2;
+		else if (y > Parameters.y_extent/2)
+			y = Parameters.y_extent/2;
 		
 		return new Point(x,y);
 	}
@@ -165,9 +165,9 @@ public class Mesh {
 	 * 	(necessary because OpenVoronoi generates points outside the box)
 	 */
 	private boolean inTheBox(Point p) {
-		if (p.x < -parms.x_extent/2 || p.x > parms.x_extent/2)
+		if (p.x < -Parameters.x_extent/2 || p.x > Parameters.x_extent/2)
 			return false;
-		if (p.y < -parms.y_extent/2 || p.y > parms.y_extent/2)
+		if (p.y < -Parameters.y_extent/2 || p.y > Parameters.y_extent/2)
 			return false;
 		return true;
 	}
@@ -254,7 +254,7 @@ public class Mesh {
 		HalfEdgeDiagram g = vd.get_graph_reference();
 		
 		// allocate hash table to track known vertices
-		MeshPointHasher pointhash = new MeshPointHasher(g.num_vertices(), parms.x_extent, parms.y_extent);
+		MeshPointHasher pointhash = new MeshPointHasher(g.num_vertices(), Parameters.x_extent, Parameters.y_extent);
 		PathHasher pathhash = new PathHasher(g.num_edges());
 
 		// locate all the vertices and edges

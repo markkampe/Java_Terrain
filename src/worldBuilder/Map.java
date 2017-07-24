@@ -33,8 +33,7 @@ public class Map extends JPanel {
 	private static final int MIN_WIDTH = 400;	// min screen width
 	private static final int MIN_HEIGHT = 400;	// min screen height
 	private static final int SMALL_POINT = 2;	// width of a small point
-	//private static final int LARGE_POINT = 4;	// width of a large point
-	private static final int TOPO_CELL = 4;		// width of a topographic cell
+	private static final int TOPO_CELL = 5;		// pixels/topographic cell
 	private Dimension size;
 
 	// display colors
@@ -48,7 +47,6 @@ public class Map extends JPanel {
 	// topographic lines are shades of gray
 	private static final int TOPO_DIM = 0;
 	private static final int TOPO_BRITE = 255;
-	
 	
 	// the interesting data
 	private Mesh mesh;				// mesh of Voronoi points
@@ -280,9 +278,18 @@ public class Map extends JPanel {
 	}
 	
 	/**
-	 * render a topographical map
+	 * Marching Squares rendering of a topological map
+	 * 	 https://en.wikipedia.org/wiki/Marching_squares
 	 * 
-	 *   1. create a dense height map
+	 *   for each <row,col>
+	 *   	compute interpolated height
+	 *   	generate shaded background
+	 *   for each topo line
+	 *   	for each <row,col>
+	 *   		compute an over/under bit-map
+	 *   	for each <row,col>
+	 *   		examine neighbors in over/under map
+	 *   		choose and render the appropraite image
 	 */
 	private void paint_topo(Graphics g) {
 		// make sure the Cartesian translation is up-to-date
@@ -297,9 +304,11 @@ public class Map extends JPanel {
 				zMap[r][c] = z;
 				
 				// shade a rectangle for that altitude
-				double shade = TOPO_DIM + ((z + Parameters.z_extent/2) * (TOPO_BRITE - TOPO_DIM));
-				g.setColor(new Color((int) shade, (int) shade, (int) shade));
-				g.drawRect(c * TOPO_CELL, r * TOPO_CELL, TOPO_CELL, TOPO_CELL);
+				if ((display & (SHOW_MESH+SHOW_POINTS)) == 0) {
+					double shade = TOPO_DIM + ((z + Parameters.z_extent/2) * (TOPO_BRITE - TOPO_DIM));
+					g.setColor(new Color((int) shade, (int) shade, (int) shade));
+					g.fillRect(c * TOPO_CELL, r * TOPO_CELL, TOPO_CELL, TOPO_CELL);
+				}
 			}
 		
 		// allocate an over-under bitmap
@@ -312,12 +321,96 @@ public class Map extends JPanel {
 			double z = line * deltaH - Parameters.z_extent/2;
 			boolean major = (line % topoMinors) == 0;
 			
-			// create an over/under bitmap for this line
+			// create an over/under bitmap for this isoline
 			for(int r = 0; r < cartesian.length; r++)
 				for(int c = 0; c < cartesian[0].length; c++)
 					over_under[r][c] = zMap[r][c] > z;
+					
+			// choose a line color for this isoline
+			//		major lines are full dark or full bright
+			//		minor lines contrast with their background
+			double shade;
+			if (major)
+				if (z <= 0)
+					shade = TOPO_BRITE;
+				else
+					shade = TOPO_DIM;
+			else {
+				double range = (TOPO_BRITE + TOPO_DIM)/2;
+				if (z <= 0) {	// from bright to neutral gray
+					double base = 3 * range / 2;
+					shade = base + range * z;
+				} else {		// from dark to neutral gray
+					double base = 3 * range / 4;
+					shade = base + range * z;
+				}
+			}
+			g.setColor(new Color((int) shade, (int) shade, (int) shade));
 			
-			// TODO: Marching squares
+			// compute the neigbor-sum for each square
+			for(int r = 0; r < cartesian.length-1; r++)
+				for(int c = 0; c < cartesian[0].length-1; c++) {
+					int sum = 0;
+					if (over_under[r][c])
+						sum += 8;
+					if (over_under[r][c+1])
+						sum += 4;
+					if (over_under[r+1][c])
+						sum += 1;
+					if (over_under[r+1][c+1])
+						sum += 2;
+					topoCell(g, r, c, sum);
+				}	
+		}
+	}
+	
+	/**
+	 * render a 5x5 block of a topo map
+	 * @param Graphics context
+	 * @param topographic row
+	 * @param topographic column
+	 * @param sum of corners (from Marching Square
+	 */
+	private void topoCell(Graphics g, int r, int c, int sum) {
+		int x = c * TOPO_CELL;
+		int y = r * TOPO_CELL;
+		
+		switch(sum) {
+		case 0:		// all below
+		case 15:	// all above
+			break;		
+		case 1:		// lower left above
+		case 14:	// lower left below
+			g.drawLine(x,y+3, x+1, y+4);
+			break;
+		case 2:		// lower right above
+		case 13:	// lower right below
+			g.drawLine(x+3, y+4, x+4, y+3);
+			break;
+		case 3:		// bottom above
+		case 12:	// bottom below
+			g.drawLine(x,y+2, x+4, y+2);
+			break;
+		case 4:		// upper right above
+		case 11:	// upper right below
+			g.drawLine(x+3, y, x+4, y+1);
+			break;
+		case 5:		// sw/ne saddle
+			g.drawLine(x+3, y+4, x+4, y+3);
+			g.drawLine(x, y+1, x+1, y);
+			break;
+		case 6:		// right above
+		case 9:		// left above
+			g.drawLine(x+2, y, x+2, y+4);
+			break;
+		case 7:		// upper left below
+		case 8:		// upper left above
+			g.drawLine(x, y+1, x+1, y);
+			break;
+		case 10:	// nw/se saddle
+			g.drawLine(x,y+3, x+1, y+4);
+			g.drawLine(x+3, y, x+4, y+1);
+			break;
 		}
 	}
 	

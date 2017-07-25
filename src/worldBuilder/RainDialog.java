@@ -3,7 +3,6 @@ package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Hashtable;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -49,7 +48,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		accept = new JButton("ACCEPT");
 		cancel = new JButton("CANCEL");
 		
-		direction = new JSlider(JSlider.HORIZONTAL, -180, 180, 0);
+		direction = new JSlider(JSlider.HORIZONTAL, -180, 180, parms.dDirection);
 		direction.setMajorTickSpacing(90);
 		direction.setMinorTickSpacing(30);
 		direction.setFont(fontSmall);
@@ -58,7 +57,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		JLabel dirLabel = new JLabel("Dominant Direction", JLabel.CENTER);
 		dirLabel.setFont(fontLarge);
 
-		amount = new JSlider(JSlider.HORIZONTAL, 0, parms.r_range, parms.r_range/4);
+		amount = new JSlider(JSlider.HORIZONTAL, 0, parms.r_range, parms.dAmount);
 		amount.setMajorTickSpacing(Parameters.niceTics(0, parms.r_range,true));
 		amount.setMinorTickSpacing(Parameters.niceTics(0, parms.r_range,false));
 		amount.setFont(fontSmall);
@@ -69,7 +68,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		
 		int a_max = Parameters.ALT_MAX/2;
 		int a_min = Parameters.ALT_MIN;
-		altitude = new JSlider(JSlider.HORIZONTAL, a_min, a_max, a_max/4);
+		altitude = new JSlider(JSlider.HORIZONTAL, a_min, a_max, parms.dRainHeight);
 		altitude.setMajorTickSpacing(Parameters.niceTics(a_min, a_max, true));
 		altitude.setMinorTickSpacing(Parameters.niceTics(a_min, a_max, false));
 		altitude.setFont(fontSmall);
@@ -130,9 +129,47 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		altitude.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
+		
+		// initialize the direction indicator
+		setDirection(direction.getValue());
 	}
 
-	
+	/**
+	 * display weather direction as a select line
+	 * 
+	 * @param angle (0 = north)
+	 */
+	private void setDirection(int degrees) {
+		
+		// figure out line center and length
+		int x_center = map.getWidth()/2;
+		int x_len = 3 * x_center / 2;
+		int y_center = map.getHeight()/2;
+		int y_len = 3 * y_center / 2;
+		
+		int x0, y0, x1, y1;
+		
+		// vertical lines are a special case
+		if (degrees == -90 || degrees == 90) {
+			x0 = x_center;
+			x1 = x_center;
+			y0 = map.getHeight()/8;
+			y1 = map.getHeight()*7/8;
+		} else {
+			double radians = Math.PI * ((double) degrees)/180;
+			double sin = Math.sin(radians);
+			double cos = Math.cos(radians);
+			double dy = sin * y_len / 2;
+			double dx = cos * x_len / 2;
+			x0 = x_center - (int) dx;
+			y0 = y_center - (int) dy;
+			x1 = x_center + (int) dx;
+			y1 = y_center + (int) dy;
+		}
+		
+		// display the slope axis
+		map.selectLine(x0, y0, x1, y1);
+	}
 	
 	/**
 	 * Window Close event handler ... implicit CANCEL
@@ -152,8 +189,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	public void stateChanged(ChangeEvent e) {
 			if (e.getSource() == direction) {
-				// TODO implement rainfall direction
-				System.out.println("Incoming weather direction: " + direction.getValue());
+				setDirection(direction.getValue());
 			} else if (e.getSource() == amount) {
 				// TODO implement rainfall amount
 				System.out.println("Annual rainfall: " + amount.getValue() + "cm/yr");
@@ -173,6 +209,10 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			map.repaint();
 			oldMesh = null;
 		} else if (e.getSource() == accept) {
+			// make the new parameters official
+			parms.dAmount = amount.getValue();
+			parms.dDirection = direction.getValue();
+			parms.dRainHeight = altitude.getValue();
 			// we no longer need the old rain map
 			oldMesh = null;
 		}

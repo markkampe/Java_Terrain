@@ -41,7 +41,7 @@ public class Map extends JPanel {
 	private static final Color SELECT_COLOR = Color.WHITE;
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
-	//private static final Color WATER_COLOR = Color.BLUE;
+	private static final Color WATER_COLOR = Color.BLUE;
 	//private static final Color RAIN_COLOR = Color.CYAN;
 	//private static final Color SOIL_COLOR = Color.YELLOW;
 	// topographic lines are shades of gray
@@ -51,6 +51,7 @@ public class Map extends JPanel {
 	// the interesting data
 	private Mesh mesh;			// mesh of Voronoi points
 	private Cartesian map;		// Cartesion translation of Voronoi Mesh
+	private Parameters parms;	// world parameters
 	
 	private static final long serialVersionUID = 1L;
 
@@ -67,6 +68,7 @@ public class Map extends JPanel {
 	public Map(int width, int height) {
 		size = new Dimension(width, height);
 		this.background = new Color(128, 128, 128);
+		this.parms = Parameters.getInstance();
 		selectNone();
 	}
 
@@ -248,19 +250,13 @@ public class Map extends JPanel {
 		}
 		
 		// see if we are rendering topology
-		if ((display & SHOW_TOPO) != 0)
+		if ((display & (SHOW_TOPO+SHOW_WATER)) != 0)
 				paint_topo(g);
 		
 		// see if we are rendering rainfall
 		if ((display & SHOW_RAIN) != 0) {
 			// TODO render rainfall
 		}
-		
-		// see if we are rendering water
-		if ((display & SHOW_WATER) != 0) {
-			// TODO render ocean
-		}
-		
 		
 		// see if we have a selection area to highlight
 		switch(sel_type) {
@@ -320,8 +316,12 @@ public class Map extends JPanel {
 	
 				// shade a rectangle for that altitude
 				if ((display & (SHOW_MESH+SHOW_POINTS)) == 0) {
-					double shade = TOPO_DIM + ((z + Parameters.z_extent/2) * (TOPO_BRITE - TOPO_DIM));
-					g.setColor(new Color((int) shade, (int) shade, (int) shade));
+					if ((display & SHOW_WATER) != 0 && z < parms.sea_level) {
+						g.setColor(WATER_COLOR);
+					} else {
+						double shade = TOPO_DIM + ((z + Parameters.z_extent/2) * (TOPO_BRITE - TOPO_DIM));
+						g.setColor(new Color((int) shade, (int) shade, (int) shade));
+					}
 					g.fillRect(c * TOPO_CELL, r * TOPO_CELL, TOPO_CELL, TOPO_CELL);
 				}
 			}
@@ -334,6 +334,9 @@ public class Map extends JPanel {
 		int maxLines = (int) (1 + Parameters.z_extent/deltaH);
 		for (int line = 0; line < maxLines; line++) {
 			double z = line * deltaH - Parameters.z_extent/2;
+			if ((display & SHOW_WATER) != 0 && z < parms.sea_level)
+				continue;
+			
 			boolean major = (line % topoMinors) == 0;
 			
 			// create an over/under bitmap for this isoline

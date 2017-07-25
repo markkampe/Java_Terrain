@@ -7,6 +7,11 @@ package worldBuilder;
  */
  
  public class Parameters {
+	// limits on world parameters
+	public static final int ALT_SCALE = 1000;	// slider labeling unit
+	public static final int ALT_MIN = 0;		// min altitude (m x 1000)
+	public static final int ALT_MAX = 10;		// max altitude (m x 1000)
+	
 	// display parameters
 	public int height = 800;		// screen height
 	public int width = 800;			// screen width
@@ -17,6 +22,7 @@ package worldBuilder;
 	public int xy_range = 500;	// X/Y range (km)
 	public int z_range = 10000;	// Z range (m)
 	public int r_range = 500;	// rain (cm/y)
+	public double sea_level = 0;// sea level (map space)
 	
 	// persistent defaults
 	public int dDiameter;		// mountain diameter

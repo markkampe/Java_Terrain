@@ -158,8 +158,8 @@ public class WorldBuilder  extends JFrame
 		editRoads.addActionListener(this);
 		JMenu editMenu = new JMenu("Edit");
 		editMenu.add(editWorld);
-		editMenu.add(editMountain);
 		editMenu.add(editSlope);
+		editMenu.add(editMountain);
 		editMenu.add(editRain);
 		editMenu.add(new JSeparator());
 		editMenu.add(editCity);
@@ -209,26 +209,56 @@ public class WorldBuilder  extends JFrame
 	 */
 	private void createWidgets() {
 		
-		// create some sliders in panel #3
-		rainfall = new JSlider();
-		erosion = new JSlider();
-		seaLevel = new JSlider();
-		JPanel sliderPanel = new JPanel(new GridLayout(2,3));
-		sliderPanel.add(rainfall);
-		sliderPanel.add(erosion);
-		sliderPanel.add(seaLevel);
-		sliderPanel.add(new JLabel("Rainfall", JLabel.CENTER));
-		sliderPanel.add(new JLabel("Erosion", JLabel.CENTER));
-		sliderPanel.add(new JLabel("Sea Level", JLabel.CENTER));
-		JPanel sliders = new JPanel();	// no stretch
-		sliders.add(sliderPanel);
+		// get some fonts
+		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
+		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		
-		// add those three panels to a control panel
-		JPanel controls = new JPanel(new GridLayout(3,1));
-		// controls.add(buttons);
-		// controls.add(combos);
-		controls.add(sliders);
-		add(controls, BorderLayout.SOUTH);
+		// create some sliders in panel #3
+		rainfall = new JSlider(0, parms.r_range, parms.r_range/10);
+		rainfall.setMajorTickSpacing(Parameters.niceTics(0, parms.r_range, true));
+		rainfall.setMinorTickSpacing(Parameters.niceTics(0, parms.r_range, false));
+		rainfall.setFont(fontSmall);
+		rainfall.setPaintTicks(true);
+		rainfall.setPaintLabels(true);
+		JLabel rainLabel = new JLabel("Rainfall (cm/yr)", JLabel.CENTER);
+		rainLabel.setFont(fontLarge);
+		JPanel r_panel = new JPanel();
+		r_panel.setLayout(new BoxLayout(r_panel, BoxLayout.PAGE_AXIS));
+		r_panel.add(rainLabel);
+		r_panel.add(rainfall);
+		
+		erosion = new JSlider();
+		JLabel eroLabel = new JLabel("Erosion", JLabel.CENTER);
+		eroLabel.setFont(fontLarge);
+		JPanel e_panel = new JPanel();
+		e_panel.setLayout(new BoxLayout(e_panel, BoxLayout.PAGE_AXIS));
+		e_panel.add(eroLabel);
+		e_panel.add(erosion);
+		
+		int a_max = Parameters.ALT_SCALE * Parameters.ALT_MAX/2;
+		seaLevel = new JSlider(-a_max, a_max, 0);
+		seaLevel.setMajorTickSpacing(Parameters.niceTics(-a_max, a_max, true));
+		seaLevel.setMinorTickSpacing(Parameters.niceTics(-a_max, a_max, false));
+		seaLevel.setFont(fontSmall);
+		seaLevel.setPaintTicks(true);
+		seaLevel.setPaintLabels(true);
+		JLabel seaLabel = new JLabel("Sea Level (m)", JLabel.CENTER);
+		seaLabel.setFont(fontLarge);
+		JPanel s_panel = new JPanel();
+		s_panel.setLayout(new BoxLayout(s_panel, BoxLayout.PAGE_AXIS));
+		s_panel.add(seaLabel);
+		s_panel.add(seaLevel);
+	
+		JPanel sliderPanel = new JPanel();
+		sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.LINE_AXIS));
+		r_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
+		e_panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 15));	
+		s_panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
+		sliderPanel.add(s_panel);
+		sliderPanel.add(r_panel);
+		sliderPanel.add(e_panel);
+
+		add(sliderPanel, BorderLayout.SOUTH);
 		
 		// register the action listeners
 		rainfall.addChangeListener(this);
@@ -367,13 +397,13 @@ public class WorldBuilder  extends JFrame
 	// these may all be just place holders
 	public void stateChanged(ChangeEvent e) {
 		Object o = e.getSource();
-		// TODO implement sea level
 		if (o == erosion) {
 			System.out.println("Erosion changed to " + erosion.getValue());
 		} else if (o == seaLevel) {
-			System.out.println("seaLevel changed to " + seaLevel.getValue());
+			parms.sea_level = ((double) seaLevel.getValue()) / parms.z_range;
+			map.repaint();
 		} else if (o == rainfall) {
-			System.out.println("rainfall changed to " + seaLevel.getValue());
+			System.out.println("rainfall changed to " + rainfall.getValue());
 		}
 	}
 	

@@ -20,9 +20,6 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		private static final int WORLD_MIN = 0;		// min world diameter (km x100)
 		private static final int WORLD_MAX = 50;	// max world diameter (km x100)
 		private static final int WORLD_GRAIN = 500;	// multiple of 500 km
-		private static final int ALT_SCALE = 1000;	// slider labeling unit
-		private static final int ALT_MIN = 0;		// min altitude (m x 1000)
-		private static final int ALT_MAX = 10;		// max altitude (m x 1000)
 		
 		private static final int BORDER_WIDTH = 5;
 		
@@ -54,9 +51,9 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			JLabel diameterLabel = new JLabel("Diameter (km x 100)", JLabel.CENTER);
 			diameterLabel.setFont(fontLarge);
 			
-			altitude = new JSlider(JSlider.HORIZONTAL, ALT_MIN, ALT_MAX, parms.z_range/(2*ALT_SCALE));
-			altitude.setMajorTickSpacing(Parameters.niceTics(ALT_MIN, ALT_MAX, true));
-			altitude.setMinorTickSpacing(Parameters.niceTics(ALT_MIN, ALT_MAX, false));
+			altitude = new JSlider(JSlider.HORIZONTAL, Parameters.ALT_MIN, Parameters.ALT_MAX, parms.z_range/(2*Parameters.ALT_SCALE));
+			altitude.setMajorTickSpacing(Parameters.niceTics(Parameters.ALT_MIN, Parameters.ALT_MAX, true));
+			altitude.setMinorTickSpacing(Parameters.niceTics(Parameters.ALT_MIN, Parameters.ALT_MAX, false));
 			altitude.setFont(fontSmall);
 			altitude.setPaintTicks(true);
 			altitude.setPaintLabels(true);
@@ -130,7 +127,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 					parms.xy_range = v;
 				}
 				if (altitude.getValue() > 0) {
-					int v = altitude.getValue() * ALT_SCALE;
+					int v = altitude.getValue() * Parameters.ALT_SCALE;
 					parms.z_range = 2*v;		// from -v to +v
 				}
 			}

@@ -155,9 +155,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * 	compute the height as a function of the distance from center
 	 */
 	private void placeMountain(double x, double y) {
-		// FIX height caps at full scale/2
 		// note the mountain parameters
-		double alt = (double) altitude.getValue() / (parms.z_range/2) * Parameters.z_extent;
+		double alt = (double) altitude.getValue() / parms.z_range *  Parameters.z_extent;
 		int Fcone = Parameters.SPHERICAL - rounding.getValue();
 		int Fcirc = rounding.getValue();
 		double diam = (double) diameter.getValue();

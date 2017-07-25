@@ -309,7 +309,7 @@ public class Map extends JPanel {
 		if (map.height != h || map.width != w)
 			map = new Cartesian(mesh, w, h);
 		
-		// interpolate up-to-date Z values
+		// interpolate Z values from the latest mesh
 		map.getHeight(mesh);
 		
 		// use height to generate background colors
@@ -388,7 +388,7 @@ public class Map extends JPanel {
 	}
 	
 	/**
-	 * render a TOPO_CELLxTOPO_CELL block of a topo map
+	 * render a 5x5 block of a topo map
 	 * @param Graphics context
 	 * @param topographic row
 	 * @param topographic column

@@ -62,8 +62,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		JLabel axisLabel = new JLabel("Axis(deg)", JLabel.CENTER);
 		axisLabel.setFont(fontLarge);
 
-		// TODO: continental slope is not large
-		i_max = (parms.z_range)/ parms.xy_range;
+		i_max = (parms.z_range/10)/ parms.xy_range;	// continental slope is not large
 		inclination = new JSlider(JSlider.HORIZONTAL, -i_max, i_max, 0);
 		inclination.setMajorTickSpacing(Parameters.niceTics(-i_max, i_max, true));
 		inclination.setMinorTickSpacing(Parameters.niceTics(-i_max, i_max, false));
@@ -124,10 +123,14 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	/**
 	 * incline the entire map plane
 	 *
-	 * @param inclination (-1.0 ... +1.0)
+	 * @param inclination (m/km)
 	 */
 	public void incline(double inclination) {
+		// convert inclination into map units
 		Zscale = (double) inclination;
+		Zscale /= parms.z_range;
+		Zscale *= parms.xy_range;
+		
 		int width = map.getWidth();
 		int height = map.getHeight();
 		double Xmid = Parameters.x_extent/2;
@@ -209,8 +212,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		if (e.getSource() == axis) {
 				setAxis(axis.getValue());
 		} else if (e.getSource() == inclination) {
-				double i = inclination.getValue();
-				incline(i/i_max);
+				incline(inclination.getValue());
 		}	
 	}
 

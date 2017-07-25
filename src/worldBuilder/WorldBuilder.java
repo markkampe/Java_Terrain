@@ -367,7 +367,7 @@ public class WorldBuilder  extends JFrame
 	// these may all be just place holders
 	public void stateChanged(ChangeEvent e) {
 		Object o = e.getSource();
-		
+		// TODO implement sea level
 		if (o == erosion) {
 			System.out.println("Erosion changed to " + erosion.getValue());
 		} else if (o == seaLevel) {

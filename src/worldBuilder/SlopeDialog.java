@@ -62,6 +62,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		JLabel axisLabel = new JLabel("Axis(deg)", JLabel.CENTER);
 		axisLabel.setFont(fontLarge);
 
+		// TODO: continental slope is not large
 		i_max = (parms.z_range)/ parms.xy_range;
 		inclination = new JSlider(JSlider.HORIZONTAL, -i_max, i_max, 0);
 		inclination.setMajorTickSpacing(Parameters.niceTics(-i_max, i_max, true));

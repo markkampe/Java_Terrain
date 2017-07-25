@@ -49,9 +49,8 @@ public class Map extends JPanel {
 	private static final int TOPO_BRITE = 255;
 	
 	// the interesting data
-	private Mesh mesh;				// mesh of Voronoi points
-	private MeshRef cartesian[][];	// Voronoi to Cartesian translation
-	private Dimension cartSize;		// size for last Cartesian
+	private Mesh mesh;			// mesh of Voronoi points
+	private Cartesian map;		// Cartesion translation of Voronoi Mesh
 	
 	private static final long serialVersionUID = 1L;
 
@@ -112,7 +111,7 @@ public class Map extends JPanel {
 	public void newMesh(Mesh m) {
 		setVisible(false);	// avoid races w/paint
 		this.mesh = m;
-		newMap();			// recreate Voronoi-to-Cartesian map
+		this.map = new Cartesian(m, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
 		setVisible(true);
 		repaint();
 	}
@@ -200,7 +199,9 @@ public class Map extends JPanel {
 		repaint();
 	}
 
-	
+	/**
+	 * repaint the map pane
+	 */
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
@@ -250,6 +251,17 @@ public class Map extends JPanel {
 		if ((display & SHOW_TOPO) != 0)
 				paint_topo(g);
 		
+		// see if we are rendering rainfall
+		if ((display & SHOW_RAIN) != 0) {
+			// TODO render rainfall
+		}
+		
+		// see if we are rendering water
+		if ((display & SHOW_WATER) != 0) {
+			// TODO render ocean
+		}
+		
+		
 		// see if we have a selection area to highlight
 		switch(sel_type) {
 		case LINE:
@@ -278,8 +290,7 @@ public class Map extends JPanel {
 	}
 	
 	/**
-	 * Marching Squares rendering of a topological map
-	 * 	 https://en.wikipedia.org/wiki/Marching_squares
+	 * Render current mesh as a topology map
 	 * 
 	 *   for each <row,col>
 	 *   	compute interpolated height
@@ -292,17 +303,21 @@ public class Map extends JPanel {
 	 *   		choose and render the appropraite image
 	 */
 	private void paint_topo(Graphics g) {
-		// make sure the Cartesian translation is up-to-date
-		checkMap();
+		// see if a screen resize has invalidated Cartesian translation
+		int h = getHeight()/TOPO_CELL;
+		int w = getWidth()/TOPO_CELL;
+		if (map.height != h || map.width != w)
+			map = new Cartesian(mesh, w, h);
 		
-		// for generate a height for each cell in the grid
-		double zMap[][] = new double[cartesian.length][cartesian[0].length];
-		for(int r = 0; r < cartesian.length; r++)
-			for(int c = 0; c < cartesian[0].length; c++) {
+		// interpolate up-to-date Z values
+		map.getHeight(mesh);
+		
+		// use height to generate background colors
+		for(int r = 0; r < h; r++)
+			for(int c = 0; c < w; c++) {
 				// interpolate height (from surrounding MeshPoints)
-				double z = cartesian[r][c].height();
-				zMap[r][c] = z;
-				
+				double z = map.z[r][c];
+	
 				// shade a rectangle for that altitude
 				if ((display & (SHOW_MESH+SHOW_POINTS)) == 0) {
 					double shade = TOPO_DIM + ((z + Parameters.z_extent/2) * (TOPO_BRITE - TOPO_DIM));
@@ -312,7 +327,7 @@ public class Map extends JPanel {
 			}
 		
 		// allocate an over-under bitmap
-		boolean over_under[][] = new boolean[cartesian.length][cartesian[0].length];
+		boolean over_under[][] = new boolean[map.height][map.width];
 		
 		// figure out how many topographic lines we have to render
 		double deltaH = topoMajor / topoMinors;
@@ -322,9 +337,9 @@ public class Map extends JPanel {
 			boolean major = (line % topoMinors) == 0;
 			
 			// create an over/under bitmap for this isoline
-			for(int r = 0; r < cartesian.length; r++)
-				for(int c = 0; c < cartesian[0].length; c++)
-					over_under[r][c] = zMap[r][c] > z;
+			for(int r = 0; r < h; r++)
+				for(int c = 0; c < w; c++)
+					over_under[r][c] = map.z[r][c] > z;
 					
 			// choose a line color for this isoline
 			//		major lines are full dark or full bright
@@ -347,9 +362,17 @@ public class Map extends JPanel {
 			}
 			g.setColor(new Color((int) shade, (int) shade, (int) shade));
 			
-			// compute the neigbor-sum for each square
-			for(int r = 0; r < cartesian.length-1; r++)
-				for(int c = 0; c < cartesian[0].length-1; c++) {
+			/*
+			 * Marching Squares topology generation algorithm
+			 * 
+			 *  https://en.wikipedia.org/wiki/Marching_squares
+			 * 
+			 * 	march a 2x2 square through the over/under array
+			 * 	for each point, note which neighbors are over
+			 *  use that four-bit-number to choose one of 16 images
+			 */
+			for(int r = 0; r < h-1; r++)
+				for(int c = 0; c < w-1; c++) {
 					int sum = 0;
 					if (over_under[r][c])
 						sum += 8;
@@ -365,11 +388,14 @@ public class Map extends JPanel {
 	}
 	
 	/**
-	 * render a 5x5 block of a topo map
+	 * render a TOPO_CELLxTOPO_CELL block of a topo map
 	 * @param Graphics context
 	 * @param topographic row
 	 * @param topographic column
-	 * @param sum of corners (from Marching Square
+	 * @param sum of corners (from Marching Square)
+	 * 
+	 * NOTE: The "Marching Square" topology line generation
+	 *       scheme works best with 3x3 or 5x5 cells.
 	 */
 	private void topoCell(Graphics g, int r, int c, int sum) {
 		int x = c * TOPO_CELL;
@@ -426,134 +452,5 @@ public class Map extends JPanel {
 	 */
 	public Dimension getPreferredSize() {
 		return size;
-	}
-	
-	/**
-	 * create mapping from Voronoi mesh to map grid
-	 * 
-	 * 		The Voronoi mesh is deliberately sparse and
-	 * 		non-uniform, but we must eventually produce a
-	 * 		dense and uniform map.  This function creates
-	 * 		a map which lists, for each 2D map point, the
-	 * 		three nearest Voronoi points (and their distances).
-	 * 		This can be used to interpolate the value of 
-	 * 		any property of any point as a function of
-	 * 		the immediately surrounding Voronoi points.
-	 * 
-	 * 		This map only changes when the Mesh changes,
-	 * 		or when the display/export size changes.
-	 */
-	public void newMap() {
-		int h = getHeight()/TOPO_CELL;
-		int w = getWidth()/TOPO_CELL;
-		
-		cartesian = new MeshRef[h][w];
-		for(int r = 0; r < h; r++) {
-			double y = (double) r/h - Parameters.y_extent/2;
-			for(int c = 0; c < w; c++) {
-				double x =  (double)c/w - Parameters.x_extent/2;
-				MeshPoint m = new MeshPoint(x,y);
-				MeshRef ref = new MeshRef();
-				cartesian[r][c] = ref;
-				for(int v = 0; v < mesh.vertices.length; v++) {
-					MeshPoint p = mesh.vertices[v];
-					ref.consider(p.index, p.distance(m));
-				}
-			}
-		}
-		
-		cartSize = new Dimension(w, h);	// note the map size
-	}
-	
-	/**
-	 * make sure the Cartesian translation matrix is still correct
-	 * (i.e. has the screen been resized).
-	 */
-	public void checkMap() {
-		int h = getHeight()/TOPO_CELL;
-		int w = getWidth()/TOPO_CELL;
-		
-		if (h != cartSize.getHeight() || w != cartSize.getWidth())
-			newMap();
-	}
-	
-	/**
-	 * Each cell of the Voronoi to grid map is represented
-	 * by a MeshRef, which describes the 3 nearest Voronoi
-	 * points.
-	 * 
-	 * We refer to the Voronoi points by index rather than
-	 * by MeshPoint because the latter change as a result
-	 * of editing operations, but the former change only
-	 * when a new Mesh is created.
-	 * 
-	 * This is a private class within Map because it needs
-	 * to make reference to the selected Mesh.
-	 */
-	private class MeshRef {
-		public int neighbors[];		// MeshPoint index
-		private double distances[];	// distance to that MeshPoint
-		private static final int NUM_NEIGHBORS = 3;
-		
-		public MeshRef() {
-			neighbors = new int[NUM_NEIGHBORS];
-			distances = new double[NUM_NEIGHBORS];
-			
-			for(int i = 0; i < NUM_NEIGHBORS; i++) {
-				neighbors[i] = -1;
-				distances[i] = 666;
-			}
-		}
-		
-		/**
-		 * consider a MeshPoint and note the three closest
-		 * 
-		 * @param index 	index of this mesh point
-		 * @param distance	distance to this mesh points
-		 */
-		public void consider(int index, double distance) {
-			if (distance >= distances[2])
-				return;
-			
-			// XXX there is a more elegant/general way to code this
-			if (distance >= distances[1]) {
-				// replace last in list
-				neighbors[2] = index;
-				distances[2] = distance;
-			} else if (distance >= distances[0]) {
-				// replace second in list
-				neighbors[2] = neighbors[1];
-				distances[2] = distances[1];
-				neighbors[1] = index;
-				distances[1] = distance;
-			} else {
-				// replace first in list
-				neighbors[2] = neighbors[1];
-				distances[2] = distances[1];
-				neighbors[1] = neighbors[0];
-				distances[1] = distances[0];
-				neighbors[0] = index;
-				distances[0] = distance;	
-			}
-		}
-		
-		/**
-		 * @return proximity weighted average height
-		 * 
-		 * 	for each neighbor, sum the height/distance
-		 * 	re-normalize that sum to the original scale
-		 * 		sum of 1.0/distance
-		 */
-		public double height() {
-			double norm = 0;
-			double zSum = 0;
-			
-			for(int n = 0; n < NUM_NEIGHBORS; n++) {
-				double dist = distances[n];
-				zSum += mesh.vertices[neighbors[n]].z/dist;
-				norm += 1/dist;
-			}
-			return zSum / norm;
-		}
 	}
 }

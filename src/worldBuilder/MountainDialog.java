@@ -35,11 +35,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private static final long serialVersionUID = 1L;
 	
 	public MountainDialog(Map map)  {
-		// pick up references
+		// pick up references, copy current mesh
 		this.map = map;
-		this.oldMesh = map.getMesh();
-		this.newMesh = new Mesh(this.oldMesh);
-		map.setMesh(newMesh);
+		this.newMesh = map.getMesh();
+		this.oldMesh = new Mesh(this.newMesh);
 		this.parms = Parameters.getInstance();
 		
 		// calibrate full scale on the sliders
@@ -303,22 +302,27 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			map.setMesh(oldMesh);
 			map.repaint();
 			oldMesh = null;
+			
 			// clean up the graphics
 			map.selectNone();
 			this.dispose();
+			
+			// un-register for mouse events
+			map.removeMouseListener(this);
+			map.removeMouseMotionListener(this);
 		} else if (e.getSource() == accept) {
 			// save the current values as defaults
 			parms.dDiameter = diameter.getValue();
 			parms.dAltitude = altitude.getValue();
 			parms.dShape = rounding.getValue();
-			// discard previous height map
-			oldMesh = null;
-			// clean up the graphics
+			
+			// save a new copy of current height map
+			oldMesh = new Mesh(newMesh);
+			
+			// clean up the selection graphics
 			map.selectNone();
-			this.dispose();
 		}
-		map.removeMouseListener(this);
-		map.removeMouseMotionListener(this);
+		
 	}
 	
 	// perfunctory methods

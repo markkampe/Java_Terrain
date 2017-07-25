@@ -175,6 +175,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			double dh_cone = (diam - d) * alt / diam;
 			double dh_circ = Math.cos(Math.PI*d/(4*diam)) * alt;
 			double delta_h = ((Fcone * dh_cone) + (Fcirc * dh_circ))/Parameters.SPHERICAL;
+			// TODO: cone-sphere-CYLINDER mountain profiles
+			// TODO: asymmetric mountain profiles
 
 			// make sure the new height is legal
 			double newZ = p.z + delta_h;
@@ -219,6 +221,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		double m = l/d;
 		int mountains = (int) (m + 0.5);
 		
+		// TODO: piece-wise mountain ranges
 		// how many mountains can we create
 		if (mountains < 2) {
 			// one mountain goes in the center
@@ -257,6 +260,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		selecting = false;
 		selected = true;
 		redraw();	
+		// TODO: multiple segment mountain ranges
 	}
 	
 	public void mouseClicked(MouseEvent e) {}

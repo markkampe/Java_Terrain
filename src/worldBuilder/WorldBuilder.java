@@ -150,7 +150,7 @@ public class WorldBuilder  extends JFrame
 		editMountain.addActionListener(this);
 		editSlope = new JMenuItem("define slope");
 		editSlope.addActionListener(this);
-		editRain = new JMenuItem("configure rain");
+		editRain = new JMenuItem("rainfall");
 		editRain.addActionListener(this);
 		editCity = new JMenuItem("add city");
 		editCity.addActionListener(this);
@@ -214,19 +214,6 @@ public class WorldBuilder  extends JFrame
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		
 		// create some sliders in panel #3
-		rainfall = new JSlider(0, parms.r_range, parms.r_range/10);
-		rainfall.setMajorTickSpacing(Parameters.niceTics(0, parms.r_range, true));
-		rainfall.setMinorTickSpacing(Parameters.niceTics(0, parms.r_range, false));
-		rainfall.setFont(fontSmall);
-		rainfall.setPaintTicks(true);
-		rainfall.setPaintLabels(true);
-		JLabel rainLabel = new JLabel("Rainfall (cm/yr)", JLabel.CENTER);
-		rainLabel.setFont(fontLarge);
-		JPanel r_panel = new JPanel();
-		r_panel.setLayout(new BoxLayout(r_panel, BoxLayout.PAGE_AXIS));
-		r_panel.add(rainLabel);
-		r_panel.add(rainfall);
-		
 		erosion = new JSlider();
 		JLabel eroLabel = new JLabel("Erosion", JLabel.CENTER);
 		eroLabel.setFont(fontLarge);
@@ -251,17 +238,14 @@ public class WorldBuilder  extends JFrame
 	
 		JPanel sliderPanel = new JPanel();
 		sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.LINE_AXIS));
-		r_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
 		e_panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 15));	
 		s_panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
 		sliderPanel.add(s_panel);
-		sliderPanel.add(r_panel);
 		sliderPanel.add(e_panel);
 
 		add(sliderPanel, BorderLayout.SOUTH);
 		
 		// register the action listeners
-		rainfall.addChangeListener(this);
 		erosion.addChangeListener(this);
 		seaLevel.addChangeListener(this);
 	}
@@ -356,7 +340,7 @@ public class WorldBuilder  extends JFrame
 		} else if (o == editSlope) {
 			new SlopeDialog(map);
 		} else if (o == editRain) {
-			System.out.println("implement edit:Rain");
+			new RainDialog(map);
 		} else if (o == editCity) {
 			System.out.println("implement edit:City");
 		} else if (o == editRoads) {

@@ -1,6 +1,9 @@
 package worldBuilder;
 import java.awt.*;
 import java.awt.event.*;
+import java.net.URL;
+import java.util.ArrayList;
+
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -68,7 +71,13 @@ public class WorldBuilder  extends JFrame
 	private static Parameters parms;						// global program parameters
 	private static final int BORDER_WIDTH = 10;				// window border
 	
-	// private static final String ICON_IMAGE = "images/world-32.png";
+	private static final String[] ICON_IMAGES = {
+			"/images/builder-16.png",
+			"/images/builder-32.png",
+			"/images/builder-64.png",
+			"/images/builder-96.png",
+			"/images/builder-128.png"
+	};
 	private static final String DEFAULT_MAP = "default_4096.json";
 	private static final String INPUT_TYPE = "*.json";
 	private static final String EXPORT_TYPE = "*.json";
@@ -82,9 +91,11 @@ public class WorldBuilder  extends JFrame
 	 */
 	public WorldBuilder(String filename) {
 		
-		// set our window icon
-		//Image myIcon = getToolkit().getImage(getClass().getResource(ICON_IMAGE));
-		//setIconImage(myIcon);
+		// set our window icon(s)
+		ArrayList<Image> icons = new ArrayList<Image>();
+		for(int i = 0; i < ICON_IMAGES.length; i++)
+			icons.add(getToolkit().getImage(getClass().getResource(ICON_IMAGES[i])));
+		setIconImages(icons);
 		
 		// get a handle on our display window
 		mainPane = getContentPane();

@@ -1,5 +1,8 @@
 package worldBuilder;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 // note: this is the only class that knows about Voronoi
 import org.rogach.jopenvoronoi.Edge;
 import org.rogach.jopenvoronoi.Face;
@@ -116,9 +119,36 @@ public class Mesh {
 	/**
 	 * write a mesh of MapPoints out to a file
 	 */
-	public void write(String filename) {
-		System.out.println("TODO: Implement Mesh.write(" + filename + ")");
-		// TODO implement Mesh:write
+	public boolean write(String filename) {
+		try {
+			FileWriter output = new FileWriter(filename);
+			final String C_FORMAT = "        { \"x\":\"%10.7f\", \"y\":\"%10.7f\", \"z\":\"%10.7f\" ";
+			
+			// write out the Mesh wrapper
+			output.write( "{   \"points\":\"" + vertices.length + "\",\n");
+			output.write( "    \"mesh\":[\n" );
+			for(int i = 0; i < vertices.length; i++) {
+				if (i != 0)
+					output.write(",\n");
+				MeshPoint m = vertices[i];
+				output.write(String.format(C_FORMAT, m.x, m.y, m.z));
+				
+				output.write(", \"neighbors\":[ ");
+				for(int n = 0; n < m.neighbors; n++) {
+					if (n != 0)
+						output.write(", ");
+					output.write(String.format("%d",  m.neighbor[n].index));
+				}
+				output.write(" ] }");
+			}
+			output.write( "\n    ]\n");
+			output.write( "}\n");
+			output.close();
+			return true;
+		} catch (IOException e) {
+			System.err.println("Unable to create output file " + filename);
+			return false;
+		}
 	}
 	
 

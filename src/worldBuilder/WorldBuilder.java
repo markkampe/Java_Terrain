@@ -78,7 +78,7 @@ public class WorldBuilder  extends JFrame
 			"/images/builder-96.png",
 			"/images/builder-128.png"
 	};
-	private static final String DEFAULT_MAP = "default_4096.json";
+	private static final String DEFAULT_MESH = "default_4096.json";
 	private static final String INPUT_TYPE = "*.json";
 	private static final String EXPORT_TYPE = "*.json";
 
@@ -445,7 +445,7 @@ public class WorldBuilder  extends JFrame
 		
 		// create our display
 		if (filename == null)
-			filename = DEFAULT_MAP;
+			filename = DEFAULT_MESH;
 		WorldBuilder w = new WorldBuilder(filename);
 		
 		// initialize the display type

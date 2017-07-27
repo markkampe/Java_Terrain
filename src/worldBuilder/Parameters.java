@@ -30,6 +30,9 @@ package worldBuilder;
 	public int dShape;			// mountain shape
 	public static final int CONICAL = 0;
 	public static final int SPHERICAL = 6;
+	public int dDirection;		// incoming weather
+	public int dAmount;			// annual rainfall
+	public int dRainHeight;		// mean height of incoming rain
 	
 	// map generation parameters
 	public int improvements = 1;	// number of smoothing iterations

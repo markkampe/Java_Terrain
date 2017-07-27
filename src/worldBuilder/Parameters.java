@@ -51,7 +51,9 @@ package worldBuilder;
 		dDiameter = maxDiameter()/2;
 		dAltitude = z_range/4;
 		dShape = (CONICAL + SPHERICAL)/2;
-		
+		dDirection = 0;				// weather from the north
+		dAmount = r_range/10;		// moderate rainfall
+		dRainHeight = ALT_MAX/5;	// not particularly high	
 	}
 	
 	public static Parameters getInstance() {

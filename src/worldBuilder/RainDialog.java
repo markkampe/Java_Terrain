@@ -135,6 +135,27 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	}
 
 	/**
+	 * calculate the rainfall received at each Mesh point
+	 */
+	private void rainFall() {
+		int dir = direction.getValue();
+		int amt = amount.getValue();
+		int alt = altitude.getValue();
+		
+		// TODO trace source path back to each MeshPoint
+		// TODO topographically forced rain
+		// TODO reduce available moisture by what falls
+		// TODO rain on MeshPoint = f(available)
+		
+		// compute the rain at every point
+		for(int i = 0; i < newMesh.vertices.length; i++) {
+			// start out with even rain distribution
+			newMesh.vertices[i].rainfall = amt;
+		}
+		map.repaint();
+	}
+	
+	/**
 	 * display weather direction as a select line
 	 * 
 	 * @param angle (0 = north)
@@ -190,12 +211,11 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	public void stateChanged(ChangeEvent e) {
 			if (e.getSource() == direction) {
 				setDirection(direction.getValue());
+				rainFall();
 			} else if (e.getSource() == amount) {
-				// TODO implement rainfall amount
-				System.out.println("Annual rainfall: " + amount.getValue() + "cm/yr");
+				rainFall();
 			} else if (e.getSource() == altitude) {
-				// TODO implement rainfall ALTITUDE
-				System.out.println("Incoming weather altitude: " + altitude.getValue() + "km");
+				rainFall();
 			}
 	}
 

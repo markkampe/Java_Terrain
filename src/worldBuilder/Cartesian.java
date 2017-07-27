@@ -10,6 +10,7 @@ public class Cartesian {
 	public int width;
 	public int height;
 	public double z[][];		// height of each Cartesian point
+	public double rain[][];			// rainfall for each Cartesian point
 	
 	private MeshRef cells[][];	// mapping from Cartesian points to MeshPoints
 
@@ -28,6 +29,7 @@ public class Cartesian {
 		// allocate the arrays
 		cells = new MeshRef[height][width];
 		z = new double[height][width];
+		rain = new double[height][width];
 		
 		// create the Cartesion->Voronoi map
 		for(int r = 0; r < height; r++) {
@@ -60,10 +62,33 @@ public class Cartesian {
 				for(int n = 0; n < MeshRef.NUM_NEIGHBORS; n++) {
 					double dist = ref.distances[n];
 					double h = mesh.vertices[ref.neighbors[n]].z;
-					zSum += mesh.vertices[ref.neighbors[n]].z/dist;
+					zSum += h/dist;
 					norm += 1/dist;
 				}
 				z[r][c] = zSum / norm;
+			}
+		}
+	}
+	
+	/**
+	 * interpolate rainfall for every cell in the map
+	 * 
+	 * @param Mesh for rainfall info
+	 */
+	public void getRain(Mesh mesh) {
+		for(int r = 0; r < height; r++) {
+			for(int c = 0; c < width; c++) {
+				// compute the proximity-weighted average height
+				MeshRef ref = cells[r][c];
+				double norm = 0;
+				double rSum = 0;
+				for(int n = 0; n < MeshRef.NUM_NEIGHBORS; n++) {
+					double dist = ref.distances[n];
+					double rainfall = mesh.vertices[ref.neighbors[n]].rainfall;
+					rSum += rainfall/dist;
+					norm += 1/dist;
+				}
+				rain[r][c] = rSum / norm;
 			}
 		}
 	}

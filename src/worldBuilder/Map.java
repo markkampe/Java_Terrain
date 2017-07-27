@@ -42,11 +42,13 @@ public class Map extends JPanel {
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
 	private static final Color WATER_COLOR = Color.BLUE;
-	//private static final Color RAIN_COLOR = Color.CYAN;
 	//private static final Color SOIL_COLOR = Color.YELLOW;
 	// topographic lines are shades of gray
 	private static final int TOPO_DIM = 0;
 	private static final int TOPO_BRITE = 255;
+	// rain fall is indicated by shades of cyan
+	private static final int RAIN_DIM = 0;
+	private static final int RAIN_BRITE= 255;
 	
 	// the interesting data
 	private Mesh mesh;			// mesh of Voronoi points
@@ -203,6 +205,9 @@ public class Map extends JPanel {
 
 	/**
 	 * repaint the map pane
+	 * 
+	 *  Note: order of painting is to enable layring of some things
+	 *  	  atop others
 	 */
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -222,6 +227,11 @@ public class Map extends JPanel {
 		}
 		
 		setBackground(background);
+		
+		// see if we are rendering rainfall
+		if ((display & SHOW_RAIN) != 0) {
+				paint_rain(g);
+		}
 		
 		// see if we are rendering points
 		if ((display & SHOW_POINTS) != 0) {
@@ -253,11 +263,7 @@ public class Map extends JPanel {
 		if ((display & (SHOW_TOPO+SHOW_WATER)) != 0)
 				paint_topo(g);
 		
-		// see if we are rendering rainfall
-		if ((display & SHOW_RAIN) != 0) {
-			// TODO render rainfall
-		}
-		
+
 		// see if we have a selection area to highlight
 		switch(sel_type) {
 		case LINE:
@@ -283,6 +289,49 @@ public class Map extends JPanel {
 	public void setTopoLines(double major, int minorPerMajor) {
 		topoMajor = major;
 		topoMinors = minorPerMajor;
+	}
+	
+	/**
+	 * linear interpolation of a value within a range
+	 * 
+	 * @param min return value
+	 * @param max return value
+	 * @param value (0-1) to be scaled
+	 */
+	private static double linear(int min, int max, double value) {
+		double ret = value * (max - min);
+		return min + ret;
+		
+	}
+	
+	/**
+	 * Render current mesh as a rainfall map
+	 * 
+	 *   for each <row,col>
+	 *   	compute interpolated rain
+	 *   	generate shaded background
+	 */
+	private void paint_rain(Graphics g) {
+		// see if a screen resize has invalidated Cartesian translation
+		int h = getHeight()/TOPO_CELL;
+		int w = getWidth()/TOPO_CELL;
+		if (map.height != h || map.width != w)
+			map = new Cartesian(mesh, w, h);
+		
+		// interpolate Z values from the latest mesh
+		map.getRain(mesh);
+		
+		// use height to generate background colors
+		for(int r = 0; r < h; r++)
+			for(int c = 0; c < w; c++) {
+				// interpolate height (from surrounding MeshPoints)
+				double rain = map.rain[r][c];
+	
+				// shade a rectangle w/cyan for that rainfall	
+				double shade = linear(RAIN_DIM, RAIN_BRITE, rain / parms.r_range);
+				g.setColor(new Color(0, (int) shade, (int) shade));
+				g.fillRect(c * TOPO_CELL, r * TOPO_CELL, TOPO_CELL, TOPO_CELL);
+			}
 	}
 	
 	/**
@@ -314,12 +363,12 @@ public class Map extends JPanel {
 				// interpolate height (from surrounding MeshPoints)
 				double z = map.z[r][c];
 	
-				// shade a rectangle for that altitude
-				if ((display & (SHOW_MESH+SHOW_POINTS)) == 0) {
+				// background color for altitude if nobody else needs it
+				if ((display & (SHOW_MESH+SHOW_POINTS+SHOW_RAIN)) == 0) {
 					if ((display & SHOW_WATER) != 0 && z < parms.sea_level) {
 						g.setColor(WATER_COLOR);
 					} else {
-						double shade = TOPO_DIM + ((z + Parameters.z_extent/2) * (TOPO_BRITE - TOPO_DIM));
+						double shade = linear(TOPO_DIM, TOPO_BRITE, z + Parameters.z_extent/2);
 						g.setColor(new Color((int) shade, (int) shade, (int) shade));
 					}
 					g.fillRect(c * TOPO_CELL, r * TOPO_CELL, TOPO_CELL, TOPO_CELL);

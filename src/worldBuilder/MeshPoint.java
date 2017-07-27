@@ -9,6 +9,7 @@ public class MeshPoint {
 	public double x;			// X coordinate
 	public double y;			// Y coordinate
 	public double z;			// Z coordinate
+	public double rainfall;		// cm/year
 	
 	public int index;			// point index #
 	public int neighbors;		// number of neighbors

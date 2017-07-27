@@ -292,7 +292,7 @@ public class Map extends JPanel {
 	}
 	
 	/**
-	 * linear interpolation of a value within a range
+	 * linear interpolation of a (color) value within a range
 	 * 
 	 * @param min return value
 	 * @param max return value
@@ -302,6 +302,28 @@ public class Map extends JPanel {
 		double ret = value * (max - min);
 		return min + ret;
 		
+	}
+	
+	/**
+	 * logarithmic interpolation of a (color) value within a range
+	 * 
+	 * @param min return value
+	 * @param max return value
+	 * @param value (0-1) to be scaled
+	 * @param base (result/2 for each increment)
+	 */
+	private static double logarithmic(int min, int max, double value, double base) {
+		double resid = 0.5;
+		double ret = 0;
+		while(value > 0) {
+			if (value > base)
+				ret += resid;
+			else
+				ret += resid * value / base;
+			resid /= 2;
+			value -= base;
+		}
+		return min + (ret * (max - min));
 	}
 	
 	/**
@@ -328,7 +350,7 @@ public class Map extends JPanel {
 				double rain = map.rain[r][c];
 	
 				// shade a rectangle w/cyan for that rainfall	
-				double shade = linear(RAIN_DIM, RAIN_BRITE, rain / parms.r_range);
+				double shade = logarithmic(RAIN_DIM, RAIN_BRITE, rain / parms.r_range, 0.2);
 				g.setColor(new Color(0, (int) shade, (int) shade));
 				g.fillRect(c * TOPO_CELL, r * TOPO_CELL, TOPO_CELL, TOPO_CELL);
 			}

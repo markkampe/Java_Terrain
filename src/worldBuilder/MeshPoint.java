@@ -2,14 +2,12 @@ package worldBuilder;
 
 
 /**
- * a MapPoint has an X and Y coordinate
- * 		if part of a grid, it has an index and neighbors
+ * a MeshPoint has an X and Y coordinate
+ * 		if part of a Mesh, it has an index and neighbors
  */
 public class MeshPoint {
 	public double x;			// X coordinate
 	public double y;			// Y coordinate
-	public double z;			// Z coordinate
-	public double rainfall;		// cm/year
 	
 	public int index;			// point index #
 	public int neighbors;		// number of neighbors
@@ -20,47 +18,13 @@ public class MeshPoint {
 	public MeshPoint(double x,double y) {
 		this.x = x;
 		this.y = y;
-		this.z = 0;
+		this.index = -1;
 	}
 	
 	public MeshPoint(double x,double y, int index) {
 		this.x = x;
 		this.y = y;
-		this.z = 0;
 		this.index = index;
-	}
-	
-	/**
-	 * @return ... downhill neighbor
-	 */
-	public MeshPoint downHill() {
-		MeshPoint minPoint = null;
-		double minZ = this.z;
-		for(int i = 0; i < neighbors; i++)
-			if (neighbor[i].z < minZ) {
-				minPoint = neighbor[i];
-				minZ = minPoint.z;
-			}
-		
-		return(minPoint);
-	}
-	
-	/**
-	 * @return height gradient between my three neighbors
-	 */
-	public Gradient gradient() {
-		if (neighbors < 3)
-			return new Gradient(0,0);
-		
-		double x1 = neighbor[1].x - neighbor[0].x;
-		double x2 = neighbor[2].x - neighbor[0].x;
-		double y1 = neighbor[1].y - neighbor[0].y;
-		double y2 = neighbor[2].y - neighbor[0].y;
-		double z1 = neighbor[1].z - neighbor[0].z;
-		double z2 = neighbor[2].z - neighbor[0].z;
-		double det = (x1 * y2) - (x2 * y1);
-		
-		return new Gradient( (y2*z1 - y1*z2)/det, (-x2*z1 + x1*z2)/det);
 	}
 	
 	/**

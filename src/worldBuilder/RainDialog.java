@@ -13,8 +13,8 @@ import javax.swing.event.*;
  */
 public class RainDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
 	private Map map;
-	private Mesh oldMesh;
-	private Mesh newMesh;
+	private double[] oldRain;	// per MeshPoint rainfall at entry
+	private double[] newRain;	// edited per MeshPoint raifall
 	private Parameters parms;
 	
 	private JSlider direction;
@@ -28,12 +28,16 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	private static final long serialVersionUID = 1L;
 	
 	public RainDialog(Map map)  {
-		// pick up references, copy current mesh
+		// pick up references
 		this.map = map;
-		this.newMesh = map.getMesh();
-		this.oldMesh = new Mesh(this.newMesh);
+		this.oldRain = map.getRainMap();
 		this.parms = Parameters.getInstance();
 		
+		// copy current rain map
+		this.newRain = new double[oldRain.length];
+		for(int i = 0; i < oldRain.length; i++)
+			newRain[i] = oldRain[i];
+		map.setRainMap(newRain);
 
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -148,9 +152,9 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		// TODO rain on MeshPoint = f(available)
 		
 		// compute the rain at every point
-		for(int i = 0; i < newMesh.vertices.length; i++) {
+		for(int i = 0; i < newRain.length; i++) {
 			// start out with even rain distribution
-			newMesh.vertices[i].rainfall = amt;
+			newRain[i] = amt;
 		}
 		map.repaint();
 	}
@@ -197,10 +201,10 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	public void windowClosing(WindowEvent e) {
 		map.selectNone();
-		if (oldMesh != null) {
-			map.setMesh(oldMesh);
+		if (oldRain != null) {
+			map.setRainMap(oldRain);
 			map.repaint();
-			oldMesh = null;
+			oldRain = null;
 		}
 		this.dispose();
 	}
@@ -225,16 +229,16 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			// revert to previous rain map
-			map.setMesh(oldMesh);
+			map.setRainMap(oldRain);
 			map.repaint();
-			oldMesh = null;
+			oldRain = null;
 		} else if (e.getSource() == accept) {
 			// make the new parameters official
 			parms.dAmount = amount.getValue();
 			parms.dDirection = direction.getValue();
 			parms.dRainHeight = altitude.getValue();
 			// we no longer need the old rain map
-			oldMesh = null;
+			oldRain = null;
 		}
 		
 		// clean up the graphics

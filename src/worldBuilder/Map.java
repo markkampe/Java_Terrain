@@ -41,8 +41,10 @@ public class Map extends JPanel {
 	private static final Color SELECT_COLOR = Color.WHITE;
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
-	private static final Color WATER_COLOR = Color.BLUE;
+	private static final Color RIVER_COLOR = Color.BLUE;
+	private static final Color STREAM_COLOR = Color.CYAN;
 	//private static final Color SOIL_COLOR = Color.YELLOW;
+	
 	// topographic lines are shades of gray
 	private static final int TOPO_DIM = 0;
 	private static final int TOPO_BRITE = 255;
@@ -52,7 +54,12 @@ public class Map extends JPanel {
 	
 	// the interesting data
 	private Mesh mesh;			// mesh of Voronoi points
-	private Cartesian map;		// Cartesion translation of Voronoi Mesh
+	private double heightMap[]; // Height of each mesh point
+	private double rainMap[];	// Rainfall of each mesh point
+	private double flowMap[];	// Water flow through each mesh point
+	private int downHill[];		// each cell's downhill neighbor
+	private Cartesian map;		// Cartesian translation of Voronoi Mesh
+	
 	private Parameters parms;	// world parameters
 	
 	private static final long serialVersionUID = 1L;
@@ -67,13 +74,69 @@ public class Map extends JPanel {
 	 * @param background
 	 *            ... background color
 	 */
-	public Map(int width, int height) {
+	public Map(Mesh mesh, int width, int height) {
 		size = new Dimension(width, height);
+		this.mesh = mesh;
+		if (mesh != null) {
+			this.map = new Cartesian(mesh, width/TOPO_CELL, height/TOPO_CELL);
+			this.heightMap = new double[mesh.vertices.length];
+			this.rainMap = new double[mesh.vertices.length];
+			this.flowMap = new double[mesh.vertices.length];
+		}
 		this.background = new Color(128, 128, 128);
 		this.parms = Parameters.getInstance();
 		selectNone();
 	}
 
+	/**
+	 * change/return the associated Mesh
+	 */
+	public Mesh getMesh() { return mesh; }
+	public void setMesh(Mesh mesh) {
+		this.mesh = mesh;	
+		if (mesh != null) {
+			this.map = new Cartesian(mesh, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
+			this.heightMap = new double[mesh.vertices.length];
+			this.rainMap = new double[mesh.vertices.length];
+			this.flowMap = new double[mesh.vertices.length];
+		} else {
+			this.map = null;
+			this.heightMap = null;
+			this.rainMap = null;
+			this.flowMap = null;
+		}
+		
+		repaint();
+	}
+	
+	// get/set methods for MeshPoints and per MeshPoint attributes
+	public double[] getHeightMap() {return heightMap;}
+	public double[] getFlowMap() {return flowMap;}
+	public double[] getRainMap() {return rainMap;}
+	public int[] getDownHill() {return downHill;}
+	
+	public double[] setHeightMap(double newHeight[]) {
+		double old[] = heightMap; 
+		heightMap = newHeight; 
+		calc_downhill();
+		repaint();
+		return old;
+	}
+
+	public double[] setRainMap(double newRain[]) {
+		double old[] = rainMap; 
+		rainMap = newRain; 
+		repaint();
+		return old;
+	}	
+
+	public double[] setFlowMap(double newFlow[]) {
+		double old[] = flowMap; 
+		flowMap = newFlow; 
+		repaint();
+		return old;
+	}
+	
 	/**
 	 * enable/disable display elements
 	 * 
@@ -90,41 +153,10 @@ public class Map extends JPanel {
 			repaint();
 		return display & view;
 	}
-
-	/**
-	 * reset the mesh to be displayed
-	 * 		typically used to switch between a base Mesh
-	 * 		and a tentative mesh (e.g. for new slopes,
-	 * 		mountains, erosion, etc).
-	 * 
-	 * NOTE: this is a change of MeshPoints only.
-	 * 		 the voronoi vertex coordinates are assumed
-	 * 		 to be unchanged.
-	 */
-	public void setMesh(Mesh m) {
-		setVisible(false);	// avoid races w/paint
-		this.mesh = m;
-		setVisible(true);
-		repaint();
-	}
 	
-	/**
-	 * load an entirely new mesh
-	 * 		based on a new/different set of Voronoi vertices
-	 */
-	public void newMesh(Mesh m) {
-		setVisible(false);	// avoid races w/paint
-		this.mesh = m;
-		this.map = new Cartesian(m, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
-		setVisible(true);
-		repaint();
-	}
-	
-	/**
-	 * @return reference to current mesh
-	 */
-	public Mesh getMesh() {
-		return this.mesh;
+	public void export(String filename, double x, double y, double dx, double dy, int meters) {
+		System.out.println("TODO: Implement Map.export to file " + filename + ", <" + x + "," + y + ">, " + dx + "x" + dy + ", grain=" + meters + "m");
+		// TODO implement Mesh:export ... maybe move it to Map:export
 	}
 
 	// description of the area to be highlighted
@@ -261,8 +293,11 @@ public class Map extends JPanel {
 		
 		// see if we are rendering topology
 		if ((display & (SHOW_TOPO+SHOW_WATER)) != 0)
-				paint_topo(g);
+			paint_topo(g);
 		
+		// see if we are rendering rivers
+		if ((display & SHOW_WATER) != 0)
+			paint_water(g);
 
 		// see if we have a selection area to highlight
 		switch(sel_type) {
@@ -334,6 +369,10 @@ public class Map extends JPanel {
 	 *   	generate shaded background
 	 */
 	private void paint_rain(Graphics g) {
+		// see if we have any rain to display
+		if (mesh == null || mesh.vertices.length == 0)
+			return;
+		
 		// see if a screen resize has invalidated Cartesian translation
 		int h = getHeight()/TOPO_CELL;
 		int w = getWidth()/TOPO_CELL;
@@ -341,13 +380,13 @@ public class Map extends JPanel {
 			map = new Cartesian(mesh, w, h);
 		
 		// interpolate Z values from the latest mesh
-		map.getRain(mesh);
+		double rArray[][] = map.interpolate(rainMap);
 		
 		// use height to generate background colors
 		for(int r = 0; r < h; r++)
 			for(int c = 0; c < w; c++) {
 				// interpolate height (from surrounding MeshPoints)
-				double rain = map.rain[r][c];
+				double rain = rArray[r][c];
 	
 				// shade a rectangle w/cyan for that rainfall	
 				double shade = logarithmic(RAIN_DIM, RAIN_BRITE, rain / parms.r_range, 0.2);
@@ -370,6 +409,10 @@ public class Map extends JPanel {
 	 *   		choose and render the appropraite image
 	 */
 	private void paint_topo(Graphics g) {
+		// see if we have any topology to render
+		if (mesh == null || mesh.vertices.length == 0)
+			return;
+		
 		// see if a screen resize has invalidated Cartesian translation
 		int h = getHeight()/TOPO_CELL;
 		int w = getWidth()/TOPO_CELL;
@@ -377,18 +420,18 @@ public class Map extends JPanel {
 			map = new Cartesian(mesh, w, h);
 		
 		// interpolate Z values from the latest mesh
-		map.getHeight(mesh);
+		double zArray[][] = map.interpolate(heightMap);
 		
 		// use height to generate background colors
 		for(int r = 0; r < h; r++)
 			for(int c = 0; c < w; c++) {
 				// interpolate height (from surrounding MeshPoints)
-				double z = map.z[r][c];
+				double z = zArray[r][c];
 	
 				// background color for altitude if nobody else needs it
 				if ((display & (SHOW_MESH+SHOW_POINTS+SHOW_RAIN)) == 0) {
 					if ((display & SHOW_WATER) != 0 && z < parms.sea_level) {
-						g.setColor(WATER_COLOR);
+						g.setColor(RIVER_COLOR);
 					} else {
 						double shade = linear(TOPO_DIM, TOPO_BRITE, z + Parameters.z_extent/2);
 						g.setColor(new Color((int) shade, (int) shade, (int) shade));
@@ -396,6 +439,10 @@ public class Map extends JPanel {
 					g.fillRect(c * TOPO_CELL, r * TOPO_CELL, TOPO_CELL, TOPO_CELL);
 				}
 			}
+		
+		// if we aren't doing topo lines, we're done
+		if ((display & SHOW_TOPO) == 0)
+			return;
 		
 		// allocate an over-under bitmap
 		boolean over_under[][] = new boolean[map.height][map.width];
@@ -413,7 +460,7 @@ public class Map extends JPanel {
 			// create an over/under bitmap for this isoline
 			for(int r = 0; r < h; r++)
 				for(int c = 0; c < w; c++)
-					over_under[r][c] = map.z[r][c] > z;
+					over_under[r][c] = zArray[r][c] > z;
 					
 			// choose a line color for this isoline
 			//		major lines are full dark or full bright
@@ -461,6 +508,49 @@ public class Map extends JPanel {
 		}
 	}
 	
+	private void paint_water(Graphics g) {
+		// make sure we have something to display
+		if (mesh == null || mesh.vertices.length == 0)
+			return;
+		
+		// collect display parameters
+		int height = getHeight();
+		int width = getWidth();
+		double x_extent = parms.x_extent;
+		double y_extent = parms.y_extent;
+		
+		// calculate the per-cell flow and peak flow
+		calc_downhill();
+		FlowMap f = new FlowMap(this);
+		double[] flux = f.calculate();
+		double peakFlux = 0;
+		for(int i = 0; i < flux.length; i++)
+			if (flux[i] > peakFlux)
+				peakFlux = flux[i];
+		
+		// draw the rivers
+		double threshold = peakFlux * 0.1;	// FIX what is display threshold
+		for(int i = 0; i < flux.length; i++) {
+			if (heightMap[i] < parms.sea_level)
+				continue;	// don't display rivers under the ocean
+			if (flux[i] < threshold)
+				continue;	// don't display flux below critical level
+			// System.out.println("flux["+i+"]=" + flux[i] + "->" + f.downHill[i]);
+			if (downHill[i] >= 0) {
+				int d = downHill[i];
+				double x1 = (mesh.vertices[i].x + x_extent/2) * width;
+				double y1 = (mesh.vertices[i].y + y_extent/2) * height;
+				double x2 = (mesh.vertices[d].x + x_extent/2) * width;
+				double y2 = (mesh.vertices[d].y + y_extent/2) * height;
+				//double hue = 255 * flux[i]/peakFlux;
+				//g.setColor(new Color(0, 0, (int) hue));
+				g.setColor(RIVER_COLOR);
+				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+			} else {
+				// TODO: render basins
+			}
+		}
+	}
 	/**
 	 * render a 5x5 block of a topo map
 	 * @param Graphics context
@@ -511,6 +601,22 @@ public class Map extends JPanel {
 			g.drawLine(x,y+3, x+1, y+4);
 			g.drawLine(x+3, y, x+4, y+1);
 			break;
+		}
+	}
+	
+	private void calc_downhill() {
+		// find the down-hill neighbor of each point
+		downHill = new int[mesh.vertices.length];
+		for( int i = 0; i < downHill.length; i++ ) {
+			downHill[i] = -1;
+			double lowest_height = heightMap[i];
+			for( int n = 0; n < mesh.vertices[i].neighbors; n++) {
+				int x = mesh.vertices[i].neighbor[n].index;
+				if (heightMap[x] < lowest_height) {
+					downHill[i] = x;
+					lowest_height = heightMap[x];
+				}
+			}
 		}
 	}
 	

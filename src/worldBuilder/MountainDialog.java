@@ -13,8 +13,8 @@ import javax.swing.event.*;
  */
 public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, WindowListener {	
 	private Map map;
-	private Mesh oldMesh;
-	private Mesh newMesh;
+	private double[] oldHeight;	// per MeshPoint altitude at entry
+	private double[] newHeight;	// edited per MeshPoint altitude
 	private Parameters parms;
 	
 	private JSlider altitude;
@@ -35,11 +35,16 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private static final long serialVersionUID = 1L;
 	
 	public MountainDialog(Map map)  {
-		// pick up references, copy current mesh
+		// pick up references
 		this.map = map;
-		this.newMesh = map.getMesh();
-		this.oldMesh = new Mesh(this.newMesh);
+		this.oldHeight = map.getHeightMap();
 		this.parms = Parameters.getInstance();
+		
+		// copy the current height map
+		this.newHeight = new double[oldHeight.length];
+		for(int i = 0; i < oldHeight.length; i++)
+			newHeight[i] = oldHeight[i];
+		map.setHeightMap(newHeight);
 		
 		// calibrate full scale on the sliders
 		this.a_max = parms.z_range/2;
@@ -164,9 +169,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		diam /= parms.xy_range * Parameters.x_extent;
 		
 		// see which points are within the scope of this mountain
+		Mesh m = map.getMesh();
 		MeshPoint centre = new MeshPoint(x,y);
-		for(int i = 0; i < newMesh.vertices.length; i++) {
-			MeshPoint p = newMesh.vertices[i];
+		for(int i = 0; i < newHeight.length; i++) {
+			MeshPoint p = m.vertices[i];
 			double d = centre.distance(p);
 			if (d > diam)
 				continue;
@@ -179,13 +185,13 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			// TODO: asymmetric mountain profiles
 
 			// make sure the new height is legal
-			double newZ = p.z + delta_h;
+			double newZ = newHeight[i] + delta_h;
 			if (newZ > Parameters.z_extent/2)
-				p.z = Parameters.z_extent/2;
+				newHeight[i] = Parameters.z_extent/2;
 			else if (newZ < -Parameters.z_extent/2)
-				p.z = -Parameters.z_extent/2;
+				newHeight[i] = -Parameters.z_extent/2;
 			else
-				p.z = newZ;
+				newHeight[i] = newZ;
 		}
 	}
 
@@ -199,8 +205,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	private void redraw() {
 		// reset to the height map we started with
-		for(int i = 0; i < oldMesh.vertices.length; i++)
-			newMesh.vertices[i].z = oldMesh.vertices[i].z;
+		for(int i = 0; i < oldHeight.length; i++)
+			newHeight[i] = oldHeight[i];
 		
 		// convert screen coordinates into map coordinates
 		double x_mid = Parameters.x_extent/2;
@@ -279,10 +285,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	public void windowClosing(WindowEvent e) {
 		map.selectNone();
-		if (oldMesh != null) {
-			map.setMesh(oldMesh);
+		if (oldHeight != null) {
+			map.setHeightMap(oldHeight);
 			map.repaint();
-			oldMesh = null;
+			oldHeight = null;
 		}
 		this.dispose();
 		map.removeMouseListener(this);
@@ -303,9 +309,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			// revert to previous height map
-			map.setMesh(oldMesh);
+			map.setHeightMap(oldHeight);
 			map.repaint();
-			oldMesh = null;
+			oldHeight = null;
 			
 			// clean up the graphics
 			map.selectNone();
@@ -321,7 +327,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			parms.dShape = rounding.getValue();
 			
 			// save a new copy of current height map
-			oldMesh = new Mesh(newMesh);
+			for(int i = 0; i < oldHeight.length; i++)
+				oldHeight[i] = newHeight[i];
 			
 			// clean up the selection graphics
 			map.selectNone();

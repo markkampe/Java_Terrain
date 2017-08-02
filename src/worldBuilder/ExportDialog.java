@@ -217,7 +217,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			double y = (double) y_start/map.getHeight() - Parameters.y_extent/2;
 			double dx = (double) (x_end - x_start)/map.getWidth();
 			double dy = (double) (y_end - y_start)/map.getHeight();
-			map.getMesh().export(filename, x, y, dx, dy, tile_sizes[resolution.getValue()]);
+			map.export(filename, x, y, dx, dy, tile_sizes[resolution.getValue()]);
 		}
 		
 		// discard the window

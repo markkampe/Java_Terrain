@@ -2,34 +2,28 @@ package worldBuilder;
 
 /**
  * this is a dense 2D array w/Cartesian coordinates
- * whose values are interpolated from the random points
+ * whose values cn be interpolated from the random points
  * in a Voronoi mesh.
  */
 public class Cartesian {
 
-	public int width;
-	public int height;
-	public double z[][];		// height of each Cartesian point
-	public double rain[][];			// rainfall for each Cartesian point
-	
+	public int width;			// columns in this map
+	public int height;			// rows in this map
 	private MeshRef cells[][];	// mapping from Cartesian points to MeshPoints
 
-	
 	/**
 	 * create a new Cartesian map
 	 * @param mesh ... Mesh of Voronoi points
 	 * @param width ... width of desired array
 	 * @param height ... height of desired array
 	 */
-	public Cartesian(Mesh mesh, int width, int height) {
+	public Cartesian(Mesh mesh, int width, int height) {	
 		// note the key parameters
 		this.height = height;
 		this.width = width;
 		
 		// allocate the arrays
 		cells = new MeshRef[height][width];
-		z = new double[height][width];
-		rain = new double[height][width];
 		
 		// create the Cartesion->Voronoi map
 		for(int r = 0; r < height; r++) {
@@ -48,49 +42,30 @@ public class Cartesian {
 	}
 	
 	/**
-	 * interpolate Z values for every cell in the map
+	 * interpolate values for every Cartesian cell
 	 * 
-	 * @param Mesh for height info
+	 * @param array of per-MeshPoint values
+	 * @return Cartesian array of interpolated values
 	 */
-	public void getHeight(Mesh mesh) {
+	public double[][] interpolate(double[] meshValues) {
+		double[][] result = new double[height][width];
+		
 		for(int r = 0; r < height; r++) {
 			for(int c = 0; c < width; c++) {
-				// compute the proximity-weighted average height
+				// compute the proximity-weighted average value
 				MeshRef ref = cells[r][c];
 				double norm = 0;
-				double zSum = 0;
+				double sum = 0;
 				for(int n = 0; n < MeshRef.NUM_NEIGHBORS; n++) {
 					double dist = ref.distances[n];
-					double h = mesh.vertices[ref.neighbors[n]].z;
-					zSum += h/dist;
+					double v = meshValues[ref.neighbors[n]];
+					sum += v/dist;
 					norm += 1/dist;
 				}
-				z[r][c] = zSum / norm;
+				result[r][c] = sum / norm;
 			}
 		}
-	}
-	
-	/**
-	 * interpolate rainfall for every cell in the map
-	 * 
-	 * @param Mesh for rainfall info
-	 */
-	public void getRain(Mesh mesh) {
-		for(int r = 0; r < height; r++) {
-			for(int c = 0; c < width; c++) {
-				// compute the proximity-weighted average height
-				MeshRef ref = cells[r][c];
-				double norm = 0;
-				double rSum = 0;
-				for(int n = 0; n < MeshRef.NUM_NEIGHBORS; n++) {
-					double dist = ref.distances[n];
-					double rainfall = mesh.vertices[ref.neighbors[n]].rainfall;
-					rSum += rainfall/dist;
-					norm += 1/dist;
-				}
-				rain[r][c] = rSum / norm;
-			}
-		}
+		return result;
 	}
 	
 	/**

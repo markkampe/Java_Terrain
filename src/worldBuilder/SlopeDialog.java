@@ -11,8 +11,8 @@ import javax.swing.event.*;
  */
 public class SlopeDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
 	private Map map;
-	private Mesh oldMesh;
-	private Mesh newMesh;
+	private double[] oldHeight;	// per MeshPoint altitude at entry
+	private double[] newHeight;	// edited per MeshPoint altitude
 	private Parameters parms;
 	
 	private int i_max;			// maximum inclination
@@ -23,7 +23,6 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	private JButton cancel;
 	
 	private int x0, y0, x1, y1;		// chosen slope axis
-	private double Zscale = 0;		// chosen inclination
 	
 	private static final int BORDER_WIDTH = 5;
 	
@@ -32,13 +31,14 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	public SlopeDialog(Map map)  {
 		// pick up references
 		this.map = map;
-		this.oldMesh = map.getMesh();
-		this.newMesh = new Mesh(this.oldMesh);
-		map.setMesh(newMesh);
+		this.oldHeight = map.getHeightMap();
 		this.parms = Parameters.getInstance();
 		
-		// figure out max slope and reasonable units
-		
+		// copy the incoming height map
+		this.newHeight = new double[oldHeight.length];
+		for(int i = 0; i < oldHeight.length; i++)
+			newHeight[i] = oldHeight[i];
+		map.setHeightMap(newHeight);
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -126,33 +126,34 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 * @param inclination (m/km)
 	 */
 	public void incline(double inclination) {
-		// convert inclination into map units
-		Zscale = (double) inclination;
+		// convert inclination from word to map units
+		double Zscale = inclination;
 		Zscale /= parms.z_range;
 		Zscale *= parms.xy_range;
 		
+		// get map and display parameters
+		Mesh m = map.getMesh();
 		int width = map.getWidth();
 		int height = map.getHeight();
 		double Xmid = Parameters.x_extent/2;
 		double Ymid = Parameters.y_extent/2;
 		
 		// height of every point is its distance (+/-) from the axis
-		for(int i = 0; i < newMesh.vertices.length; i++) {
+		for(int i = 0; i < newHeight.length; i++) {
 			double X0 = (double) x0/width - Xmid;
 			double Y0 = (double) y0/height - Ymid;
 			double X1 = (double) x1/width - Xmid;
 			double Y1 = (double) y1/height - Ymid;
-			MeshPoint p = newMesh.vertices[i];
-			double d = p.distanceLine(X0, Y0, X1, Y1);
+			double d = m.vertices[i].distanceLine(X0, Y0, X1, Y1);
 			
 			// make sure the new height is legal
-			double newZ = Zscale * d + oldMesh.vertices[i].z;
+			double newZ = Zscale * d + oldHeight[i];
 			if (newZ > Parameters.z_extent/2)
-				p.z = Parameters.z_extent/2;
+				newHeight[i] = Parameters.z_extent/2;
 			else if (newZ < -Parameters.z_extent/2)
-				p.z = -Parameters.z_extent/2;
+				newHeight[i] = -Parameters.z_extent/2;
 			else
-				p.z = newZ;
+				newHeight[i] = newZ;
 		}
 		map.repaint();
 	}
@@ -190,7 +191,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		
 		// display the slope axis
 		map.selectLine(x0, y0, x1, y1);
-		incline(Zscale);
+		incline(inclination.getValue());
 	}
 	
 	/**
@@ -198,8 +199,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void windowClosing(WindowEvent e) {
 		map.selectNone();
-		if (oldMesh != null) {
-			map.setMesh(oldMesh);
+		if (oldHeight != null) {
+			map.setHeightMap(oldHeight);
 			map.repaint();
 		}
 		this.dispose();
@@ -222,13 +223,13 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			map.selectNone();
-			map.setMesh(oldMesh);
+			map.setHeightMap(oldHeight);
 			map.repaint();
-			oldMesh = null;
+			oldHeight = null;
 			this.dispose();
 		} else if (e.getSource() == accept) {
 			map.selectNone();
-			oldMesh = null;	// don't need this anymore
+			oldHeight = null;	// don't need this anymore
 			this.dispose();
 		}
 	}

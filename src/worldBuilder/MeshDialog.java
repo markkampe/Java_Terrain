@@ -116,7 +116,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 				parms.improvements = (Integer) improveChooser.getSelectedItem();
 				Mesh m = new Mesh();
 				m.create();
-				map.newMesh(m);
+				map.setMesh(m);
 			}
 			// discard the window
 			this.dispose();

@@ -61,32 +61,6 @@ public class Mesh {
 	}
 	
 	/**
-	 * create a copy of an existing mesh
-	 * 		with copies of all of the MapPoints and Paths
-	 * 		so that we can change them w/o affecting original
-	 * 
-	 * @param	Mesh to copy
-	 */
-	public Mesh( Mesh m ) {
-		parms = Parameters.getInstance();
-		
-		// create an entirely new list of mapPoints
-		vertices = new MeshPoint[m.vertices.length];
-		for(int i = 0; i < m.vertices.length; i++) {
-			MeshPoint p = m.vertices[i];
-			vertices[i] = new MeshPoint(p.x, p.y, i);
-			vertices[i].z = p.z;
-		}
-		
-		// create a corresponding list of edges
-		edges = new Path[m.edges.length];
-		for(int i = 0; i < m.edges.length; i++) {
-			Path p = m.edges[i];
-			edges[i] = new Path(vertices[p.source.index], vertices[p.target.index], i);
-		}
-	}
-	
-	/**
 	 * create a new mesh
 	 */
 	public void create() {
@@ -122,7 +96,7 @@ public class Mesh {
 	public boolean write(String filename) {
 		try {
 			FileWriter output = new FileWriter(filename);
-			final String C_FORMAT = "        { \"x\":\"%10.7f\", \"y\":\"%10.7f\", \"z\":\"%10.7f\" ";
+			final String C_FORMAT = "        { \"x\":\"%10.7f\", \"y\":\"%10.7f\" }\n";
 			
 			// write out the Mesh wrapper
 			output.write( "{   \"points\":\"" + vertices.length + "\",\n");
@@ -131,7 +105,7 @@ public class Mesh {
 				if (i != 0)
 					output.write(",\n");
 				MeshPoint m = vertices[i];
-				output.write(String.format(C_FORMAT, m.x, m.y, m.z));
+				output.write(String.format(C_FORMAT, m.x, m.y));
 				
 				output.write(", \"neighbors\":[ ");
 				for(int n = 0; n < m.neighbors; n++) {
@@ -152,10 +126,7 @@ public class Mesh {
 	}
 	
 
-	public void export(String filename, double x, double y, double dx, double dy, int meters) {
-		System.out.println("TODO: Implement Mesh.export to file " + filename + ", <" + x + "," + y + ">, " + dx + "x" + dy + ", grain=" + meters + "m");
-		// TODO implement Mesh:export ... maybe move it to Map:export
-	}
+	
 	
 	/**
 	 * is a point near the edge

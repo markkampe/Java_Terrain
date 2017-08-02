@@ -29,7 +29,7 @@ public class WorldBuilder  extends JFrame
 	
 	// 2D canvas
 	private Container mainPane;
-	private Map map;	
+	private Map map;
 	
 	// view status
 	private int viewing_points;
@@ -105,8 +105,14 @@ public class WorldBuilder  extends JFrame
 		addComponentListener(this);
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
+		// if we were given an input file, use it
+		Mesh m = new Mesh();
+		if (filename != null)
+			m.read(filename);
+		modified = false;
+		
 		// create the main map panel, capture mouse events within it
-		map = new Map(parms.width, parms.height);
+		map = new Map(m, parms.width, parms.height);
 		mainPane.add(map, BorderLayout.CENTER);	
 		
 		// create menus and widgets, put up the display
@@ -115,12 +121,7 @@ public class WorldBuilder  extends JFrame
 		pack();
 		setVisible(true);
 		
-		// if we were given an input file, use it
-		if (filename != null) {
-			Mesh m = new Mesh();
-			m.read(filename);
-		}
-		modified = false;
+		
 	}
 	
 	/**
@@ -313,7 +314,7 @@ public class WorldBuilder  extends JFrame
 				if (dir != null)
 					filename = dir + filename;
 				m.read(filename);
-				map.newMesh(m);
+				map.setMesh(m);
 				modified = false;
 			}
 		} else if (o == fileSave) {
@@ -323,7 +324,7 @@ public class WorldBuilder  extends JFrame
 		} else if (o == fileClose) {
 			if (modified)
 				checkSave();
-			map.newMesh(null);
+			map.setMesh(null);
 			modified = false;
 		} else if (o == fileExport) {
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);

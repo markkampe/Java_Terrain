@@ -41,8 +41,6 @@ public class Map extends JPanel {
 	private static final Color SELECT_COLOR = Color.WHITE;
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
-	private static final Color RIVER_COLOR = Color.BLUE;
-	private static final Color STREAM_COLOR = Color.CYAN;
 	//private static final Color SOIL_COLOR = Color.YELLOW;
 	
 	// topographic lines are shades of gray
@@ -431,7 +429,7 @@ public class Map extends JPanel {
 				// background color for altitude if nobody else needs it
 				if ((display & (SHOW_MESH+SHOW_POINTS+SHOW_RAIN)) == 0) {
 					if ((display & SHOW_WATER) != 0 && z < parms.sea_level) {
-						g.setColor(RIVER_COLOR);
+						g.setColor(Color.BLUE);
 					} else {
 						double shade = linear(TOPO_DIM, TOPO_BRITE, z + Parameters.z_extent/2);
 						g.setColor(new Color((int) shade, (int) shade, (int) shade));
@@ -516,35 +514,44 @@ public class Map extends JPanel {
 		// collect display parameters
 		int height = getHeight();
 		int width = getWidth();
-		double x_extent = parms.x_extent;
-		double y_extent = parms.y_extent;
 		
-		// calculate the per-cell flow and peak flow
+		// calculate the per-cell rainfall scaling factors
+		double m2 = parms.xy_range * parms.xy_range * 1000000 / mesh.vertices.length;
+		double seconds = 365 * 24 * 60 * 60;
+		double flowScale = m2 / seconds;
+		double minFlow = parms.min_flux * seconds * 100 / m2;
+		double river_threshold = minFlow * parms.RIVER_FLOW;
+		
+		// calculate the color curve (green vs flow)
+		double dGdF = 255/(river_threshold - minFlow);
+		double intercept = river_threshold * dGdF;
+		
+		// calculate the per-cell flows
 		calc_downhill();
 		FlowMap f = new FlowMap(this);
 		double[] flux = f.calculate();
-		double peakFlux = 0;
-		for(int i = 0; i < flux.length; i++)
-			if (flux[i] > peakFlux)
-				peakFlux = flux[i];
 		
-		// draw the rivers
-		double threshold = peakFlux * 0.1;	// FIX what is display threshold
+		// draw the rivers and streams
 		for(int i = 0; i < flux.length; i++) {
 			if (heightMap[i] < parms.sea_level)
 				continue;	// don't display rivers under the ocean
-			if (flux[i] < threshold)
-				continue;	// don't display flux below critical level
-			// System.out.println("flux["+i+"]=" + flux[i] + "->" + f.downHill[i]);
+			if (flux[i] < minFlow)
+				continue;	// don't display flux below stream cut-off
 			if (downHill[i] >= 0) {
 				int d = downHill[i];
-				double x1 = (mesh.vertices[i].x + x_extent/2) * width;
-				double y1 = (mesh.vertices[i].y + y_extent/2) * height;
-				double x2 = (mesh.vertices[d].x + x_extent/2) * width;
-				double y2 = (mesh.vertices[d].y + y_extent/2) * height;
-				//double hue = 255 * flux[i]/peakFlux;
-				//g.setColor(new Color(0, 0, (int) hue));
-				g.setColor(RIVER_COLOR);
+				double x1 = (mesh.vertices[i].x + Parameters.x_extent/2) * width;
+				double y1 = (mesh.vertices[i].y + Parameters.y_extent/2) * height;
+				double x2 = (mesh.vertices[d].x + Parameters.x_extent/2) * width;
+				double y2 = (mesh.vertices[d].y + Parameters.y_extent/2) * height;
+				if (heightMap[d] < parms.sea_level) {
+					// if line flows into the sea, shorten it
+					x2 = (x1 + x2)/2;
+					y2 = (y1 + y2)/2;
+				}
+				
+				// river=BLUE, stream=CYAN
+				double green = Math.max(0, intercept - (dGdF * flux[i]));
+				g.setColor(new Color(0, (int) green, 255));
 				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 			} else {
 				// TODO: render basins

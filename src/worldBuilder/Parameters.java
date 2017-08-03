@@ -15,10 +15,10 @@ package worldBuilder;
 
 	// display parameters
 	private static final int PIXELS = 800;		// display height/width
-	public int height = PIXELS;		// screen height
-	public int width = PIXELS;		// screen width
-	public int dialogDX = PIXELS/2;	// X offset for dialog boxes
-	public int dialogDY = PIXELS;	// Y offset for dialog boxes
+	public int height = PIXELS;			// screen height
+	public int width = PIXELS;			// screen width
+	public int dialogDX = PIXELS/3;		// X offset for dialog boxes
+	public int dialogDY = 5*PIXELS/4;	// Y offset for dialog boxes
 	
 	// map scaling parameters
 	public int xy_range = 500;	// X/Y range (km)
@@ -27,7 +27,8 @@ package worldBuilder;
 	public double latitude = 30.0;	// central point latitude
 	public double longitude = -90.0;// central point longitude
 	public double sea_level = 0;// sea level (map space)
-	public double min_flux = 10;	// minimum waterway flow rate (m3/s)
+	public double min_flux = 0.25;	// minimum stream flow (m3/s)
+	public static final int RIVER_FLOW = 5;	// river/stream
 	
 	// persistent defaults
 	public int dDiameter;		// mountain diameter

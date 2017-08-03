@@ -136,6 +136,9 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		
 		// initialize the direction indicator
 		setDirection(direction.getValue());
+		
+		// initialize the rainfall to default values
+		rainFall();
 	}
 
 	/**

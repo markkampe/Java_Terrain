@@ -155,7 +155,9 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 			else
 				newHeight[i] = newZ;
 		}
-		map.repaint();
+		
+		// tell the map about the update
+		map.setHeightMap(newHeight);
 	}
 
 	/**

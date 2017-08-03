@@ -159,7 +159,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			// start out with even rain distribution
 			newRain[i] = amt;
 		}
-		map.repaint();
+		// tell the map about the update
+		map.setRainMap(newRain);
 	}
 	
 	/**

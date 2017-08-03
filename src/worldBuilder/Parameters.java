@@ -20,17 +20,21 @@ package worldBuilder;
 	public int dialogDX = PIXELS/3;		// X offset for dialog boxes
 	public int dialogDY = 5*PIXELS/4;	// Y offset for dialog boxes
 	
-	// map scaling parameters
+	// map scale/location parameters
 	public int xy_range = 500;	// X/Y range (km)
 	public int z_range = 10000;	// Z range (m)
 	public int r_range = 500;	// rain (cm/y)
 	public double latitude = 30.0;	// central point latitude
 	public double longitude = -90.0;// central point longitude
-	public double sea_level = 0;// sea level (map space)
-	public double min_flux = 0.25;	// minimum stream flow (m3/s)
-	public static final int RIVER_FLOW = 5;	// river/stream
 	
+	// map rendering thresholds
+	public static final int RIVER_FLOW = 5;	// river/stream
+	public double min_flux = 0.25;	// minimum stream flow (m3/s)
+	public double topo_major = 0.1;	// max 10 major lines
+	public int topo_minor = 5;		// minor lines per major
+
 	// persistent defaults
+	public double sea_level = 0;// sea level (map space)
 	public int dDiameter;		// mountain diameter
 	public int dAltitude;		// mountain altitude
 	public int dShape;			// mountain shape
@@ -40,6 +44,7 @@ package worldBuilder;
 	public int dDirection;		// incoming weather
 	public int dAmount;			// annual rainfall
 	public int dRainHeight;		// mean height of incoming rain
+	
 	
 	// map generation parameters
 	public int improvements = 1;	// number of smoothing iterations
@@ -56,7 +61,7 @@ package worldBuilder;
 	private static Parameters singleton = null;
 	private Parameters() {
 		dDiameter = maxDiameter()/2;
-		dAltitude = z_range/4;
+		dAltitude = z_range/20;
 		dShape = (CONICAL + SPHERICAL)/2;
 		dDirection = 0;				// weather from the north
 		dAmount = r_range/10;		// moderate rainfall

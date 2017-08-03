@@ -245,7 +245,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 				mountains -= 1;
 			}
 		}
-		map.repaint();
+		// tell the map about the update
+		map.setHeightMap(newHeight);
 	}
 	
 	/**

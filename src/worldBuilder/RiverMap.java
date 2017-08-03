@@ -1,19 +1,80 @@
 package worldBuilder;
 
-public class FlowMap {
+import java.awt.Color;
+import java.awt.Graphics;
+
+public class RiverMap {
 	private Map map;		// mesh to which we correspond
 	private double height[]; // height of each MeshPoint
 	private int byHeight[];	// MeshPoints sorted by height
 	private Parameters parms;
 	
-	public FlowMap(Map m) {
+	public RiverMap(Map m) {
 		this.map = m;
 		this.parms = Parameters.getInstance();
 	}
 	
 	/**
+	 * Display the streams and rivers
+	 * 
+	 * @param graphics context
+	 * @param display map width
+	 * @param display map height
+	 */
+	public void paint(Graphics g, int width, int height) {
+		
+		Mesh mesh = map.getMesh();
+		double[] heightMap = map.getHeightMap();
+		int downHill[] = map.getDownHill();
+
+		// calculate the minimum flow to qualify as a stream
+		//	m2 = estimated water-shed area for this MeshPoint
+		//	year = number of seconds in a year
+		//	parms.min_flux = minimum M3/sec for a stream
+		//	minFlow = minimum annual cm of flow for a stream
+		double m2 = parms.xy_range * parms.xy_range * 1000000 / mesh.vertices.length;
+		double year = 365 * 24 * 60 * 60;
+		double minFlow = parms.min_flux * year * 100 / m2;
+
+		// calculate the color curve (green vs flow)
+		//	a river is RIVER_FLOW * minFlow
+		double river_threshold = minFlow * Parameters.RIVER_FLOW;
+		double dGdF = 255/(river_threshold - minFlow);
+		double intercept = river_threshold * dGdF;
+		
+		// draw the streams, rivers, lakes and oceans
+		double flux[] = this.calculate();
+		for(int i = 0; i < flux.length; i++) {
+			if (heightMap[i] < parms.sea_level)
+				continue;	// don't display rivers under the ocean
+			if (flux[i] < minFlow)
+				continue;	// don't display flux below stream cut-off
+			if (downHill[i] >= 0) {
+				int d = downHill[i];
+				double x1 = (mesh.vertices[i].x + Parameters.x_extent/2) * width;
+				double y1 = (mesh.vertices[i].y + Parameters.y_extent/2) * height;
+				double x2 = (mesh.vertices[d].x + Parameters.x_extent/2) * width;
+				double y2 = (mesh.vertices[d].y + Parameters.y_extent/2) * height;
+				
+				// if a river segment flows into the sea, halve its length
+				if (heightMap[d] < parms.sea_level) {
+					x2 = (x1 + x2)/2;
+					y2 = (y1 + y2)/2;
+				}
+				
+				// interpolate a color: river=BLUE, stream=CYAN
+				double green = Math.max(0, intercept - (dGdF * flux[i]));
+				g.setColor(new Color(0, (int) green, 255));
+				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+			} else {
+				// TODO: render basins
+			}
+		}
+	}
+	
+	
+	/**
 	 * (re)calculate the water flux in each MeshPoint
-	 * 		may have been changes in height/rainfall
 	 */
 	public double[]calculate() {
 		double[] flux = new double[map.getMesh().vertices.length];
@@ -35,8 +96,12 @@ public class FlowMap {
 			byHeight[i] = i;
 		heightSort(0, byHeight.length - 1);
 		
-		// compute the flow into each cell, from highest to lowest
+		// make sure we know what is downhill from what
 		int downHill[] = map.getDownHill();
+		
+		// processing MeshPoints from highest to lowest
+		//	flux[this] += this MeshPoint's rainfall
+		//	flux[downhill] += flux[this]
 		for( int i = 0; i < byHeight.length; i++ ) {
 			int x = byHeight[i];
 			

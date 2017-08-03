@@ -11,30 +11,31 @@ package worldBuilder;
 	public static final int ALT_SCALE = 1000;	// slider labeling unit
 	public static final int ALT_MIN = 0;		// min altitude (m x 1000)
 	public static final int ALT_MAX = 10;		// max altitude (m x 1000)
-	
+	public static final int RADIUS = 6371;		// planetary radius (m x 1000)
+
 	// display parameters
-	public int height = 800;		// screen height
-	public int width = 800;			// screen width
-	public int dialogDX = 200;		// X offset for dialog boxes
-	public int dialogDY = 350;		// Y offset for dialog boxes
+	private static final int PIXELS = 800;		// display height/width
+	public int height = PIXELS;		// screen height
+	public int width = PIXELS;		// screen width
+	public int dialogDX = PIXELS/2;	// X offset for dialog boxes
+	public int dialogDY = PIXELS;	// Y offset for dialog boxes
 	
 	// map scaling parameters
 	public int xy_range = 500;	// X/Y range (km)
 	public int z_range = 10000;	// Z range (m)
 	public int r_range = 500;	// rain (cm/y)
-	public double latitude;		// central point latitude
-	public double longitude;	// central point longitude
+	public double latitude = 30.0;	// central point latitude
+	public double longitude = -90.0;// central point longitude
 	public double sea_level = 0;// sea level (map space)
-	public double min_flux = 100;	// minimum cm/yr to qualify as a water-way
-	public double rivers = 0.98;	// percentile to display as a river
-	public double streams = 0.90;	// percentile to display as a stream
+	public double min_flux = 10;	// minimum waterway flow rate (m3/s)
 	
 	// persistent defaults
 	public int dDiameter;		// mountain diameter
 	public int dAltitude;		// mountain altitude
 	public int dShape;			// mountain shape
-	public static final int CONICAL = 0;
-	public static final int SPHERICAL = 6;
+		public static final int CONICAL = 0;
+		public static final int SPHERICAL = 6;
+		public static final int CYLINDRICAL = 9;
 	public int dDirection;		// incoming weather
 	public int dAmount;			// annual rainfall
 	public int dRainHeight;		// mean height of incoming rain

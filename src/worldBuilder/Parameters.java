@@ -22,7 +22,12 @@ package worldBuilder;
 	public int xy_range = 500;	// X/Y range (km)
 	public int z_range = 10000;	// Z range (m)
 	public int r_range = 500;	// rain (cm/y)
+	public double latitude;		// central point latitude
+	public double longitude;	// central point longitude
 	public double sea_level = 0;// sea level (map space)
+	public double min_flux = 100;	// minimum cm/yr to qualify as a water-way
+	public double rivers = 0.98;	// percentile to display as a river
+	public double streams = 0.90;	// percentile to display as a stream
 	
 	// persistent defaults
 	public int dDiameter;		// mountain diameter

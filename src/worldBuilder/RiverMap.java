@@ -14,6 +14,25 @@ public class RiverMap {
 		this.parms = Parameters.getInstance();
 	}
 	
+	/*
+	 * notes on the mathematics of rivers
+	 * 	Flow = width * depth * Velocity
+	 * 	velocity: 	.1m/s - 3M/s	3*slope?
+	 *  width/depth: 2-20			6/V?
+	 *  
+	 * 	use slope to compute velocity
+	 * 	use flow & velocity to compute WxD
+	 * 	use velocity to compute W/D
+	 *  solve for W,D
+	 *  
+	 *  simplified Hjulstrom curves
+	 *    use velocity to compute erosion and burden
+	 *  	erosion starts 1 .2m/s, is major at 2m/s
+	 *    use velocity and burden to compute deposition
+	 *  	soil deposition happens between .1 - .005 m/s
+	 *  call deposited soil area 10x river width
+	 */
+	
 	/**
 	 * Display the streams and rivers
 	 * 

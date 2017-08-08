@@ -33,7 +33,9 @@ public class Map extends JPanel {
 	private static final int MIN_WIDTH = 400;	// min screen width
 	private static final int MIN_HEIGHT = 400;	// min screen height
 	private static final int SMALL_POINT = 2;	// width of a small point
+	private static final int LARGE_POINT = 4;	// width of a large point
 	private static final int TOPO_CELL = 5;		// pixels/topographic cell
+												// CODE DEPENDS ON THIS CONSTANT
 	private Dimension size;
 
 	// display colors
@@ -45,11 +47,12 @@ public class Map extends JPanel {
 	private Mesh mesh;			// mesh of Voronoi points
 	private double heightMap[]; // Height of each mesh point
 	private double rainMap[];	// Rainfall of each mesh point
-	private double depression[]; // which cells are in depressions
+	private double[] depression; // which cells are in depressions
+	public int sinks[];			// what drains to where
 	private int downHill[];		// each cell's downhill neighbor
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	
-	private Parameters parms;	// world parameters
+	private Parameters parms;
 	
 	private static final long serialVersionUID = 1L;
 
@@ -70,8 +73,9 @@ public class Map extends JPanel {
 			this.map = new Cartesian(mesh, width/TOPO_CELL, height/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
+			this.parms = Parameters.getInstance();
+			calc_downhill();
 		}
-		this.parms = Parameters.getInstance();
 		selectNone();
 	}
 
@@ -85,6 +89,7 @@ public class Map extends JPanel {
 			this.map = new Cartesian(mesh, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
+			calc_downhill();
 		} else {
 			this.map = null;
 			this.heightMap = null;
@@ -112,6 +117,7 @@ public class Map extends JPanel {
 	}
 	
 	public int[] getDownHill() {calc_downhill(); return downHill;}	
+	public double [] getDepression() {return depression;}
 	public Cartesian getCartesian() {return map;}
 	
 	/**
@@ -133,7 +139,7 @@ public class Map extends JPanel {
 	
 	public void export(String filename, double x, double y, double dx, double dy, int meters) {
 		System.out.println("TODO: Implement Map.export to file " + filename + ", <" + x + "," + y + ">, " + dx + "x" + dy + ", grain=" + meters + "m");
-		// TODO implement Mesh:export ... maybe move it to Map:export
+		// TODO implement Map:export
 	}
 
 	// description of the area to be highlighted
@@ -265,6 +271,18 @@ public class Map extends JPanel {
 				g.drawOval((int) x, (int) y, SMALL_POINT, SMALL_POINT);
 			}
 		}
+		
+		// FIX - remove depresssion display
+		for(int i = 0; i < mesh.vertices.length; i++) {
+			if (sinks[i] == -1)
+				continue;
+			g.setColor(sinks[i] == i ? Color.RED : Color.ORANGE);
+			MeshPoint p = mesh.vertices[i];
+			double x = ((p.x + x_extent / 2) * width) - LARGE_POINT / 2;
+			double y = ((p.y + y_extent / 2) * height) - LARGE_POINT / 2;
+			g.drawOval((int) x, (int) y, LARGE_POINT, LARGE_POINT);
+			
+		}
 
 		// see if we are rendering the mesh
 		if ((display & SHOW_MESH) != 0) {
@@ -310,16 +328,26 @@ public class Map extends JPanel {
 			break;
 		}
 	}
-	
+	// TODO move calc_downhill into another class
+	// TODO sink computation
+	// edges have a downhill of OFFMAP
+	// no downhill is NONESUCH (or -(1+ESCAPE POINT)
+	// have a count of tributaries as well as ultimate down hill
+	// for each sink with tributaries, find lowest neighbor w/different sink
+	//	that is the escape point for this sink
 	/**
 	 * recalculate the map of who is downhill from whom
 	 * 	must be done whenever the height map changes
 	 */
 	private void calc_downhill() {
+		final int UNKNOWN = -666;
+		
 		// find the down-hill neighbor of each point
 		downHill = new int[mesh.vertices.length];
+		sinks = new int[mesh.vertices.length];
 		for( int i = 0; i < downHill.length; i++ ) {
 			downHill[i] = -1;
+			sinks[i] = UNKNOWN;
 			double lowest_height = heightMap[i];
 			for( int n = 0; n < mesh.vertices[i].neighbors; n++) {
 				int x = mesh.vertices[i].neighbor[n].index;
@@ -328,6 +356,36 @@ public class Map extends JPanel {
 					lowest_height = heightMap[x];
 				}
 			}
+		}
+		
+		// follow the down-hill pointers to identify the sinks
+		for(int i = 0; i < downHill.length; i++) {
+			int point = i;
+			while(true) {
+				// if we already know how this ends, we can stop
+				if (sinks[point] != UNKNOWN) {
+					sinks[i] = sinks[point];
+					break;
+				}
+				// if we make it to sea level, there is no sink
+				if (heightMap[i] < parms.sea_level) {
+					sinks[i] = -1;
+					break;
+				}
+				// if we make it to the edge, there is no sink
+				if (mesh.vertices[point].neighbors < 3) {
+					sinks[i] = -1;
+					break;
+				}
+				// if we reach a low point, we are done
+				int x = downHill[point];
+				if (x == -1) {
+					sinks[i] = point;
+					break;
+				}
+				// continue following the downhill pointers
+				point = x;
+			}	
 		}
 	}
 	

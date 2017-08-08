@@ -153,6 +153,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		selected = false;
 	}
 
+	// TODO: static PlaceMountain(x,y,height,shape)
 	/**
 	 * compute the delta_h associated with placing one mountain
 	 * 	find all points within the effective diameter

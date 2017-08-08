@@ -28,7 +28,11 @@ public class WaterMap {
 		// interpolate Z values from the latest mesh
 		double zArray[][] = map.getCartesian().interpolate(map.getHeightMap());
 		
-		// identify local depressions
+		// XXX all depressions are not necessarily full of water
+		// TODO: fill depressions w/water
+		//	blue depends on (a) being a depression and 
+		//                  (b) how much of a depression
+		//                  (c) flux at the sink (which might be a surrogate for (b)
 		
 		// use height to generate background colors
 		g.setColor(Color.BLUE);
@@ -37,8 +41,7 @@ public class WaterMap {
 			for(int c = 0; c < w; c++) {
 				int sum = 0;
 				if (r < h-1 && c < w-1) {
-					// FIX identify and fill depressions
-					// see which of our neighbors are under water
+					// see which of our neighbors are above water
 					if (zArray[r][c] >= seaLevel)
 						sum += 8;
 					if (zArray[r][c + 1] >= seaLevel)

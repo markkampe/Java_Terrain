@@ -48,11 +48,11 @@ public class RiverMap {
 
 		// calculate the minimum flow to qualify as a stream
 		//	m2 = estimated water-shed area for this MeshPoint
+		double m2 = parms.xy_range * parms.xy_range * 1000 * 1000 / mesh.vertices.length;
 		//	year = number of seconds in a year
+		double year = 365.25 * 24 * 60 * 60;
 		//	parms.min_flux = minimum M3/sec for a stream
 		//	minFlow = minimum annual cm of flow for a stream
-		double m2 = parms.xy_range * parms.xy_range * 1000000 / mesh.vertices.length;
-		double year = 365 * 24 * 60 * 60;
 		double minFlow = parms.min_flux * year * 100 / m2;
 
 		// calculate the color curve (green vs flow)

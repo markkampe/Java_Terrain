@@ -2,6 +2,9 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import javax.swing.*;
 
 public class Map extends JPanel {
@@ -141,9 +144,67 @@ public class Map extends JPanel {
 		return display & view;
 	}
 	
-	public void export(String filename, double x, double y, double dx, double dy, int meters) {
+	/**
+	 * export a map as high resolution tiles
+	 * 
+	 * @param filename	name of output file
+	 * @param x			X origin (map coordinates)
+	 * @param y			Y origin (map coordinates)
+	 * @param dx		width (map units)
+	 * @param dy		height (map units)
+	 * @param meters	tile size
+	 */
+	public boolean export(String filename, double x, double y, double dx, double dy, int meters) {
 		System.out.println("TODO: Implement Map.export to file " + filename + ", <" + x + "," + y + ">, " + dx + "x" + dy + ", grain=" + meters + "m");
 		// TODO implement Map:export
+		int height = 10;	// FIX calculate height in tiles
+		int width = 10;		// FIX calculate width in tiles
+		double lat = -119.23499;	// FIX calculate latitude
+		double lon = 34.283800;		// FIX calculate longitude
+		// create the appropriate height map
+		// create an appropriate water map
+		try {
+			FileWriter output = new FileWriter(filename);
+			final String C_FORMAT = "        { \"x\":\"%10.7f\", \"y\":\"%10.7f\" }\n";
+			
+			// write out the Mesh wrapper
+			output.write( "{   \"name\":\"" + "TODO - MAP NAME" + "\",\n");
+			output.write( "    \"height\":\"" + height + "\",\n");
+			output.write( "    \"width\":\"" + width + "\",\n");
+			output.write( "    \"tilesize\":\"" + meters + "m" + "\",\n");
+			output.write( "    \"origin\": [ \"" + String.format("%10.5f", lat) + "\", \"" + String.format("%10.5f", lon) + "\"],\n");
+			output.write( "    \"points\":[\n" );
+			for(int r = 0; r < height; r++) {
+				for(int c = 0; c < width; c++) {
+					int alt = 1;	// FIX use real altitudes
+					double dzdx = 0.2;	// FIX compute real dzdx
+					double dzdy = 0.1;	// FIX compute real dzdy
+					int rain = 6;	// FIX compute real rain
+					int hydration = 50;	// FIX compute real hydration
+					String soil = "alluvial";	// FIX compute real soil type
+					output.write("        { ");
+					output.write("\"altitude\": \"" + alt + "m\", ");
+					output.write("\"dz/dx\": \"" + String.format("%7.4f", dzdx) + "\", ");
+					output.write("\"dz/dy\": \"" + String.format("%7.4f", dzdy) + "\", ");
+					output.write("\n");
+					output.write("           ");
+					output.write("\"rain\": \"" + rain + "cm\", ");
+					output.write("\"hydration\": \"" + hydration + "%\", ");
+					output.write("\"soil\": \"" + soil + "\" }");
+					if (r != height-1 && c != width-1)
+						output.write(",");
+					output.write("\n");
+				}
+			}
+
+			output.write( "    ]\n");
+			output.write( "}\n");
+			output.close();
+			return true;
+		} catch (IOException e) {
+			System.err.println("Unable to create output file " + filename);
+			return false;
+		}
 	}
 
 	// description of the area to be highlighted

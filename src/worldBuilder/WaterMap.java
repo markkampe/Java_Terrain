@@ -85,7 +85,7 @@ public class WaterMap {
 		g.fillPolygon(Xs, Ys, sides[sum]);
 	}
 	
-	// TODO: why is the coast line ragget?
+	// TODO: why is the coast line ragged?
 	
 	// how many sides in the water polygon
 	private static final int sides[] = {

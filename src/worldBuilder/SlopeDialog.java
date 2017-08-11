@@ -120,7 +120,6 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		setAxis(0);
 	}
 	
-	// TODO static SlopeDialog.addSlope(double axis, double slope)
 	/**
 	 * incline the entire map plane
 	 *

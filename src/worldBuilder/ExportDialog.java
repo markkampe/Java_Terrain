@@ -2,6 +2,8 @@ package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Hashtable;
 
 import javax.swing.*;
@@ -16,8 +18,10 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	private Parameters parms;
 	private String filename;
 	
+	private JTextField sel_name;
 	private JLabel sel_file;
 	private JLabel sel_pixels;
+	private JLabel sel_center;
 	private JLabel sel_km;
 	private JLabel sel_t_size;
 	private JLabel sel_points;
@@ -27,8 +31,10 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	
 	private boolean selecting;		// selection in progress
 	private boolean selected;		// selection completed
-	private int x_start, x_end, y_start, y_end;		// selection start/end coordinates
-	
+	private int x_start, x_end, y_start, y_end;		// selection screen coordinates
+	private int x_points, y_points;	// selection width/height (in tiles)
+	private double x_km, y_km;		// selection width/height (in km)
+
 	private static final int tile_sizes[] = {1, 5, 10, 50, 100, 500, 1000, 5000, 10000};
 	
 	private static final int BORDER_WIDTH = 5;
@@ -41,8 +47,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		this.map = map;
 		this.parms = Parameters.getInstance();
 		
-		// TODO export name region
-		
 		// create the dialog box
 		Container mainPane = getContentPane();
 		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
@@ -53,6 +57,11 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		// create the basic widgets
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
+		sel_name = new JTextField();
+		sel_name.setText("Happyville");
+		JLabel nameLabel = new JLabel("Name for exported region", JLabel.CENTER);
+		nameLabel.setFont(fontLarge);
+		
 		accept = new JButton("EXPORT");
 		cancel = new JButton("CANCEL");
 		
@@ -76,21 +85,29 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		
 		sel_file = new JLabel("File: " + filename);
 		sel_pixels = new JLabel();
+		sel_center = new JLabel();
 		sel_km = new JLabel();
 		sel_t_size = new JLabel();
 		sel_points = new JLabel("Select the area to be exported");
 
 		/*
 		 * Pack them into:
-		 * 		a vertical Box layout containing descriptions sliders and buttons
+		 * 		a name (1x2 grid) name selection panel
+		 * 		a vertical Box layout containing descriptions, sliders and buttons
 		 * 		descriptions are a 1x3 layout of Labels
 		 * 		sliders are a 1x2 grid layout
 		 * 			each being a vertical Box w/label and slider
 		 * 		buttons a horizontal Box layout
 		 */
-		JPanel descPanel = new JPanel(new GridLayout(5,1));
+		JPanel namePanel = new JPanel(new GridLayout(2,1));
+		namePanel.add(nameLabel);
+		namePanel.add(sel_name);
+		namePanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+		
+		JPanel descPanel = new JPanel(new GridLayout(6,1));
 		descPanel.add(sel_file);
 		descPanel.add(sel_pixels);
+		descPanel.add(sel_center);
 		descPanel.add(sel_km);
 		descPanel.add(sel_t_size);
 		descPanel.add(sel_points);
@@ -111,10 +128,15 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		buttons.add(Box.createRigidArea(new Dimension(40,0)));
 		buttons.add(accept);
 		buttons.setBorder(BorderFactory.createEmptyBorder(20,100, 20, 10));
+		
+		JPanel controls = new JPanel();
+		controls.setLayout(new BoxLayout(controls, BoxLayout.PAGE_AXIS));
+		controls.add(namePanel);
+		controls.add(buttons);
 
 		mainPane.add(descPanel, BorderLayout.NORTH);
 		mainPane.add(sliders);
-		mainPane.add(buttons, BorderLayout.SOUTH);
+		mainPane.add(controls, BorderLayout.SOUTH);
 		
 		pack();
 		setLocation(parms.dialogDX, parms.dialogDY);
@@ -132,6 +154,69 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	}
 	
 	/**
+	 * export a map as high resolution tiles
+	 */
+	public void export() {
+		int height = 4;	// FIX just for testing
+		int width = 3;	// FIX just for testing
+
+		// figure out the selected region (in map coordinates)
+
+		double x = (double) x_start/map.getWidth() - Parameters.x_extent/2;
+		double y = (double) y_start/map.getHeight() - Parameters.y_extent/2;
+		double dx = (double) (x_end - x_start)/map.getWidth();
+		double dy = (double) (y_end - y_start)/map.getHeight();
+		double lat = map.latitude(y + dy/2);
+		double lon = map.longitude(x + dx/2);
+		
+		int meters = tile_sizes[resolution.getValue()];
+		// create the appropriate height map
+		// create an appropriate water map
+		try {
+			FileWriter output = new FileWriter(filename);
+			final String F_FORMAT = "\"%f\"";
+			
+			// write out the Mesh wrapper
+			output.write("\"map_grid\": {\n");
+			output.write( "    \"name\": \"" + sel_name.getText() + "\",\n");
+			output.write( "    \"dimensions\": { ");
+				output.write( "\"height\": \"" + y_points + "\", ");
+				output.write( "\"width\": \"" + x_points + "\" },\n");
+			output.write( "    \"tile_size\": \"" + meters + "m" + "\",\n");
+			output.write( "    \"center\": { ");
+				output.write( "\"latitude\": \"" + lat + "\", ");
+				output.write( "\"longitude\": \"" + lon + "\" },\n");
+			output.write( "    \"points\": [\n" );
+			
+			boolean first = true;
+			for(int r = 0; r < height; r++) {
+				for(int c = 0; c < width; c++) {
+					if (first)
+						first = false;
+					else
+						output.write(",\n");
+					int alt = 1;	// FIX use real altitudes
+					int rain = parms.dAmount;	// XXX export non-uniform rain
+					int hydration = parms.dAmount;	// FIX compute real hydration
+					String soil = "alluvial";	// FIX compute real soil type
+					
+					output.write("        { ");
+					output.write("\"altitude\": \"" + alt + "m\", ");
+					output.write("\"rainfall\": \"" + rain + "cm\", ");
+					output.write("\"hydration\": \"" + hydration + "%\", ");
+					output.write("\"soil\": \"" + soil + "\" }");
+				}
+			}
+
+			output.write( "\n    ]\n");
+			output.write( "}\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Unable to create output file " + filename);		
+		}
+	}
+	
+	/**
 	 * describe the selected area
 	 */
 	private void select(int x0, int y0, int x1, int y1, int res) {
@@ -139,15 +224,18 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		int x_pixels = Math.abs(x1-x0);
 		int y_pixels = Math.abs(y1-y0);
 		
+		// TODO normalize negative distances
+		
 		// selected area in km
 		double scale = parms.xy_range;
 		scale /= map.getWidth() > map.getHeight() ? map.getWidth() : map.getHeight();
-		double x_km = x_pixels * scale;
-		double y_km = y_pixels * scale;
-		int x_points = (int) x_km * 1000/res;
-		int y_points = (int) y_km * 1000/res;
+		x_km = x_pixels * scale;
+		y_km = y_pixels * scale;
+		x_points = (int) x_km * 1000/res;
+		y_points = (int) y_km * 1000/res;
 		
 		sel_pixels.setText("Pixels:    " + x_pixels + "x" + y_pixels);
+		sel_center.setText("Center: lat=" + parms.latitude + ", lon=" + parms.longitude);
 		sel_km.setText("Kilometers:" + (int) x_km + "x" + (int) y_km);
 		sel_t_size.setText("Tile Size: " + res + " meters");
 		sel_points.setText("Output:    " + x_points + "x" + y_points + " tiles");
@@ -212,14 +300,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		map.selectNone();
 		
 		if (e.getSource() == accept && selected) {
-			
-			// figure out the selected region
-			// TODO normalize negative distances
-			double x = (double) x_start/map.getWidth() - Parameters.x_extent/2;
-			double y = (double) y_start/map.getHeight() - Parameters.y_extent/2;
-			double dx = (double) (x_end - x_start)/map.getWidth();
-			double dy = (double) (y_end - y_start)/map.getHeight();
-			map.export(filename, x, y, dx, dy, tile_sizes[resolution.getValue()]);
+			export();
 		}
 		
 		// discard the window

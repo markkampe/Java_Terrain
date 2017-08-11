@@ -127,6 +127,25 @@ public class Map extends JPanel {
 	public double [] getDepression() {return depression;}
 	public Cartesian getCartesian() {return map;}
 	
+	
+	/**
+	 * turn a screen coordinate into a latitude
+	 * 
+	 * @param screen_y
+	 */
+	public double latitude(double screen_y) {
+		return parms.latitude; // FIX implement map.latitude
+	}
+	
+	/**
+	 * turn a screen coordinate into a longitude
+	 * 
+	 * @param screen_x
+	 */
+	public double longitude(double screen_x) {
+		return parms.longitude;	// FIX implement map.longitude
+	}
+	
 	/**
 	 * enable/disable display elements
 	 * 
@@ -144,72 +163,7 @@ public class Map extends JPanel {
 		return display & view;
 	}
 	
-	/**
-	 * export a map as high resolution tiles
-	 * 
-	 * @param filename	name of output file
-	 * @param x			X origin (map coordinates)
-	 * @param y			Y origin (map coordinates)
-	 * @param dx		width (map units)
-	 * @param dy		height (map units)
-	 * @param meters	tile size
-	 */
-	public boolean export(String filename, double x, double y, double dx, double dy, int meters) {
-		System.out.println("TODO: Implement Map.export to file " + filename + ", <" + x + "," + y + ">, " + dx + "x" + dy + ", grain=" + meters + "m");
-		// TODO implement Map:export
-		int height = 10;	// FIX calculate height in tiles
-		int width = 10;		// FIX calculate width in tiles
-		double lat = -119.23499;	// FIX calculate latitude
-		double lon = 34.283800;		// FIX calculate longitude
-		// create the appropriate height map
-		// create the appropriate rainfall map
-		// create an appropriate water map
-		try {
-			FileWriter output = new FileWriter(filename);
-			final String C_FORMAT = "        { \"x\":\"%10.7f\", \"y\":\"%10.7f\" }\n";
-			
-			// write out the Mesh wrapper
-			output.write( "{   \"name\": \"" + "TODO - MAP NAME" + "\",\n");
-			output.write( "    \"height\": \"" + height + "\",\n");
-			output.write( "    \"width\": \"" + width + "\",\n");
-			output.write( "    \"tilesize\": \"" + meters + "m" + "\",\n");
-			output.write( "    \"origin\": [ \"" + String.format("%10.5f", lat) + "\", \"" + String.format("%10.5f", lon) + "\"],\n");
-			output.write( "    \"points\": [\n" );
-			
-			boolean first = true;
-			for(int r = 0; r < height; r++) {
-				for(int c = 0; c < width; c++) {
-					if (first)
-						first = false;
-					else
-						output.write(",\n");
-					int alt = 1;	// FIX use real altitudes
-					double dzdx = 0.2;	// FIX compute real dzdx
-					double dzdy = 0.1;	// FIX compute real dzdy
-					int rain = 6;	// FIX compute real rain
-					int hydration = 50;	// FIX compute real hydration
-					String soil = "alluvial";	// FIX compute real soil type
-					output.write("        { ");
-					output.write("\"altitude\": \"" + alt + "m\", ");
-					output.write("\"dz/dx\": \"" + String.format("%7.4f", dzdx) + "\", ");
-					output.write("\"dz/dy\": \"" + String.format("%7.4f", dzdy) + "\", ");
-					output.write("\n");
-					output.write("          ");
-					output.write("\"rainfall\": \"" + rain + "cm\", ");
-					output.write("\"hydration\": \"" + hydration + "%\", ");
-					output.write("\"soil\": \"" + soil + "\" }");
-				}
-			}
-
-			output.write( "\n    ]\n");
-			output.write( "}\n");
-			output.close();
-			return true;
-		} catch (IOException e) {
-			System.err.println("Unable to create output file " + filename);
-			return false;
-		}
-	}
+	
 
 	// description of the area to be highlighted
 	private int sel_x0, sel_y0, sel_x1, sel_y1;

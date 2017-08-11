@@ -133,17 +133,13 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		
 		// get map and display parameters
 		Mesh m = map.getMesh();
-		int width = map.getWidth();
-		int height = map.getHeight();
-		double Xmid = Parameters.x_extent/2;
-		double Ymid = Parameters.y_extent/2;
-		
+
 		// height of every point is its distance (+/-) from the axis
 		for(int i = 0; i < newHeight.length; i++) {
-			double X0 = (double) x0/width - Xmid;
-			double Y0 = (double) y0/height - Ymid;
-			double X1 = (double) x1/width - Xmid;
-			double Y1 = (double) y1/height - Ymid;
+			double X0 = map.x(x0);
+			double Y0 = map.y(y0);
+			double X1 = map.x(x1);
+			double Y1 = map.y(y1);
 			double d = m.vertices[i].distanceLine(X0, Y0, X1, Y1);
 			
 			// make sure the new height is legal

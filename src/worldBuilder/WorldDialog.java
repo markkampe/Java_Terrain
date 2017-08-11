@@ -47,7 +47,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			JLabel latLabel = new JLabel("latitude (center of map)");
 			latLabel.setFont(fontLarge);
 			longitude = new JTextField(Double.toString(parms.longitude));
-			JLabel lonLabel = new JLabel("longitude (center of map");
+			JLabel lonLabel = new JLabel("longitude (center of map)");
 			lonLabel.setFont(fontLarge);
 			
 			diameter = new JSlider(JSlider.HORIZONTAL, WORLD_MIN, WORLD_MAX, parms.xy_range/WORLD_SCALE);
@@ -56,7 +56,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			diameter.setFont(fontSmall);
 			diameter.setPaintTicks(true);
 			diameter.setPaintLabels(true);
-			JLabel diameterLabel = new JLabel("Diameter (km x 100)", JLabel.CENTER);
+			JLabel diameterLabel = new JLabel("Height/Width (km x 100)", JLabel.CENTER);
 			diameterLabel.setFont(fontLarge);
 			
 			altitude = new JSlider(JSlider.HORIZONTAL, Parameters.ALT_MIN, Parameters.ALT_MAX, parms.z_range/(2*Parameters.ALT_SCALE));

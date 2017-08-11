@@ -114,4 +114,46 @@ package worldBuilder;
 		switch (c) {
 		}
 	}
+	
+	/**
+	 * turn a map coordinate into a latitude
+	 * 
+	 * @param y (map coordinate)
+	 */
+	public double latitude(double y) {
+		double degrees = 180.0 * xy_range / (Math.PI * RADIUS);
+		double offset = y * degrees / y_extent;
+		return latitude + offset;
+	}
+	
+	/**
+	 * turn a map coordinate into a longitude
+	 * 
+	 * @param x (map coordinate)
+	 */
+	public double longitude(double x) {
+		double degrees = 360.0 * xy_range / (2 * Math.PI * RADIUS);
+		// FIX correct for latitudinal radius
+		double offset = x * degrees / x_extent;
+		return longitude + offset;
+	}
+	/**
+	 * turn a map distance into world km
+	 * 
+	 * @param d	(distance in map coordiantes)
+	 * @return km
+	 */
+	public double km(double d) {
+		return d * xy_range / x_extent;
+	}
+	
+	/**
+	 * turn a map coordinate into a world altitude
+	 * 
+	 * @param z (map coordinate)
+	 * @return	meters (above sea level)
+	 */
+	public double altitude(double z) {
+		return (z - sea_level) * z_extent * z_range;
+	}
 }

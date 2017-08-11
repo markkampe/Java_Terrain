@@ -129,24 +129,6 @@ public class Map extends JPanel {
 	
 	
 	/**
-	 * turn a screen coordinate into a latitude
-	 * 
-	 * @param screen_y
-	 */
-	public double latitude(double screen_y) {
-		return parms.latitude; // FIX implement map.latitude
-	}
-	
-	/**
-	 * turn a screen coordinate into a longitude
-	 * 
-	 * @param screen_x
-	 */
-	public double longitude(double screen_x) {
-		return parms.longitude;	// FIX implement map.longitude
-	}
-	
-	/**
 	 * enable/disable display elements
 	 * 
 	 * @param view to be enabled/disabled
@@ -163,7 +145,20 @@ public class Map extends JPanel {
 		return display & view;
 	}
 	
-	
+	/**
+	 * convert a screen coordinate into a map coordinate
+	 */
+	double x(int screen_x) {
+		double x = (double) screen_x / getWidth();
+		x -= .5;
+		return x * Parameters.x_extent;	
+	}
+
+	double y(int screen_y) {
+		double y = (double) screen_y / getHeight();
+		y -= .5;
+		return y * Parameters.y_extent;	
+	}
 
 	// description of the area to be highlighted
 	private int sel_x0, sel_y0, sel_x1, sel_y1;

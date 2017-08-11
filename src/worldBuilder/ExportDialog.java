@@ -59,7 +59,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		sel_name = new JTextField();
 		sel_name.setText("Happyville");
-		JLabel nameLabel = new JLabel("Name for exported region", JLabel.CENTER);
+		JLabel nameLabel = new JLabel("Name of this region", JLabel.CENTER);
 		nameLabel.setFont(fontLarge);
 		
 		accept = new JButton("EXPORT");
@@ -83,7 +83,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		JLabel resolutionLabel = new JLabel("Tile size(m)", JLabel.CENTER);
 		resolutionLabel.setFont(fontLarge);
 		
-		sel_file = new JLabel("File: " + filename);
+		sel_file = new JLabel(filename);
 		sel_pixels = new JLabel();
 		sel_center = new JLabel();
 		sel_km = new JLabel();
@@ -104,13 +104,20 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		namePanel.add(sel_name);
 		namePanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
 		
-		JPanel descPanel = new JPanel(new GridLayout(6,1));
+		JPanel descPanel = new JPanel(new GridLayout(6,2));
+		descPanel.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
+		descPanel.add(new JLabel("File"));
 		descPanel.add(sel_file);
-		descPanel.add(sel_pixels);
+		descPanel.add(new JLabel("Center"));
 		descPanel.add(sel_center);
+		descPanel.add(new JLabel("Pixels"));
+		descPanel.add(sel_pixels);
+		descPanel.add(new JLabel("km"));
 		descPanel.add(sel_km);
-		descPanel.add(sel_t_size);
+		descPanel.add(new JLabel("Points"));
 		descPanel.add(sel_points);
+		descPanel.add(new JLabel("Tile Size"));
+		descPanel.add(sel_t_size);
 		
 		JPanel resPanel = new JPanel();
 		resPanel.setLayout(new BoxLayout(resPanel, BoxLayout.PAGE_AXIS));
@@ -132,10 +139,10 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		JPanel controls = new JPanel();
 		controls.setLayout(new BoxLayout(controls, BoxLayout.PAGE_AXIS));
 		controls.add(namePanel);
+		controls.add(sliders);
 		controls.add(buttons);
 
 		mainPane.add(descPanel, BorderLayout.NORTH);
-		mainPane.add(sliders);
 		mainPane.add(controls, BorderLayout.SOUTH);
 		
 		pack();
@@ -161,55 +168,89 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		int width = 3;	// FIX just for testing
 
 		// figure out the selected region (in map coordinates)
-
-		double x = (double) x_start/map.getWidth() - Parameters.x_extent/2;
-		double y = (double) y_start/map.getHeight() - Parameters.y_extent/2;
-		double dx = (double) (x_end - x_start)/map.getWidth();
-		double dy = (double) (y_end - y_start)/map.getHeight();
-		double lat = map.latitude(y + dy/2);
-		double lon = map.longitude(x + dx/2);
+		double x = map.x(x_start);
+		double dx = map.x(x_end) - x;
+		if (dx < 0) {
+			x -= dx;
+			dx = -dx;
+		}
+		double y = map.y(y_start);
+		double dy = map.x(y_end) - y;
+		if (dy < 0) {
+			y -= dy;
+			dy = -dy;
+		}
+		
+		double lat = parms.latitude(y + dy/2);
+		double lon = parms.longitude(x + dx/2);
 		
 		int meters = tile_sizes[resolution.getValue()];
 		// create the appropriate height map
 		// create an appropriate water map
 		try {
 			FileWriter output = new FileWriter(filename);
-			final String F_FORMAT = "\"%f\"";
+			final String FORMAT_S = " \"%s\": \"%s\"";
+			final String FORMAT_D = " \"%s\": \"%d\"";
+			final String FORMAT_DM = " \"%s\": \"%dm\"";
+			final String FORMAT_DP = " \"%s\": \"%d%%\"";
+			final String FORMAT_FM = " \"%s\": \"%.2fm\"";
+			final String FORMAT_CM = " \"%s\": \"%dcm\"";
+			final String FORMAT_L = " \"%s\": \"%.5f\"";
+			final String FORMAT_O = " \"%s\": {";
+			final String FORMAT_A = " \"%s\": [";
+			final String NEW_POINT = "\n        { ";
+			final String NEWLINE = "\n    ";
+			final String COMMA = ", ";
 			
-			// write out the Mesh wrapper
-			output.write("\"map_grid\": {\n");
-			output.write( "    \"name\": \"" + sel_name.getText() + "\",\n");
-			output.write( "    \"dimensions\": { ");
-				output.write( "\"height\": \"" + y_points + "\", ");
-				output.write( "\"width\": \"" + x_points + "\" },\n");
-			output.write( "    \"tile_size\": \"" + meters + "m" + "\",\n");
-			output.write( "    \"center\": { ");
-				output.write( "\"latitude\": \"" + lat + "\", ");
-				output.write( "\"longitude\": \"" + lon + "\" },\n");
-			output.write( "    \"points\": [\n" );
+			// write out the grid wrapper
+			output.write("\"map_grid\": {");
+			output.write(NEWLINE);
+			output.write(String.format(FORMAT_S,  "name", sel_name.getText()));
+			output.write(",");
+			output.write(NEWLINE);
+			output.write(String.format(FORMAT_O, "dimensions"));
+				output.write(String.format(FORMAT_D, "height", y_points));
+				output.write(COMMA);
+				output.write(String.format(FORMAT_D, "width", x_points));
+				output.write(" },");
+				output.write(NEWLINE);
+			output.write(String.format(FORMAT_DM, "tilesize", meters));
+			output.write(",");
+			output.write(NEWLINE);
+			output.write(String.format(FORMAT_O, "center"));
+				output.write(String.format(FORMAT_L, "latitude", lat));
+				output.write(COMMA);
+				output.write(String.format(FORMAT_L, "longitude", lon));
+				output.write(" },");
+			output.write(NEWLINE);
+			output.write(String.format(FORMAT_A, "points"));
 			
 			boolean first = true;
 			for(int r = 0; r < height; r++) {
 				for(int c = 0; c < width; c++) {
-					if (first)
-						first = false;
-					else
-						output.write(",\n");
-					int alt = 1;	// FIX use real altitudes
+					double alt = 1;	// FIX use real altitudes
 					int rain = parms.dAmount;	// XXX export non-uniform rain
 					int hydration = parms.dAmount;	// FIX compute real hydration
 					String soil = "alluvial";	// FIX compute real soil type
 					
-					output.write("        { ");
-					output.write("\"altitude\": \"" + alt + "m\", ");
-					output.write("\"rainfall\": \"" + rain + "cm\", ");
-					output.write("\"hydration\": \"" + hydration + "%\", ");
-					output.write("\"soil\": \"" + soil + "\" }");
+					if (first)
+						first = false;
+					else
+						output.write(",");
+					output.write(NEW_POINT);
+					output.write(String.format(FORMAT_FM, "altitude", alt));
+					output.write(COMMA);
+					output.write(String.format(FORMAT_CM, "rainfall", rain));
+					output.write(COMMA);
+					output.write(String.format(FORMAT_DP, "hydration", hydration));
+					output.write(COMMA);
+					output.write(String.format(FORMAT_S, "soil", soil));
+					output.write(" }");
 				}
 			}
-
-			output.write( "\n    ]\n");
-			output.write( "}\n");
+			output.write(NEWLINE);
+			output.write("]\n");	// end of points
+			output.write( "}\n");	// end of grid
 			output.close();
 		} catch (IOException e) {
 			System.err.println("Unable to create output file " + filename);		
@@ -221,24 +262,30 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	private void select(int x0, int y0, int x1, int y1, int res) {
 		// selected area in pixels
-		int x_pixels = Math.abs(x1-x0);
-		int y_pixels = Math.abs(y1-y0);
+		int x_pixels = Math.abs(x1 - x0);
+		int y_pixels = Math.abs(y1 - y0);
 		
-		// TODO normalize negative distances
-		
+		// selected area in map coordinates
+		double X0 = map.x(x0);
+		double X1 = map.x(x1);
+		double dx = X1 - X0;
+		double Y0 = map.y(y0);	
+		double Y1 = map.y(y1);
+		double dy = Y1 - Y0;
+	
 		// selected area in km
-		double scale = parms.xy_range;
-		scale /= map.getWidth() > map.getHeight() ? map.getWidth() : map.getHeight();
-		x_km = x_pixels * scale;
-		y_km = y_pixels * scale;
+		x_km = parms.km(dx);
+		y_km = parms.km(dy);
+
+		// selected area in tiles
 		x_points = (int) x_km * 1000/res;
 		y_points = (int) y_km * 1000/res;
 		
-		sel_pixels.setText("Pixels:    " + x_pixels + "x" + y_pixels);
-		sel_center.setText("Center: lat=" + parms.latitude + ", lon=" + parms.longitude);
-		sel_km.setText("Kilometers:" + (int) x_km + "x" + (int) y_km);
-		sel_t_size.setText("Tile Size: " + res + " meters");
-		sel_points.setText("Output:    " + x_points + "x" + y_points + " tiles");
+		sel_pixels.setText(x_pixels + "x" + y_pixels);
+		sel_center.setText(String.format("%.5f, %.5f", parms.latitude((Y1+Y0)/2),  parms.longitude((X1+X0)/2)));
+		sel_km.setText((int) x_km + "x" + (int) y_km);
+		sel_t_size.setText(res + " meters");
+		sel_points.setText(x_points + "x" + y_points + " tiles");
 	}
 	
 	/**

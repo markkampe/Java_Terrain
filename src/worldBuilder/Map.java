@@ -162,20 +162,27 @@ public class Map extends JPanel {
 		double lat = -119.23499;	// FIX calculate latitude
 		double lon = 34.283800;		// FIX calculate longitude
 		// create the appropriate height map
+		// create the appropriate rainfall map
 		// create an appropriate water map
 		try {
 			FileWriter output = new FileWriter(filename);
 			final String C_FORMAT = "        { \"x\":\"%10.7f\", \"y\":\"%10.7f\" }\n";
 			
 			// write out the Mesh wrapper
-			output.write( "{   \"name\":\"" + "TODO - MAP NAME" + "\",\n");
-			output.write( "    \"height\":\"" + height + "\",\n");
-			output.write( "    \"width\":\"" + width + "\",\n");
-			output.write( "    \"tilesize\":\"" + meters + "m" + "\",\n");
+			output.write( "{   \"name\": \"" + "TODO - MAP NAME" + "\",\n");
+			output.write( "    \"height\": \"" + height + "\",\n");
+			output.write( "    \"width\": \"" + width + "\",\n");
+			output.write( "    \"tilesize\": \"" + meters + "m" + "\",\n");
 			output.write( "    \"origin\": [ \"" + String.format("%10.5f", lat) + "\", \"" + String.format("%10.5f", lon) + "\"],\n");
-			output.write( "    \"points\":[\n" );
+			output.write( "    \"points\": [\n" );
+			
+			boolean first = true;
 			for(int r = 0; r < height; r++) {
 				for(int c = 0; c < width; c++) {
+					if (first)
+						first = false;
+					else
+						output.write(",\n");
 					int alt = 1;	// FIX use real altitudes
 					double dzdx = 0.2;	// FIX compute real dzdx
 					double dzdy = 0.1;	// FIX compute real dzdy
@@ -187,17 +194,14 @@ public class Map extends JPanel {
 					output.write("\"dz/dx\": \"" + String.format("%7.4f", dzdx) + "\", ");
 					output.write("\"dz/dy\": \"" + String.format("%7.4f", dzdy) + "\", ");
 					output.write("\n");
-					output.write("           ");
-					output.write("\"rain\": \"" + rain + "cm\", ");
+					output.write("          ");
+					output.write("\"rainfall\": \"" + rain + "cm\", ");
 					output.write("\"hydration\": \"" + hydration + "%\", ");
 					output.write("\"soil\": \"" + soil + "\" }");
-					if (r != height-1 && c != width-1)
-						output.write(",");
-					output.write("\n");
 				}
 			}
 
-			output.write( "    ]\n");
+			output.write( "\n    ]\n");
 			output.write( "}\n");
 			output.close();
 			return true;

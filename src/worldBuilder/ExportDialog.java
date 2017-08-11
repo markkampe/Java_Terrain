@@ -41,6 +41,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		this.map = map;
 		this.parms = Parameters.getInstance();
 		
+		// TODO export name region
+		
 		// create the dialog box
 		Container mainPane = getContentPane();
 		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));

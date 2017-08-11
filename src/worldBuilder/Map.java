@@ -74,6 +74,8 @@ public class Map extends JPanel {
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
 			this.parms = Parameters.getInstance();
+			// ensure that the map is not perfectly flat
+			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL);
 			calc_downhill();
 		}
 		selectNone();
@@ -89,6 +91,8 @@ public class Map extends JPanel {
 			this.map = new Cartesian(mesh, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
+			// ensure that the map is not perfectly flat
+			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL);
 			calc_downhill();
 		} else {
 			this.map = null;

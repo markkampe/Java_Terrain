@@ -120,8 +120,6 @@ public class WorldBuilder  extends JFrame
 		createWidgets();
 		pack();
 		setVisible(true);
-		
-		// TODO create a low wide cone
 	}
 	
 	/**

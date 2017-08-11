@@ -153,46 +153,48 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		selected = false;
 	}
 
-	// TODO: static PlaceMountain(x,y,height,shape)
 	/**
+	 * @param Map
+	 * @param x: (map) x coordinate
+	 * @param y: (map) y coordinate
+	 * @param radius: (map) radius (0 = full map)
+	 * @param zMax: max (map) z value
+	 * @param shape: curvature
+	 *
 	 * compute the delta_h associated with placing one mountain
 	 * 	find all points within the effective diameter
 	 * 	compute the height as a function of the distance from center
 	 */
-	private void placeMountain(double x, double y) {
-		// note the mountain parameters
-		double alt = (double) altitude.getValue() / parms.z_range *  Parameters.z_extent;
-		int Fcone = Parameters.SPHERICAL - rounding.getValue();
-		int Fcirc = rounding.getValue();
-		double diam = (double) diameter.getValue();
-		if (diam == 0)
-				diam = 1;
-		diam /= parms.xy_range * Parameters.x_extent;
+	public static void placeMountain(Map map, double x, double y, double radius, double zMax, int shape) {
+		// get the shape parameters
+		int Fcone = Parameters.SPHERICAL - shape;
+		int Fcirc = shape;
 		
 		// see which points are within the scope of this mountain
 		Mesh m = map.getMesh();
+		double heights[] = map.getHeightMap();
 		MeshPoint centre = new MeshPoint(x,y);
-		for(int i = 0; i < newHeight.length; i++) {
+		for(int i = 0; i < heights.length; i++) {
 			MeshPoint p = m.vertices[i];
 			double d = centre.distance(p);
-			if (d > diam)
+			if (d > radius)
 				continue;
 			
 			// calculate the deltaH for this point
-			double dh_cone = (diam - d) * alt / diam;
-			double dh_circ = Math.cos(Math.PI*d/(4*diam)) * alt;
+			double dh_cone = (radius - d) * zMax / radius;
+			double dh_circ = Math.cos(Math.PI*d/(4*radius)) * zMax;
 			double delta_h = ((Fcone * dh_cone) + (Fcirc * dh_circ))/Parameters.SPHERICAL;
 			// TODO: cone-sphere-CYLINDER mountain profiles
 			// TODO: asymmetric mountain profiles
 
 			// make sure the new height is legal
-			double newZ = newHeight[i] + delta_h;
+			double newZ = heights[i] + delta_h;
 			if (newZ > Parameters.z_extent/2)
-				newHeight[i] = Parameters.z_extent/2;
+				heights[i] = Parameters.z_extent/2;
 			else if (newZ < -Parameters.z_extent/2)
-				newHeight[i] = -Parameters.z_extent/2;
+				heights[i] = -Parameters.z_extent/2;
 			else
-				newHeight[i] = newZ;
+				heights[i] = newZ;
 		}
 	}
 
@@ -219,20 +221,28 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		double X1 = (double) x_end/width - x_mid;
 		double Y1 = (double) y_end/height - y_mid;
 
-		// figure out how long the mountain range is (in map coordinates)
-		double l = Math.sqrt(((X1-X0)*(X1-X0)) + (Y1-Y0)*(Y1-Y0));
+		// turn the diameter into map units
 		double d = (double) diameter.getValue();
 		if (d == 0)
 			d = 1;
-		d /= parms.xy_range;
+		d /= parms.xy_range * parms.x_extent;
+		
+		// figure out how long the mountain range is (in map coordinates)
+		double l = Math.sqrt(((X1-X0)*(X1-X0)) + (Y1-Y0)*(Y1-Y0));
 		double m = l/d;
 		int mountains = (int) (m + 0.5);
+		
+		// get the height
+		double alt = (double) altitude.getValue() / parms.z_range *  Parameters.z_extent;
+		
+		// get the shape
+		int shape = rounding.getValue();
 		
 		// TODO: piece-wise mountain ranges
 		// how many mountains can we create
 		if (mountains < 2) {
 			// one mountain goes in the center
-			placeMountain((X0+X1)/2, (Y0+Y1)/2);
+			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d/2, alt, shape);
 		} else {
 			// multiple mountains are evenly spaced along the line
 			double X = X0;
@@ -240,7 +250,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			double dx = (X1 - X0)/mountains;
 			double dy = (Y1 - Y0)/mountains;
 			while( mountains >= 0 ) {
-				placeMountain(X, Y);
+				placeMountain(map, X, Y, d/2, alt, shape);
 				X += dx;
 				Y += dy;
 				mountains -= 1;

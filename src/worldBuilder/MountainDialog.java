@@ -84,7 +84,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		JLabel diameterLabel = new JLabel("Diameter(km)", JLabel.CENTER);
 		diameterLabel.setFont(fontLarge);
 		
-		rounding = new JSlider(JSlider.HORIZONTAL, Parameters.CONICAL, Parameters.SPHERICAL, parms.dShape);
+		rounding = new JSlider(JSlider.HORIZONTAL, Parameters.CONICAL, Parameters.CYLINDRICAL, parms.dShape);
 		rounding.setMajorTickSpacing(4);
 		rounding.setMinorTickSpacing(1);
 		rounding.setFont(fontSmall);
@@ -94,7 +94,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
 		labels.put(Parameters.CONICAL, new JLabel("cone"));
-		labels.put(Parameters.SPHERICAL, new JLabel("circle"));
+		labels.put(Parameters.SPHERICAL, new JLabel("round"));
+		labels.put(Parameters.CYLINDRICAL, new JLabel("flat"));
 		rounding.setLabelTable(labels);
 		rounding.setPaintLabels(true);
 		
@@ -169,9 +170,19 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * 	compute the height as a function of the distance from center
 	 */
 	public static void placeMountain(Map map, double x, double y, double radius, double zMax, int shape, int mineral) {
-		// get the shape parameters
-		int Fcone = Parameters.SPHERICAL - shape;
-		int Fcirc = shape;
+		// figure out the shape coefficients
+		int fullscale = Parameters.CYLINDRICAL;
+		int midscale = fullscale/2;
+		double Fcone, Fcirc, Fcyl;
+		if (shape <= midscale) {
+			Fcone = (double) (midscale - shape) / midscale;
+			Fcirc = (double) shape / midscale;
+			Fcyl = 0;
+		} else {	// circ-flat
+			Fcone = 0;
+			Fcirc = (double) (fullscale - shape) / midscale;
+			Fcyl =	(double) (shape - midscale) / midscale;
+		}
 		
 		// see which points are within the scope of this mountain
 		Mesh m = map.getMesh();
@@ -187,8 +198,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			// calculate the deltaH for this point
 			double dh_cone = (radius - d) * zMax / radius;
 			double dh_circ = Math.cos(Math.PI*d/(4*radius)) * zMax;
-			double delta_h = ((Fcone * dh_cone) + (Fcirc * dh_circ))/Parameters.SPHERICAL;
-			// TODO: cone-sphere-CYLINDER mountain profiles
+			double dh_cyl = zMax;
+			double delta_h = (Fcone * dh_cone) + (Fcirc * dh_circ) + (Fcyl * dh_cyl);
 			// TODO: asymmetric mountain profiles
 
 			// make sure the new height is legal

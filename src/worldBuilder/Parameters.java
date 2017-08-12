@@ -39,8 +39,8 @@ package worldBuilder;
 	public int dAltitude;		// mountain altitude
 	public int dShape;			// mountain shape
 		public static final int CONICAL = 0;
-		public static final int SPHERICAL = 6;
-		public static final int CYLINDRICAL = 9;
+		public static final int SPHERICAL = 4;
+		public static final int CYLINDRICAL = 8;
 	public int dDirection;		// incoming weather
 	public int dAmount;			// annual rainfall
 	public int dRainHeight;		// mean height of incoming rain

@@ -328,14 +328,20 @@ public class Map extends JPanel {
 		// see if we are rendering the mesh
 		if ((display & SHOW_MESH) != 0) {
 			g.setColor(MESH_COLOR);
-			Path paths[] = mesh.edges;
-			for (int i = 0; i < paths.length; i++) {
-				Path p = paths[i];
-				double x1 = (p.source.x + x_extent / 2) * width;
-				double y1 = (p.source.y + y_extent / 2) * height;
-				double x2 = (p.target.x + x_extent / 2) * width;
-				double y2 = (p.target.y + y_extent / 2) * height;
-				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+			// for each mesh point
+			for(int i = 0; i < mesh.vertices.length; i++) {
+				MeshPoint m = mesh.vertices[i];
+				// for each neighbor
+				for(int j = 0; j < m.neighbors; j++) {
+					MeshPoint n = m.neighbor[j];
+					if (n.index < i)
+						continue;	// we already got this one
+					double x1 = (m.x + x_extent / 2) * width;
+					double y1 = (m.y + y_extent / 2) * height;
+					double x2 = (n.x + x_extent / 2) * width;
+					double y2 = (n.y + y_extent / 2) * height;
+					g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+				}
 			}
 		}
 		

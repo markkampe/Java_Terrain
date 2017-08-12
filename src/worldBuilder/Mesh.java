@@ -55,9 +55,7 @@ import worldMaps.MapReader.SoilType;
  *         three neighbors).
  */
 public class Mesh {
-	public MeshPoint[] vertices;	// grid vertices	
-	public Path[] edges;			// mesh connections
-	
+	public MeshPoint[] vertices;	// grid vertices		
 	private Parameters parms;		// global options
 	
 	/**
@@ -98,7 +96,6 @@ public class Mesh {
 		} catch (FileNotFoundException e) {
 			System.err.println("FATAL: unable to open input file " + filename);
 			vertices = new MeshPoint[0];
-			edges = new Path[0];
 			return;
 		}
 
@@ -110,7 +107,7 @@ public class Mesh {
 		double y = 0;
 		int length = 0;	// expected number of points
 		int points = 0;	// number of points read
-		PathHasher pathhash = null;
+		int paths = 0;	// number of paths created
 		while(parser.hasNext()) {
 			JsonParser.Event e = parser.next();
 			switch(e) {		
@@ -132,7 +129,8 @@ public class Mesh {
 				if (inNeighbors) {
 					int n = new Integer(parser.getString());
 					vertices[points].addNeighbor(vertices[n]);
-					pathhash.findPath(vertices[points], vertices[n]);
+					if (points < n)	// a path only counts once
+						paths++;
 					break;
 				}
 				
@@ -140,7 +138,6 @@ public class Mesh {
 					case "length":
 						length = new Integer(parser.getString());
 						vertices = new MeshPoint[length];
-						pathhash = new PathHasher(3*length);
 						break;
 						
 					case "x":
@@ -182,13 +179,8 @@ public class Mesh {
 		}
 		parser.close();
 		
-		// copy out the list of unique Edges
-		edges = new Path[pathhash.numPaths];
-		for(int i = 0; i < pathhash.numPaths; i++)
-			edges[i] = pathhash.paths[i];
-		
 		if (parms.debug_level > 0)
-			System.out.println("Loaded " + points + "/" + length + " points, " + edges.length + " paths from file " + filename);
+			System.out.println("Loaded " + points + "/" + length + " points, " + paths + " paths from file " + filename);
 	}
 	
 	/**
@@ -358,6 +350,8 @@ public class Mesh {
 	 * 		 vertices of the corresponding Voronoi polygons.
 	 */
 	private void makeMesh( MeshPoint[] points ) {
+		int numPaths = 0;
+		
 		// compute the Voronoi teselation of the current point set
 		VoronoiDiagram vd = new VoronoiDiagram();
 		for (int i = 0; i < points.length; i++) {
@@ -367,7 +361,6 @@ public class Mesh {
 		
 		// allocate hash table to track known vertices
 		MeshPointHasher pointhash = new MeshPointHasher(g.num_vertices(), Parameters.x_extent, Parameters.y_extent);
-		PathHasher pathhash = new PathHasher(g.num_edges());
 
 		// locate all the vertices and edges
 		//	NOTE: unfortunate OpenVoronoi behavior
@@ -407,9 +400,7 @@ public class Mesh {
 			// note that each is a neighbor of the other
 			mp1.addNeighbor(mp2);
 			mp2.addNeighbor(mp1);
-			
-			// and note the path that connects them
-			pathhash.findPath(mp1, mp2);
+			numPaths++;
 		} 
 		
 		// TODO stitch together out-of-the-box paths
@@ -418,14 +409,9 @@ public class Mesh {
 		vertices = new MeshPoint[pointhash.numVertices];
 		for(int i = 0; i < pointhash.numVertices; i++)
 			vertices[i] = pointhash.vertices[i];
-	
-		// copy out the list of unique Edges
-		edges = new Path[pathhash.numPaths];
-		for(int i = 0; i < pathhash.numPaths; i++)
-			edges[i] = pathhash.paths[i];
 		
 		if (parms.debug_level > 0)
 			System.out.println(points.length + " points-> " + vertices.length + "/" + g.num_vertices() + 
-					" mesh vertices, " + edges.length + "/" + g.num_edges() + " mesh paths");
+					" mesh vertices, " + numPaths/2 + "/" + g.num_edges() + " mesh paths");
 	}
 }

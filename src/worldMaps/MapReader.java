@@ -9,7 +9,7 @@ import javax.json.stream.JsonParser;
 /**
  * this class uses a streaming JSON parser to avoid
  * the huge memory footprint associated with complete
- * object parsing.
+ * object parsing for large numbers of points.
  */
 public class MapReader {
 
@@ -20,8 +20,9 @@ public class MapReader {
 	
 	// returned directions
 	public enum CompassDirection {
-		NORTH, NORTH_EAST, EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST, NORTH_WEST
+		NONE, NORTH, NORTH_EAST, EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST, NORTH_WEST
 	};
+	private static final double MIN_SLOPE = .1;	//
 	
 	// per map state
 	private String region;
@@ -145,6 +146,7 @@ public class MapReader {
 				
 			case END_ARRAY:
 				inPoints = false;
+				break;
 				
 			case END_OBJECT:
 				if (inPoints) {
@@ -157,6 +159,8 @@ public class MapReader {
 				break;
 				
 			case START_OBJECT:
+			default:
+				break;
 			}
 		}
 		parser.close();
@@ -173,31 +177,91 @@ public class MapReader {
 	public int tileSize() {return tileSize; };
 	
 	/**
-	 * methods to return per-cell information
+	 * altitude above mean sea level
 	 */
 	public double altitude(int row, int col) {
 		return altitude[row][col];
 	}
 	
+	/**
+	 * slope upwards to the east
+	 */
+	public double dZdX(int row, int col) {
+		if (col == width - 1)
+			col--;
+		double dz = altitude[row][col+1] - altitude[row][col];
+		double dx = tileSize;
+		return dz/dx;
+	}
+
+	/**
+	 * slope upwards to the south
+	 */
+	public double dZdY(int row, int col) {
+		if (row == height - 1)
+			row--;
+		double dz = altitude[row+1][col] - altitude[row][col];
+		double dy = tileSize;
+		return dz/dy;
+	}
+	
+	/**
+	 * max steepness
+	 */
+	public double slope(int row, int col ) {
+		double dzdy = dZdY(row, col);
+		double dzdx = dZdX(row, col);
+		return Math.sqrt(dzdx*dzdx + dzdy*dzdy);
+	}
+	
+	/**
+	 * direction slope faces
+	 */
+	public CompassDirection face(int row, int col ) {
+		double dzdy = dZdY(row, col);
+		double dzdx = dZdX(row, col);
+
+		final CompassDirection dirmap[] = {
+				CompassDirection.NONE,
+				CompassDirection.NORTH, CompassDirection.EAST, CompassDirection.NORTH_EAST,
+				CompassDirection.SOUTH, 
+				CompassDirection.NONE, 
+				CompassDirection.SOUTH_EAST,
+				CompassDirection.NONE,
+				CompassDirection.WEST, CompassDirection.NORTH_WEST, 
+				CompassDirection.NONE, CompassDirection.NONE,
+				CompassDirection.SOUTH_WEST,
+				CompassDirection.NONE, CompassDirection.NONE, CompassDirection.NONE
+		};
+		int face = 0;
+		face += (dzdy > MIN_SLOPE) ? 1 : 0;
+		face += (dzdx < -MIN_SLOPE) ? 2 : 0;
+		face += (dzdy < -MIN_SLOPE) ? 4 : 0;
+		face += (dzdx > MIN_SLOPE) ? 8 : 0;
+	
+		return dirmap[face];
+	}
+	
+	/**
+	 * cm of annual rainfall
+	 */
 	public int rainfall(int row, int col) {
 		return rainfall[row][col];
 	}
 	
-	public double slope(int row, int col ) {
-		// FIX: implement slope
-		return(0);
-	}
-	
-	public CompassDirection face(int row, int col ) {
-		// FIX: implement face
-		return(CompassDirection.SOUTH);
-	}
-	
+	/**
+	 * soil hydration
+	 *	100% = shallow water
+	 *	200% = deep water
+	 */
 	public int hydration(int row, int col) {
 		return hydration[row][col];
 	}
 	
+	/**
+	 * dominant soil composition
+	 */
 	public SoilType soilType(int row, int col) {
-		return SoilType.UNKNOWN;	// FIX: implement soilTYpe
+		return soil[row][col];
 	}
 }

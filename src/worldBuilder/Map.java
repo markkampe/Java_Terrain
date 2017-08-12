@@ -2,8 +2,6 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.io.FileWriter;
-import java.io.IOException;
 
 import javax.swing.*;
 
@@ -73,7 +71,10 @@ public class Map extends JPanel {
 		size = new Dimension(width, height);
 		this.mesh = mesh;
 		if (mesh != null) {
-			this.map = new Cartesian(mesh, width/TOPO_CELL, height/TOPO_CELL);
+			this.map = new Cartesian(mesh, 
+					-Parameters.x_extent/2, -Parameters.y_extent/2, 
+					Parameters.x_extent/2, Parameters.y_extent/2,
+					width/TOPO_CELL, height/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
 			this.parms = Parameters.getInstance();
@@ -91,7 +92,10 @@ public class Map extends JPanel {
 	public void setMesh(Mesh mesh) {
 		this.mesh = mesh;	
 		if (mesh != null) {
-			this.map = new Cartesian(mesh, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
+			this.map = new Cartesian(mesh, 
+					-Parameters.x_extent/2, -Parameters.y_extent/2, 
+					Parameters.x_extent/2, Parameters.y_extent/2,
+					getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
 			// ensure that the map is not perfectly flat
@@ -262,7 +266,10 @@ public class Map extends JPanel {
 		
 		// make sure the Cartesian translation is up-to-date
 		if (map.height != height/TOPO_CELL || map.width != width/TOPO_CELL)
-			map = new Cartesian(mesh, width/TOPO_CELL, height/TOPO_CELL);
+			map = new Cartesian(mesh, 
+					-Parameters.x_extent/2, -Parameters.y_extent/2, 
+					Parameters.x_extent/2, Parameters.y_extent/2,
+					width/TOPO_CELL, height/TOPO_CELL);
 		
 		// start by rendering backgrounds (rain, altitude, and water bodies)
 		if ((display & SHOW_RAIN) != 0) {

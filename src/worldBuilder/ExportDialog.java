@@ -195,7 +195,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			final String FORMAT_DP = " \"%s\": \"%d%%\"";
 			final String FORMAT_FM = " \"%s\": \"%.2fm\"";
 			final String FORMAT_CM = " \"%s\": \"%dcm\"";
-			final String FORMAT_L = " \"%s\": \"%.5f\"";
+			final String FORMAT_L = " \"%s\": \"%.6f\"";
 			final String FORMAT_O = " \"%s\": {";
 			final String FORMAT_A = " \"%s\": [";
 			final String NEW_POINT = "\n        { ";

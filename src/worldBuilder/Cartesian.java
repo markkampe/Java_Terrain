@@ -14,10 +14,14 @@ public class Cartesian {
 	/**
 	 * create a new Cartesian map
 	 * @param mesh ... Mesh of Voronoi points
+	 * @param left ... left edge of mapped area
+	 * @param top ... top of mapped area
+	 * @param right ... right edge of mapped area
+	 * @param bottom ... bottom edge of mapped area
 	 * @param width ... width of desired array
 	 * @param height ... height of desired array
 	 */
-	public Cartesian(Mesh mesh, int width, int height) {	
+	public Cartesian(Mesh mesh, double left, double top, double right, double bottom, int width, int height) {	
 		// note the key parameters
 		this.height = height;
 		this.width = width;
@@ -25,11 +29,15 @@ public class Cartesian {
 		// allocate the arrays
 		cells = new MeshRef[height][width];
 		
-		// create the Cartesion->Voronoi map
+		// figure out the spacing
+		double dx = (double)(right - left) / width;
+		double dy = (double)(bottom - top) / height;
+		
+		// create the Cartesian->Voronoi map for the specified region
 		for(int r = 0; r < height; r++) {
-			double y = (double) r/height - Parameters.y_extent/2;
+			double y = top + (r * dy);
 			for(int c = 0; c < width; c++) {
-				double x =  (double)c/width - Parameters.x_extent/2;
+				double x = left + (c * dx);
 				MeshPoint m = new MeshPoint(x,y);
 				MeshRef ref = new MeshRef();
 				cells[r][c] = ref;

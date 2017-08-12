@@ -164,9 +164,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 * export a map as high resolution tiles
 	 */
 	public void export() {
-		int height = 4;	// FIX just for testing
-		int width = 3;	// FIX just for testing
-
 		// figure out the selected region (in map coordinates)
 		double x = map.x(x_start);
 		double dx = map.x(x_end) - x;
@@ -181,6 +178,11 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			dy = -dy;
 		}
 		
+		// get Cartesian interpolations of tile characteristics
+		Cartesian cart = new Cartesian(map.getMesh(), x, y, x+dx, y+dy, x_points, y_points);
+		double heights[][] = cart.interpolate(map.getHeightMap());
+		double rain[][] = cart.interpolate(map.getRainMap());
+		
 		double lat = parms.latitude(y + dy/2);
 		double lon = parms.longitude(x + dx/2);
 		
@@ -194,7 +196,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			final String FORMAT_DM = " \"%s\": \"%dm\"";
 			final String FORMAT_DP = " \"%s\": \"%d%%\"";
 			final String FORMAT_FM = " \"%s\": \"%.2fm\"";
-			final String FORMAT_CM = " \"%s\": \"%dcm\"";
+			final String FORMAT_CM = " \"%s\": \"%.0fcm\"";
 			final String FORMAT_L = " \"%s\": \"%.6f\"";
 			final String FORMAT_O = " \"%s\": {";
 			final String FORMAT_A = " \"%s\": [";
@@ -226,10 +228,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			output.write(String.format(FORMAT_A, "points"));
 			
 			boolean first = true;
-			for(int r = 0; r < height; r++) {
-				for(int c = 0; c < width; c++) {
-					double alt = 1;	// FIX use real altitudes
-					int rain = parms.dAmount;	// XXX export non-uniform rain
+			for(int r = 0; r < y_points; r++) {
+				for(int c = 0; c < x_points; c++) {
 					int hydration = parms.dAmount;	// FIX compute real hydration
 					String soil = "alluvial";	// FIX compute real soil type
 					
@@ -238,9 +238,9 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 					else
 						output.write(",");
 					output.write(NEW_POINT);
-					output.write(String.format(FORMAT_FM, "altitude", alt));
+					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(heights[r][c])));
 					output.write(COMMA);
-					output.write(String.format(FORMAT_CM, "rainfall", rain));
+					output.write(String.format(FORMAT_CM, "rainfall", rain[r][c]));
 					output.write(COMMA);
 					output.write(String.format(FORMAT_DP, "hydration", hydration));
 					output.write(COMMA);
@@ -282,7 +282,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		y_points = (int) y_km * 1000/res;
 		
 		sel_pixels.setText(x_pixels + "x" + y_pixels);
-		sel_center.setText(String.format("%.5f, %.5f", parms.latitude((Y1+Y0)/2),  parms.longitude((X1+X0)/2)));
+		sel_center.setText(String.format("%.6f, %.6f", parms.latitude((Y1+Y0)/2),  parms.longitude((X1+X0)/2)));
 		sel_km.setText((int) x_km + "x" + (int) y_km);
 		sel_t_size.setText(res + " meters");
 		sel_points.setText(x_points + "x" + y_points + " tiles");

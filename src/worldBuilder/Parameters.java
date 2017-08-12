@@ -132,8 +132,11 @@ package worldBuilder;
 	 * @param x (map coordinate)
 	 */
 	public double longitude(double x) {
-		double degrees = 360.0 * xy_range / (2 * Math.PI * RADIUS);
-		// FIX correct for latitudinal radius
+		// radius must be corrected for latitude
+		double lat = latitude * Math.PI / 180;
+		double radius = Math.cos(lat) * RADIUS;
+		
+		double degrees = 360.0 * xy_range / (2 * Math.PI * radius);
 		double offset = x * degrees / x_extent;
 		return longitude + offset;
 	}

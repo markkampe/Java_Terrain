@@ -1,17 +1,29 @@
 package worldMaps;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 
+import javax.json.Json;
+import javax.json.stream.JsonParser;
+
+/**
+ * this class uses a streaming JSON parser to avoid
+ * the huge memory footprint associated with complete
+ * object parsing.
+ */
 public class MapReader {
 
 	// returned soil types
-	public static final int UNKNOWN = 0;
-	public static final int IGNIOUS = 1;
-	public static final int METAMORPHIC = 2;
-	public static final int SEDIMENTARY = 3;
-	public static final int ALUVIAL = 4;
+	public enum SoilType {
+			UNKNOWN, IGNIOUS, METAMORPHIC, SEDIMENTARY, ALLUVIAL
+	};
+	
+	// returned directions
+	public enum CompassDirection {
+		NORTH, NORTH_EAST, EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST, NORTH_WEST
+	};
 	
 	// per map state
-	private SleazyJson reader;
-	private String filename;
 	private String region;
 	private double lat;
 	private double lon;
@@ -21,123 +33,133 @@ public class MapReader {
 	
 	// per cell state
 	private double altitude[][];
-	private double rainfall[][];
+	private int rainfall[][];
+	private int hydration[][];
+	private SoilType soil[][];
 	
 	public MapReader(String filename) {
-		reader = new SleazyJson(filename);		
-		this.filename = filename;
-	}
-	
-	public boolean readMap() {
-		if (!reader.enter("map_grid")) {
-			System.err.println("File " + filename + " does not contain a map_grid");
-			return false;
+		JsonParser parser;
+		try {
+			parser = Json.createParser(new BufferedReader(new FileReader(filename)));
+		} catch (FileNotFoundException e) {
+			System.err.println("FATAL: unable to open input file " + filename);
+			return;
 		}
-		reader.push();
-		
-		// read the descriptive properties
-		region = reader.property("name");
-		if (region == null) {
-			System.err.println("ERROR: File " + filename + " does not contain a name");
-		}
-		
-		String s = reader.property("tilesize");
-		if (s == null) {
-			System.err.println("ERROR: File " + filename + " does not contain a tilesize");
-		} else {
-			int x = s.indexOf('m');
-			if (x != -1)
-				s = s.substring(0, x);
-			tileSize = new Integer(s);
-		}
-		
-		if (reader.enter("center")) {
-			s = reader.property("latitude");
-			if (s == null)
-				System.err.println("ERROR: File " + filename + " center does not contain a center.latitude");
-			else
-				lat = new Double(s);
-			s = reader.property("longitude");
-			if (s == null)
-				System.err.println("ERROR: File " + filename + " center does not contain a center.longitude");
-			else
-				lon = new Double(s);
-			reader.pop();
-		}
-		if (!reader.enter("dimensions")) {
-			System.err.println("ERROR: File " + filename + " contains no dimensions");
-			return false;
-		} else {
-			s = reader.property("height");
-			if (s == null) {
-				System.err.println("FATAL: File " + filename + " does not contain a dimensions.height");
-				return false;
-			}
-			height = new Integer(s);
-			s = reader.property("width");
-			if (s == null) {
-				System.err.println("FATAL: File " + filename + " does not contain a dimensions.width");
-				return false;
-			}
-			width = new Integer(s);
-		}
-		reader.pop();
-		
-		// find the data points
-		if (!reader.enter("points")) {
-			System.err.println("FATAL File " + filename + " contains no points");
-			return false;
-		}
-		
-		// allocate and read in the per-cell arrays
-		altitude = new double[height][width];
-		rainfall = new double[height][width];
-		for(int r = 0; r < height; r++)
-			for(int c = 0; c < width; c++) {
-				if (!reader.nextObject()) {
-					System.err.println("FATAL: File " + filename + "ends after row " + r + ", col " + c);
-					return false;
-				}
+
+		String thisKey = "";
+		boolean inPoints = false;
+		int row = 0;
+		int col = 0;
+		while(parser.hasNext()) {
+			JsonParser.Event e = parser.next();
+			switch(e) {
+			case START_ARRAY:
+				inPoints = true;
+				altitude = new double[height][width];
+				rainfall = new int[height][width];
+				hydration = new int[height][width];
+				soil = new SoilType[height][width];
+				break;
 				
-				s = reader.property("altitude");
-				if (s == null) {
-					System.err.println("FATAL: File " + filename + "[" + r + "]]" + c + "] contains no altitude");
-					return false;
-				}
-				int x = s.indexOf('m');
-				if (x != -1)
-					s = s.substring(0, x);
-				altitude[r][c] = new Double(s);
+			case KEY_NAME:
+				thisKey = parser.getString();
+				break;
 				
-				s = reader.property("rainfall");
-				if (s == null) {
-					System.err.println("ERROR: File " + filename + "[" + r + "]]" + c + "] contains no rainfall");
-				} else {
+			case VALUE_FALSE:
+			case VALUE_TRUE:
+			case VALUE_STRING:
+			case VALUE_NUMBER:
+				switch(thisKey) {
+				case "name":
+					region = parser.getString();
+					break;
+					
+				case "height":
+					height = new Integer(parser.getString());
+					break;
+					
+				case "width":
+					width = new Integer(parser.getString());
+					break;
+					
+				case "tilesize":
+					String s = parser.getString();
+					int x = s.indexOf('m');
+					if (x != -1)
+						s = s.substring(0, x-1);
+					tileSize = new Integer(s);
+					break;
+					
+				case "latitude":
+					lat = new Double(parser.getString());
+					break;
+					
+				case "longitude":
+					lon = new Double(parser.getString());
+					break;
+					
+				case "altitude":
+					s = parser.getString();
+					x = s.indexOf('m');
+					if (x != -1)
+						s = s.substring(0, x);
+					altitude[row][col] = new Double(s);
+					break;
+					
+				case "rainfall":
+					s = parser.getString();
 					x = s.indexOf("cm");
 					if (x != -1)
 						s = s.substring(0, x);
-					rainfall[r][c] = new Double(s);
-				}
-				
-				s = reader.property("hydration");
-				if (s == null) {
-					System.err.println("ERROR: File " + filename + "[" + r + "]]" + c + "] contains no hydration");
-				} else {
-					x = s.indexOf("%");
+					rainfall[row][col] = new Integer(s);
+					break;
+					
+				case "hydration":
+					s = parser.getString();
+					x = s.indexOf('%');
 					if (x != -1)
 						s = s.substring(0, x);
-					// FIX: implement hydration
+					hydration[row][col] = new Integer(s);
+					break;
+					
+				case "soil":
+					switch(parser.getString()) {
+					case "igneous":
+						soil[row][col] = SoilType.IGNIOUS;
+						break;
+					case "metamorphic":
+						soil[row][col] = SoilType.METAMORPHIC;
+						break;
+					case "sedimentary":
+						soil[row][col] = SoilType.SEDIMENTARY;
+						break;
+					case "alluvial":
+						soil[row][col] = SoilType.ALLUVIAL;
+						break;
+					default:
+						soil[row][col] = SoilType.UNKNOWN;
+						break;	
+					}
 				}
+				break;
 				
-				s = reader.property("soil");
-				if (s == null) {
-					System.err.println("ERROR: File " + filename + "[" + r + "]]" + c + "] contains no soil");
-				} else {
-					// FIX: implement soil
+			case END_ARRAY:
+				inPoints = false;
+				
+			case END_OBJECT:
+				if (inPoints) {
+					col++;
+					if (col >= width) {
+						col = 0;
+						row++;
+					}
 				}
+				break;
+				
+			case START_OBJECT:
 			}
-		
-		return true;
+		}
+		parser.close();
 	}
 	
 	/**
@@ -157,7 +179,7 @@ public class MapReader {
 		return altitude[row][col];
 	}
 	
-	public double rainfall(int row, int col) {
+	public int rainfall(int row, int col) {
 		return rainfall[row][col];
 	}
 	
@@ -166,19 +188,16 @@ public class MapReader {
 		return(0);
 	}
 	
-	public int face(int row, int col ) {
+	public CompassDirection face(int row, int col ) {
 		// FIX: implement face
-		return(0);
+		return(CompassDirection.SOUTH);
 	}
 	
 	public int hydration(int row, int col) {
-		return 50;	// FIX: implement hydration
+		return hydration[row][col];
 	}
 	
-	public int soilType(int row, int col) {
-		return UNKNOWN;	// FIX: implement soilTYpe
-	}
-	public void close() {
-		reader.close();
+	public SoilType soilType(int row, int col) {
+		return SoilType.UNKNOWN;	// FIX: implement soilTYpe
 	}
 }

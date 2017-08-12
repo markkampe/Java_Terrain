@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1366838501768
+Build-Jdk: 1.7.0_13
+Built-By: jitu
+Bundle-Description: API module of JSR 353:Java API for Processing JSON
+Bundle-DocURL: http://www.oracle.com
+Bundle-License: https://glassfish.java.net/public/CDDL+GPL_1_1.html
+Bundle-ManifestVersion: 2
+Bundle-Name: JSR 353 (JSON Processing) API
+Bundle-SymbolicName: javax.json-api
+Bundle-Vendor: Oracle
+Bundle-Version: 1.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: javax.json;uses:="javax.json.stream,javax.json.spi";vers
+ ion="1.0",javax.json.stream;uses:="javax.json";version="1.0",javax.json
+ .spi;uses:="javax.json,javax.json.stream";version="1.0"
+Extension-Name: javax.json
+Implementation-Version: 1.0
+Specification-Version: 1.0
+Tool: Bnd-1.50.0

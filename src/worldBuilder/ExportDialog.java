@@ -205,7 +205,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			final String COMMA = ", ";
 			
 			// write out the grid wrapper
-			output.write("\"map_grid\": {");
+			output.write("{");
 			output.write(NEWLINE);
 			output.write(String.format(FORMAT_S,  "name", sel_name.getText()));
 			output.write(",");

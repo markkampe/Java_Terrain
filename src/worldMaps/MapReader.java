@@ -15,7 +15,7 @@ public class MapReader {
 
 	// returned soil types
 	public enum SoilType {
-			UNKNOWN, IGNIOUS, METAMORPHIC, SEDIMENTARY, ALLUVIAL
+			UNKNOWN, IGNEOUS, METAMORPHIC, SEDIMENTARY, ALLUVIAL
 	};
 	
 	// returned directions
@@ -126,7 +126,7 @@ public class MapReader {
 				case "soil":
 					switch(parser.getString()) {
 					case "igneous":
-						soil[row][col] = SoilType.IGNIOUS;
+						soil[row][col] = SoilType.IGNEOUS;
 						break;
 					case "metamorphic":
 						soil[row][col] = SoilType.METAMORPHIC;

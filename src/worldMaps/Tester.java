@@ -65,7 +65,7 @@ public class Tester {
 			for(int col = 0; col < r.width(); col++) {
 				String s = "? ";
 				switch(r.soilType(row, col)) {
-				case IGNIOUS:	s = "I "; break;
+				case IGNEOUS:	s = "I "; break;
 				case METAMORPHIC: s = "M "; break;
 				case SEDIMENTARY: s = "S "; break;
 				case ALLUVIAL: s = "A "; break;

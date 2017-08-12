@@ -30,6 +30,12 @@ public class Map extends JPanel {
 	public static final int SHOW_SOIL = 0x20;
 	private int display;		// bitmask for enabled SHOWs
 	
+	// soil types
+	public static final int SEDIMENTARY = 0;
+	public static final int METAMORPHIC = 1;
+	public static final int IGNIOUS = 2;
+	public static final int ALLUVIAL = 3;
+	
 	// map size (in pixels)
 	private static final int MIN_WIDTH = 400;	// min screen width
 	private static final int MIN_HEIGHT = 400;	// min screen height
@@ -47,6 +53,7 @@ public class Map extends JPanel {
 	// the interesting data
 	private Mesh mesh;			// mesh of Voronoi points
 	private double heightMap[]; // Height of each mesh point
+	private double soilMap[];	// Soil type of each mesh point
 	private double rainMap[];	// Rainfall of each mesh point
 	private double[] depression; // which cells are in depressions
 	public int sinks[];			// what drains to where
@@ -77,9 +84,10 @@ public class Map extends JPanel {
 					width/TOPO_CELL, height/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
+			this.soilMap = new double[mesh.vertices.length];
 			this.parms = Parameters.getInstance();
 			// ensure that the map is not perfectly flat
-			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL);
+			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);
 			calc_downhill();
 		}
 		selectNone();
@@ -98,8 +106,9 @@ public class Map extends JPanel {
 					getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
+			this.soilMap = new double[mesh.vertices.length];
 			// ensure that the map is not perfectly flat
-			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL);
+			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);
 			calc_downhill();
 		} else {
 			this.map = null;
@@ -124,6 +133,13 @@ public class Map extends JPanel {
 		double old[] = rainMap; 
 		rainMap = newRain; 
 		repaint();
+		return old;
+	}
+	
+	public double [] getSoilMap() {return soilMap;}
+	public double[] setSoilMap(double newSoil[]) {
+		double old[] = soilMap;
+		soilMap = newSoil;
 		return old;
 	}
 	

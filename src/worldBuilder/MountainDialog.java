@@ -12,6 +12,9 @@ import javax.swing.event.*;
  * cause a uniform slope to the entire map.  
  */
 public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, WindowListener {	
+	
+	private static final double MIN_MOUNTAIN = 0.05;	// minerals pop through	
+	
 	private Map map;
 	private double[] oldHeight;	// per MeshPoint altitude at entry
 	private double[] newHeight;	// edited per MeshPoint altitude
@@ -165,7 +168,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * 	find all points within the effective diameter
 	 * 	compute the height as a function of the distance from center
 	 */
-	public static void placeMountain(Map map, double x, double y, double radius, double zMax, int shape) {
+	public static void placeMountain(Map map, double x, double y, double radius, double zMax, int shape, int mineral) {
 		// get the shape parameters
 		int Fcone = Parameters.SPHERICAL - shape;
 		int Fcirc = shape;
@@ -173,6 +176,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// see which points are within the scope of this mountain
 		Mesh m = map.getMesh();
 		double heights[] = map.getHeightMap();
+		double soil[] = map.getSoilMap();
 		MeshPoint centre = new MeshPoint(x,y);
 		for(int i = 0; i < heights.length; i++) {
 			MeshPoint p = m.vertices[i];
@@ -195,6 +199,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 				heights[i] = -Parameters.z_extent/2;
 			else
 				heights[i] = newZ;
+			
+			// if mountain is tall enough, set the mineral type
+			if (newZ > MIN_MOUNTAIN)
+				soil[i] = mineral;
 		}
 	}
 
@@ -237,16 +245,17 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// TODO: piece-wise mountain ranges
 		// how many mountains can we create
 		if (mountains < 2) {
-			// one mountain goes in the center
-			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d/2, alt, shape);
+			// one mountain goes in the center (likely volcanic)
+			int mineral = (shape < (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNIOUS : Map.METAMORPHIC;
+			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d/2, alt, shape, mineral);
 		} else {
-			// multiple mountains are evenly spaced along the line
+			// multiple mountains are evenly spaced along the line (possibly metamorphic)
 			double X = X0;
 			double Y = Y0;
 			double dx = (X1 - X0)/mountains;
 			double dy = (Y1 - Y0)/mountains;
 			while( mountains >= 0 ) {
-				placeMountain(map, X, Y, d/2, alt, shape);
+				placeMountain(map, X, Y, d/2, alt, shape, map.METAMORPHIC);
 				X += dx;
 				Y += dy;
 				mountains -= 1;

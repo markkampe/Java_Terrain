@@ -18,6 +18,10 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	private Parameters parms;
 	private String filename;
 	
+	private static final String soilTypes[] = {
+			"sedimentary", "metamorphic", "ignious", "alluvial"
+	};
+	
 	private JTextField sel_name;
 	private JLabel sel_file;
 	private JLabel sel_pixels;
@@ -182,6 +186,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		Cartesian cart = new Cartesian(map.getMesh(), x, y, x+dx, y+dy, x_points, y_points);
 		double heights[][] = cart.interpolate(map.getHeightMap());
 		double rain[][] = cart.interpolate(map.getRainMap());
+		double soil[][] = cart.interpolate(map.getSoilMap());
 		
 		double lat = parms.latitude(y + dy/2);
 		double lon = parms.longitude(x + dx/2);
@@ -231,8 +236,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			for(int r = 0; r < y_points; r++) {
 				for(int c = 0; c < x_points; c++) {
 					int hydration = parms.dAmount;	// FIX compute real hydration
-					String soil = "alluvial";	// FIX compute real soil type
-					
 					if (first)
 						first = false;
 					else
@@ -244,7 +247,9 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 					output.write(COMMA);
 					output.write(String.format(FORMAT_DP, "hydration", hydration));
 					output.write(COMMA);
-					output.write(String.format(FORMAT_S, "soil", soil));
+					
+					int st = (int) Math.round(soil[r][c]);
+					output.write(String.format(FORMAT_S, "soil", soilTypes[st]));
 					output.write(" }");
 				}
 			}

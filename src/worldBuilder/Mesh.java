@@ -1,7 +1,13 @@
 package worldBuilder;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import javax.json.Json;
+import javax.json.stream.JsonParser;
 
 // note: this is the only class that knows about Voronoi
 import org.rogach.jopenvoronoi.Edge;
@@ -12,6 +18,8 @@ import org.rogach.jopenvoronoi.PointSite;
 import org.rogach.jopenvoronoi.Vertex;
 import org.rogach.jopenvoronoi.VertexType;
 import org.rogach.jopenvoronoi.VoronoiDiagram;
+
+import worldMaps.MapReader.SoilType;
 
 /**
  * @module mesh ... functions to generate the basic map
@@ -84,10 +92,103 @@ public class Mesh {
 	 * read mesh of MapPoints from a file
 	 */
 	public void read(String filename) {
-		System.out.println("TODO: Implement Mesh.read(" + filename + ")");
-		vertices = new MeshPoint[0];
-		edges = new Path[0];
-		// TODO implement Mesh:read
+		JsonParser parser;
+		try {
+			parser = Json.createParser(new BufferedReader(new FileReader(filename)));
+		} catch (FileNotFoundException e) {
+			System.err.println("FATAL: unable to open input file " + filename);
+			vertices = new MeshPoint[0];
+			edges = new Path[0];
+			return;
+		}
+
+		String thisKey = "";
+		boolean inPoints = false;
+		boolean inMesh = false;
+		boolean inNeighbors = false;
+		double x = 0;
+		double y = 0;
+		int length = 0;	// expected number of points
+		int points = 0;	// number of points read
+		PathHasher pathhash = null;
+		while(parser.hasNext()) {
+			JsonParser.Event e = parser.next();
+			switch(e) {		
+			case KEY_NAME:
+				thisKey = parser.getString();
+				if (thisKey.equals("points")) {
+					inPoints = true;
+					points = 0;
+				} else if (thisKey.equals("mesh")) {
+					inMesh = true;
+					points = 0;
+				}
+				break;
+				
+			case VALUE_FALSE:
+			case VALUE_TRUE:
+			case VALUE_STRING:
+			case VALUE_NUMBER:
+				if (inNeighbors) {
+					int n = new Integer(parser.getString());
+					vertices[points].addNeighbor(vertices[n]);
+					pathhash.findPath(vertices[points], vertices[n]);
+					break;
+				}
+				
+				switch(thisKey) {
+					case "length":
+						length = new Integer(parser.getString());
+						vertices = new MeshPoint[length];
+						pathhash = new PathHasher(3*length);
+						break;
+						
+					case "x":
+						x = new Double(parser.getString());
+						break;
+						
+					case "y":
+						y = new Double(parser.getString());
+						break;
+				}
+				break;
+				
+			case END_OBJECT:
+				if (inPoints) {
+					vertices[points] = new MeshPoint(x,y,points);
+					points++;
+				}
+				break;
+				
+			case START_ARRAY:
+				if (inMesh)
+					inNeighbors = true;
+				break;
+				
+			case END_ARRAY:
+				if (inPoints)
+					inPoints = false;
+				else if (inNeighbors) {
+					inNeighbors = false;
+					points++;
+				} else if (inMesh)
+					inMesh = false;
+				break;
+				
+			case START_OBJECT:
+			default:
+				break;
+			}
+		}
+		parser.close();
+		
+		// copy out the list of unique Edges
+		edges = new Path[pathhash.numPaths];
+		for(int i = 0; i < pathhash.numPaths; i++)
+			edges[i] = pathhash.paths[i];
+		
+		if (parms.debug_level > 0)
+			System.out.println("Loaded " + points + "/" + length + " points, " + edges.length + " paths from file " + filename);
 	}
 	
 	/**
@@ -96,25 +197,35 @@ public class Mesh {
 	public boolean write(String filename) {
 		try {
 			FileWriter output = new FileWriter(filename);
-			final String C_FORMAT = "        { \"x\":\"%10.7f\", \"y\":\"%10.7f\" }\n";
+			final String C_FORMAT = "        { \"x\":\"%10.7f\", \"y\":\"%10.7f\" }";
 			
 			// write out the Mesh wrapper
-			output.write( "{   \"points\":\"" + vertices.length + "\",\n");
-			output.write( "    \"mesh\":[\n" );
+			output.write( "{   \"length\":" + vertices.length + ",\n");
+			// first write out the points
+			output.write( "    \"points\": [\n" );
 			for(int i = 0; i < vertices.length; i++) {
 				if (i != 0)
 					output.write(",\n");
 				MeshPoint m = vertices[i];
 				output.write(String.format(C_FORMAT, m.x, m.y));
-				
-				output.write(", \"neighbors\":[ ");
+			}
+			output.write(" ],\n");
+			
+			// then write out the neighbor connections
+			output.write( "    \"mesh\": [\n" );
+			for(int i = 0; i < vertices.length; i++) {
+				if (i != 0)
+					output.write(",\n");
+				MeshPoint m = vertices[i];
+				output.write("        [ ");
 				for(int n = 0; n < m.neighbors; n++) {
 					if (n != 0)
 						output.write(", ");
 					output.write(String.format("%d",  m.neighbor[n].index));
 				}
-				output.write(" ] }");
+				output.write(" ]");
 			}
+		
 			output.write( "\n    ]\n");
 			output.write( "}\n");
 			output.close();

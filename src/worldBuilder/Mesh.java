@@ -389,7 +389,6 @@ public class Mesh {
 			// ignore paths originating outside the box
 			if (!inTheBox(p1))
 				continue;
-			// TODO short-circuit paths ending outside the box
 			if (!inTheBox(p2))
 				continue;		
 			
@@ -403,13 +402,21 @@ public class Mesh {
 			numPaths++;
 		} 
 		
-		// TODO stitch together out-of-the-box paths
-		
 		// copy out the list of unique Vertices
 		vertices = new MeshPoint[pointhash.numVertices];
 		for(int i = 0; i < pointhash.numVertices; i++)
 			vertices[i] = pointhash.vertices[i];
 		
+		/*
+		 * NOTE
+		 * I was irritated by the number of disconnected edge-points and
+		 * had been thinking about stitching together non-fully connected
+		 * points (with a clockwise scan, connecting adjacent 
+		 * non-3-neighbor MeshPoints). 
+		 * But the primary purpose of the neighbor list is water flow 
+		 * ... which ends at the edges anyway.
+		 */
+
 		if (parms.debug_level > 0)
 			System.out.println(points.length + " points-> " + vertices.length + "/" + g.num_vertices() + 
 					" mesh vertices, " + numPaths/2 + "/" + g.num_edges() + " mesh paths");

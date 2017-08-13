@@ -377,7 +377,7 @@ public class Map extends JPanel {
 	}
 	// TODO move calc_downhill into another class
 	// TODO sink computation
-	// edges have a downhill of OFFMAP
+	// edges have a downhill of OFFMAP ... based on edge, not neighbors
 	// no downhill is NONESUCH (or -(1+ESCAPE POINT)
 	// have a count of tributaries as well as ultimate down hill
 	// for each sink with tributaries, find lowest neighbor w/different sink

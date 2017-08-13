@@ -45,6 +45,13 @@ public class MeshPoint {
 		neighbor[neighbors++] = p;
 	}
 	
+	public boolean isNeighbor(MeshPoint p) {
+		for(int i = 0; i < neighbors; i++)
+			if (neighbor[i] == p)
+				return(true);
+		return(false);
+	}
+	
 	/**
 	 * compute the distance between two points
 	 * 

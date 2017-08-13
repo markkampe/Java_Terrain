@@ -84,6 +84,8 @@ public class WorldBuilder  extends JFrame
 
 	private static final String SWITCH_CHAR = "-";			// command line switches
 	
+	private static final String DEFAULT_TEMPLATE = "Templates/default_4096.json";
+	
 	private static final long serialVersionUID = 0xdeadbeef;	// this is stupid
 	
 	/**
@@ -431,7 +433,7 @@ public class WorldBuilder  extends JFrame
 	public static void main(String[] args) {
 		// instantiate a parameters singleton
 		parms = Parameters.getInstance();
-		String filename = null;
+		String filename = DEFAULT_TEMPLATE;
 		
 		// process the arguments
 		for( int i = 0; i < args.length; i++ ) {
@@ -441,6 +443,7 @@ public class WorldBuilder  extends JFrame
 				filename = args[i];		// Do I have non-switch args?
 			}
 		}
+
 		
 		// create our display
 		WorldBuilder w = new WorldBuilder(filename);

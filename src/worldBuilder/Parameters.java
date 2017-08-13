@@ -78,7 +78,7 @@ package worldBuilder;
 	 * the largest legal mountain diameter
 	 */
 	public int maxDiameter() {
-		return(xy_range/5);
+		return(xy_range/2);
 	}
 	
 	/**

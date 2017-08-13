@@ -234,7 +234,7 @@ public class WorldBuilder  extends JFrame
 		e_panel.add(eroLabel);
 		e_panel.add(erosion);
 		
-		int a_max = Parameters.ALT_SCALE * Parameters.ALT_MAX/2;
+		int a_max = Parameters.ALT_SCALE * Parameters.ALT_MAX/4;
 		seaLevel = new JSlider(-a_max, a_max, 0);
 		seaLevel.setMajorTickSpacing(Parameters.niceTics(-a_max, a_max, true));
 		seaLevel.setMinorTickSpacing(Parameters.niceTics(-a_max, a_max, false));

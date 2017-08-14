@@ -16,7 +16,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 		private JComboBox<Integer> pointsChooser;
 		private JComboBox<Integer> improveChooser;
 				
-		private static final int BORDER_WIDTH = 5;
+		private static final int DIALOG_OFFSET = 2;
 		
 		private static final long serialVersionUID = 1L;
 		
@@ -26,9 +26,10 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 			this.parms = Parameters.getInstance();
 			
 			// create the dialog box
+			int border = parms.dialogBorder;
 			Container mainPane = getContentPane();
-			((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
-			setTitle("World Size");
+			((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
+			setTitle("Create Mesh");
 			addWindowListener( this );
 			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			
@@ -49,7 +50,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 			for(int i = 0; i <= 4; i++) {
 				improveChooser.addItem(i);
 			}
-			improveChooser.setSelectedItem(1);
+			improveChooser.setSelectedItem(parms.improvements);
 			
 			accept = new JButton("ACCEPT");
 			cancel = new JButton("CANCEL");
@@ -89,7 +90,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 			mainPane.add(buttons, BorderLayout.SOUTH);
 			
 			pack();
-			setLocation(parms.dialogDX, parms.dialogDY);
+			setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 			setVisible(true);
 			
 			// add the action listeners

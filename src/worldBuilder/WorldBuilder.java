@@ -21,7 +21,6 @@ public class WorldBuilder  extends JFrame
 	private String filename;	// name of current input/output file
 	private boolean modified;	// should this file be saved
 	
-	
 	// exit codes
 	private static final int EXIT_OK = 0;
 	// private static final int EXIT_ARGS = 1;
@@ -30,14 +29,6 @@ public class WorldBuilder  extends JFrame
 	// 2D canvas
 	private Container mainPane;
 	private Map map;
-	
-	// view status
-	private int viewing_points;
-	private int viewing_mesh;
-	private int viewing_topo;
-	private int viewing_rain;
-	private int viewing_water;
-	private int viewing_soil;
 	
 	// menu bar items
 	private JMenuItem fileNew;
@@ -78,13 +69,11 @@ public class WorldBuilder  extends JFrame
 			"/images/builder-96.png",
 			"/images/builder-128.png"
 	};
-	
-	private static final String INPUT_TYPE = "*.json";
-	private static final String EXPORT_TYPE = "*.json";
 
 	private static final String SWITCH_CHAR = "-";			// command line switches
 	
 	private static final String DEFAULT_TEMPLATE = "Templates/default_4096.json";
+	private static final String DEFAULT_CONFIG = "Templates/worldBuilder.json";
 	
 	private static final long serialVersionUID = 0xdeadbeef;	// this is stupid
 	
@@ -101,8 +90,9 @@ public class WorldBuilder  extends JFrame
 		
 		// get a handle on our display window
 		mainPane = getContentPane();
-		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
-		setTitle("World Builder");
+		int border = parms.border;
+		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
+		setTitle(parms.title);
 		addWindowListener( this );
 		addComponentListener(this);
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -234,10 +224,9 @@ public class WorldBuilder  extends JFrame
 		e_panel.add(eroLabel);
 		e_panel.add(erosion);
 		
-		int a_max = Parameters.ALT_SCALE * Parameters.ALT_MAX/4;
-		seaLevel = new JSlider(-a_max, a_max, 0);
-		seaLevel.setMajorTickSpacing(Parameters.niceTics(-a_max, a_max, true));
-		seaLevel.setMinorTickSpacing(Parameters.niceTics(-a_max, a_max, false));
+		seaLevel = new JSlider(-parms.msl_range, parms.msl_range, 0);
+		seaLevel.setMajorTickSpacing(Parameters.niceTics(-parms.msl_range, parms.msl_range, true));
+		seaLevel.setMinorTickSpacing(Parameters.niceTics(-parms.msl_range, parms.msl_range, false));
 		seaLevel.setFont(fontSmall);
 		seaLevel.setPaintTicks(true);
 		seaLevel.setPaintLabels(true);
@@ -268,7 +257,7 @@ public class WorldBuilder  extends JFrame
 	private void doSave(String filename) {
 		String title = (filename == null) ? "Save As" : "Save";
 		FileDialog d = new FileDialog(this, title, FileDialog.SAVE);
-		d.setFile(filename == null ? INPUT_TYPE : filename);
+		d.setFile(filename == null ? "world.json" : filename);
 		d.setLocation(parms.dialogDX, parms.dialogDY);
 		d.setVisible(true);
 		filename = d.getFile();
@@ -304,7 +293,6 @@ public class WorldBuilder  extends JFrame
 			if (modified)
 				checkSave();
 			FileDialog d = new FileDialog(this, "Choose input file", FileDialog.LOAD);
-			d.setFile(INPUT_TYPE);
 			d.setLocation(parms.dialogDX, parms.dialogDY);
 			d.setVisible(true);
 			filename = d.getFile();
@@ -350,34 +338,27 @@ public class WorldBuilder  extends JFrame
 		}
 		
 		// view menu toggles individual views on and off
-		else if (o == viewPoints) {
-			viewing_points = map.setDisplay(Map.SHOW_POINTS, viewing_points == 0);
-			viewPoints.setText(viewing_points != 0 ? "~points" : "Points");
-		} else if (o == viewMesh) {
-			viewing_mesh = map.setDisplay(Map.SHOW_MESH, viewing_mesh == 0);
-			viewMesh.setText(viewing_mesh != 0 ? "~mesh" : "Mesh");
-		} else if (o == viewTopo) {
-			viewing_topo = map.setDisplay(Map.SHOW_TOPO, viewing_topo == 0);
-			viewTopo.setText(viewing_topo != 0 ? "~topo" : "Topo");
-		} else if (o == viewRain) {
-			viewing_rain = map.setDisplay(Map.SHOW_RAIN, viewing_rain == 0);
-			viewRain.setText(viewing_rain != 0 ? "~rain" : "Rain");
-		} else if (o == viewWater) {
-			viewing_water = map.setDisplay(Map.SHOW_WATER, viewing_water == 0);
-			viewWater.setText(viewing_water != 0 ? "~water" : "Water");
-		} else if (o == viewSoil) {
-			viewing_soil = map.setDisplay(Map.SHOW_SOIL, viewing_soil == 0);
-			viewSoil.setText(viewing_soil != 0 ? "~soil" : "Soil");
-		} else if (o == viewZoom) {
+		else if (o == viewPoints)
+			parms.display_options = map.setDisplay(Map.SHOW_POINTS, (parms.display_options & Map.SHOW_POINTS) == 0);
+		else if (o == viewMesh)
+			parms.display_options = map.setDisplay(Map.SHOW_MESH, (parms.display_options & Map.SHOW_MESH) == 0);
+		else if (o == viewTopo)
+			parms.display_options = map.setDisplay(Map.SHOW_TOPO, (parms.display_options & Map.SHOW_TOPO) == 0);
+		else if (o == viewRain)
+			parms.display_options = map.setDisplay(Map.SHOW_RAIN, (parms.display_options & Map.SHOW_RAIN) == 0);
+		else if (o == viewWater)
+			parms.display_options = map.setDisplay(Map.SHOW_WATER, (parms.display_options & Map.SHOW_WATER) == 0);
+		else if (o == viewSoil)
+			parms.display_options = map.setDisplay(Map.SHOW_SOIL, (parms.display_options & Map.SHOW_SOIL) == 0);
+		else if (o == viewZoom)
 			new ZoomDialog(map);
-		}
-		
 		// help menu just shows info
 		else if (o == helpInfo) {
 			JOptionPane.showMessageDialog(new JFrame(), 
 					version +"\n" + author + "\n" + credit + "\n" + license, 
 					"Information", JOptionPane.INFORMATION_MESSAGE);
 		}
+		updateDisplayMenus(parms.display_options);
 	}
 	
 	// these may all be just place holders
@@ -393,10 +374,19 @@ public class WorldBuilder  extends JFrame
 		}
 	}
 	
+	private void updateDisplayMenus(int opts) {
+		viewPoints.setText( (opts & Map.SHOW_POINTS) != 0 ? "~points" : "Points");
+		viewMesh.setText( (opts & Map.SHOW_MESH) != 0 ? "~mesh" : "Mesh");
+		viewTopo.setText( (opts & Map.SHOW_TOPO) != 0 ? "~topo" : "Topo");
+		viewRain.setText( (opts & Map.SHOW_RAIN) != 0 ? "~rain" : "Rain");
+		viewWater.setText( (opts & Map.SHOW_WATER) != 0 ? "~water" : "Water");
+		viewSoil.setText( (opts & Map.SHOW_SOIL) != 0 ? "~soil" : "Soil");
+	}
 	/**
 	 * window resize
 	 */
 	public void componentResized(ComponentEvent e) {
+		// TODO: send resize to map
 	}
 	
 	/**
@@ -421,25 +411,25 @@ public class WorldBuilder  extends JFrame
 	public void componentMoved(ComponentEvent arg0) {}
 
 	public static void main(String[] args) {
-		// instantiate a parameters singleton
-		parms = Parameters.getInstance();
-		String filename = DEFAULT_TEMPLATE;
-		
 		// process the arguments
+		String filename = DEFAULT_TEMPLATE;
+		int debug = 0;
 		for( int i = 0; i < args.length; i++ ) {
 			if (args[i].startsWith(SWITCH_CHAR)) {	
-				parms.parseSwitch( args[i].substring(1));
+				if (args[i].startsWith("-d"))
+					debug = new Integer(args[i].substring(2));
 			} else {
 				filename = args[i];		// Do I have non-switch args?
 			}
 		}
+		// instantiate the parameters singleton
+		parms = new Parameters(DEFAULT_CONFIG, debug);
 
-		
 		// create our display
 		WorldBuilder w = new WorldBuilder(filename);
 		
-		// initialize the display type
-		w.viewing_mesh = w.map.setDisplay(Map.SHOW_MESH, true);
-		w.viewMesh.setText("~mesh");
+		// initialize the display type and options menus
+		w.map.setDisplay(parms.display_options, true);
+		w.updateDisplayMenus(parms.display_options);
 	}
 }

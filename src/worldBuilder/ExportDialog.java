@@ -39,7 +39,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 
 	private static final int tile_sizes[] = {1, 5, 10, 50, 100, 500, 1000, 5000, 10000};
 	
-	private static final int BORDER_WIDTH = 5;
+	private static final int DIALOG_OFFSET = 4;
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -50,7 +50,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
-		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
+		int border = parms.dialogBorder;
+		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
 		setTitle("Export");
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -144,7 +145,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		mainPane.add(controls, BorderLayout.SOUTH);
 		
 		pack();
-		setLocation(parms.dialogDX, parms.dialogDY);
+		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners
@@ -254,6 +255,10 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		} catch (IOException e) {
 			System.err.println("Unable to create output file " + filename);		
 		}
+		
+		if (parms.debug_level > 0)
+			System.out.println("Exported: " + x_points + "x" + y_points + " " + meters + "m tiles " +
+					"from <" + lat + "," + lon + "> to " + filename);
 	}
 	
 	/**

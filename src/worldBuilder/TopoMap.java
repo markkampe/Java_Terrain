@@ -44,8 +44,8 @@ public class TopoMap {
 		boolean over_under[][] = new boolean[zArray.length][zArray[0].length];
 
 		// figure out how many topographic lines we have to render
-		double deltaH = parms.topo_major / parms.topo_minor;
-		int maxLines = (int) (1 + Parameters.z_extent / deltaH);
+		int maxLines = parms.topo_major * parms.topo_minor;
+		double deltaH = Parameters.z_extent / maxLines;
 		for (int line = 0; line < maxLines; line++) {
 			double z = line * deltaH - Parameters.z_extent / 2;
 			if (z < parms.sea_level)

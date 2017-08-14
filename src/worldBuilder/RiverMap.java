@@ -47,26 +47,25 @@ public class RiverMap {
 		int downHill[] = map.getDownHill();
 
 		// calculate the minimum flow to qualify as a stream
-		//	m2 = estimated water-shed area for this MeshPoint
+		//	m2 = estimated water-shed area for this MeshPoint (m2/s)
 		double m2 = parms.xy_range * parms.xy_range * 1000 * 1000 / mesh.vertices.length;
 		//	year = number of seconds in a year
 		double year = 365.25 * 24 * 60 * 60;
-		//	parms.min_flux = minimum M3/sec for a stream
-		//	minFlow = minimum annual cm of flow for a stream
-		double minFlow = parms.min_flux * year * 100 / m2;
+		
+		// translate minimum flow thresholds into cm/year of rain
+		double minStream = parms.stream_flux * year * 100 / m2;
+		double minRiver = parms.river_flux * year * 100 / m2;
 
 		// calculate the color curve (green vs flow)
-		//	a river is RIVER_FLOW * minFlow
-		double river_threshold = minFlow * Parameters.RIVER_FLOW;
-		double dGdF = 255/(river_threshold - minFlow);
-		double intercept = river_threshold * dGdF;
+		double dGdF = 255/(minRiver - minStream);
+		double intercept = minRiver * dGdF;
 		
 		// draw the streams, rivers, lakes and oceans
 		double flux[] = this.calculate();
 		for(int i = 0; i < flux.length; i++) {
 			if (heightMap[i] < parms.sea_level)
 				continue;	// don't display rivers under the ocean
-			if (flux[i] < minFlow)
+			if (flux[i] < minStream)
 				continue;	// don't display flux below stream cut-off
 			if (downHill[i] >= 0) {
 				int d = downHill[i];
@@ -80,9 +79,12 @@ public class RiverMap {
 					x2 = (x1 + x2)/2;
 					y2 = (y1 + y2)/2;
 				}
+				// FIX: streams should become paler as well as less blue
 				
+				// anything as high as a river is a river
+				double flow = flux[i] > minRiver ? minRiver : flux[i];
 				// interpolate a color: river=BLUE, stream=CYAN
-				double green = Math.max(0, intercept - (dGdF * flux[i]));
+				double green = Math.max(0, intercept - (dGdF * flow));
 				g.setColor(new Color(0, (int) green, 255));
 				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 			} else {

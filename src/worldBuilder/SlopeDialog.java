@@ -24,8 +24,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	
 	private int x0, y0, x1, y1;		// chosen slope axis
 	
-	private static final int BORDER_WIDTH = 5;
-	
+	private static final int DIALOG_OFFSET = 1;
 	private static final long serialVersionUID = 1L;
 	
 	public SlopeDialog(Map map)  {
@@ -42,7 +41,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
-		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
+		int border = parms.dialogBorder;
+		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
 		setTitle("Define Whole-Map Slope");
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -62,14 +62,16 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		JLabel axisLabel = new JLabel("Axis(deg)", JLabel.CENTER);
 		axisLabel.setFont(fontLarge);
 
-		i_max = (parms.z_range/10)/ parms.xy_range;	// continental slope is not large
+		i_max = (100 * parms.z_range)/ parms.xy_range;	// max possible cm/km
+		i_max /= 5;			// continental slope is much less than that
 		inclination = new JSlider(JSlider.HORIZONTAL, -i_max, i_max, 0);
 		inclination.setMajorTickSpacing(Parameters.niceTics(-i_max, i_max, true));
 		inclination.setMinorTickSpacing(Parameters.niceTics(-i_max, i_max, false));
 		inclination.setFont(fontSmall);
 		inclination.setPaintTicks(true);
 		inclination.setPaintLabels(true);
-		JLabel inclinationLabel = new JLabel("Slope(m/km)", JLabel.CENTER);
+		String label = "Slope(" + Parameters.unit_s + ")";
+		JLabel inclinationLabel = new JLabel(label, JLabel.CENTER);
 		inclinationLabel.setFont(fontLarge);
 		
 		/*
@@ -107,7 +109,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		mainPane.add(buttons, BorderLayout.SOUTH);
 		
 		pack();
-		setLocation(parms.dialogDX, parms.dialogDY);
+		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners
@@ -128,8 +130,9 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	public void incline(double inclination) {
 		// convert inclination from word to map units
 		double Zscale = inclination;
-		Zscale /= parms.z_range;
-		Zscale *= parms.xy_range;
+		Zscale *= parms.xy_range;	// slope times distance
+		Zscale /= 100;				// cm->m
+		Zscale /= parms.z_range;	// scaled to Z range
 		
 		// get map and display parameters
 		Mesh m = map.getMesh();
@@ -228,6 +231,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		} else if (e.getSource() == accept) {
 			map.selectNone();
 			oldHeight = null;	// don't need this anymore
+			if (parms.debug_level > 0)
+				System.out.println("Incline continent: axis=" + axis.getValue() + ", slope=" + inclination.getValue() + Parameters.unit_s);
 			this.dispose();
 		}
 	}

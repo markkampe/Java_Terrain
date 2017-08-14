@@ -1,0 +1,40 @@
+{
+    "window": {
+	"title": "Worldbuilder 0.1 - WIP",
+	"height": 1000,
+	"width": 1000,
+	"border": 10,
+	"dialog_x": 250,
+	"dialog_y": 1000,
+	"dialog_delta": 50,
+    	"dialog_border": 5
+    },
+    "world": {
+	"diameter_unit": 100,
+	"diameter_max": 1000,
+	"diameter_grain": 10,
+	"altitude_unit": 100,
+	"altitude_max": 5000,
+	"mountain_fraction": 4,
+	"altitude_rain": 3000,
+	"msl_range": 2500,
+	"rain_max": 2000,
+	"radius": 6371,
+	"latitude": 30.0,
+	"longitude": -90.0
+	},
+    "map": {
+	"points": 4096,
+	"improvements": 1,
+	"topo_major": 10,
+	"topo_minor": 5,
+	"river": 100,
+	"stream": 0.25
+    },
+    "display": {
+    	"mesh": true,
+	"topo": true,
+	"water": true
+    }
+}
+   

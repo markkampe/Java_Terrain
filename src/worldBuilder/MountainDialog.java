@@ -33,7 +33,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private int d_max;				// diameter: full scale
 	private int a_max;				// altitude: full scale
 	
-	private static final int BORDER_WIDTH = 5;
+	private String placed;			// debug message
+	
+	private static final int DIALOG_OFFSET = 5;
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -51,11 +53,12 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		// calibrate full scale on the sliders
 		this.a_max = parms.z_range/2;
-		this.d_max = parms.maxDiameter();
+		this.d_max = parms.xy_range / parms.mountain_divisor;
 	
 		// create the dialog box
 		Container mainPane = getContentPane();
-		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
+		int border = parms.dialogBorder;
+		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
 		setTitle("Add Mountain(s)");
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -141,7 +144,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		mainPane.add(buttons, BorderLayout.SOUTH);
 		
 		pack();
-		setLocation(parms.dialogDX, parms.dialogDY);
+		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners
@@ -226,6 +229,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 *  5. map.repaint
 	 */
 	private void redraw() {
+		placed = "";	// reset the debug message
+		
 		// reset to the height map we started with
 		for(int i = 0; i < oldHeight.length; i++)
 			newHeight[i] = oldHeight[i];
@@ -248,7 +253,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		int mountains = (int) (m + 0.5);
 		
 		// get the height
-		double alt = (double) altitude.getValue() / parms.z_range *  Parameters.z_extent;
+		int alt = altitude.getValue();
+		double z = (double) alt / parms.z_range *  Parameters.z_extent;
 		
 		// get the shape
 		int shape = rounding.getValue();
@@ -258,7 +264,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		if (mountains < 2) {
 			// one mountain goes in the center (likely volcanic)
 			int mineral = (shape < (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNIOUS : Map.METAMORPHIC;
-			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d/2, alt, shape, mineral);
+			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d/2, z, shape, mineral);
+			placed = "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
+					alt + Parameters.unit_z + " " + Map.soil_names[mineral] + " mountain at <" +
+					parms.latitude(X0+X1/2) + "," + parms.longitude(Y0+Y1/2) + "> shape=" + shape + "\n";
 		} else {
 			// multiple mountains are evenly spaced along the line (possibly metamorphic)
 			double X = X0;
@@ -266,7 +275,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			double dx = (X1 - X0)/mountains;
 			double dy = (Y1 - Y0)/mountains;
 			while( mountains >= 0 ) {
-				placeMountain(map, X, Y, d/2, alt, shape, map.METAMORPHIC);
+				placeMountain(map, X, Y, d/2, z, shape, map.METAMORPHIC);
+				placed += "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
+						alt + Parameters.unit_z + " metamorphic mountain at <" +
+						parms.latitude(X) + "," + parms.longitude(Y) + "> shape=" + shape + "\n";
 				X += dx;
 				Y += dy;
 				mountains -= 1;
@@ -360,6 +372,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			
 			// clean up the selection graphics
 			map.selectNone();
+			
+			if (parms.debug_level > 0)
+				System.out.print(placed);
 		}
 		
 	}

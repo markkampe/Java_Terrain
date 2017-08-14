@@ -41,7 +41,7 @@ public class RainMap {
 				double rain = rArray[r][c];
 
 				// shade a rectangle w/cyan for that rainfall
-				double shade = logarithmic(RAIN_DIM, RAIN_BRITE, rain / parms.r_range, 0.2);
+				double shade = logarithmic(RAIN_DIM, RAIN_BRITE, rain / parms.rain_max, 0.2);
 				g.setColor(new Color(0, (int) shade, (int) shade));
 				g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 			}

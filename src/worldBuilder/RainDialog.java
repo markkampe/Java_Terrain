@@ -23,7 +23,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	private JButton accept;
 	private JButton cancel;
 	
-	private static final int BORDER_WIDTH = 5;
+	private static final int DIALOG_OFFSET = 3;
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -41,7 +41,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 
 		// create the dialog box
 		Container mainPane = getContentPane();
-		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
+		int border = parms.dialogBorder;
+		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
 		setTitle("Rainfall");
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -61,24 +62,22 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		JLabel dirLabel = new JLabel("Dominant Direction", JLabel.CENTER);
 		dirLabel.setFont(fontLarge);
 
-		amount = new JSlider(JSlider.HORIZONTAL, 0, parms.r_range, parms.dAmount);
-		amount.setMajorTickSpacing(Parameters.niceTics(0, parms.r_range,true));
-		amount.setMinorTickSpacing(Parameters.niceTics(0, parms.r_range,false));
+		amount = new JSlider(JSlider.HORIZONTAL, 0, parms.rain_max, parms.dAmount);
+		amount.setMajorTickSpacing(Parameters.niceTics(0, parms.rain_max,true));
+		amount.setMinorTickSpacing(Parameters.niceTics(0, parms.rain_max,false));
 		amount.setFont(fontSmall);
 		amount.setPaintTicks(true);
 		amount.setPaintLabels(true);
 		JLabel amtLabel = new JLabel("Annual Rainfall(cm/yr)", JLabel.CENTER);
 		amtLabel.setFont(fontLarge);
 		
-		int a_max = Parameters.ALT_MAX/2;
-		int a_min = Parameters.ALT_MIN;
-		altitude = new JSlider(JSlider.HORIZONTAL, a_min, a_max, parms.dRainHeight);
-		altitude.setMajorTickSpacing(Parameters.niceTics(a_min, a_max, true));
-		altitude.setMinorTickSpacing(Parameters.niceTics(a_min, a_max, false));
+		altitude = new JSlider(JSlider.HORIZONTAL, 0, parms.alt_maxrain, parms.dRainHeight);
+		altitude.setMajorTickSpacing(Parameters.niceTics(0, parms.alt_maxrain, true));
+		altitude.setMinorTickSpacing(Parameters.niceTics(0, parms.alt_maxrain, false));
 		altitude.setFont(fontSmall);
 		altitude.setPaintTicks(true);
 		altitude.setPaintLabels(true);
-		JLabel altLabel = new JLabel("Altitude(m x 1000)", JLabel.CENTER);
+		JLabel altLabel = new JLabel("Cloud Bottoms(m x 1000)", JLabel.CENTER);
 		altLabel.setFont(fontLarge);
 
 		
@@ -124,7 +123,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		mainPane.add(buttons, BorderLayout.SOUTH);
 		
 		pack();
-		setLocation(parms.dialogDX, parms.dialogDY);
+		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners
@@ -241,6 +240,10 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			parms.dAmount = amount.getValue();
 			parms.dDirection = direction.getValue();
 			parms.dRainHeight = altitude.getValue();
+			
+			if (parms.debug_level > 0)
+				System.out.println("Rainfall: " + parms.dAmount + Parameters.unit_r + ", from " + 
+						parms.dDirection + ", cloud bottoms at " + parms.dRainHeight + Parameters.unit_z);
 			// we no longer need the old rain map
 			oldRain = null;
 		}

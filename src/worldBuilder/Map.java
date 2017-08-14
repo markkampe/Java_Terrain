@@ -35,6 +35,9 @@ public class Map extends JPanel {
 	public static final int METAMORPHIC = 1;
 	public static final int IGNIOUS = 2;
 	public static final int ALLUVIAL = 3;
+	public static final String soil_names[] = {
+			"Sedimentary", "Metamorphic", "Ignious", "Alluvial"
+	};
 	
 	// map size (in pixels)
 	private static final int MIN_WIDTH = 400;	// min screen width
@@ -162,7 +165,7 @@ public class Map extends JPanel {
 			display &= ~view;
 		if (mesh != null)
 			repaint();
-		return display & view;
+		return display;
 	}
 	
 	/**

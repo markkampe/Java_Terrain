@@ -16,13 +16,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		private JTextField latitude;
 		private JTextField longitude;
 		
-		// limits on world sizes
-		private static final int WORLD_SCALE = 100;	// slider labeling unit
-		private static final int WORLD_MIN = 0;		// min world diameter (km x100)
-		private static final int WORLD_MAX = 50;	// max world diameter (km x100)
-		private static final int WORLD_GRAIN = 500;	// multiple of 500 km
-		
-		private static final int BORDER_WIDTH = 5;
+		private static final int DIALOG_OFFSET = 0;
 		
 		private static final long serialVersionUID = 1L;
 		
@@ -32,7 +26,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			
 			// create the dialog box
 			Container mainPane = getContentPane();
-			((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
+			((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(parms.border, parms.border, parms.border, parms.border, Color.LIGHT_GRAY));
 			setTitle("Map Size/Location");
 			addWindowListener( this );
 			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -49,23 +43,29 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			longitude = new JTextField(Double.toString(parms.longitude));
 			JLabel lonLabel = new JLabel("longitude (center of map)");
 			lonLabel.setFont(fontLarge);
-			
-			diameter = new JSlider(JSlider.HORIZONTAL, WORLD_MIN, WORLD_MAX, parms.xy_range/WORLD_SCALE);
-			diameter.setMajorTickSpacing(Parameters.niceTics(WORLD_MIN, WORLD_MAX, true));
-			diameter.setMinorTickSpacing(Parameters.niceTics(WORLD_MIN, WORLD_MAX, false));
+		
+			int max = parms.diameter_max/parms.diameter_scale;
+			int dflt = parms.xy_range/parms.diameter_scale;
+			diameter = new JSlider(JSlider.HORIZONTAL, 0, max, dflt);
+			diameter.setMajorTickSpacing(Parameters.niceTics(0, max, true));
+			diameter.setMinorTickSpacing(Parameters.niceTics(0, max, false));
 			diameter.setFont(fontSmall);
 			diameter.setPaintTicks(true);
 			diameter.setPaintLabels(true);
-			JLabel diameterLabel = new JLabel("Height/Width (km x 100)", JLabel.CENTER);
+			String label = "Height/Width (" + parms.unit_xy + " x " + parms.diameter_scale + ")";
+			JLabel diameterLabel = new JLabel(label, JLabel.CENTER);
 			diameterLabel.setFont(fontLarge);
 			
-			altitude = new JSlider(JSlider.HORIZONTAL, Parameters.ALT_MIN, Parameters.ALT_MAX, parms.z_range/(2*Parameters.ALT_SCALE));
-			altitude.setMajorTickSpacing(Parameters.niceTics(Parameters.ALT_MIN, Parameters.ALT_MAX, true));
-			altitude.setMinorTickSpacing(Parameters.niceTics(Parameters.ALT_MIN, Parameters.ALT_MAX, false));
+			max = parms.alt_max / parms.alt_scale;
+			dflt = parms.z_range / (2 * parms.alt_scale);
+			altitude = new JSlider(JSlider.HORIZONTAL, 0, max, dflt);
+			altitude.setMajorTickSpacing(Parameters.niceTics(0, max, true));
+			altitude.setMinorTickSpacing(Parameters.niceTics(0, max, false));
 			altitude.setFont(fontSmall);
 			altitude.setPaintTicks(true);
 			altitude.setPaintLabels(true);
-			JLabel altLabel = new JLabel(" max Altitude (m x 1000)", JLabel.CENTER);
+			label = "max Altitude (" + parms.unit_z + " x " + parms.alt_scale + ")";
+			JLabel altLabel = new JLabel(label, JLabel.CENTER);
 			altLabel.setFont(fontLarge);
 			
 			/*
@@ -124,7 +124,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			mainPane.add(buttons, BorderLayout.SOUTH);
 			
 			pack();
-			setLocation(parms.dialogDX, parms.dialogDY);
+			setLocation(parms.dialogDX + DIALOG_OFFSET*parms.dialogDelta, parms.dialogDY+ DIALOG_OFFSET*parms.dialogDelta);
 			setVisible(true);
 			
 			// add the action listeners
@@ -150,19 +150,22 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			// on acceptance, copy values into parameters
 			if (e.getSource() == accept) {
 				if (diameter.getValue() > 0) {
-					int v = diameter.getValue() * WORLD_SCALE;
-					if (v < WORLD_GRAIN)	// minimum legal value
-						v = WORLD_GRAIN;
+					int v = diameter.getValue() * parms.diameter_scale;
+					if (v < parms.diameter_grain)	// minimum legal value
+						v = parms.diameter_grain;
 					else					// force it to a round number
-						v = ((v + WORLD_GRAIN-1) / WORLD_GRAIN) * WORLD_GRAIN;
+						v = ((v + parms.diameter_grain-1) /parms. diameter_grain) * parms.diameter_grain;
 					parms.xy_range = v;
 				}
 				if (altitude.getValue() > 0) {
-					int v = altitude.getValue() * Parameters.ALT_SCALE;
+					int v = altitude.getValue() * parms.alt_scale;
 					parms.z_range = 2*v;		// from -v to +v
 				}
 				parms.latitude = Double.parseDouble(latitude.getText());
 				parms.longitude = Double.parseDouble(longitude.getText());
+				if (parms.debug_level > 0)
+					parms.worldParms();
+				
 				this.dispose();
 			} else if (e.getSource() == cancel) {
 				this.dispose();

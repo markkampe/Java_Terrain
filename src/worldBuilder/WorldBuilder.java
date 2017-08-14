@@ -327,17 +327,7 @@ public class WorldBuilder  extends JFrame
 			map.setMesh(null);
 			modified = false;
 		} else if (o == fileExport) {
-			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
-			d.setFile(EXPORT_TYPE);
-			d.setLocation(parms.dialogDX, parms.dialogDY);
-			d.setVisible(true);
-			String export_file = d.getFile();
-			if (export_file != null) {
-				String dir = d.getDirectory();
-				if (dir != null)
-					export_file = dir + export_file;
-				new ExportDialog(map, export_file);
-			}
+			new ExportDialog(map);
 		} else if (o == fileExit) {
 			if (modified)
 				checkSave();

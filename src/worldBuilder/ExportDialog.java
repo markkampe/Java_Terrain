@@ -16,14 +16,12 @@ import javax.swing.event.*;
 public class ExportDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, WindowListener {	
 	private Map map;
 	private Parameters parms;
-	private String filename;
 	
 	private static final String soilTypes[] = {
 			"sedimentary", "metamorphic", "ignious", "alluvial"
 	};
 	
 	private JTextField sel_name;
-	private JLabel sel_file;
 	private JLabel sel_pixels;
 	private JLabel sel_center;
 	private JLabel sel_km;
@@ -45,9 +43,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	
 	private static final long serialVersionUID = 1L;
 	
-	public ExportDialog(Map map, String filename)  {
+	public ExportDialog(Map map)  {
 		// pick up references
-		this.filename = filename;
 		this.map = map;
 		this.parms = Parameters.getInstance();
 		
@@ -87,7 +84,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		JLabel resolutionLabel = new JLabel("Tile size(m)", JLabel.CENTER);
 		resolutionLabel.setFont(fontLarge);
 		
-		sel_file = new JLabel(filename);
 		sel_pixels = new JLabel();
 		sel_center = new JLabel();
 		sel_km = new JLabel();
@@ -108,10 +104,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		namePanel.add(sel_name);
 		namePanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
 		
-		JPanel descPanel = new JPanel(new GridLayout(6,2));
+		JPanel descPanel = new JPanel(new GridLayout(5,2));
 		descPanel.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
-		descPanel.add(new JLabel("File"));
-		descPanel.add(sel_file);
 		descPanel.add(new JLabel("Center"));
 		descPanel.add(sel_center);
 		descPanel.add(new JLabel("Pixels"));
@@ -167,7 +161,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	/**
 	 * export a map as high resolution tiles
 	 */
-	public void export() {
+	public void export(String filename) {
 		// figure out the selected region (in map coordinates)
 		double x = map.x(x_start);
 		double dx = map.x(x_end) - x;
@@ -352,7 +346,17 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		map.selectNone();
 		
 		if (e.getSource() == accept && selected) {
-			export();
+			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
+			d.setFile(sel_name.getText()+".json");
+			d.setLocation(parms.dialogDX, parms.dialogDY);
+			d.setVisible(true);
+			String export_file = d.getFile();
+			if (export_file != null) {
+				String dir = d.getDirectory();
+				if (dir != null)
+					export_file = dir + export_file;
+				export(export_file);
+			}
 		}
 		
 		// discard the window

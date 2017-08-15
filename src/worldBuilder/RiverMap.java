@@ -63,7 +63,6 @@ public class RiverMap {
 		double flux[] = this.calculate();
 		int blue_range = 255 - WATER_DIM;
 		double dBdF = blue_range/(maxFlux - minStream);
-		double intercept = maxFlux * dBdF;
 		
 		// draw the streams, rivers, lakes and oceans
 		for(int i = 0; i < flux.length; i++) {

@@ -219,6 +219,73 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 				soil[i] = mineral;
 		}
 	}
+	
+	/**
+	 * @param Map
+	 * @param x: (map) x coordinate
+	 * @param y: (map) y coordinate
+	 * @param radius: (map) radius (0 = full map)
+	 * @param zMax: max (map) z value
+	 * @param shape: curvature
+	 *
+	 * compute the delta_h associated with placing a ridge
+	 * 	find all points within the effective elipse
+	 * 	compute the height as a function of the distance from center
+	 */
+	public static void placeRidge(Map map, double x0, double y0, double x1, double y1,
+			double radius, double zMax, int shape, int mineral) {
+		// figure out the shape coefficients
+		int fullscale = Parameters.CYLINDRICAL;
+		int midscale = fullscale/2;
+		double Fcone, Fcirc, Fcyl;
+		if (shape <= midscale) {
+			Fcone = (double) (midscale - shape) / midscale;
+			Fcirc = (double) shape / midscale;
+			Fcyl = 0;
+		} else {	// circ-flat
+			Fcone = 0;
+			Fcirc = (double) (fullscale - shape) / midscale;
+			Fcyl =	(double) (shape - midscale) / midscale;
+		}
+		
+		// see which points are within the scope of this mountain
+		Mesh m = map.getMesh();
+		double heights[] = map.getHeightMap();
+		double soil[] = map.getSoilMap();
+		MeshPoint first = new MeshPoint(x0,y0);
+		MeshPoint second = new MeshPoint(x1,y1);
+		double minDist = first.distance(second);
+		double maxDist = minDist + radius;
+		
+		for(int i = 0; i < heights.length; i++) {
+			MeshPoint p = m.vertices[i];
+			double d0 = first.distance(p);
+			double d1 = second.distance(p);
+			if (d0 + d1 > maxDist)
+				continue;
+			
+			// calculate the deltaH for this point
+			double dist = d0 + d1 - minDist;
+			double dh_cone = (radius - dist) * zMax / radius;
+			double dh_circ = Math.cos(Math.PI*dist/(4*radius)) * zMax;
+			double dh_cyl = zMax;
+			double delta_h = (Fcone * dh_cone) + (Fcirc * dh_circ) + (Fcyl * dh_cyl);
+			// TODO: asymmetric mountain profiles
+
+			// make sure the new height is legal
+			double newZ = heights[i] + delta_h;
+			if (newZ > Parameters.z_extent/2)
+				heights[i] = Parameters.z_extent/2;
+			else if (newZ < -Parameters.z_extent/2)
+				heights[i] = -Parameters.z_extent/2;
+			else
+				heights[i] = newZ;
+			
+			// if mountain is tall enough, set the mineral type
+			if (newZ > MIN_MOUNTAIN)
+				soil[i] = mineral;
+		}
+	}
 
 	/**
 	 * compute the delta_h associated with this mountain range
@@ -269,20 +336,12 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 					alt + Parameters.unit_z + " " + Map.soil_names[mineral] + " mountain at <" +
 					parms.latitude(X0+X1/2) + "," + parms.longitude(Y0+Y1/2) + "> shape=" + shape + "\n";
 		} else {
-			// TODO: eliptical ridge line (d1+d2<=(d2-d1+r))
-			double X = X0;
-			double Y = Y0;
-			double dx = (X1 - X0)/mountains;
-			double dy = (Y1 - Y0)/mountains;
-			while( mountains >= 0 ) {
-				placeMountain(map, X, Y, d, z, shape, Map.METAMORPHIC);
-				placed += "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
-						alt + Parameters.unit_z + " metamorphic mountain at <" +
-						parms.latitude(X) + "," + parms.longitude(Y) + "> shape=" + shape + "\n";
-				X += dx;
-				Y += dy;
-				mountains -= 1;
-			}
+			placeRidge(map, X0, Y0, X1, Y1, d/2, z, shape, Map.METAMORPHIC);
+			placed = "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
+					alt + Parameters.unit_z + " " +
+					" metamorphic ridge from <" +
+					parms.latitude(X0) + "," + parms.longitude(Y0) + "> to <" +
+					parms.latitude(X1) + "," + parms.longitude(Y1) + "> shape=" + shape + "\n";
 		}
 		// tell the map about the update
 		map.setHeightMap(newHeight);

@@ -19,16 +19,6 @@ public class RiverMap {
 	}
 	
 	/*
-	 * notes on the mathematics of rivers
-	 * 	Flow = width * depth * Velocity
-	 * 	velocity: 	.1m/s - 3M/s	3*slope?
-	 *  width/depth: 2-20			6/V?
-	 *  
-	 * 	use slope to compute velocity
-	 * 	use flow & velocity to compute WxD
-	 * 	use velocity to compute W/D
-	 *  solve for W,D
-	 *  
 	 *  simplified Hjulstrom curves
 	 *    use velocity to compute erosion and burden
 	 *  	erosion starts 1 .2m/s, is major at 2m/s
@@ -36,6 +26,46 @@ public class RiverMap {
 	 *  	soil deposition happens between .1 - .005 m/s
 	 *  call deposited soil area 10x river width
 	 */
+	
+	/**
+	 * estimated flow velocity
+	 * @param slope ... dZ/dX
+	 * @return flow speed (meters/second)
+	 * 
+	 * NOTE: velocity ranges from .1m/s to 3m/s
+	 * 		 max sustainable slope is 1/1
+	 */
+	public static double velocity(double slope) {
+		return 3 * slope;
+	}
+	
+	/**
+	 * estimated river width
+	 * 
+	 * @param flow ... rate (cubic meters/second)
+	 * @param velocity ... flow speed (meters/second)
+	 * @return width (meters)
+	 * 
+	 * NOTE: W/D ranges from 2-20 ... call it 6/V
+	 */
+	public static double width(double flow, double velocity) {
+		double area = flow / velocity;
+		return Math.sqrt(6 * velocity * area);
+	}
+	
+	/**
+	 * estimated river depth
+	 * 
+	 * @param rlow ... flow rate in (cubic meters/second)
+	 * @param velocity ... flow speed (meters/second)
+	 * @return width (meters)
+	 * 
+	 * * NOTE: W/D ranges from 2-20 ... call it 6/V
+	 */
+	public static double depth(double flow, double velocity) {
+		double area = flow / velocity;
+		return Math.sqrt(area/(6 * velocity));
+	}
 	
 	/**
 	 * Display the streams and rivers

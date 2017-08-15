@@ -30,6 +30,7 @@ public class Tester {
 			for(int col = 0; col < r.width(); col++) {
 				String d = "   ";
 				switch(r.face(row, col)) {
+				case NONE: d = "   "; break;
 				case NORTH: d = " N "; break;
 				case NORTH_WEST: d = "NW "; break;
 				case NORTH_EAST: d = "NE "; break;
@@ -65,6 +66,7 @@ public class Tester {
 			for(int col = 0; col < r.width(); col++) {
 				String s = "? ";
 				switch(r.soilType(row, col)) {
+				case UNKNOWN:	s = "   "; break;
 				case IGNEOUS:	s = "I "; break;
 				case METAMORPHIC: s = "M "; break;
 				case SEDIMENTARY: s = "S "; break;

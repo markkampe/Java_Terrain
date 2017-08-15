@@ -19,8 +19,6 @@ import org.rogach.jopenvoronoi.Vertex;
 import org.rogach.jopenvoronoi.VertexType;
 import org.rogach.jopenvoronoi.VoronoiDiagram;
 
-import worldMaps.MapReader.SoilType;
-
 /**
  * @module mesh ... functions to generate the basic map
  *

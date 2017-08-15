@@ -52,7 +52,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			diameter.setFont(fontSmall);
 			diameter.setPaintTicks(true);
 			diameter.setPaintLabels(true);
-			String label = "Height/Width (" + parms.unit_xy + " x " + parms.diameter_scale + ")";
+			String label = "Height/Width (" + Parameters.unit_xy + " x " + parms.diameter_scale + ")";
 			JLabel diameterLabel = new JLabel(label, JLabel.CENTER);
 			diameterLabel.setFont(fontLarge);
 			
@@ -64,7 +64,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			altitude.setFont(fontSmall);
 			altitude.setPaintTicks(true);
 			altitude.setPaintLabels(true);
-			label = "max Altitude (" + parms.unit_z + " x " + parms.alt_scale + ")";
+			label = "max Altitude (" + Parameters.unit_z + " x " + parms.alt_scale + ")";
 			JLabel altLabel = new JLabel(label, JLabel.CENTER);
 			altLabel.setFont(fontLarge);
 			

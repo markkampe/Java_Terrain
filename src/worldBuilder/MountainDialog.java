@@ -245,7 +245,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		double d = (double) diameter.getValue();
 		if (d == 0)
 			d = 1;
-		d /= parms.xy_range * parms.x_extent;
+		d /= parms.xy_range * Parameters.x_extent;
 		
 		// figure out how long the mountain range is (in map coordinates)
 		double l = Math.sqrt(((X1-X0)*(X1-X0)) + (Y1-Y0)*(Y1-Y0));
@@ -275,7 +275,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			double dx = (X1 - X0)/mountains;
 			double dy = (Y1 - Y0)/mountains;
 			while( mountains >= 0 ) {
-				placeMountain(map, X, Y, d/2, z, shape, map.METAMORPHIC);
+				placeMountain(map, X, Y, d/2, z, shape, Map.METAMORPHIC);
 				placed += "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
 						alt + Parameters.unit_z + " metamorphic mountain at <" +
 						parms.latitude(X) + "," + parms.longitude(Y) + "> shape=" + shape + "\n";

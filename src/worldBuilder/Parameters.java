@@ -7,8 +7,6 @@ import java.io.FileReader;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
-import worldMaps.MapReader.SoilType;
-
 /**
  * This is a singleton class containing global program parameters.
  * 
@@ -261,6 +259,8 @@ import worldMaps.MapReader.SoilType;
 				default:
 					break;
 				}
+			default:
+				break;
 			}
 		}
 		parser.close();

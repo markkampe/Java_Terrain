@@ -1,7 +1,6 @@
 package worldBuilder;
 import java.awt.*;
 import java.awt.event.*;
-import java.net.URL;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -60,7 +59,6 @@ public class WorldBuilder  extends JFrame
 	
 	// configuration
 	private static Parameters parms;						// global program parameters
-	private static final int BORDER_WIDTH = 10;				// window border
 	
 	private static final String[] ICON_IMAGES = {
 			"/images/builder-16.png",

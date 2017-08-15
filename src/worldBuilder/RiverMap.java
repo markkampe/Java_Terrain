@@ -7,6 +7,10 @@ public class RiverMap {
 	private Map map;		// mesh to which we correspond
 	private double height[]; // height of each MeshPoint
 	private int byHeight[];	// MeshPoints sorted by height
+	private double maxFlux;	// maximum flow on map
+	
+	private static final int WATER_DIM = 128;	// dimmest water
+	
 	private Parameters parms;
 	
 	public RiverMap(Map m) {
@@ -54,14 +58,14 @@ public class RiverMap {
 		
 		// translate minimum flow thresholds into cm/year of rain
 		double minStream = parms.stream_flux * year * 100 / m2;
-		double minRiver = parms.river_flux * year * 100 / m2;
 
-		// calculate the color curve (green vs flow)
-		double dGdF = 255/(minRiver - minStream);
-		double intercept = minRiver * dGdF;
+		// calculate the color curve (blue vs flow)
+		double flux[] = this.calculate();
+		int blue_range = 255 - WATER_DIM;
+		double dBdF = blue_range/(maxFlux - minStream);
+		double intercept = maxFlux * dBdF;
 		
 		// draw the streams, rivers, lakes and oceans
-		double flux[] = this.calculate();
 		for(int i = 0; i < flux.length; i++) {
 			if (heightMap[i] < parms.sea_level)
 				continue;	// don't display rivers under the ocean
@@ -79,13 +83,11 @@ public class RiverMap {
 					x2 = (x1 + x2)/2;
 					y2 = (y1 + y2)/2;
 				}
-				// FIX: streams should become paler as well as less blue
-				
-				// anything as high as a river is a river
-				double flow = flux[i] > minRiver ? minRiver : flux[i];
-				// interpolate a color: river=BLUE, stream=CYAN
-				double green = Math.max(0, intercept - (dGdF * flow));
-				g.setColor(new Color(0, (int) green, 255));
+				// blue gets brighter, green dimmer w/increasing flow
+				double delta = (flux[i] - minStream) * dBdF;
+				double blue = WATER_DIM + delta;
+				double green = Math.max(0, WATER_DIM - delta);
+				g.setColor(new Color(0, (int) green, (int) blue));
 				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 			} else {
 				// TODO: render basins
@@ -96,9 +98,11 @@ public class RiverMap {
 	
 	/**
 	 * (re)calculate the water flux in each MeshPoint
+	 * 	and (as side-effect), sets maxFlux
 	 */
 	public double[]calculate() {
 		double[] flux = new double[map.getMesh().vertices.length];
+		maxFlux = 0;
 		
 		// make sure we have water flow to calculate
 		Mesh m = map.getMesh();
@@ -134,9 +138,14 @@ public class RiverMap {
 			
 			// each cell gets its own rainfall
 			flux[x] += rain[x];
+
 			// each cell gets what drains from above
 			if (downHill[x] >= 0)
 				flux[downHill[x]] += flux[x]; 
+			
+			// note the greatest flux we have seen
+			if (flux[x] > maxFlux)
+				maxFlux = flux[x];
 		}
 		return(flux);
 	}

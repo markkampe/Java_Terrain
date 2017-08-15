@@ -55,7 +55,6 @@ import javax.json.stream.JsonParser;
 	public String title = "WorldBuilder";
 	
 	// map rendering thresholds
-	public double river_flux = 100;		// river threshold (m3/s)
 	public double stream_flux = 0.1;	// stream threshold (m3/s)
 	public int topo_major = 10;			// max 10 major lines
 	public int topo_minor = 5;			// minor lines per major
@@ -241,9 +240,6 @@ import javax.json.stream.JsonParser;
 				case "toppo_minor":
 					topo_minor = new Integer(parser.getString());
 					break;
-				case "river":
-					river_flux = new Double(parser.getString());
-					break;
 				case "stream":
 					stream_flux = new Double(parser.getString());
 					break;
@@ -271,7 +267,7 @@ import javax.json.stream.JsonParser;
 			System.out.println("   window:     " + width + "x" + height + ", border=" + border);
 			System.out.println("   dialogs:    x+" + dialogDX + ", y+" + dialogDY + " + " + dialogBorder + "/, border=" + dialogBorder);
 			System.out.println("   topo maps:  " + topo_major + " major lines, " + topo_minor*topo_major + " minor");
-			System.out.println("   thresholds: river " + river_flux + " " + unit_f + ", stream " + stream_flux + " " + unit_f);
+			System.out.println("   stream:     >= river " + stream_flux + " " + unit_f);
 			System.out.println("   max ranges: " + diameter_max + unit_xy + 
 					", altitude +/-" + alt_max + unit_z + 
 					", msl +/-" + msl_range + unit_z);

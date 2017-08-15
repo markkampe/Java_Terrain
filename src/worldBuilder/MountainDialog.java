@@ -269,13 +269,13 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 					alt + Parameters.unit_z + " " + Map.soil_names[mineral] + " mountain at <" +
 					parms.latitude(X0+X1/2) + "," + parms.longitude(Y0+Y1/2) + "> shape=" + shape + "\n";
 		} else {
-			// multiple mountains are evenly spaced along the line (possibly metamorphic)
+			// TODO: replace multiple mountains with a ridgeline
 			double X = X0;
 			double Y = Y0;
 			double dx = (X1 - X0)/mountains;
 			double dy = (Y1 - Y0)/mountains;
 			while( mountains >= 0 ) {
-				placeMountain(map, X, Y, d/2, z, shape, Map.METAMORPHIC);
+				placeMountain(map, X, Y, d, z, shape, Map.METAMORPHIC);
 				placed += "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
 						alt + Parameters.unit_z + " metamorphic mountain at <" +
 						parms.latitude(X) + "," + parms.longitude(Y) + "> shape=" + shape + "\n";

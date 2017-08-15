@@ -230,9 +230,13 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 			this.dispose();
 		} else if (e.getSource() == accept) {
 			map.selectNone();
+			int dir = axis.getValue();
+			int slope = inclination.getValue();
+			// by default, weather comes from off-shore
+			parms.dDirection = (slope >= 0) ? dir - 90 : dir + 90;
 			oldHeight = null;	// don't need this anymore
 			if (parms.debug_level > 0)
-				System.out.println("Incline continent: axis=" + axis.getValue() + ", slope=" + inclination.getValue() + Parameters.unit_s);
+				System.out.println("Incline continent: axis=" + dir + ", slope=" + slope + Parameters.unit_s);
 			this.dispose();
 		}
 	}

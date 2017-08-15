@@ -269,7 +269,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 					alt + Parameters.unit_z + " " + Map.soil_names[mineral] + " mountain at <" +
 					parms.latitude(X0+X1/2) + "," + parms.longitude(Y0+Y1/2) + "> shape=" + shape + "\n";
 		} else {
-			// TODO: replace multiple mountains with a ridgeline
+			// TODO: eliptical ridge line (d1+d2<=(d2-d1+r))
 			double X = X0;
 			double Y = Y0;
 			double dx = (X1 - X0)/mountains;

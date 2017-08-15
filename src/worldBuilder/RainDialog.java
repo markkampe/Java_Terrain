@@ -176,7 +176,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		int y_len = 3 * y_center / 2;
 		
 		int x0, y0, x1, y1;
-		
+		// TODO: put arrow head on direction line
 		// vertical lines are a special case
 		if (degrees == -90 || degrees == 90) {
 			x0 = x_center;

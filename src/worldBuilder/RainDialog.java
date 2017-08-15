@@ -15,6 +15,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	private Map map;
 	private double[] oldRain;	// per MeshPoint rainfall at entry
 	private double[] newRain;	// edited per MeshPoint raifall
+	private int x0, x1, y0, y1;	// weather axis line
+	
 	private Parameters parms;
 	
 	private JSlider direction;
@@ -144,19 +146,29 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 * calculate the rainfall received at each Mesh point
 	 */
 	private void rainFall() {
+		Mesh m = map.getMesh();
 		int dir = direction.getValue();
 		int amt = amount.getValue();
-		int alt = altitude.getValue();
 		
-		// TODO trace source path back to each MeshPoint
-		// TODO topographically forced rain
-		// TODO reduce available moisture by what falls
-		// TODO rain on MeshPoint = f(available)
+		// TODO - normalize rainfall over terain
+		// TODO - altitude sensitive rain shadows
+		// int alt = altitude.getValue();
+		// double heights[] = map.getHeightMap();
 		
+		// normalize incoming rainfall
+		// compute sampling path
+		double len = Math.sqrt(2 * Parameters.x_extent * Parameters.y_extent);
+		//double dy = Math.cos(Math.PI * -dir/360)/len;
+		//double dx = Math.sin(Math.PI * -dir/360)/len;
+		double X0 = map.x(x0);
+		double Y0 = map.y(y0);
+		double X1 = map.x(x1);
+		double Y1 = map.y(y1);
 		// compute the rain at every point
-		for(int i = 0; i < newRain.length; i++) {
-			// start out with even rain distribution
-			newRain[i] = amt;
+		for(int i = 0; i < m.vertices.length; i++) {
+			MeshPoint p = m.vertices[i];
+			double d = len/2 - p.distanceLine(X0,  Y0,  X1,  Y1);
+			newRain[i] = amt * (1-d)/len;
 		}
 		// tell the map about the update
 		map.setRainMap(newRain);
@@ -175,7 +187,6 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		int y_center = map.getHeight()/2;
 		int y_len = 3 * y_center / 2;
 		
-		int x0, y0, x1, y1;
 		// TODO: put arrow head on direction line
 		// vertical lines are a special case
 		if (degrees == -90 || degrees == 90) {

@@ -94,25 +94,17 @@ public class RiverMap {
 		double[] heightMap = map.getHeightMap();
 		int downHill[] = map.getDownHill();
 
-		// calculate the minimum flow to qualify as a stream
-		//	m2 = estimated water-shed area for this MeshPoint (m2/s)
-		double m2 = parms.xy_range * parms.xy_range * 1000 * 1000 / mesh.vertices.length;
-		//	year = number of seconds in a year
-		double year = 365.25 * 24 * 60 * 60;
-		
-		// translate minimum flow thresholds into cm/year of rain
-		double minStream = parms.stream_flux * year * 100 / m2;
-
 		// calculate the color curve (blue vs flow)
 		double flux[] = this.calculate();
 		int blue_range = 255 - WATER_DIM;
-		double dBdF = blue_range/(maxFlux - minStream);
+		double min_stream = parms.stream_flux;
+		double dBdF = blue_range/(maxFlux - min_stream);
 		
 		// draw the streams, rivers, lakes and oceans
 		for(int i = 0; i < flux.length; i++) {
 			if (heightMap[i] < parms.sea_level)
 				continue;	// don't display rivers under the ocean
-			if (flux[i] < minStream)
+			if (flux[i] < min_stream)
 				continue;	// don't display flux below stream cut-off
 			if (downHill[i] >= 0) {
 				int d = downHill[i];
@@ -127,7 +119,7 @@ public class RiverMap {
 					y2 = (y1 + y2)/2;
 				}
 				// blue gets brighter, green dimmer w/increasing flow
-				double delta = (flux[i] - minStream) * dBdF;
+				double delta = (flux[i] - min_stream) * dBdF;
 				double blue = WATER_DIM + delta;
 				double green = Math.max(0, WATER_DIM - delta);
 				g.setColor(new Color(0, (int) green, (int) blue));
@@ -167,6 +159,11 @@ public class RiverMap {
 		// make sure we know what is downhill from what
 		int downHill[] = map.getDownHill();
 		
+		// figure out the mapping from rainfall to water flow
+		double area = (parms.xy_range * parms.xy_range) / byHeight.length;
+		double year = 365.25 * 24 * 60 * 60;
+		double rain_to_flow = .01 * area * 1000000 / year;
+		
 		// processing MeshPoints from highest to lowest
 		//	flux[this] += this MeshPoint's rainfall
 		//	flux[downhill] += flux[this]
@@ -180,7 +177,7 @@ public class RiverMap {
 			}
 			
 			// each cell gets its own rainfall
-			flux[x] += rain[x];
+			flux[x] += rain[x] * rain_to_flow;
 
 			// each cell gets what drains from above
 			if (downHill[x] >= 0)

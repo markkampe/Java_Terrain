@@ -9,7 +9,7 @@
 	"dialog_delta": 50,
     	"dialog_border": 5
     },
-    "world": {
+    "limits": {
 	"diameter_unit": 100,
 	"diameter_max": 1000,
 	"diameter_grain": 10,
@@ -18,7 +18,9 @@
 	"mountain_fraction": 4,
 	"altitude_rain": 3000,
 	"msl_range": 2500,
-	"rain_max": 2000,
+	"rain_max": 2000
+	},
+    "world": {
 	"radius": 6371,
 	"latitude": 30.0,
 	"longitude": -90.0
@@ -35,13 +37,14 @@
 	"improvements": 1,
 	"topo_major": 10,
 	"topo_minor": 5,
-	"stream": 0.25
+	"stream": 2.0
     },
     "display": {
-    	"mesh": false,
-	"topo": false,
-	"water": false,
-	"rain": true
+    	"mesh": true,
+	"topo": true,
+	"rain": false,
+	"water": true,
+    	"erosion": true,
+	"soil": false
     }
 }
-   

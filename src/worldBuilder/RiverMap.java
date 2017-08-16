@@ -18,14 +18,6 @@ public class RiverMap {
 		this.parms = Parameters.getInstance();
 	}
 	
-	/*
-	 *  simplified Hjulstrom curves
-	 *    use velocity to compute erosion and burden
-	 *  	erosion starts 1 .2m/s, is major at 2m/s
-	 *    use velocity and burden to compute deposition
-	 *  	soil deposition happens between .1 - .005 m/s
-	 *  call deposited soil area 10x river width
-	 */
 	
 	/**
 	 * estimated flow velocity
@@ -40,31 +32,53 @@ public class RiverMap {
 	}
 	
 	/**
-	 * estimated river width
+	 * estimated river width and depth
 	 * 
 	 * @param flow ... rate (cubic meters/second)
 	 * @param velocity ... flow speed (meters/second)
-	 * @return width (meters)
 	 * 
 	 * NOTE: W/D ranges from 2-20 ... call it 6/V
+	 * 	1. Area = Flow/Velocity
+	 * 	2. Area = W x D
+	 * 	3. W / D = 6/V
+	 * 
+	 *  from (3):
+	 *  	(3a) W=6D/V or (3b) D=WV/6
+	 *  substituting (3a) into (2)
+	 *  	A = 6D/V * D = 6D^2/V; D = sqrt(AV/6)
+	 *  substituting (3b) into (2)
+	 *  	A = W * WV/6 = W^2V/6; W = sqrt(6A/V)
 	 */
 	public static double width(double flow, double velocity) {
 		double area = flow / velocity;
-		return Math.sqrt(6 * velocity * area);
+		return Math.sqrt(6 * area / velocity);
+	}
+
+	public static double depth(double flow, double velocity) {
+		double area = flow / velocity;
+		return Math.sqrt(area * velocity / 6);
 	}
 	
 	/**
-	 * estimated river depth
+	 * estimated erosion and deposition
 	 * 
-	 * @param rlow ... flow rate in (cubic meters/second)
-	 * @param velocity ... flow speed (meters/second)
-	 * @return width (meters)
-	 * 
-	 * * NOTE: W/D ranges from 2-20 ... call it 6/V
+	 * NOTE:
+	 * 	The Hjulstrom curve says that 
+	 * 		erosion starts at 1m/s and is major by 2m/s
+	 * 			slopes between .6 and 1.2
+	 * 		sedimentation starts at .1m/s and is done by .005m/s
+	 * 			slopes between .03 and .0015
 	 */
-	public static double depth(double flow, double velocity) {
-		double area = flow / velocity;
-		return Math.sqrt(area/(6 * velocity));
+	// returns M3 soil per M3/s of flow
+	public double erosion( double v ) {
+		double Ve = parms.Ve;
+		return (v < Ve) ? 0 : parms.Ce * (v * v)/(Ve * Ve);
+	}
+	
+	// returns fraction of carried load per km
+	public double sedimentation( double v) {
+		double Vs = parms.Vd;
+		return (v > Vs) ? 0 : parms.Cd/v;
 	}
 	
 	/**

@@ -79,6 +79,11 @@ import javax.json.stream.JsonParser;
 	public int dAmount;			// annual rainfall
 	public int dRainHeight;		// mean height of incoming rain
 	
+	// physical processes
+	public double Ve = 1.0;		// minimum flow for erosion
+	public double Ce = 1.0;		// coefficient of erosion
+	public double Vd = 0.1;		// maximum flow for deposition
+	public double Cd = .001;	// coefficient of deposition
 	
 	// map generation parameters
 	public int improvements = 1;	// number of smoothing iterations
@@ -232,7 +237,21 @@ import javax.json.stream.JsonParser;
 				case "altitude_rain":
 					alt_maxrain = new Integer(parser.getString());
 					break;
-
+					
+				// physical process parameters
+				case "Ve":
+					Ve = new Double(parser.getString());
+					break;
+				case "Ce":
+					Ce = new Double(parser.getString());
+					break;
+				case "Vd":
+					Vd = new Double(parser.getString());
+					break;
+				case "Cd":
+					Cd = new Double(parser.getString());
+					break;
+					
 				// map rendering parameters
 				case "topo_major":
 					topo_major = new Integer(parser.getString());

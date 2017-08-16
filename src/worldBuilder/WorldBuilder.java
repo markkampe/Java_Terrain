@@ -429,15 +429,5 @@ public class WorldBuilder  extends JFrame
 		// initialize the display type and options menus
 		w.map.setDisplay(parms.display_options, true);
 		w.updateDisplayMenus(parms.display_options);
-		
-		// test river stuff
-		for(double slope = 0.1; slope <= 1.0; slope += 0.1)
-			for(double flow = 0.2; flow < 2.0; flow += 0.2) {
-				double v = RiverMap.velocity(slope);
-				double d = RiverMap.depth(flow, v);
-				double wid = RiverMap.width(flow,  v);
-				System.out.println("dz/dx = " + slope + ", v=" + v + ", flow=" + flow + ", " + wid + "x" + d);
-			}
-		
 	}
 }

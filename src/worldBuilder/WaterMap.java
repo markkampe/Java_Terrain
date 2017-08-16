@@ -13,6 +13,8 @@ public class WaterMap {
 		this.parms = Parameters.getInstance();
 	}
 
+	// TODO: rain is in cm/y but flux should be in M3/s
+	
 	/**
 	 * Render bodies of water
 	 * 

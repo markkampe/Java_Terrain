@@ -380,12 +380,6 @@ public class WorldBuilder  extends JFrame
 		viewWater.setText( (opts & Map.SHOW_WATER) != 0 ? "~water" : "Water");
 		viewSoil.setText( (opts & Map.SHOW_SOIL) != 0 ? "~soil" : "Soil");
 	}
-	/**
-	 * window resize
-	 */
-	public void componentResized(ComponentEvent e) {
-		// TODO: send resize to map
-	}
 	
 	/**
 	 * shut down the program
@@ -407,6 +401,7 @@ public class WorldBuilder  extends JFrame
 	public void componentShown(ComponentEvent arg0) {}
 	public void componentHidden(ComponentEvent arg0) {}
 	public void componentMoved(ComponentEvent arg0) {}
+	public void componentResized(ComponentEvent e) {}
 
 	public static void main(String[] args) {
 		// process the arguments

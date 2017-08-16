@@ -20,7 +20,8 @@ import javax.json.stream.JsonParser;
 	public static final String unit_z = "m";
 	public static final String unit_r = "cm/y";
 	public static final String unit_s = "cm/km";
-	public static final String unit_f = "m3/s";
+	public static final String unit_f = "m^3/s";
+	public static final String unit_v = "m/s";
 	
 	// map coordinate ranges (probably don't want to change)
 	public static final double x_extent = 1.0;	// Xmax - Xmin
@@ -84,6 +85,7 @@ import javax.json.stream.JsonParser;
 	public double Ce = 1.0;		// coefficient of erosion
 	public double Vd = 0.1;		// maximum flow for deposition
 	public double Cd = .001;	// coefficient of deposition
+	public double dRdX = .001;	// precipitation/km
 	
 	// map generation parameters
 	public int improvements = 1;	// number of smoothing iterations
@@ -239,17 +241,20 @@ import javax.json.stream.JsonParser;
 					break;
 					
 				// physical process parameters
-				case "Ve":
+				case "Ve":	// critical velocity for erosion
 					Ve = new Double(parser.getString());
 					break;
-				case "Ce":
+				case "Ce":	// coefficient of erosion
 					Ce = new Double(parser.getString());
 					break;
-				case "Vd":
+				case "Vd":	// critical velocity for deposition
 					Vd = new Double(parser.getString());
 					break;
-				case "Cd":
+				case "Cd":	// coefficient of deposition
 					Cd = new Double(parser.getString());
+					break;
+				case "dR/dX":	// precipitation/km
+					dRdX = new Double(parser.getString());
 					break;
 					
 				// map rendering parameters
@@ -282,16 +287,23 @@ import javax.json.stream.JsonParser;
 		setDefaults();
 		
 		if (debug_level > 0) {
-			System.out.println("Configuration Parameters");
+			System.out.println("Configuration Parameters (" + filename + ")");
 			System.out.println("   window:     " + width + "x" + height + ", border=" + border);
 			System.out.println("   dialogs:    x+" + dialogDX + ", y+" + dialogDY + " + " + dialogBorder + "/, border=" + dialogBorder);
 			System.out.println("   topo maps:  " + topo_major + " major lines, " + topo_minor*topo_major + " minor");
-			System.out.println("   stream:     >= river " + stream_flux + " " + unit_f);
+			System.out.println("   min stream: " + stream_flux + " " + unit_f);
+			System.out.println("   erosion:    Ve=" + String.format("%.2f", Ve) + unit_v +
+											", Ce=" + String.format("%.4f", Ce) +
+										    ", Vd=" + String.format("%.2f", Vd) + unit_v +
+										    ", Cd=" + String.format("%.4f", Cd));
+			System.out.println("   rainfall:   " + dRdX * 100 + "%/" + unit_xy);
 			System.out.println("   max ranges: " + diameter_max + unit_xy + 
 					", altitude +/-" + alt_max + unit_z + 
 					", msl +/-" + msl_range + unit_z);
-			System.out.println("               mountain diameter=world/" + mountain_divisor +
-					", max rain=" + rain_max + unit_r + " (bottoms at " + alt_maxrain + unit_z + ")");
+			System.out.println("               mountain diameter=world/" + mountain_divisor);
+			System.out.println("               rainfall=" + rain_max + unit_r + 
+											   " (bottoms at " + alt_maxrain + unit_z + ")");
+											   
 			System.out.println("   debug=" + debug_level);
 			worldParms();
 		}
@@ -305,7 +317,7 @@ import javax.json.stream.JsonParser;
 	
 	public void worldParms() {
 		System.out.println("World Configuration");
-		System.out.println("   maped area: " + xy_range + "x" + xy_range + " " + unit_xy + "2, altitude " + z_range/2 + unit_z);
+		System.out.println("   maped area: " + xy_range + "x" + xy_range + " " + unit_xy + "^2, max altitude " + z_range/2 + unit_z);
 		System.out.println("   planetary:  lat=" + latitude + ", lon=" + longitude + ", radius=" + radius + unit_xy);
 	}
 	

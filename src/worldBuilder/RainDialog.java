@@ -14,7 +14,8 @@ import javax.swing.event.*;
 public class RainDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
 	private Map map;
 	private double[] oldRain;	// per MeshPoint rainfall at entry
-	private double[] newRain;	// edited per MeshPoint raifall
+	private double[] newRain;	// edited per MeshPoint rainfall
+	private double meanRain;	// mean rainfal (over entire map)
 	private int x0, x1, y0, y1;	// weather axis line
 	
 	private Parameters parms;
@@ -147,38 +148,48 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 * 
 	 * TODO: rain shadows in 1 pass
 	 * 		define a set of stripes, originating off screen
-	 * 		order the mesh points by proximity to the source
+	 * 		sort the mesh points by proximity to the source
 	 * 		enumerate the mesh points, calculating how much rain hits each
 	 * 			based on distance, MeshPoint area, and altitude
-	 * 		all rain that falls decreases what remains in the stripe
+	 * 		rain that falls decreases what remains in the stripe
 	 * 
 	 */
 	private void rainFall() {
 		Mesh m = map.getMesh();
-		int dir = direction.getValue();
-		int amt = amount.getValue();
 		
-		// TODO - normalize rainfall
-		//		stated rainfall is not initial, but average (over map)
-		//		so compute expected rainfall, and goose the incoming
-		// int alt = altitude.getValue();
-		// double heights[] = map.getHeightMap();
+		// rain originates along an imaginary line that is a corner
+		//	radius out from the center of the map (just off the map)
+		double d = Math.sqrt((Parameters.x_extent*Parameters.x_extent) + (Parameters.y_extent*Parameters.y_extent))/2;
+		double X0, X1, Y0, Y1;
+		int degrees = direction.getValue();
+		double radians = Math.PI * ((double) degrees)/180;
+		double sin = Math.sin(radians);
+		double cos = Math.cos(radians);
+		double Xc = sin * d;
+		double Yc = -cos * d;
+		double dy = sin;
+		double dx = cos;
+		X0 = Xc - dx;
+		Y0 = Yc - dy;
+		X1 = Xc + dx;
+		Y1 = Yc + dy;
+
+		// specified rainfall is for the center of the map
+		//	scale that up to account for reduction over distance
+		double Rc = Math.pow(1-parms.dRdX, parms.km(d));
+		double incoming = (double) amount.getValue() / Rc;
 		
-		// normalize incoming rainfall
-		// compute sampling path
-		double len = Math.sqrt(2 * Parameters.x_extent * Parameters.y_extent);
-		//double dy = Math.cos(Math.PI * -dir/360)/len;
-		//double dx = Math.sin(Math.PI * -dir/360)/len;
-		double X0 = map.x(x0);
-		double Y0 = map.y(y0);
-		double X1 = map.x(x1);
-		double Y1 = map.y(y1);
 		// compute the rain at every point
+		meanRain = 0;
 		for(int i = 0; i < m.vertices.length; i++) {
 			MeshPoint p = m.vertices[i];
-			double d = len/2 - p.distanceLine(X0,  Y0,  X1,  Y1);
-			newRain[i] = amt * (1-d)/len;
+			d = parms.km(p.distanceLine(X0,  Y0,  X1,  Y1));
+			double r = incoming * Math.pow(1-parms.dRdX, Math.abs(d));
+			newRain[i] = r;
+			meanRain += r;
 		}
+		meanRain /= m.vertices.length;
+		
 		// tell the map about the update
 		map.setRainMap(newRain);
 	}
@@ -262,7 +273,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			parms.dRainHeight = altitude.getValue();
 			
 			if (parms.debug_level > 0)
-				System.out.println("Rainfall: " + parms.dAmount + Parameters.unit_r + ", from " + 
+				System.out.println("Rainfall: mean " + (int) meanRain + Parameters.unit_r + ", from " + 
 						parms.dDirection + ", cloud bottoms at " + parms.dRainHeight + Parameters.unit_z);
 			// we no longer need the old rain map
 			oldRain = null;

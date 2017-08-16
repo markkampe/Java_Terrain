@@ -23,6 +23,13 @@
 	"latitude": 30.0,
 	"longitude": -90.0
 	},
+    "physics": {
+    	"Ve": 0.75,
+	"Ce": 1.5,
+	"Vd": 0.15,
+    	"Cd": 0.001,
+    	"dR/dX": 0.005
+    },
     "map": {
 	"points": 4096,
 	"improvements": 1,
@@ -31,15 +38,10 @@
 	"stream": 0.25
     },
     "display": {
-    	"mesh": true,
-	"topo": true,
-	"water": true
-    }
-    "physics": {
-    	"Ve": 0.75,
-	"Ce": 1.0,
-	"Vd": 0.1,
-    	"Cd": 0.001
+    	"mesh": false,
+	"topo": false,
+	"water": false,
+	"rain": true
     }
 }
    

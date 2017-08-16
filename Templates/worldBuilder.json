@@ -35,5 +35,11 @@
 	"topo": true,
 	"water": true
     }
+    "physics": {
+    	"Ve": 0.75,
+	"Ce": 1.0,
+	"Vd": 0.1,
+    	"Cd": 0.001
+    }
 }
    

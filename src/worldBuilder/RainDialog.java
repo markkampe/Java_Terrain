@@ -144,14 +144,23 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 
 	/**
 	 * calculate the rainfall received at each Mesh point
+	 * 
+	 * TODO: rain shadows in 1 pass
+	 * 		define a set of stripes, originating off screen
+	 * 		order the mesh points by proximity to the source
+	 * 		enumerate the mesh points, calculating how much rain hits each
+	 * 			based on distance, MeshPoint area, and altitude
+	 * 		all rain that falls decreases what remains in the stripe
+	 * 
 	 */
 	private void rainFall() {
 		Mesh m = map.getMesh();
 		int dir = direction.getValue();
 		int amt = amount.getValue();
 		
-		// TODO - normalize rainfall over terain
-		// TODO - altitude sensitive rain shadows
+		// TODO - normalize rainfall
+		//		stated rainfall is not initial, but average (over map)
+		//		so compute expected rainfall, and goose the incoming
 		// int alt = altitude.getValue();
 		// double heights[] = map.getHeightMap();
 		

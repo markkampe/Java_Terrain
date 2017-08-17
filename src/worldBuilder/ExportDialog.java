@@ -273,9 +273,17 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		double X0 = map.x(x0);
 		double X1 = map.x(x1);
 		double dx = X1 - X0;
+		if (dx < 0) {
+			X0 = X1;
+			dx *= -1;
+		}
 		double Y0 = map.y(y0);	
 		double Y1 = map.y(y1);
 		double dy = Y1 - Y0;
+		if (dy < 0) {
+			Y0 = -Y1;
+			dy *= -1;
+		}
 	
 		// selected area in km
 		x_km = parms.km(dx);

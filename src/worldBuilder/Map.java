@@ -59,6 +59,7 @@ public class Map extends JPanel {
 	private double soilMap[];	// Soil type of each mesh point
 	private double rainMap[];	// Rainfall of each mesh point
 	private double[] depression; // which cells are in depressions
+	private double[] erodeMap;	// erosion/deposition
 	public int sinks[];			// what drains to where
 	private int downHill[];		// each cell's downhill neighbor
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
@@ -87,6 +88,7 @@ public class Map extends JPanel {
 					width/TOPO_CELL, height/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
+			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
 			this.parms = Parameters.getInstance();
 			// ensure that the map is not perfectly flat
@@ -109,6 +111,7 @@ public class Map extends JPanel {
 					getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
+			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
 			// ensure that the map is not perfectly flat
 			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);
@@ -135,6 +138,14 @@ public class Map extends JPanel {
 	public double[] setRainMap(double newRain[]) {
 		double old[] = rainMap; 
 		rainMap = newRain; 
+		repaint();
+		return old;
+	}
+	
+	public double[] getErodeMap() {return erodeMap;}
+	public double[] setErodeMap(double newmap[]) { 
+		double old[] = erodeMap;
+		erodeMap = newmap;
 		repaint();
 		return old;
 	}

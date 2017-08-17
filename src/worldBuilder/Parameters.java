@@ -37,6 +37,7 @@ import javax.json.stream.JsonParser;
 	public int rain_max = 1000;			// rain (cm/y)
 	public int slope_max = 5;			// slope m/km
 	public int mountain_divisor = 2;	// world/mountain width
+	public int erosion_max = 10;		// erosion cycles
 	
 	// world size slider units
 	public int diameter_scale = 100;	// slider labeling unit (km)
@@ -79,6 +80,7 @@ import javax.json.stream.JsonParser;
 	public int dDirection;		// incoming weather
 	public int dAmount;			// annual rainfall
 	public int dRainHeight;		// mean height of incoming rain
+	public int dErosion;		// erosion cycles
 	
 	// physical processes
 	public double Ve = 1.0;		// minimum flow for erosion
@@ -122,6 +124,9 @@ import javax.json.stream.JsonParser;
 		dDirection = 0;				// weather from the north
 		dAmount = rain_max/10;		// moderate rainfall
 		dRainHeight = alt_maxrain/4;// not particularly high	
+		
+		// default erosion
+		dErosion = erosion_max/2;
 	}
 	
 	// public constructor to read from configuration file
@@ -239,6 +244,9 @@ import javax.json.stream.JsonParser;
 				case "altitude_rain":
 					alt_maxrain = new Integer(parser.getString());
 					break;
+				case "erosion_max":
+					erosion_max = new Integer(parser.getString());
+					break;
 					
 				// physical process parameters
 				case "Ve":	// critical velocity for erosion
@@ -292,7 +300,8 @@ import javax.json.stream.JsonParser;
 			System.out.println("   dialogs:    x+" + dialogDX + ", y+" + dialogDY + " + " + dialogBorder + "/, border=" + dialogBorder);
 			System.out.println("   topo maps:  " + topo_major + " major lines, " + topo_minor*topo_major + " minor");
 			System.out.println("   min stream: " + stream_flux + " " + unit_f);
-			System.out.println("   erosion:    Ve=" + String.format("%.2f", Ve) + unit_v +
+			System.out.println("   erosion:    cycles=" + erosion_max +
+					                        "  Ve=" + String.format("%.2f", Ve) + unit_v +
 											", Ce=" + String.format("%.4f", Ce) +
 										    ", Vd=" + String.format("%.2f", Vd) + unit_v +
 										    ", Cd=" + String.format("%.4f", Cd));

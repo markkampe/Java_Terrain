@@ -41,6 +41,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem editMountain;
 	private JMenuItem editSlope;
 	private JMenuItem editRain;
+	private JMenuItem editErode;
 	private JMenuItem editCity;
 	private JMenuItem editRoads;
 	private JMenuItem viewPoints;
@@ -152,6 +153,8 @@ public class WorldBuilder  extends JFrame
 		editSlope.addActionListener(this);
 		editRain = new JMenuItem("rainfall");
 		editRain.addActionListener(this);
+		editErode = new JMenuItem("erosion");
+		editErode.addActionListener(this);
 		editCity = new JMenuItem("add city");
 		editCity.addActionListener(this);
 		editRoads = new JMenuItem("draw roads");
@@ -161,6 +164,7 @@ public class WorldBuilder  extends JFrame
 		editMenu.add(editSlope);
 		editMenu.add(editMountain);
 		editMenu.add(editRain);
+		editMenu.add(editErode);
 		editMenu.add(new JSeparator());
 		editMenu.add(editCity);
 		editMenu.add(editRoads);
@@ -214,14 +218,6 @@ public class WorldBuilder  extends JFrame
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		
 		// create some sliders in panel #3
-		erosion = new JSlider();
-		JLabel eroLabel = new JLabel("Erosion", JLabel.CENTER);
-		eroLabel.setFont(fontLarge);
-		JPanel e_panel = new JPanel();
-		e_panel.setLayout(new BoxLayout(e_panel, BoxLayout.PAGE_AXIS));
-		e_panel.add(eroLabel);
-		e_panel.add(erosion);
-		
 		seaLevel = new JSlider(-parms.msl_range, parms.msl_range, 0);
 		seaLevel.setMajorTickSpacing(Parameters.niceTics(-parms.msl_range, parms.msl_range, true));
 		seaLevel.setMinorTickSpacing(Parameters.niceTics(-parms.msl_range, parms.msl_range, false));
@@ -237,15 +233,12 @@ public class WorldBuilder  extends JFrame
 	
 		JPanel sliderPanel = new JPanel();
 		sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.LINE_AXIS));
-		e_panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 15));	
 		s_panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
 		sliderPanel.add(s_panel);
-		sliderPanel.add(e_panel);
 
 		add(sliderPanel, BorderLayout.SOUTH);
 		
 		// register the action listeners
-		erosion.addChangeListener(this);
 		seaLevel.addChangeListener(this);
 	}
 	
@@ -329,6 +322,8 @@ public class WorldBuilder  extends JFrame
 			new SlopeDialog(map);
 		} else if (o == editRain) {
 			new RainDialog(map);
+		} else if (o == editErode) {
+			new ErosionDialog(map);
 		} else if (o == editCity) {
 			System.out.println("implement edit:City");
 		} else if (o == editRoads) {

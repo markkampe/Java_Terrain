@@ -1,10 +1,31 @@
 package worldMaps;
 
-public class Tester {
+import java.awt.FileDialog;
+import javax.swing.JFrame;
+
+public class Tester extends JFrame {
+	
+	private static final long serialVersionUID = 1L;
+	public String filename;
+	
+	public Tester() {
+		FileDialog d = new FileDialog(this, "Select WorldBuilder Export to load", FileDialog.LOAD);
+		d.setFile(filename == null ? "Happyville.json" : filename);
+		d.setVisible(true);
+		filename = d.getFile();
+		if (filename != null) {
+			String dir = d.getDirectory();
+			if (dir != null)
+				filename = dir + filename;
+		}
+	}
+	
 	public static void main(String[] args) {
-		
-		MapReader r = new MapReader(args[1]);
-		System.out.println("File: " + args[1]);
+		String filename = (args.length > 1) ? args[1] : new Tester().filename;
+		if (filename == null)
+			System.exit(-1);
+		MapReader r = new MapReader(filename);
+		System.out.println("File: " + filename);
 		System.out.println("Region: " + r.name());
 		System.out.println("location: " + r.latitude() + ", " + r.longitude());
 		System.out.println("size: " + r.height() + "x" + r.width() + " x " + r.tileSize() + "m");

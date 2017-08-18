@@ -62,7 +62,9 @@ public class Map extends JPanel {
 	private double heightMap[]; // Height of each mesh point
 	private double soilMap[];	// Soil type of each mesh point
 	private double rainMap[];	// Rainfall of each mesh point
+	private double fluxMap[];	// Water flow through each point
 	private double erodeMap[];	// erosion/deposition
+	private int downHill[];		// down-hill neighbor
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	private int erosion;		// number of erosion cycles
 	
@@ -95,14 +97,16 @@ public class Map extends JPanel {
 					width/TOPO_CELL, height/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
+			this.downHill = new int[mesh.vertices.length];
+			this.fluxMap = new double[mesh.vertices.length];
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
 			this.parms = Parameters.getInstance();
 			this.hydro = new Hydrology(this);
 			
 			// ensure that the map is not perfectly flat
-			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);
-			hydro.downhill(true);
+			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);	
+			hydro.reCalculate();
 		}
 		selectNone();
 	}
@@ -120,16 +124,24 @@ public class Map extends JPanel {
 					getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
+			this.downHill = new int[mesh.vertices.length];
+			this.fluxMap = new double[mesh.vertices.length];
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
+			
 			// ensure that the map is not perfectly flat
 			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);
-			hydro.downhill(true);
+			hydro.reCalculate();
 		} else {
 			this.map = null;
 			this.heightMap = null;
 			this.rainMap = null;
+			this.downHill = null;
+			this.fluxMap = null;
+			this.erodeMap = null;
+			this.soilMap = null;
+			this.hydro = null;
 		}
 		
 		repaint();
@@ -140,7 +152,7 @@ public class Map extends JPanel {
 	public double[] setHeightMap(double newHeight[]) {
 		double old[] = heightMap; 
 		heightMap = newHeight; 
-		hydro.downhill(true);
+		hydro.reCalculate();
 		repaint();
 		return old;
 	}
@@ -154,41 +166,27 @@ public class Map extends JPanel {
 		return old;
 	}
 	
-	/* Z value for net erosion (- for sedimentation) */
-	public double[] getErodeMap() {return erodeMap;}
-	public double[] setErodeMap(double newmap[]) { 
-		double old[] = erodeMap;
-		erodeMap = newmap;
-		hydro.downhill(true);
-		repaint();
-		return old;
-	}
-	
-	/* soil type for each Mesh point */
-	public double [] getSoilMap() {return soilMap;}
-	public double[] setSoilMap(double newSoil[]) {
-		double old[] = soilMap;
-		soilMap = newSoil;
-		return old;
-	}
-	
-	/* down-hill neighor for each mesh point */
-	public int[] getDownHill() {
-		return hydro.downhill(false); 
-	}
-	
-	/* Meshpoint to Cartesian translation matrix */
-	public Cartesian getCartesian() {return map;}
-	
 	/* Number of configured erosion cycles	*/
 	public int getErosion() {return erosion;}
 	public int setErosion(int cycles) {
 		int old = erosion;
 		erosion = cycles;
-		hydro.downhill(true);
+		hydro.reCalculate();
 		repaint();
 		return old;
 	}
+	
+	/*
+	 * these arrays are regularly re-calculated from height/rain
+	 * and so do not need to be explicitly SET
+	 */
+	public int[] getDownHill() { return downHill; }
+	public double[] getFluxMap() {return fluxMap;}
+	public double[] getErodeMap() {return erodeMap;}
+	public double [] getSoilMap() {return soilMap;}
+	
+	/* Meshpoint to Cartesian translation matrix */
+	public Cartesian getCartesian() {return map;}
 	
 	/**
 	 * enable/disable display elements
@@ -328,6 +326,9 @@ public class Map extends JPanel {
 					-Parameters.x_extent/2, -Parameters.y_extent/2, 
 					Parameters.x_extent/2, Parameters.y_extent/2,
 					width/TOPO_CELL, height/TOPO_CELL);
+		
+		// make sure all the rainfall/river/erosion data is up-to-date
+		hydro.reCalculate();
 		
 		// start by rendering backgrounds (rain, altitude, erosion, and water bodies)
 		if ((display & SHOW_RAIN) != 0) {

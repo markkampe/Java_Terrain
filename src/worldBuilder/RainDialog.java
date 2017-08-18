@@ -273,7 +273,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			
 			if (parms.debug_level > 0)
 				System.out.println("Rainfall: mean " + (int) meanRain + Parameters.unit_r + ", from " + 
-						parms.dDirection + ", cloud bottoms at " + parms.dRainHeight + Parameters.unit_z);
+						parms.dDirection + ", cloud bottoms at " + parms.dRainHeight + Parameters.unit_z +
+						", max flow " + map.max_flux + Parameters.unit_f);
 			// we no longer need the old rain map
 			oldRain = null;
 		}

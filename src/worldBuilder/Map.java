@@ -135,6 +135,7 @@ public class Map extends JPanel {
 		repaint();
 	}
 	
+	/* Z value (pre-erosion) for each Mesh point */
 	public double[] getHeightMap() {return heightMap;}
 	public double[] setHeightMap(double newHeight[]) {
 		double old[] = heightMap; 
@@ -144,6 +145,7 @@ public class Map extends JPanel {
 		return old;
 	}
 
+	/* rainfall (in cm) for each Mesh point */
 	public double[] getRainMap() {return rainMap;}
 	public double[] setRainMap(double newRain[]) {
 		double old[] = rainMap; 
@@ -152,6 +154,7 @@ public class Map extends JPanel {
 		return old;
 	}
 	
+	/* Z value for net erosion (- for sedimentation) */
 	public double[] getErodeMap() {return erodeMap;}
 	public double[] setErodeMap(double newmap[]) { 
 		double old[] = erodeMap;
@@ -161,6 +164,7 @@ public class Map extends JPanel {
 		return old;
 	}
 	
+	/* soil type for each Mesh point */
 	public double [] getSoilMap() {return soilMap;}
 	public double[] setSoilMap(double newSoil[]) {
 		double old[] = soilMap;
@@ -168,12 +172,15 @@ public class Map extends JPanel {
 		return old;
 	}
 	
+	/* down-hill neighor for each mesh point */
 	public int[] getDownHill() {
 		return hydro.downhill(false); 
 	}
 	
+	/* Meshpoint to Cartesian translation matrix */
 	public Cartesian getCartesian() {return map;}
 	
+	/* Number of configured erosion cycles	*/
 	public int getErosion() {return erosion;}
 	public int setErosion(int cycles) {
 		int old = erosion;
@@ -322,7 +329,7 @@ public class Map extends JPanel {
 					Parameters.x_extent/2, Parameters.y_extent/2,
 					width/TOPO_CELL, height/TOPO_CELL);
 		
-		// start by rendering backgrounds (rain, altitude, and water bodies)
+		// start by rendering backgrounds (rain, altitude, erosion, and water bodies)
 		if ((display & SHOW_RAIN) != 0) {
 				RainMap r = new RainMap(this);
 				r.paint(g, width, height, TOPO_CELL);

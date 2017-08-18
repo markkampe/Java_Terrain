@@ -180,6 +180,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		// get Cartesian interpolations of tile characteristics
 		Cartesian cart = new Cartesian(map.getMesh(), x, y, x+dx, y+dy, x_points, y_points);
 		double heights[][] = cart.interpolate(map.getHeightMap());
+		double erode[][] = cart.interpolate(map.getErodeMap());
 		double rain[][] = cart.interpolate(map.getRainMap());
 		double soil[][] = cart.interpolate(map.getSoilMap());
 		
@@ -236,7 +237,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 					else
 						output.write(",");
 					output.write(NEW_POINT);
-					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(heights[r][c])));
+					double z = heights[r][c]-erode[r][c];
+					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(z)));
 					output.write(COMMA);
 					output.write(String.format(FORMAT_CM, "rainfall", rain[r][c]));
 					output.write(COMMA);

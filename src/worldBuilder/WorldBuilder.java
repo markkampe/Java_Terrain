@@ -49,6 +49,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem viewTopo;
 	private JMenuItem viewRain;
 	private JMenuItem viewWater;
+	private JMenuItem viewErode;
 	private JMenuItem viewSoil;
 	private JMenuItem viewZoom;
 	private JMenuItem helpInfo;
@@ -180,6 +181,8 @@ public class WorldBuilder  extends JFrame
 		viewRain.addActionListener(this);
 		viewWater = new JMenuItem("Water");
 		viewWater.addActionListener(this);
+		viewErode = new JMenuItem("Erosion");
+		viewErode.addActionListener(this);
 		viewSoil = new JMenuItem("Soil");
 		viewSoil.addActionListener(this);
 		viewZoom = new JMenuItem("Zoom");
@@ -190,6 +193,7 @@ public class WorldBuilder  extends JFrame
 		viewMenu.add(viewTopo);
 		viewMenu.add(viewRain);
 		viewMenu.add(viewWater);
+		viewMenu.add(viewErode);
 		viewMenu.add(viewSoil);
 		viewMenu.add(viewZoom);
 		
@@ -341,6 +345,8 @@ public class WorldBuilder  extends JFrame
 			parms.display_options = map.setDisplay(Map.SHOW_RAIN, (parms.display_options & Map.SHOW_RAIN) == 0);
 		else if (o == viewWater)
 			parms.display_options = map.setDisplay(Map.SHOW_WATER, (parms.display_options & Map.SHOW_WATER) == 0);
+		else if (o == viewErode)
+			parms.display_options = map.setDisplay(Map.SHOW_ERODE, (parms.display_options & Map.SHOW_ERODE) == 0);
 		else if (o == viewSoil)
 			parms.display_options = map.setDisplay(Map.SHOW_SOIL, (parms.display_options & Map.SHOW_SOIL) == 0);
 		else if (o == viewZoom)
@@ -373,6 +379,7 @@ public class WorldBuilder  extends JFrame
 		viewTopo.setText( (opts & Map.SHOW_TOPO) != 0 ? "~topo" : "Topo");
 		viewRain.setText( (opts & Map.SHOW_RAIN) != 0 ? "~rain" : "Rain");
 		viewWater.setText( (opts & Map.SHOW_WATER) != 0 ? "~water" : "Water");
+		viewErode.setText( (opts & Map.SHOW_ERODE) != 0 ? "~erosion" : "Erosion");
 		viewSoil.setText( (opts & Map.SHOW_SOIL) != 0 ? "~soil" : "Soil");
 	}
 	

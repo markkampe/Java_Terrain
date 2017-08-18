@@ -7,8 +7,7 @@ import javax.swing.event.*;
 
 public class ErosionDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {
 	private Map map;
-	private double[] oldErode;	// per MeshPoint deltaZ
-	private double[] newErode;	// edited per MeshPoint deltaZ
+	private int oldCycles;
 	
 	private Parameters parms;
 	
@@ -23,20 +22,14 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 	public ErosionDialog(Map map)  {
 		// pick up references
 		this.map = map;
-		this.oldErode = map.getErodeMap();
 		this.parms = Parameters.getInstance();
-		
-		// copy current map
-		this.newErode = new double[oldErode.length];
-		for(int i = 0; i < oldErode.length; i++)
-			newErode[i] = oldErode[i];
-		map.setErodeMap(newErode);
+		this.oldCycles = map.getErosion();
 
 		// create the dialog box
 		Container mainPane = getContentPane();
 		int border = parms.dialogBorder;
 		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
-		setTitle("Erosion/Sedimentation");
+		setTitle("Erosion/Deposition");
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
@@ -52,7 +45,7 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 		amount.setFont(fontSmall);
 		amount.setPaintTicks(true);
 		amount.setPaintLabels(true);
-		JLabel amtLabel = new JLabel("Erosion(cycles)", JLabel.CENTER);
+		JLabel amtLabel = new JLabel("Erosion/Deposition(cycles)", JLabel.CENTER);
 		amtLabel.setFont(fontLarge);
 		
 		/*
@@ -94,35 +87,13 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 		cancel.addActionListener(this);
 	}
 	
-	private void erode(int cycles) {
-		
-		// zero out the erosion map
-		for(int i = 0; i < newErode.length; i++)
-			newErode[i] = 0;
-		
-		for(int c = 0; c < cycles; c++) {
-			// re-sort by height
-			// recompute downhill
-			// for each point
-				// if eroding
-				//		erode
-				//		update the load
-				// else if depositing
-				//		deposit
-				//		update the load
-		}
-	}
-	
 	/**
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
 		map.selectNone();
-		if (oldErode != null) {
-			map.setErodeMap(oldErode);
-			map.repaint();
-			oldErode = null;
-		}
+		map.setErosion(oldCycles);
+		map.repaint();
 		this.dispose();
 	}
 	
@@ -130,9 +101,9 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 	 * updates to the axis/inclination/profile sliders
 	 */
 	public void stateChanged(ChangeEvent e) {
-			if (e.getSource() == amount) {
-				erode(amount.getValue());
-			} 
+		if (e.getSource() == amount) {
+			map.setErosion(amount.getValue());
+		} 
 	}
 
 	/**
@@ -141,17 +112,16 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			// revert to previous Erosion map
-			map.setErodeMap(oldErode);
+			map.setErosion(oldCycles);
 			map.repaint();
-			oldErode = null;
 		} else if (e.getSource() == accept) {
 			// make the new parameters official
 			parms.dErosion = amount.getValue();
 			
 			if (parms.debug_level > 0)
-				System.out.println("Erode: " + amount.getValue() + " cycles");
-			// we no longer need the old map
-			oldErode = null;
+				System.out.println("Erode: " + amount.getValue() + " cycles" +
+						", max erosion: " + String.format("%.1f", map.max_erosion) + parms.unit_z +
+						", max deposition: " + String.format("%.1f",  map.max_deposition) + parms.unit_z);
 		}
 		
 		// clean up the graphics

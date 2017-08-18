@@ -313,7 +313,7 @@ import javax.json.stream.JsonParser;
 			System.out.println("               rainfall=" + rain_max + unit_r + 
 											   " (bottoms at " + alt_maxrain + unit_z + ")");
 											   
-			System.out.println("   debug=" + debug_level);
+			System.out.println("   verbosity:  " + debug_level);
 			worldParms();
 		}
 	}

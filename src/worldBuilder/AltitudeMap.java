@@ -30,12 +30,14 @@ public class AltitudeMap {
 			int w = width/cellWidth;
 			
 			// interpolate Z values from the latest mesh
-			double zArray[][] = map.getCartesian().interpolate(map.getHeightMap());
+			Cartesian cart = map.getCartesian();
+			double zArray[][] = cart.interpolate(map.getHeightMap());
+			double eArray[][] = cart.interpolate(map.getErodeMap());
 			
 			// use height to generate background colors
 			for(int r = 0; r < h; r++)
 				for(int c = 0; c < w; c++) {
-					double z = zArray[r][c];
+					double z = zArray[r][c] - eArray[r][c];
 					if (z < parms.sea_level)
 						continue;
 					double shade = linear(TOPO_DIM, TOPO_BRITE, z + Parameters.z_extent/2);

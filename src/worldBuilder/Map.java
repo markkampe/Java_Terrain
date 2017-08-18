@@ -27,7 +27,8 @@ public class Map extends JPanel {
 	public static final int SHOW_TOPO = 0x04;
 	public static final int SHOW_RAIN = 0x08;
 	public static final int SHOW_WATER = 0x10;
-	public static final int SHOW_SOIL = 0x20;
+	public static final int SHOW_ERODE = 0x20;
+	public static final int SHOW_SOIL = 0x40;
 	private int display;		// bitmask for enabled SHOWs
 	
 	// soil types
@@ -63,6 +64,10 @@ public class Map extends JPanel {
 	public int sinks[];			// what drains to where
 	private int downHill[];		// each cell's downhill neighbor
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
+	private int erosion;		// number of erosion cycles
+	
+	public double max_erosion;		// maximum soil loss due to erosion
+	public double max_deposition;	// maximum soil gain due to sedimentation
 	
 	private Parameters parms;
 	
@@ -146,6 +151,7 @@ public class Map extends JPanel {
 	public double[] setErodeMap(double newmap[]) { 
 		double old[] = erodeMap;
 		erodeMap = newmap;
+		calc_downhill();
 		repaint();
 		return old;
 	}
@@ -161,6 +167,14 @@ public class Map extends JPanel {
 	public double [] getDepression() {return depression;}
 	public Cartesian getCartesian() {return map;}
 	
+	public int getErosion() {return erosion;}
+	public int setErosion(int cycles) {
+		int old = erosion;
+		erosion = cycles;
+		calc_downhill();
+		repaint();
+		return old;
+	}
 	
 	/**
 	 * enable/disable display elements
@@ -310,9 +324,14 @@ public class Map extends JPanel {
 				a.paint(g, width, height, TOPO_CELL);
 		}
 		
+		if ((display & SHOW_ERODE) != 0 ) {
+			ErodeMap e = new ErodeMap(this);
+			e.paint(g, width, height, TOPO_CELL);
+		}
+		
 		if ((display & SHOW_WATER) != 0) {
-				WaterMap w = new WaterMap(this);
-				w.paint(g, width, height, TOPO_CELL);
+			WaterMap w = new WaterMap(this);
+			w.paint(g, width, height, TOPO_CELL);
 		}
 		
 		// see if we are rendering points
@@ -398,7 +417,7 @@ public class Map extends JPanel {
 	//	that is the escape point for this sink
 	/**
 	 * recalculate the map of who is downhill from whom
-	 * 	must be done whenever the height map changes
+	 * 	must be done whenever the height or erosion map changes
 	 */
 	private void calc_downhill() {
 		final int UNKNOWN = -666;
@@ -409,12 +428,13 @@ public class Map extends JPanel {
 		for( int i = 0; i < downHill.length; i++ ) {
 			downHill[i] = -1;
 			sinks[i] = UNKNOWN;
-			double lowest_height = heightMap[i];
+			double lowest_height = heightMap[i] - erodeMap[i];
 			for( int n = 0; n < mesh.vertices[i].neighbors; n++) {
 				int x = mesh.vertices[i].neighbor[n].index;
-				if (heightMap[x] < lowest_height) {
+				double z = heightMap[x] = erodeMap[x];
+				if (z < lowest_height) {
 					downHill[i] = x;
-					lowest_height = heightMap[x];
+					lowest_height = z;
 				}
 			}
 		}
@@ -429,7 +449,7 @@ public class Map extends JPanel {
 					break;
 				}
 				// if we make it to sea level, there is no sink
-				if (heightMap[i] < parms.sea_level) {
+				if (heightMap[i] - erodeMap[i] < parms.sea_level) {
 					sinks[i] = -1;
 					break;
 				}

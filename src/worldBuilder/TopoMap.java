@@ -38,8 +38,10 @@ public class TopoMap {
 		int w = width / cellWidth;
 
 		// interpolate Z values from the latest mesh
-		double zArray[][] = map.getCartesian().interpolate(map.getHeightMap());
-
+		Cartesian cart = map.getCartesian();
+		double zArray[][] = cart.interpolate(map.getHeightMap());
+		double eArray[][] = cart.interpolate(map.getErodeMap());
+		
 		// allocate an over-under bitmap
 		boolean over_under[][] = new boolean[zArray.length][zArray[0].length];
 
@@ -55,7 +57,7 @@ public class TopoMap {
 			// create an over/under bitmap for this isoline
 			for (int r = 0; r < h; r++)
 				for (int c = 0; c < w; c++)
-					over_under[r][c] = zArray[r][c] > z;
+					over_under[r][c] = zArray[r][c] - eArray[r][c] > z;
 
 			// choose a line color for this isoline
 			// 	major lines are full dark or full bright

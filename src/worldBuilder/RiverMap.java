@@ -6,6 +6,7 @@ import java.awt.Graphics;
 public class RiverMap {
 	private Map map;		// mesh to which we correspond
 	private double height[]; // height of each MeshPoint
+	private double erode[];	// erosion at each MeshPoint
 	private int byHeight[];	// MeshPoints sorted by height
 	private double maxFlux;	// maximum flow on map
 	
@@ -137,6 +138,7 @@ public class RiverMap {
 	 */
 	public double[]calculate() {
 		double[] flux = new double[map.getMesh().vertices.length];
+		double[] erosion = new double[map.getMesh().vertices.length];
 		maxFlux = 0;
 		
 		// make sure we have water flow to calculate
@@ -146,6 +148,7 @@ public class RiverMap {
 		height = map.getHeightMap();
 		if (height == null)
 			return flux;
+
 		double[] rain = map.getRainMap();
 		if (rain == null)
 			return flux;
@@ -204,10 +207,10 @@ public class RiverMap {
         int i = left, j = right;
         while(i <= j) {
         	// find the first thing on left that belongs on right
-            while(height[byHeight[i]] >  pivotValue)
+            while(height[byHeight[i]] - erode[byHeight[i]] >  pivotValue)
                 i++;
             // find first thing on right that belongs on left
-            while(height[byHeight[j]] < pivotValue)
+            while(height[byHeight[j]] - erode[byHeight[i]]< pivotValue)
                 j--;
  
             // swap them

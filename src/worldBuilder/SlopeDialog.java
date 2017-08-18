@@ -236,7 +236,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 			this.dispose();
 			
 			if (parms.debug_level > 0)
-				System.out.println("Incline continent: axis=" + dir + ", slope=" + slope + Parameters.unit_s);
+				System.out.println("Incline continent: axis=" + dir + ", slope=" + slope + Parameters.unit_s +
+						", max slope=" + String.format("%.4f", map.max_slope));
 			
 			// by default, weather comes from off-shore
 			if (dir >= 0)

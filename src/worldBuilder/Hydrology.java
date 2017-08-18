@@ -3,6 +3,7 @@ package worldBuilder;
 public class Hydrology {
 	
 	private Map map;
+	private Mesh mesh;
 	private Parameters parms;
 	
 	// instance varialbles used by reCacluate & heightSort
@@ -26,7 +27,7 @@ public class Hydrology {
 	public void reCalculate() {
 		
 		// collect topographic/hyrdological data from the map
-		Mesh mesh = map.getMesh();
+		mesh = map.getMesh();
 		if (mesh == null)
 			return;
 		heightMap = map.getHeightMap();
@@ -67,30 +68,62 @@ public class Hydrology {
 		double year = 365.25 * 24 * 60 * 60;
 		double rain_to_flow = .01 * area * 1000000 / year;
 		
+		// map units per meter
+		double zScale = Parameters.z_extent / parms.z_range;
+		
 		// processing points form highest to lowest,
 		//	send rainfall down the downhill neighbor chain
 		map.max_flux = 0;
+		map.max_velocity = 0;
+		map.max_erosion = 0;
+		map.max_deposition = 0;
+		double load[] = new double[mesh.vertices.length];
 		for( int i = 0; i < byHeight.length; i++ ) {
 			int x = byHeight[i];
 			
-			// flow stops once we hit sea level
-			// FIX: below sea level does not mean "in the sea"
+			// FIX: need better criterion for being ocean
+			//		?below sea level AND drains to edge?
 			if (heightMap[x] - erodeMap[x] < parms.sea_level) {
 				fluxMap[x] = 0;
 				continue;
 			}
 			
-			// each cell gets its own rainfall
-			fluxMap[x] += rainMap[x] * rain_to_flow;
-			// TODO compute soil water absorbtion
-
-			// each cell gets what drains from above
-			if (downHill[x] >= 0)
-				fluxMap[downHill[x]] += fluxMap[x]; 
-			
-			// note the greatest flux we have seen
+			double flux = rainMap[x] * rain_to_flow;
+			// TODO calculate soil water absorbtion/hydration
+			fluxMap[x] += flux;
 			if (fluxMap[x] > map.max_flux)
 				map.max_flux = fluxMap[x];
+			
+			// calculate the down-hill flow and erosion
+			double v = 0;
+			if (downHill[x] >= 0) {
+				fluxMap[downHill[x]] += fluxMap[x];
+				double s = slope(downHill[x], x);
+				if (s > map.max_slope)
+					map.max_slope = s;
+				v = velocity(s);
+				if (v > map.max_velocity)
+					map.max_velocity = v;
+				double e = erosion(v);
+				if (e > 0) {
+					double taken = e * fluxMap[x] * zScale;
+					// FIX: make sure taken isn't too large
+					erodeMap[x] += taken;
+					if (erodeMap[x] > map.max_erosion)
+						map.max_erosion = erodeMap[x];
+					load[downHill[x]] = load[x] + taken;
+				} else {
+					double d = sedimentation(v);
+					if (d > 0) {
+						double given = d * load[x] * zScale;
+						// FIX: make sure given isn't too large
+						erodeMap[x] -= given;
+						if (erodeMap[x] < - map.max_deposition)
+							map.max_deposition = - erodeMap[x];
+						load[downHill[x]] = load[x] - given;
+					}
+				}
+			}
 		}
 		
 		// TODO sink computation
@@ -131,6 +164,16 @@ public class Hydrology {
 	}
 	
 	/**
+	 * @return slope between two MeshPoints
+	 */
+	private double slope(int here, int there) {
+		double dx = (parms.km(mesh.vertices[there].x) - parms.km(mesh.vertices[here].x)) * 1000;
+		double dy = (parms.km(mesh.vertices[there].y) - parms.km(mesh.vertices[here].y)) * 1000;
+		double dz = parms.altitude(heightMap[there]) - parms.altitude(heightMap[here]);
+		return dz / Math.sqrt(dx*dx + dy*dy);
+	}
+	
+	/**
 	 * estimated flow velocity
 	 * @param slope ... dZ/dX
 	 * @return flow speed (meters/second)
@@ -138,7 +181,7 @@ public class Hydrology {
 	 * NOTE: velocity ranges from .1m/s to 3m/s
 	 * 		 max sustainable slope is 1/1
 	 */
-	public static double velocity(double slope) {
+	private static double velocity(double slope) {
 		return 3 * slope;
 	}
 	
@@ -160,12 +203,12 @@ public class Hydrology {
 	 *  substituting (3b) into (2)
 	 *  	A = W * WV/6 = W^2V/6; W = sqrt(6A/V)
 	 */
-	public static double width(double flow, double velocity) {
+	private static double width(double flow, double velocity) {
 		double area = flow / velocity;
 		return Math.sqrt(6 * area / velocity);
 	}
 
-	public static double depth(double flow, double velocity) {
+	private static double depth(double flow, double velocity) {
 		double area = flow / velocity;
 		return Math.sqrt(area * velocity / 6);
 	}

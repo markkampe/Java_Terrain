@@ -69,7 +69,9 @@ public class Map extends JPanel {
 	private int erosion;		// number of erosion cycles
 	
 	// hydrological results
+	public double max_slope;		// maximum slope
 	public double max_flux;			// maximum river flow
+	public double max_velocity;		// maximum water velocity
 	public double max_erosion;		// maximum soil loss due to erosion
 	public double max_deposition;	// maximum soil gain due to sedimentation
 

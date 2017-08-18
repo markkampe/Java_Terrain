@@ -5,7 +5,7 @@ import java.awt.Graphics;
 
 public class ErodeMap {
 
-	private static final int DIM = 0;
+	private static final int DIM = 128;
 	private static final int BRITE = 255;
 	private Map map;
 	private Parameters parms;
@@ -31,32 +31,23 @@ public class ErodeMap {
 		Cartesian cart = map.getCartesian();
 		double eArray[][] = cart.interpolate(map.getErodeMap());
 		
-		// find the maximum and minimum erosions/depositions
-		double max_erode = 0;
-		double max_deposit = 0;
-		for(int r = 0; r < h; r++)
-			for(int c = 0; c < w; c++) {
-				double e = eArray[r][c];
-				if (e > max_erode)
-					max_erode = e;
-				else if (e < max_deposit)
-					max_deposit = e;
-			}
-		
 		// render each cell according to its erosion/deposition
 		for(int r = 0; r < h; r++)
 			for(int c = 0; c < w; c++) {
 				double e = eArray[r][c];
 				if (e > 0) {		// erosion
-					e /= max_erode;
-					double shade = linear(DIM, BRITE, e);
-					g.setColor(new Color((int) shade, (int) shade, 0));
-				} else if (e < 0) {	// deposition
-					e /= max_deposit;
+					// TODO: scale/cut-off for erosion
+					e /= map.max_erosion;
 					double shade = linear(DIM, BRITE, e);
 					g.setColor(new Color((int) shade, 0, (int) shade));
+					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
+				} else if (e < 0) {	// deposition
+					e /= map.max_deposition;
+					double shade = linear(DIM, BRITE, e);
+					g.setColor(new Color((int) shade, (int) shade, 0));
+					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				}
-				g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
+				
 			}
 	}
 	

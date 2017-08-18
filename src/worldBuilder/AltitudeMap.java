@@ -40,6 +40,8 @@ public class AltitudeMap {
 					double z = zArray[r][c] - eArray[r][c];
 					if (z < parms.sea_level)
 						continue;
+					if (z > Parameters.z_extent/2)
+						System.out.println("z=" + z);
 					double shade = linear(TOPO_DIM, TOPO_BRITE, z + Parameters.z_extent/2);
 					g.setColor(new Color((int) shade, (int) shade, (int) shade));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);

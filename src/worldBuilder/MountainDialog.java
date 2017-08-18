@@ -434,9 +434,14 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			
 			// clean up the selection graphics
 			map.selectNone();
+			selected = false;
+			selecting = false;
 			
-			if (parms.debug_level > 0)
+			if (!placed.equals("") && parms.debug_level > 0) {
 				System.out.print(placed);
+				System.out.println("   max slope=" + String.format("%.4f", map.max_slope));
+			}
+			placed = "";
 		}
 		
 	}

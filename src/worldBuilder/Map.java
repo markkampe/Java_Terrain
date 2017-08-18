@@ -56,19 +56,21 @@ public class Map extends JPanel {
 	
 	// the interesting data
 	private Mesh mesh;			// mesh of Voronoi points
+	private Hydrology hydro;	// hydrology calculator
+	
+	// per MeshPoint information
 	private double heightMap[]; // Height of each mesh point
 	private double soilMap[];	// Soil type of each mesh point
 	private double rainMap[];	// Rainfall of each mesh point
-	private double[] depression; // which cells are in depressions
-	private double[] erodeMap;	// erosion/deposition
-	public int sinks[];			// what drains to where
-	private int downHill[];		// each cell's downhill neighbor
+	private double erodeMap[];	// erosion/deposition
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	private int erosion;		// number of erosion cycles
 	
+	// hydrological results
+	public double max_flux;			// maximum river flow
 	public double max_erosion;		// maximum soil loss due to erosion
 	public double max_deposition;	// maximum soil gain due to sedimentation
-	
+
 	private Parameters parms;
 	
 	private static final long serialVersionUID = 1L;
@@ -96,9 +98,11 @@ public class Map extends JPanel {
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
 			this.parms = Parameters.getInstance();
+			this.hydro = new Hydrology(this);
+			
 			// ensure that the map is not perfectly flat
 			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);
-			calc_downhill();
+			hydro.downhill(true);
 		}
 		selectNone();
 	}
@@ -118,9 +122,10 @@ public class Map extends JPanel {
 			this.rainMap = new double[mesh.vertices.length];
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
+			this.hydro = new Hydrology(this);
 			// ensure that the map is not perfectly flat
 			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);
-			calc_downhill();
+			hydro.downhill(true);
 		} else {
 			this.map = null;
 			this.heightMap = null;
@@ -134,7 +139,7 @@ public class Map extends JPanel {
 	public double[] setHeightMap(double newHeight[]) {
 		double old[] = heightMap; 
 		heightMap = newHeight; 
-		calc_downhill();
+		hydro.downhill(true);
 		repaint();
 		return old;
 	}
@@ -151,7 +156,7 @@ public class Map extends JPanel {
 	public double[] setErodeMap(double newmap[]) { 
 		double old[] = erodeMap;
 		erodeMap = newmap;
-		calc_downhill();
+		hydro.downhill(true);
 		repaint();
 		return old;
 	}
@@ -163,15 +168,17 @@ public class Map extends JPanel {
 		return old;
 	}
 	
-	public int[] getDownHill() {calc_downhill(); return downHill;}	
-	public double [] getDepression() {return depression;}
+	public int[] getDownHill() {
+		return hydro.downhill(false); 
+	}
+	
 	public Cartesian getCartesian() {return map;}
 	
 	public int getErosion() {return erosion;}
 	public int setErosion(int cycles) {
 		int old = erosion;
 		erosion = cycles;
-		calc_downhill();
+		hydro.downhill(true);
 		repaint();
 		return old;
 	}
@@ -345,18 +352,6 @@ public class Map extends JPanel {
 				g.drawOval((int) x, (int) y, SMALL_POINT, SMALL_POINT);
 			}
 		}
-		
-		// FIX - remove depresssion display
-		for(int i = 0; i < mesh.vertices.length; i++) {
-			if (sinks[i] == -1)
-				continue;
-			g.setColor(sinks[i] == i ? Color.RED : Color.ORANGE);
-			MeshPoint p = mesh.vertices[i];
-			double x = ((p.x + x_extent / 2) * width) - LARGE_POINT / 2;
-			double y = ((p.y + y_extent / 2) * height) - LARGE_POINT / 2;
-			g.drawOval((int) x, (int) y, LARGE_POINT, LARGE_POINT);
-			
-		}
 
 		// see if we are rendering the mesh
 		if ((display & SHOW_MESH) != 0) {
@@ -406,67 +401,6 @@ public class Map extends JPanel {
 			break;
 		case NONE:
 			break;
-		}
-	}
-	// TODO move calc_downhill into another class
-	// TODO sink computation
-	// edges have a downhill of OFFMAP ... based on edge, not neighbors
-	// no downhill is NONESUCH (or -(1+ESCAPE POINT)
-	// have a count of tributaries as well as ultimate down hill
-	// for each sink with tributaries, find lowest neighbor w/different sink
-	//	that is the escape point for this sink
-	/**
-	 * recalculate the map of who is downhill from whom
-	 * 	must be done whenever the height or erosion map changes
-	 */
-	private void calc_downhill() {
-		final int UNKNOWN = -666;
-		
-		// find the down-hill neighbor of each point
-		downHill = new int[mesh.vertices.length];
-		sinks = new int[mesh.vertices.length];
-		for( int i = 0; i < downHill.length; i++ ) {
-			downHill[i] = -1;
-			sinks[i] = UNKNOWN;
-			double lowest_height = heightMap[i] - erodeMap[i];
-			for( int n = 0; n < mesh.vertices[i].neighbors; n++) {
-				int x = mesh.vertices[i].neighbor[n].index;
-				double z = heightMap[x] = erodeMap[x];
-				if (z < lowest_height) {
-					downHill[i] = x;
-					lowest_height = z;
-				}
-			}
-		}
-		
-		// follow the down-hill pointers to identify the sinks
-		for(int i = 0; i < downHill.length; i++) {
-			int point = i;
-			while(true) {
-				// if we already know how this ends, we can stop
-				if (sinks[point] != UNKNOWN) {
-					sinks[i] = sinks[point];
-					break;
-				}
-				// if we make it to sea level, there is no sink
-				if (heightMap[i] - erodeMap[i] < parms.sea_level) {
-					sinks[i] = -1;
-					break;
-				}
-				// if we make it to the edge, there is no sink
-				if (mesh.vertices[point].neighbors < 3) {
-					sinks[i] = -1;
-					break;
-				}
-				// if we reach a low point, we are done
-				int x = downHill[point];
-				if (x == -1) {
-					sinks[i] = point;
-					break;
-				}
-				// continue following the downhill pointers
-				point = x;
-			}	
 		}
 	}
 	

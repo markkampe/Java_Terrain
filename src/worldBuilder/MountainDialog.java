@@ -34,6 +34,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private int a_max;				// altitude: full scale
 	
 	private String placed;			// debug message
+	private static final String POS_FMT = "%.6f";
 	
 	private static final int DIALOG_OFFSET = 5;
 	
@@ -334,14 +335,16 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d/2, z, shape, mineral);
 			placed = "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
 					alt + Parameters.unit_z + " " + Map.soil_names[mineral] + " mountain at <" +
-					parms.latitude(X0+X1/2) + "," + parms.longitude(Y0+Y1/2) + "> shape=" + shape + "\n";
+					String.format(POS_FMT, parms.latitude(X0+X1/2)) + "," + String.format(POS_FMT, parms.longitude(Y0+Y1/2)) + 
+					"> shape=" + shape + "/" + Parameters.CYLINDRICAL + "\n";
 		} else {
 			placeRidge(map, X0, Y0, X1, Y1, d/2, z, shape, Map.METAMORPHIC);
 			placed = "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
 					alt + Parameters.unit_z + " " +
-					" metamorphic ridge from <" +
-					parms.latitude(X0) + "," + parms.longitude(Y0) + "> to <" +
-					parms.latitude(X1) + "," + parms.longitude(Y1) + "> shape=" + shape + "\n";
+					Map.soil_names[Map.METAMORPHIC] + " ridge from <" +
+					String.format(POS_FMT, parms.latitude(X0)) + "," + String.format(POS_FMT, parms.longitude(Y0)) + "> to <" +
+							String.format(POS_FMT, parms.latitude(X1)) + "," + String.format(POS_FMT, parms.longitude(Y1)) + 
+							"> shape=" + shape + "/" + Parameters.CYLINDRICAL + "\n";
 		}
 		// tell the map about the update
 		map.setHeightMap(newHeight);

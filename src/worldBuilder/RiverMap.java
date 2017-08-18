@@ -138,7 +138,6 @@ public class RiverMap {
 	 */
 	public double[]calculate() {
 		double[] flux = new double[map.getMesh().vertices.length];
-		double[] erosion = new double[map.getMesh().vertices.length];
 		maxFlux = 0;
 		
 		// make sure we have water flow to calculate
@@ -148,10 +147,11 @@ public class RiverMap {
 		height = map.getHeightMap();
 		if (height == null)
 			return flux;
-
 		double[] rain = map.getRainMap();
 		if (rain == null)
 			return flux;
+		
+		erode = map.getErodeMap();
 		
 		// sort the MeshPoints by descending height
 		byHeight = new int[height.length];

@@ -22,7 +22,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	};
 	
 	private JTextField sel_name;
-	private JLabel sel_pixels;
 	private JLabel sel_center;
 	private JLabel sel_km;
 	private JLabel sel_t_size;
@@ -85,7 +84,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		JLabel resolutionLabel = new JLabel("Tile size(m)", JLabel.CENTER);
 		resolutionLabel.setFont(fontLarge);
 		
-		sel_pixels = new JLabel();
 		sel_center = new JLabel();
 		sel_km = new JLabel();
 		sel_t_size = new JLabel();
@@ -105,15 +103,13 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		namePanel.add(sel_name);
 		namePanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
 		
-		JPanel descPanel = new JPanel(new GridLayout(5,2));
+		JPanel descPanel = new JPanel(new GridLayout(4,2));
 		descPanel.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
 		descPanel.add(new JLabel("Center"));
 		descPanel.add(sel_center);
-		descPanel.add(new JLabel("Pixels"));
-		descPanel.add(sel_pixels);
 		descPanel.add(new JLabel("km"));
 		descPanel.add(sel_km);
-		descPanel.add(new JLabel("Points"));
+		descPanel.add(new JLabel("Tiles"));
 		descPanel.add(sel_points);
 		descPanel.add(new JLabel("Tile Size"));
 		descPanel.add(sel_t_size);
@@ -294,12 +290,13 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		// selected area in tiles
 		x_points = (int) x_km * 1000/res;
 		y_points = (int) y_km * 1000/res;
+		int tiles = x_points * y_points;
 		
-		sel_pixels.setText(x_pixels + "x" + y_pixels);
 		sel_center.setText(String.format("%.6f, %.6f", parms.latitude((Y1+Y0)/2),  parms.longitude((X1+X0)/2)));
 		sel_km.setText((int) x_km + "x" + (int) y_km);
 		sel_t_size.setText(res + " meters");
-		sel_points.setText(x_points + "x" + y_points + " tiles");
+		sel_points.setText(x_points + "x" + y_points);
+		sel_points.setForeground( tiles > parms.tiles_max ? Color.RED : Color.BLACK);
 	}
 	
 	/**

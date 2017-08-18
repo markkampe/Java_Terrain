@@ -19,7 +19,8 @@
 	"altitude_rain": 3000,
 	"msl_range": 2500,
 	"rain_max": 1000,
-	"erosion_max": 10
+	"erosion_max": 10,
+	"tiles_max": 16384
 	},
     "world": {
 	"radius": 6371,

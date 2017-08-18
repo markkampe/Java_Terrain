@@ -38,6 +38,7 @@ import javax.json.stream.JsonParser;
 	public int slope_max = 5;			// slope m/km
 	public int mountain_divisor = 2;	// world/mountain width
 	public int erosion_max = 10;		// erosion cycles
+	public int tiles_max = 10000;		// export warning limit
 	
 	// world size slider units
 	public int diameter_scale = 100;	// slider labeling unit (km)
@@ -247,6 +248,9 @@ import javax.json.stream.JsonParser;
 				case "erosion_max":
 					erosion_max = new Integer(parser.getString());
 					break;
+				case "tiles_max":
+					tiles_max = new Integer(parser.getString());
+					break;
 					
 				// physical process parameters
 				case "Ve":	// critical velocity for erosion
@@ -312,7 +316,7 @@ import javax.json.stream.JsonParser;
 			System.out.println("               mountain diameter=world/" + mountain_divisor);
 			System.out.println("               rainfall=" + rain_max + unit_r + 
 											   " (bottoms at " + alt_maxrain + unit_z + ")");
-											   
+			System.out.println("   warnings:   tiles=" + tiles_max);
 			System.out.println("   verbosity:  " + debug_level);
 			worldParms();
 		}

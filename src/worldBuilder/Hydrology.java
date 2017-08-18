@@ -7,6 +7,8 @@ public class Hydrology {
 	private int downHill[];
 	private int sinks[];
 	
+	private static final int UNKNOWN = -666;	// no known downhill target
+	
 	public Hydrology(Map map) {
 		this.map = map;
 		this.parms = Parameters.getInstance();
@@ -29,15 +31,13 @@ public class Hydrology {
 	 */
 	public int[] downhill(boolean recalculate) {
 		
-		if (recalculate)
+		if (!recalculate)
 			return downHill;
 		
 		// collect topographic/hyrdological data from the map
 		Mesh mesh = map.getMesh();
 		double[] heightMap = map.getHeightMap();
 		double[] erodeMap = map.getErodeMap();
-		
-		final int UNKNOWN = -666;
 		
 		// find the down-hill neighbor of each point
 		downHill = new int[mesh.vertices.length];
@@ -48,7 +48,7 @@ public class Hydrology {
 			double lowest_height = heightMap[i] - erodeMap[i];
 			for( int n = 0; n < mesh.vertices[i].neighbors; n++) {
 				int x = mesh.vertices[i].neighbor[n].index;
-				double z = heightMap[x] = erodeMap[x];
+				double z = heightMap[x] - erodeMap[x];
 				if (z < lowest_height) {
 					downHill[i] = x;
 					lowest_height = z;

@@ -242,7 +242,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 					output.write(COMMA);
 					
 					int st = (int) Math.round(soil[r][c]);
-					output.write(String.format(FORMAT_S, "soil", soilTypes[st]));
+					output.write(String.format(FORMAT_S, "soil", 
+							soilTypes[erode[r][c] < 0 ? Map.ALLUVIAL : st]));
 					output.write(" }");
 				}
 			}

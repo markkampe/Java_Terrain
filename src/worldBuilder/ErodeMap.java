@@ -36,12 +36,13 @@ public class ErodeMap {
 			for(int c = 0; c < w; c++) {
 				double e = eArray[r][c];
 				if (e > 0) {		// erosion
-					// TODO: scale/cut-off for erosion
+					// TODO: move erosion to a fixed loagarithmic scale
 					e /= map.max_erosion;
 					double shade = linear(DIM, BRITE, e);
 					g.setColor(new Color((int) shade, 0, (int) shade));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				} else if (e < 0) {	// deposition
+					// TODO: move deposition to a fixed loagarithmic scale
 					e /= map.max_deposition;
 					double shade = linear(DIM, BRITE, e);
 					g.setColor(new Color((int) shade, (int) shade, 0));

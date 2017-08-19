@@ -248,10 +248,9 @@ public class Hydrology {
 		return (v < Ve) ? 0 : parms.Ce * (v * v)/(Ve * Ve);
 	}
 	
-	// returns fraction of carried load per km
+	// returns fraction of carried load
 	public double sedimentation( double v) {
-		double Vs = parms.Vd;
-		return (v > Vs) ? 0 : parms.Cd/v;
+		return (v > parms.Vd) ? 0 : parms.Cd/v;
 	}
 	
 	/**

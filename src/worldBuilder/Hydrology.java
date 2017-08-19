@@ -41,6 +41,9 @@ public class Hydrology {
 			return;
 		int[] downHill = map.getDownHill();
 		
+		// TODO interate over number of cycles
+		//		perhaps moving this into a subroutine
+		
 		// initialize each array and find downhill neighbor
 		for( int i = 0; i < downHill.length; i++ ) {
 			downHill[i] = -1;
@@ -90,7 +93,12 @@ public class Hydrology {
 			
 			double flux = rainMap[x] * rain_to_flow;
 			// TODO calculate soil water absorbtion/hydration
+			//	penetration depth = min(depth[soiltype], rain/penetration)
+			//	double saturation = saturation[soiltype] * depth
 			fluxMap[x] += flux;
+			//	double absorbed = min(saturation, fluxMap[x])
+			//	saturation[x] = absorbed / depth[soiltype]
+			//  fluxMap[x] -= absorbed;
 			if (fluxMap[x] > map.max_flux)
 				map.max_flux = fluxMap[x];
 			
@@ -125,6 +133,17 @@ public class Hydrology {
 				}
 			}
 		}
+		
+		// TODO flood planes
+		// do
+		//		from highest to lowest
+		//		if erode >= 0
+		//			continue
+		//		for each neighbor
+		//			if higher than me - epsilon
+		//				continue
+		//			give them half of delta-epsilon
+		// while did something
 		
 		// TODO sink computation
 		// edges have a downhill of OFFMAP ... based on edge, not neighbors

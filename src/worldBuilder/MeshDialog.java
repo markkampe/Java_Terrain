@@ -39,7 +39,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 			pointsChooser = new JComboBox<Integer>();
 			JLabel pointsLabel = new JLabel("Points", JLabel.CENTER);
 			pointsLabel.setFont(fontLarge);
-			for(int i = 1024; i < 16536; i *= 2) {
+			for(int i = 256; i < 16536; i *= 2) {
 				pointsChooser.addItem(i);
 			}
 			pointsChooser.setSelectedItem(parms.points);

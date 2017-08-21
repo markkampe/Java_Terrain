@@ -89,6 +89,7 @@ import javax.json.stream.JsonParser;
 	public double Vd = 0.1;		// maximum flow for deposition
 	public double Cd = .001;	// coefficient of deposition
 	public double dRdX = .001;	// precipitation/km
+	public double Dp = 1.0;		// rain penetration (m)
 	
 	// map generation parameters
 	public int improvements = 1;	// number of smoothing iterations
@@ -268,6 +269,9 @@ import javax.json.stream.JsonParser;
 				case "dR/dX":	// precipitation/km
 					dRdX = new Double(parser.getString());
 					break;
+				case "Dp":		// rain penetration depth (m)
+					Dp = new Double(parser.getString());
+					break;
 					
 				// map rendering parameters
 				case "topo_major":
@@ -309,8 +313,9 @@ import javax.json.stream.JsonParser;
 											", Ce=" + String.format("%.4f", Ce) +
 										    ", Vd=" + String.format("%.2f", Vd) + unit_v +
 										    ", Cd=" + String.format("%.4f", Cd));
-			System.out.println("   rainfall:   " + dRdX * 100 + "%/" + unit_xy);
-			System.out.println("   max ranges: " + diameter_max + unit_xy + 
+			System.out.println("   rainfall:   " + dRdX * 100 + "%/" + unit_xy +
+							                ", Dp=" + String.format("%.1f", Dp) + unit_z);
+  			System.out.println("   max ranges: " + diameter_max + unit_xy + 
 					", altitude +/-" + alt_max + unit_z + 
 					", msl +/-" + msl_range + unit_z);
 			System.out.println("               mountain diameter=world/" + mountain_divisor);

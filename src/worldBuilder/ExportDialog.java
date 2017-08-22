@@ -18,7 +18,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	private Parameters parms;
 	
 	private static final String soilTypes[] = {
-			"sedimentary", "metamorphic", "ignious", "alluvial"
+			"sedimentary", "metamorphic", "igneous", "alluvial"
 	};
 	
 	private JTextField sel_name;
@@ -179,6 +179,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		double erode[][] = cart.interpolate(map.getErodeMap());
 		double rain[][] = cart.interpolate(map.getRainMap());
 		double soil[][] = cart.interpolate(map.getSoilMap());
+		double hydration[][] = cart.interpolate(map.getHydrationMap());
 		
 		double lat = parms.latitude(y + dy/2);
 		double lon = parms.longitude(x + dx/2);
@@ -191,12 +192,13 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			final String FORMAT_S = " \"%s\": \"%s\"";
 			final String FORMAT_D = " \"%s\": %d";
 			final String FORMAT_DM = " \"%s\": \"%dm\"";
-			final String FORMAT_DP = " \"%s\": \"%d%%\"";
+			final String FORMAT_DP = " \"%s\": %.2f";
 			final String FORMAT_FM = " \"%s\": \"%.2fm\"";
 			final String FORMAT_CM = " \"%s\": \"%.0fcm\"";
 			final String FORMAT_L = " \"%s\": %.6f";
 			final String FORMAT_O = " \"%s\": {";
 			final String FORMAT_A = " \"%s\": [";
+			final String FORMAT_T = " \"%s\": \"%.1fC\"";
 			final String NEW_POINT = "\n        { ";
 			final String NEWLINE = "\n    ";
 			final String COMMA = ", ";
@@ -222,23 +224,35 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 				output.write(String.format(FORMAT_L, "longitude", lon));
 				output.write(" },");
 			output.write(NEWLINE);
-			output.write(String.format(FORMAT_A, "points"));
+			output.write(String.format(FORMAT_O, "temperatures"));
+				output.write(String.format(FORMAT_T, "mean", parms.meanTemp()));
+				output.write(COMMA);
+				output.write(String.format(FORMAT_T, "summer", parms.meanSummer()));
+				output.write(COMMA);
+				output.write(String.format(FORMAT_T, "winter", parms.meanWinter()));
+				output.write(" },");
+		output.write(NEWLINE);
 			
+			output.write(String.format(FORMAT_A, "points"));
+			// TODO: river exporting
 			boolean first = true;
 			for(int r = 0; r < y_points; r++) {
 				for(int c = 0; c < x_points; c++) {
-					int hydration = parms.dAmount;	// FIX compute real hydration
+
 					if (first)
 						first = false;
 					else
 						output.write(",");
 					output.write(NEW_POINT);
 					double z = heights[r][c]-erode[r][c];
+					double hydro = hydration[r][c];
+					if (z < parms.sea_level)
+						hydro = -parms.altitude(z);
 					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(z)));
 					output.write(COMMA);
 					output.write(String.format(FORMAT_CM, "rainfall", rain[r][c]));
 					output.write(COMMA);
-					output.write(String.format(FORMAT_DP, "hydration", hydration));
+					output.write(String.format(FORMAT_DP, "hydration", hydro));
 					output.write(COMMA);
 					
 					int st = (int) Math.round(soil[r][c]);
@@ -314,8 +328,19 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	public void mouseReleased(MouseEvent e) {
 		if (selecting) {
-			x_end = e.getX();
-			y_end = e.getY();
+			if (e.getX() >= x_start)
+				x_end = e.getX();
+			else {
+				x_end = x_start;
+				x_start = e.getX();
+			}
+			if (e.getY() >= y_start)
+				y_end = e.getY();
+			else {
+				y_end = y_start;
+				y_start = e.getY();
+			}
+
 			selecting = false;
 			selected = true;
 			select(x_start, y_start, x_end, y_end, tile_sizes[resolution.getValue()]);

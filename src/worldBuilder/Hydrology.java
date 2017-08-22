@@ -14,7 +14,7 @@ public class Hydrology {
 	//private static final int UNKNOWN = -666;	// no known downhill target
 	
 	// how much water can different types of soil hold (m^3/m^3)
-	private static double saturation[] = {
+	public static double saturation[] = {
 		0.30,	// max water content of sedimentary soil
 		0.15,	// max water content of metamorphic soil
 		0.10,	// max water content of igneous soil

@@ -11,7 +11,15 @@ public class Hydrology {
 	private double erodeMap[];	// Z erosion of each MeshPoint
 	private int byHeight[];		// MeshPoints sorted from high to low
 		
-	private static final int UNKNOWN = -666;	// no known downhill target
+	//private static final int UNKNOWN = -666;	// no known downhill target
+	
+	// how much water can different types of soil hold (m^3/m^3)
+	private static double saturation[] = {
+		0.30,	// max water content of sedimentary soil
+		0.15,	// max water content of metamorphic soil
+		0.10,	// max water content of igneous soil
+		0.40	// max water content of alluvial soil
+	};
 	
 	public Hydrology(Map map) {
 		this.map = map;
@@ -31,14 +39,18 @@ public class Hydrology {
 		if (mesh == null)
 			return;
 		heightMap = map.getHeightMap();
-		erodeMap = map.getErodeMap();
 		if (heightMap == null)
 			return;
-		
 		double[] rainMap = map.getRainMap();
-		double[] fluxMap = map.getFluxMap();
 		if (rainMap == null)
 			return;
+		
+		// if the above are valid, so are these
+		double[] fluxMap = map.getFluxMap();
+		double[] soilMap = map.getSoilMap();
+		double[] hydrationMap = map.getHydrationMap();
+		erodeMap = map.getErodeMap();
+		
 		int[] downHill = map.getDownHill();
 		
 		// TODO interate over number of cycles
@@ -66,10 +78,10 @@ public class Hydrology {
 			byHeight[i] = i;
 		heightSort(0, byHeight.length - 1);
 		
-		// figure out the mapping from rainfall to water flow
-		double area = (parms.xy_range * parms.xy_range) / byHeight.length;
+		// figure out the mapping from rainfall (cm/y) to water flow (m3/s)
+		double area = 1000000 * (parms.xy_range * parms.xy_range) / byHeight.length;
 		double year = 365.25 * 24 * 60 * 60;
-		double rain_to_flow = .01 * area * 1000000 / year;
+		double rain_to_flow = .01 * area / year;
 		
 		// map units per meter
 		double zScale = Parameters.z_extent / parms.z_range;
@@ -91,14 +103,24 @@ public class Hydrology {
 				continue;
 			}
 			
-			double flux = rainMap[x] * rain_to_flow;
-			// TODO calculate soil water absorbtion/hydration
-			//	penetration depth = min(depth[soiltype], rain/penetration)
-			//	double saturation = saturation[soiltype] * depth
-			fluxMap[x] += flux;
-			//	double absorbed = min(saturation, fluxMap[x])
-			//	saturation[x] = absorbed / depth[soiltype]
-			//  fluxMap[x] -= absorbed;
+			// figure how much water comes into this cell
+			double rain = rainMap[x] * rain_to_flow;
+			fluxMap[x] += rain;
+			
+			// how much water can it hold, how much evaporates in a year
+			int soilType = erodeMap[x] < 0 ? Map.ALLUVIAL : (int) soilMap[x];
+			double maxH2O = saturation[soilType] * parms.Dp * area;
+			double lost = maxH2O *= evaporation();
+			
+			if (fluxMap[x] * year > lost) {
+				hydrationMap[x] = saturation[soilType];
+				fluxMap[x] -= lost / year;
+			} else {
+				hydrationMap[x] = fluxMap[x] * year / (parms.Dp * area); 
+				fluxMap[x] = 0;
+			}
+			
+			// remember the largest flux I have seen
 			if (fluxMap[x] > map.max_flux)
 				map.max_flux = fluxMap[x];
 			
@@ -251,6 +273,21 @@ public class Hydrology {
 	// returns fraction of carried load
 	public double sedimentation( double v) {
 		return (v > parms.Vd) ? 0 : parms.Cd/v;
+	}
+	
+	/*
+	 * returns fraction of soil-water lost after a year
+	 * 
+	 * 	Note: I read a few articles and, finding them quite complex
+	 * 		  made up a formula that I fit to a few data
+	 * 		  points based on two plausible assumptions:
+	 * 			1. there is a half-time, during which 1/2 of the water evaporates
+	 * 			2. the half time decreases exponentially as the temperature rises
+	 */
+	public double evaporation () {
+		double degC = parms.meanTemp();
+		double half_time = parms.E35C * Math.pow(2, (35-degC)/parms.Edeg);
+		return 1 - Math.pow(0.5, 365.25/half_time);
 	}
 	
 	/**

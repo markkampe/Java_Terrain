@@ -281,6 +281,12 @@ import javax.json.stream.JsonParser;
 				case "Dp":		// rain penetration depth (m)
 					Dp = new Double(parser.getString());
 					break;
+				case "Edeg":	// evaporation half-time doubling temp
+					Edeg = new Double(parser.getString());
+					break;
+				case "E35C":	// evaporation half-time for 35C
+					E35C = new Double(parser.getString());
+					break;
 					
 				// map rendering parameters
 				case "topo_major":

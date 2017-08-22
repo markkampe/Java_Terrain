@@ -18,7 +18,7 @@
 	"mountain_fraction": 4,
 	"altitude_rain": 3000,
 	"msl_range": 2500,
-	"rain_max": 1000,
+	"rain_max": 500,
 	"erosion_max": 10,
 	"tiles_max": 16384
 	},

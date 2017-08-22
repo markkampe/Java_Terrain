@@ -331,7 +331,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// how many mountains can we create
 		if (mountains < 2) {
 			// one mountain goes in the center (likely volcanic)
-			int mineral = (shape < (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNIOUS : Map.METAMORPHIC;
+			int mineral = (shape < (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNEOUS : Map.METAMORPHIC;
 			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d/2, z, shape, mineral);
 			placed = "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
 					alt + Parameters.unit_z + " " + Map.soil_names[mineral] + " mountain at <" +

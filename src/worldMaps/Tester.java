@@ -77,7 +77,7 @@ public class Tester extends JFrame {
 		for(int row = 0; row < r.height(); row++) {
 			System.out.print("\n    ");
 			for(int col = 0; col < r.width(); col++) {
-				System.out.print(String.format("%3d ", r.hydration(row, col)));
+				System.out.print(String.format("%.2f ", r.hydration(row, col)));
 			}
 		}
 		

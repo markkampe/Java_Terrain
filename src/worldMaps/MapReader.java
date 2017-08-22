@@ -35,7 +35,7 @@ public class MapReader {
 	// per cell state
 	private double altitude[][];
 	private int rainfall[][];
-	private int hydration[][];
+	private double hydration[][];
 	private SoilType soil[][];
 	
 	public MapReader(String filename) {
@@ -58,7 +58,7 @@ public class MapReader {
 				inPoints = true;
 				altitude = new double[height][width];
 				rainfall = new int[height][width];
-				hydration = new int[height][width];
+				hydration = new double[height][width];
 				soil = new SoilType[height][width];
 				break;
 				
@@ -120,7 +120,7 @@ public class MapReader {
 					x = s.indexOf('%');
 					if (x != -1)
 						s = s.substring(0, x);
-					hydration[row][col] = new Integer(s);
+					hydration[row][col] = new Double(s);
 					break;
 					
 				case "soil":
@@ -254,7 +254,7 @@ public class MapReader {
 	 *	100% = shallow water
 	 *	200% = deep water
 	 */
-	public int hydration(int row, int col) {
+	public double hydration(int row, int col) {
 		return hydration[row][col];
 	}
 	

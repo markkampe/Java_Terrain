@@ -27,23 +27,25 @@
 	"latitude": 30.0,
 	"longitude": -90.0
 	},
-    "physics": {
+    "hydro-physics": {
     	"Ve": 0.75,
 	"Ce": 1.5,
 	"Vd": 0.15,
     	"Cd": 0.001,
     	"dR/dX": 0.005,
-    	"Dp": 2.0
+    	"Dp": 1.0,
+	"Edeg": 10,
+	"E35C": 100
     },
     "map": {
 	"points": 4096,
 	"improvements": 1,
 	"topo_major": 10,
 	"topo_minor": 5,
-	"stream": 2.0
+	"stream": 0.25
     },
     "display": {
-    	"mesh": true,
+    	"mesh": false,
 	"topo": true,
 	"rain": false,
 	"water": true,

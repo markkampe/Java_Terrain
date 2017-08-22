@@ -394,6 +394,12 @@ public class Map extends JPanel {
 			t.paint(g, width, height, TOPO_CELL);
 		}
 		
+		// see if we are rendering soil/hydration
+		if ((display & SHOW_SOIL) != 0) {
+			SoilMap s = new SoilMap(this);
+			s.paint(g, width, height, TOPO_CELL);
+		}
+		
 		// see if we are rendering rivers
 		if ((display & SHOW_WATER) != 0) {
 			RiverMap r = new RiverMap(this);
@@ -417,6 +423,54 @@ public class Map extends JPanel {
 		case NONE:
 			break;
 		}
+	}
+	
+	/**
+	 * linear interpolation of a (color) value within a range
+	 * 
+	 * @param min return value
+	 * @param max return value
+	 * @param value (0-1) to be scaled
+	 */
+	public static double linear(int min, int max, double value) {
+		if (value <= 0)
+			return min;
+		else if (value >= 1)
+			return max;
+		
+		double ret = value * (max - min);
+		return min + ret;
+	}
+	
+	/**
+	 * logarithmic interpolation of a (color) value within a range
+	 * 
+	 * @param min
+	 *            return value
+	 * @param max
+	 *            return value
+	 * @param value
+	 *            (0-1) to be scaled
+	 * @param base
+	 *            (result/2 for each increment)
+	 */
+	public static double logarithmic(int min, int max, double value, double base) {
+		if (value <= 0)
+			return min;
+		else if (value >= 1)
+			return max;
+		
+		double resid = 0.5;
+		double ret = 0;
+		while (value > 0) {
+			if (value > base)
+				ret += resid;
+			else
+				ret += resid * value / base;
+			resid /= 2;
+			value -= base;
+		}
+		return min + (ret * (max - min));
 	}
 	
 	/**

@@ -38,30 +38,17 @@ public class ErodeMap {
 				if (e > 0) {		// erosion
 					// TODO: move erosion to a fixed loagarithmic scale
 					e /= map.max_erosion;
-					double shade = linear(DIM, BRITE, e);
+					double shade = Map.linear(DIM, BRITE, e);
 					g.setColor(new Color((int) shade, 0, (int) shade));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				} else if (e < 0) {	// deposition
 					// TODO: move deposition to a fixed loagarithmic scale
 					e /= map.max_deposition;
-					double shade = linear(DIM, BRITE, e);
+					double shade = Map.linear(DIM, BRITE, e);
 					g.setColor(new Color((int) shade, (int) shade, 0));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				}
 				
 			}
-	}
-	
-	
-	/**
-	 * linear interpolation of a (color) value within a range
-	 * 
-	 * @param min return value
-	 * @param max return value
-	 * @param value (0-1) to be scaled
-	 */
-	private static double linear(int min, int max, double value) {
-		double ret = value * (max - min);
-		return min + ret;
 	}
 }

@@ -41,35 +41,10 @@ public class RainMap {
 				double rain = rArray[r][c];
 
 				// shade a rectangle w/cyan for that rainfall
-				double shade = logarithmic(RAIN_DIM, RAIN_BRITE, rain / parms.rain_max, 0.2);
+				double shade = Map.logarithmic(RAIN_DIM, RAIN_BRITE, rain / parms.rain_max, 0.2);
 				g.setColor(new Color(0, (int) shade, (int) shade));
 				g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 			}
 	}
 
-	/**
-	 * logarithmic interpolation of a (color) value within a range
-	 * 
-	 * @param min
-	 *            return value
-	 * @param max
-	 *            return value
-	 * @param value
-	 *            (0-1) to be scaled
-	 * @param base
-	 *            (result/2 for each increment)
-	 */
-	private static double logarithmic(int min, int max, double value, double base) {
-		double resid = 0.5;
-		double ret = 0;
-		while (value > 0) {
-			if (value > base)
-				ret += resid;
-			else
-				ret += resid * value / base;
-			resid /= 2;
-			value -= base;
-		}
-		return min + (ret * (max - min));
-	}
 }

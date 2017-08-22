@@ -34,10 +34,10 @@ public class Map extends JPanel {
 	// soil types
 	public static final int SEDIMENTARY = 0;
 	public static final int METAMORPHIC = 1;
-	public static final int IGNIOUS = 2;
+	public static final int IGNEOUS = 2;
 	public static final int ALLUVIAL = 3;
 	public static final String soil_names[] = {
-			"Sedimentary", "Metamorphic", "Ignious", "Alluvial"
+			"Sedimentary", "Metamorphic", "Igneous", "Alluvial"
 	};
 	
 	// map size (in pixels)
@@ -64,6 +64,7 @@ public class Map extends JPanel {
 	private double rainMap[];	// Rainfall of each mesh point
 	private double fluxMap[];	// Water flow through each point
 	private double erodeMap[];	// erosion/deposition
+	private double hydrationMap[];	// soil hydration
 	private int downHill[];		// down-hill neighbor
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	private int erosion;		// number of erosion cycles
@@ -103,6 +104,7 @@ public class Map extends JPanel {
 			this.fluxMap = new double[mesh.vertices.length];
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
+			this.hydrationMap = new double[mesh.vertices.length];
 			this.parms = Parameters.getInstance();
 			this.hydro = new Hydrology(this);
 			
@@ -130,6 +132,7 @@ public class Map extends JPanel {
 			this.fluxMap = new double[mesh.vertices.length];
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
+			this.hydrationMap = new double[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
 			
 			// ensure that the map is not perfectly flat
@@ -143,6 +146,7 @@ public class Map extends JPanel {
 			this.fluxMap = null;
 			this.erodeMap = null;
 			this.soilMap = null;
+			this.hydrationMap = null;
 			this.hydro = null;
 		}
 		
@@ -186,6 +190,7 @@ public class Map extends JPanel {
 	public double[] getFluxMap() {return fluxMap;}
 	public double[] getErodeMap() {return erodeMap;}
 	public double [] getSoilMap() {return soilMap;}
+	public double [] getHydrationMap() { return hydrationMap; }
 	
 	/* Meshpoint to Cartesian translation matrix */
 	public Cartesian getCartesian() {return map;}

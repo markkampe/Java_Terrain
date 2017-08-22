@@ -22,14 +22,20 @@ import javax.json.stream.JsonParser;
 	public static final String unit_s = "cm/km";
 	public static final String unit_f = "m^3/s";
 	public static final String unit_v = "m/s";
+	public static final String unit_t = "C";
 	
 	// map coordinate ranges (probably don't want to change)
 	public static final double x_extent = 1.0;	// Xmax - Xmin
 	public static final double y_extent = 1.0;	// Ymax - Ymin
 	public static final double z_extent = 1.0;	// Zmax - Zmin
 	
+	// planetary characteristics
+	public int radius = 6371;	// planetary radius (km)
+	public int tilt = 18;		// (seasonal) axis tilt
+	private double Tmin = -5;	// mean temperature at poles
+	private double Tmax = 30;	// mean temperature at equator
+	
 	// limits on world parameters (overide in config.json)
-	public int radius = 6371;			// planetary radius (km)
 	public int alt_max = 10000;			// max altitude (m)
 	public int alt_maxrain = 1000;		// max rain altitude (m)
 	public int diameter_max = 5000;		// max world diameter (km)
@@ -90,6 +96,9 @@ import javax.json.stream.JsonParser;
 	public double Cd = .001;	// coefficient of deposition
 	public double dRdX = .001;	// precipitation/km
 	public double Dp = 1.0;		// rain penetration (m)
+	public double Edeg = 10;	// degC to halve evaporation rate
+	public double E35C = 100;	// transpiration half-time
+	
 	
 	// map generation parameters
 	public int improvements = 1;	// number of smoothing iterations
@@ -315,6 +324,7 @@ import javax.json.stream.JsonParser;
 										    ", Cd=" + String.format("%.4f", Cd));
 			System.out.println("   rainfall:   " + dRdX * 100 + "%/" + unit_xy +
 							                ", Dp=" + String.format("%.1f", Dp) + unit_z);
+			System.out.println("   mean temps: polar=" + Tmin + unit_t + ", equator=" + Tmax + unit_t);
   			System.out.println("   max ranges: " + diameter_max + unit_xy + 
 					", altitude +/-" + alt_max + unit_z + 
 					", msl +/-" + msl_range + unit_z);
@@ -337,9 +347,12 @@ import javax.json.stream.JsonParser;
 		System.out.println("World Configuration");
 		System.out.println("   maped area: " + xy_range + "x" + xy_range + " " + unit_xy + "^2, max altitude " + z_range/2 + unit_z);
 		System.out.println("   planetary:  lat=" + latitude + ", lon=" + longitude + ", radius=" + radius + unit_xy);
+		System.out.println("               Tmean=" + String.format("%.1f", meanTemp()) + unit_t + 
+											", Tsummer=" + String.format("%.1f", meanSummer()) + unit_t + 
+											", Twinter=" + String.format("%.1f", meanWinter()) + unit_t);
 	}
 	
-	/**
+	/** 
 	 * attractive slider calibration
 	 * 
 	 * @param min value
@@ -359,6 +372,29 @@ import javax.json.stream.JsonParser;
 			else
 				return full_scale/10;
 		}
+	}
+	
+	/**
+	 * mean temperatore (for this latitude)
+	 * 
+	 * @return	mean temperature (degC)
+	 */
+	public double meanTemp() {
+		double radians = latitude * Math.PI / 180;
+		return Tmin + Tmax * Math.cos(radians);	
+	}
+	
+	public double meanWinter() {
+		double lat = latitude > 0 ? latitude + tilt : latitude - tilt;
+		double radians = lat * Math.PI / 180;
+		return Tmin + Tmax * Math.cos(radians);	
+		
+	}
+	
+	public double meanSummer() {
+		double lat = latitude > 0 ? latitude - tilt : latitude + tilt;
+		double radians = lat * Math.PI / 180;
+		return Tmin + Tmax * Math.cos(radians);	
 	}
 	
 	/**
@@ -386,6 +422,7 @@ import javax.json.stream.JsonParser;
 		double offset = x * degrees / x_extent;
 		return longitude + offset;
 	}
+	
 	/**
 	 * turn a map distance into world km
 	 * 

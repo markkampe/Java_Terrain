@@ -137,8 +137,9 @@ public class Hydrology {
 				double e = erosion(v);
 				if (e > 0) {
 					double taken = e * fluxMap[x] * zScale;
-					// FIX: make sure taken isn't too large
 					erodeMap[x] += taken;
+					if (heightMap[x] - erodeMap[x] < -Parameters.z_extent/2)
+						erodeMap[x] = heightMap[x] + Parameters.z_extent/2;
 					if (erodeMap[x] > map.max_erosion)
 						map.max_erosion = erodeMap[x];
 					load[downHill[x]] = load[x] + taken;
@@ -146,7 +147,6 @@ public class Hydrology {
 					double d = sedimentation(v);
 					if (d > 0) {
 						double given = d * load[x] * zScale;
-						// FIX: make sure given isn't too large
 						erodeMap[x] -= given;
 						if (erodeMap[x] < - map.max_deposition)
 							map.max_deposition = - erodeMap[x];
@@ -244,12 +244,12 @@ public class Hydrology {
 	 *  substituting (3b) into (2)
 	 *  	A = W * WV/6 = W^2V/6; W = sqrt(6A/V)
 	 */
-	private static double width(double flow, double velocity) {
+	public static double width(double flow, double velocity) {
 		double area = flow / velocity;
 		return Math.sqrt(6 * area / velocity);
 	}
 
-	private static double depth(double flow, double velocity) {
+	public static double depth(double flow, double velocity) {
 		double area = flow / velocity;
 		return Math.sqrt(area * velocity / 6);
 	}

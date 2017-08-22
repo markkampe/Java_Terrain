@@ -8,11 +8,11 @@ public class ErodeMap {
 	private static final int DIM = 128;
 	private static final int BRITE = 255;
 	private Map map;
-	private Parameters parms;
+	//private Parameters parms;
 	
 	public ErodeMap(Map map) {
 		this.map = map;
-		this.parms = Parameters.getInstance();
+		//this.parms = Parameters.getInstance();
 	}
 
 	/**

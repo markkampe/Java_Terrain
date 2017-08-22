@@ -278,10 +278,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 * describe the selected area
 	 */
 	private void select(int x0, int y0, int x1, int y1, int res) {
-		// selected area in pixels
-		int x_pixels = Math.abs(x1 - x0);
-		int y_pixels = Math.abs(y1 - y0);
-		
 		// selected area in map coordinates
 		double X0 = map.x(x0);
 		double X1 = map.x(x1);

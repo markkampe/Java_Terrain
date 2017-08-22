@@ -120,8 +120,8 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 			
 			if (parms.debug_level > 0)
 				System.out.println("Erode: " + amount.getValue() + " cycles" +
-						", max erosion: " + String.format("%.1f", map.max_erosion) + parms.unit_z +
-						", max deposition: " + String.format("%.1f",  map.max_deposition) + parms.unit_z);
+						", max erosion: " + String.format("%.1f", map.max_erosion) + Parameters.unit_z +
+						", max deposition: " + String.format("%.1f",  map.max_deposition) + Parameters.unit_z);
 		}
 		
 		// clean up the graphics

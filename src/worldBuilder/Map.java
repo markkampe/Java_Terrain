@@ -44,7 +44,7 @@ public class Map extends JPanel {
 	private static final int MIN_WIDTH = 400;	// min screen width
 	private static final int MIN_HEIGHT = 400;	// min screen height
 	private static final int SMALL_POINT = 2;	// width of a small point
-	private static final int LARGE_POINT = 4;	// width of a large point
+	//private static final int LARGE_POINT = 4;	// width of a large point
 	private static final int TOPO_CELL = 5;		// pixels/topographic cell
 												// CODE DEPENDS ON THIS CONSTANT
 	private Dimension size;
@@ -76,7 +76,7 @@ public class Map extends JPanel {
 	public double max_erosion;		// maximum soil loss due to erosion
 	public double max_deposition;	// maximum soil gain due to sedimentation
 
-	private Parameters parms;
+	// private Parameters parms;
 	
 	private static final long serialVersionUID = 1L;
 
@@ -105,8 +105,8 @@ public class Map extends JPanel {
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
 			this.hydrationMap = new double[mesh.vertices.length];
-			this.parms = Parameters.getInstance();
 			this.hydro = new Hydrology(this);
+			//this.parms = Parameters.getInstance();
 			
 			// ensure that the map is not perfectly flat
 			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);	

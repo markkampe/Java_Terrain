@@ -25,33 +25,26 @@ public class WaterMap {
 		int h = height/cellWidth;
 		int w = width/cellWidth;
 		
-		// interpolate Z values from the latest mesh
-		double zArray[][] = map.getCartesian().interpolate(map.getHeightMap());
-		
-		// XXX all depressions are not necessarily full of water
-		// TODO: fill depressions w/water
-		//	blue depends on (a) being a depression and 
-		//                  (b) how much of a depression
-		//                  (c) flux at the sink (which might be a surrogate for (b)
-		
+		// interpolate per-cell hydration from the mesh
+		double hArray[][] = map.getCartesian().interpolate(map.getHydrationMap());
+			
 		// use height to generate background colors
 		g.setColor(Color.BLUE);
-		double seaLevel = parms.sea_level;
 		for(int r = 0; r < h; r++)
 			for(int c = 0; c < w; c++) {
 				int sum = 0;
 				if (r < h-1 && c < w-1) {
 					// see which of our neighbors are above water
-					if (zArray[r][c] >= seaLevel)
+					if (hArray[r][c] < 1.0)
 						sum += 8;
-					if (zArray[r][c + 1] >= seaLevel)
+					if (hArray[r][c + 1] < 1.0)
 						sum += 4;
-					if (zArray[r + 1][c] >= seaLevel)
+					if (hArray[r + 1][c] < 1.0)
 						sum += 1;
-					if (zArray[r + 1][c + 1] >= seaLevel)
+					if (hArray[r + 1][c + 1] < 1.0)
 						sum += 2;
 				} else
-						sum = (zArray[r][c] >= seaLevel) ? 15 : 0;
+						sum = (hArray[r][c] < 1.0) ? 15 : 0;
 				
 				// render a cell of the appropriate shape
 				waterCell(g, r, c, cellWidth, sum);

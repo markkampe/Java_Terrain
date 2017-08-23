@@ -331,17 +331,26 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// how many mountains can we create
 		if (mountains < 2) {
 			// one mountain goes in the center (likely volcanic)
-			int mineral = (shape < (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNEOUS : Map.METAMORPHIC;
-			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d/2, z, shape, mineral);
+			int composition = (shape <= (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNEOUS : Map.METAMORPHIC;
+			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d/2, z, shape, composition);
+			String form;
+			if (z < 0)
+				form = "caldera";
+			else if (shape >= (Parameters.SPHERICAL + Parameters.CYLINDRICAL)/2)
+				form = "plateau";
+			else
+				form = "mountain";
 			placed = "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
-					alt + Parameters.unit_z + " " + Map.soil_names[mineral] + " mountain at <" +
+					alt + Parameters.unit_z + " " + Map.soil_names[composition] + " " + form + " at <" +
 					String.format(POS_FMT, parms.latitude(X0+X1/2)) + "," + String.format(POS_FMT, parms.longitude(Y0+Y1/2)) + 
 					"> shape=" + shape + "/" + Parameters.CYLINDRICAL + "\n";
 		} else {
-			placeRidge(map, X0, Y0, X1, Y1, d/2, z, shape, Map.METAMORPHIC);
+			int composition = (alt > 0) ? Map.METAMORPHIC : Map.SEDIMENTARY;
+			placeRidge(map, X0, Y0, X1, Y1, d/2, z, shape, composition);
+			String form = (alt > 0) ? "ridge" : "trench";
 			placed = "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
 					alt + Parameters.unit_z + " " +
-					Map.soil_names[Map.METAMORPHIC] + " ridge from <" +
+					Map.soil_names[composition] + " " + form + " from <" +
 					String.format(POS_FMT, parms.latitude(X0)) + "," + String.format(POS_FMT, parms.longitude(Y0)) + "> to <" +
 							String.format(POS_FMT, parms.latitude(X1)) + "," + String.format(POS_FMT, parms.longitude(Y1)) + 
 							"> shape=" + shape + "/" + Parameters.CYLINDRICAL + "\n";
@@ -368,10 +377,17 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		selecting = false;
 		selected = true;
 		redraw();	
-		// TODO: multiple segment mountain ranges
 	}
 	
-	public void mouseClicked(MouseEvent e) {}
+	public void mouseClicked(MouseEvent e) {
+		x_start = e.getX();
+		y_start = e.getY();
+		x_end = x_start + 1;
+		y_end = y_start + 1;
+		selecting = false;
+		selected = true;
+		redraw();
+	}
 	
 	/**
 	 * progress in region selection

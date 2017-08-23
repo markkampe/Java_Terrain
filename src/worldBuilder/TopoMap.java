@@ -41,6 +41,7 @@ public class TopoMap {
 		Cartesian cart = map.getCartesian();
 		double zArray[][] = cart.interpolate(map.getHeightMap());
 		double eArray[][] = cart.interpolate(map.getErodeMap());
+		double hArray[][] = cart.interpolate(map.getHydrationMap());
 		
 		// allocate an over-under bitmap
 		boolean over_under[][] = new boolean[zArray.length][zArray[0].length];
@@ -50,8 +51,6 @@ public class TopoMap {
 		double deltaH = Parameters.z_extent / maxLines;
 		for (int line = 0; line < maxLines; line++) {
 			double z = line * deltaH - Parameters.z_extent / 2;
-			if (z < parms.sea_level)
-				continue;
 			boolean major = (line % parms.topo_minor) == 0;
 
 			// create an over/under bitmap for this isoline

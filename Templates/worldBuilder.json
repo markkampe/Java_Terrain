@@ -1,6 +1,6 @@
 {
     "window": {
-	"title": "Worldbuilder 0.1 - WIP",
+	"title": "Worldbuilder 0.1 - Demo",
 	"height": 1000,
 	"width": 1000,
 	"border": 10,
@@ -24,6 +24,7 @@
 	},
     "world": {
 	"radius": 6371,
+	"tilt": 23.5,
 	"latitude": 30.0,
 	"longitude": -90.0
 	},

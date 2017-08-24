@@ -31,7 +31,7 @@ import javax.json.stream.JsonParser;
 	
 	// planetary characteristics
 	public int radius = 6371;	// planetary radius (km)
-	public int tilt = 18;		// (seasonal) axis tilt
+	public double tilt = 23.5;	// (seasonal) axis tilt
 	private double Tmin = -5;	// mean temperature at poles
 	private double Tmax = 30;	// mean temperature at equator
 	
@@ -61,7 +61,7 @@ import javax.json.stream.JsonParser;
 	public int dialogDelta;				// per dialog offsets
 	public int dialogBorder;			// dialog box border
 	
-	public String title = "WorldBuilder";
+	public String title = "WorldBuilder 0.1 WIP";
 	
 	// map rendering thresholds
 	public double stream_flux = 0.1;	// stream threshold (m3/s)
@@ -89,15 +89,18 @@ import javax.json.stream.JsonParser;
 	public int dRainHeight;		// mean height of incoming rain
 	public int dErosion;		// erosion cycles
 	
-	// physical processes
-	public double Ve = 1.0;		// minimum flow for erosion
-	public double Ce = 1.0;		// coefficient of erosion
-	public double Vd = 0.1;		// maximum flow for deposition
+	// tunable physical process parameters
+	//		others (less likely to change) are in Hydrology.java
+	public double Ve = 0.75;	// minimum velocity for erosion
+	public double Ce = 1.5;		// coefficient of erosion
+								// erosion = flow * Ce * (V/Ve)^2
+	public double Vd = 0.15;	// maximum velocity for deposition
 	public double Cd = .001;	// coefficient of deposition
-	public double dRdX = .001;	// precipitation/km
+								// deposition = load * Cd/V
+	public double dRdX = .005;	// fraction of rain that falls per km
 	public double Dp = 1.0;		// rain penetration (m)
 	public double Edeg = 10;	// degC to halve evaporation rate
-	public double E35C = 100;	// transpiration half-time
+	public double E35C = 100;	// transpiration half-time at 35C (days)
 	
 	
 	// map generation parameters
@@ -226,6 +229,9 @@ import javax.json.stream.JsonParser;
 				case "radius":
 					radius = new Integer(parser.getString());
 					break;
+				case "tilt":
+					tilt = new Double(parser.getString());
+					break;
 
 				// limits on configuration sliders
 				case "diameter_unit":
@@ -352,7 +358,7 @@ import javax.json.stream.JsonParser;
 	public void worldParms() {
 		System.out.println("World Configuration");
 		System.out.println("   maped area: " + xy_range + "x" + xy_range + " " + unit_xy + "^2, max altitude " + z_range/2 + unit_z);
-		System.out.println("   planetary:  lat=" + latitude + ", lon=" + longitude + ", radius=" + radius + unit_xy);
+		System.out.println("   planetary:  lat=" + latitude + ", lon=" + longitude + ", radius=" + radius + unit_xy + ", tilt=" + tilt);
 		System.out.println("               Tmean=" + String.format("%.1f", meanTemp()) + unit_t + 
 											", Tsummer=" + String.format("%.1f", meanSummer()) + unit_t + 
 											", Twinter=" + String.format("%.1f", meanWinter()) + unit_t);

@@ -6,11 +6,11 @@ import java.awt.Graphics;
 public class WaterMap {
 
 	private Map map;
-	private Parameters parms;
+	// private Parameters parms;
 	
 	public WaterMap(Map map) {
 		this.map = map;
-		this.parms = Parameters.getInstance();
+		// this.parms = Parameters.getInstance();
 	}
 	
 	/**

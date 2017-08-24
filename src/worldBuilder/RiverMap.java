@@ -57,12 +57,11 @@ public class RiverMap {
 				}
 				// blue gets brighter, green dimmer w/increasing flow
 				double delta = (flux[i] - min_stream) * dBdF;
+				if (delta > 128.0)	System.out.println("delta=" + delta + ", f[i]=" + flux[i] + ", min=" + min_stream + ", max=" + map.max_flux + ", dBdF=" + dBdF);
 				double blue = WATER_DIM + delta;
 				double green = Math.max(0, WATER_DIM - delta);
 				g.setColor(new Color(0, (int) green, (int) blue));
 				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
-			} else {
-				// TODO: render basins
 			}
 		}
 	}

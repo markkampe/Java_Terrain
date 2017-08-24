@@ -41,7 +41,6 @@ public class TopoMap {
 		Cartesian cart = map.getCartesian();
 		double zArray[][] = cart.interpolate(map.getHeightMap());
 		double eArray[][] = cart.interpolate(map.getErodeMap());
-		double hArray[][] = cart.interpolate(map.getHydrationMap());
 		
 		// allocate an over-under bitmap
 		boolean over_under[][] = new boolean[zArray.length][zArray[0].length];

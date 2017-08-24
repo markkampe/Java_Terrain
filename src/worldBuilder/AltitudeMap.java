@@ -10,11 +10,11 @@ public class AltitudeMap {
 	private static final int TOPO_BRITE = 255;
 	
 	private Map map;
-	private Parameters parms;
+	//private Parameters parms;
 	
 	public AltitudeMap(Map map) {
 		this.map = map;
-		this.parms = Parameters.getInstance();
+		//this.parms = Parameters.getInstance();
 	}
 
 	/**

@@ -28,7 +28,6 @@ public class RiverMap {
 	public void paint(Graphics g, int width, int height) {
 		
 		Mesh mesh = map.getMesh();
-		double[] heightMap = map.getHeightMap();
 		int downHill[] = map.getDownHill();
 		double flux[] = map.getFluxMap();
 		
@@ -39,8 +38,6 @@ public class RiverMap {
 		
 		// draw the streams, rivers, lakes and oceans
 		for(int i = 0; i < flux.length; i++) {
-			if (heightMap[i] < parms.sea_level)
-				continue;	// don't display rivers under the ocean
 			if (flux[i] < min_stream)
 				continue;	// don't display flux below stream cut-off
 			if (downHill[i] >= 0) {
@@ -50,14 +47,9 @@ public class RiverMap {
 				double x2 = (mesh.vertices[d].x + Parameters.x_extent/2) * width;
 				double y2 = (mesh.vertices[d].y + Parameters.y_extent/2) * height;
 				
-				// if a river segment flows into the sea, halve its length
-				if (heightMap[d] < parms.sea_level) {
-					x2 = (x1 + x2)/2;
-					y2 = (y1 + y2)/2;
-				}
 				// blue gets brighter, green dimmer w/increasing flow
 				double delta = (flux[i] - min_stream) * dBdF;
-				if (delta > 128.0)	System.out.println("delta=" + delta + ", f[i]=" + flux[i] + ", min=" + min_stream + ", max=" + map.max_flux + ", dBdF=" + dBdF);
+				if (delta >= 127) delta = 127;	// we didn't count under-sea rivers
 				double blue = WATER_DIM + delta;
 				double green = Math.max(0, WATER_DIM - delta);
 				g.setColor(new Color(0, (int) green, (int) blue));

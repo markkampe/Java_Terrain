@@ -52,6 +52,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem viewErode;
 	private JMenuItem viewSoil;
 	private JMenuItem viewZoom;
+	private JMenuItem viewDebug;
 	private JMenuItem helpInfo;
 	
 	// control widgets
@@ -187,6 +188,8 @@ public class WorldBuilder  extends JFrame
 		viewSoil.addActionListener(this);
 		viewZoom = new JMenuItem("Zoom");
 		viewZoom.addActionListener(this);
+		viewDebug = new JMenuItem("Debug");
+		viewDebug.addActionListener(this);
 		JMenu viewMenu = new JMenu("View");
 		viewMenu.add(viewPoints);
 		viewMenu.add(viewMesh);
@@ -196,6 +199,8 @@ public class WorldBuilder  extends JFrame
 		viewMenu.add(viewErode);
 		viewMenu.add(viewSoil);
 		viewMenu.add(viewZoom);
+		viewMenu.add(new JSeparator());
+		viewMenu.add(viewDebug);
 		
 		// create help menu
 		helpInfo = new JMenuItem("about WorldBuilder");
@@ -351,6 +356,8 @@ public class WorldBuilder  extends JFrame
 			parms.display_options = map.setDisplay(Map.SHOW_SOIL, (parms.display_options & Map.SHOW_SOIL) == 0);
 		else if (o == viewZoom)
 			new ZoomDialog(map);
+		else if (o == viewDebug)
+			new PointDebug(map);
 		// help menu just shows info
 		else if (o == helpInfo) {
 			JOptionPane.showMessageDialog(new JFrame(), 

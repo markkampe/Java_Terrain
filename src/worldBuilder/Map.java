@@ -382,11 +382,6 @@ public class Map extends JPanel {
 			e.paint(g, width, height, TOPO_CELL);
 		}
 		
-		if ((display & SHOW_WATER) != 0) {
-			WaterMap w = new WaterMap(this);
-			w.paint(g, width, height, TOPO_CELL);
-		}
-		
 		// see if we are rendering points
 		if ((display & SHOW_POINTS) != 0) {
 			g.setColor(POINT_COLOR);
@@ -435,6 +430,8 @@ public class Map extends JPanel {
 		if ((display & SHOW_WATER) != 0) {
 			RiverMap r = new RiverMap(this);
 			r.paint(g, width, height);
+			WaterMap w = new WaterMap(this);
+			w.paint(g, width, height, TOPO_CELL);		
 		}
 		
 		// see if we have points to highlight

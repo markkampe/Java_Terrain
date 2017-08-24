@@ -1,17 +1,26 @@
 package worldBuilder;
 
+import java.awt.Color;
+
+/*
+ * This is probably the most complex and computationally expensive
+ * class in the entire program.  It calculates topology, water 
+ * placement and flow, erosion and sedimentation and embodies a
+ * considerable amount of (badly approximated) physics.
+ * 
+
+ */
 public class Hydrology {
 	
 	private Map map;
 	private Mesh mesh;
 	private Parameters parms;
 	
-	// instance varialbles used by reCacluate & heightSort
+	// instance variables used by reCacluate & height Sort
 	private double heightMap[];	// Z value of each MeshPoint
 	private double erodeMap[];	// Z erosion of each MeshPoint
+	private double surface[];	// Z depression padding
 	private int byHeight[];		// MeshPoints sorted from high to low
-		
-	//private static final int UNKNOWN = -666;	// no known downhill target
 	
 	// how much water can different types of soil hold (m^3/m^3)
 	public static double saturation[] = {
@@ -21,50 +30,87 @@ public class Hydrology {
 		0.40	// max water content of alluvial soil
 	};
 	
+	// XXX soil-type specific erosion rates
+	
+	// drainage notations
+	public static final int UNKNOWN = -666;
+	public static final int OCEAN = -1;
+	public static final int OFF_MAP = -2;
+	
+	private static final double EPSILON = .0000001;
+	
 	public Hydrology(Map map) {
 		this.map = map;
 		this.parms = Parameters.getInstance();
 	}
-
-
+	
+	/*
+	 * return the CURRENT (map) height of a Meshpoint
+	 *
+	 *  Many algorithms depend on processing points from 
+	 *  highest-to-lowest or vice versa.  Because of the
+	 *  way we do hydrological processing, height is divided
+	 *  into three components:
+	 * 		heightMap[p] ... (fixed) height of the underlying rock
+	 * 		erodeMap[p] ... (changing) erosion/deposition above that
+	 * 		surface[p] ... brings under-water points up to H2O surface
+	 * 					   (to make them up-hill from their exit points)
+	 */
+	private double height(int point) {
+		double h = heightMap[point] + surface[point] - erodeMap[point];
+		return h;
+	}
 	
 	/**
 	 * re-calculate downHill, flux, and erosion
 	 * 		needed whenever Height, Rain or Erosion changes
+	 * 
+	 * @param reset erosion map (vs incremental erosion)
+	 * 
+	 * 1. figure out what is down-hill from what
+	 * 2. sort MeshPoints by descending height
+	 * 3. identify all local depressions and sink points
+	 * 4. identify escape point from each depression
+	 * 5. route drainage to escape point, pad heights to escape height
+	 *    re-sort MeshPoints by descending (padded) height
+	 * 6. identify all points that are under the ocean
+	 * 7. compute rain-fall and absorbtion for each point,
+	 * 	  any excess water drains down-hill
+	 * 8. use down-hill slope, velocity, flow to compute
+	 * 	  erosion and sedimentation.
+	 * 9. fill depressions w/excess water up to escape heights
+	 * 10.spread shallow water and sedimentation over flood planes
 	 */
-	public void reCalculate() {
-		
-		// collect topographic/hyrdological data from the map
+	public void reCalculate(boolean reset) {
+		// collect topographic data from the map
 		mesh = map.getMesh();
 		if (mesh == null)
 			return;
 		heightMap = map.getHeightMap();
 		if (heightMap == null)
 			return;
-		double[] rainMap = map.getRainMap();
-		if (rainMap == null)
-			return;
-		
-		// if the above are valid, so are these
+		int[] downHill = map.getDownHill();
 		double[] fluxMap = map.getFluxMap();
 		double[] soilMap = map.getSoilMap();
 		double[] hydrationMap = map.getHydrationMap();
+		double[] sinkMap = new double[mesh.vertices.length];
+		surface = new double[mesh.vertices.length];
 		erodeMap = map.getErodeMap();
-		
-		int[] downHill = map.getDownHill();
-		
-		// TODO interate over number of cycles
-		//		perhaps moving this into a subroutine
 		
 		// initialize each array and find downhill neighbor
 		for( int i = 0; i < downHill.length; i++ ) {
 			downHill[i] = -1;
 			fluxMap[i] = 0;
-			erodeMap[i] = 0;
-			double lowest_height = heightMap[i] - erodeMap[i];
+			hydrationMap[i] = 0;
+			surface[i] = 0;
+			sinkMap[i] = UNKNOWN;
+			if (reset)
+				erodeMap[i] = 0;
+			
+			double lowest_height = height(i);
 			for( int n = 0; n < mesh.vertices[i].neighbors; n++) {
 				int x = mesh.vertices[i].neighbor[n].index;
-				double z = heightMap[x] - erodeMap[x];
+				double z = height(x);
 				if (z < lowest_height) {
 					downHill[i] = x;
 					lowest_height = z;
@@ -78,6 +124,114 @@ public class Hydrology {
 			byHeight[i] = i;
 		heightSort(0, byHeight.length - 1);
 		
+		// identify sinks (scan lowest to highest)
+		if (parms.debug_level > 1)
+			map.highlight(-1, null);
+		for(int i = byHeight.length - 1; i >= 0; i--) {
+			int point = byHeight[i];
+			
+			// points we already know
+			if (sinkMap[point] != UNKNOWN)
+				continue;
+			
+			// edge points drain to OCEAN or OFF_MAP
+			double msl = height(point) - parms.sea_level;
+			if (mesh.vertices[point].neighbors < 3) {
+				sinkMap[point] = (msl < 0) ? OCEAN : OFF_MAP;
+				continue;
+			}
+			
+			// others inherit sink from their downHill neighbor
+			int d = downHill[point];
+			if (d >= 0) {
+					sinkMap[point] = sinkMap[d];
+					continue;
+			}
+			
+			// any point with no down-hill neighbors is a sink
+			sinkMap[point] = point;
+		}
+		
+		// find escape points and consolidate sinks into larger ones
+		int escapePoint;
+		double escapeHeight;
+		boolean gotSome;
+		do {gotSome = false;	// iterate until no more changes
+			for(int s = 0; s < mesh.vertices.length; s++) {
+				if (sinkMap[s] != s)	// find a local sink
+					continue;
+				if (downHill[s] >= 0)	// with no known escape point
+					continue;
+				
+				// find the lowest bordering neighbor
+				escapePoint = -1;
+				escapeHeight = Parameters.z_extent;
+				// enumerate every point in that sink
+				for(int i = 0; i < byHeight.length; i++) {
+					int point = byHeight[i];
+					if (sinkMap[point] != s)
+						continue;
+					
+					// find the lowest neighbor not in the sink
+					for(int j = 0; j < mesh.vertices[point].neighbors; j++) {
+						int n = mesh.vertices[point].neighbor[j].index;
+						if (sinkMap[n] == s)
+							continue;
+						double z = height(n);
+						if (z < escapeHeight) {
+							escapePoint = n;
+							escapeHeight = z;
+						}
+					}
+				}
+				
+				// re-route all drainage from that depression to escape point
+				if (escapePoint >= 0) {
+					if (parms.debug_level > 1) {
+						map.highlight(escapePoint, sinkMap[escapePoint] == OCEAN ? Color.BLUE : Color.GREEN);
+						map.highlight(s,  Color.ORANGE);
+					}
+					
+					// merge this depression into the escape point's depression
+					double bottomHeight = heightMap[s];
+					for(int i = 0; i < mesh.vertices.length; i++) {
+						// only consider points in selected depression
+						if (sinkMap[i] != s)
+							continue;
+						
+						// redirect flow from local sink to new escape point
+						if (downHill[i] == -1) {
+							downHill[i] = escapePoint;
+						}
+						
+						// reassign this point to the surrounding basin
+						sinkMap[i] = sinkMap[escapePoint];
+						
+						// pad this point to slightly above escape level
+						surface[i] = escapeHeight - heightMap[i];
+						surface[i] += (heightMap[i] + Parameters.z_extent/2) * EPSILON;	// preserve relative height
+						
+						gotSome = true;
+					}
+				} else if (parms.debug_level > 1)
+					map.highlight(s, Color.RED);
+			}
+		} while (gotSome);
+		
+		// for now, any point below sea level is ocean
+		for(int i = byHeight.length - 1; i >= 0; i--) {
+			int point = byHeight[i];
+			double z = height(point);
+			if (z >= parms.sea_level)
+				continue;
+			hydrationMap[point] = 1 - parms.altitude(z);
+		}
+		
+		// collect rain-fall information from the Map
+		double[] rainMap = map.getRainMap();
+		if (rainMap == null)
+			return;
+
 		// figure out the mapping from rainfall (cm/y) to water flow (m3/s)
 		double area = 1000000 * (parms.xy_range * parms.xy_range) / byHeight.length;
 		double year = 365.25 * 24 * 60 * 60;
@@ -85,20 +239,20 @@ public class Hydrology {
 		
 		// map units per meter
 		double zScale = Parameters.z_extent / parms.z_range;
-		
-		// processing points form highest to lowest,
-		//	send rainfall down the downhill neighbor chain
+
 		map.max_flux = 0;
 		map.max_velocity = 0;
 		map.max_erosion = 0;
 		map.max_deposition = 0;
 		double load[] = new double[mesh.vertices.length];
+		
+		// re-sort (now that we have filled depressions)
+		heightSort(0, byHeight.length - 1);
 		for( int i = 0; i < byHeight.length; i++ ) {
 			int x = byHeight[i];
 			
-			// FIX: need better criterion for being ocean
-			//		?below sea level AND drains to edge?
-			if (heightMap[x] - erodeMap[x] < parms.sea_level) {
+			// flux in the ocean is meaningless
+			if (hydrationMap[x] >= 1.0 && surface[x] == 0) {
 				fluxMap[x] = 0;
 				continue;
 			}
@@ -112,13 +266,15 @@ public class Hydrology {
 			double maxH2O = saturation[soilType] * parms.Dp * area;
 			double lost = maxH2O *= evaporation();
 			
-			if (fluxMap[x] * year > lost) {
-				hydrationMap[x] = saturation[soilType];
-				fluxMap[x] -= lost / year;
-			} else {
+			// figure out if any water leaves this cell
+			if (fluxMap[x] * year <= lost) {
 				hydrationMap[x] = fluxMap[x] * year / (parms.Dp * area); 
 				fluxMap[x] = 0;
+				continue;
 			}
+				
+			hydrationMap[x] = saturation[soilType];
+			fluxMap[x] -= lost / year;
 			
 			// remember the largest flux I have seen
 			if (fluxMap[x] > map.max_flux)
@@ -156,6 +312,15 @@ public class Hydrology {
 			}
 		}
 		
+		// fill the lakes in to their surface altitudes
+		for(int i = 0; i < mesh.vertices.length; i++) {
+			if (surface[i] == 0)
+				continue;
+			if (fluxMap[i] <= 0)
+				continue;
+			// hydrationMap[i] = 1 + surface[i];
+		}
+		
 		// TODO flood planes
 		// do
 		//		from highest to lowest
@@ -166,42 +331,6 @@ public class Hydrology {
 		//				continue
 		//			give them half of delta-epsilon
 		// while did something
-		
-		// TODO sink computation
-		// edges have a downhill of OFFMAP ... based on edge, not neighbors
-		// no downhill is NONESUCH (or -(1+ESCAPE POINT)
-		// have a count of tributaries as well as ultimate down hill
-		// for each sink with tributaries, find lowest neighbor w/different sink
-		//	that is the escape point for this sink
-		// follow the down-hill pointers to identify the sinks
-//		for(int i = 0; i < downHill.length; i++) {
-//			int point = i;
-//			while(true) {
-//				// if we already know how this ends, we can stop
-//				if (sinks[point] != UNKNOWN) {
-//					sinks[i] = sinks[point];
-//					break;
-//				}
-//				// if we make it to sea level, there is no sink
-//				if (heightMap[i] - erodeMap[i] < parms.sea_level) {
-//					sinks[i] = -1;
-//					break;
-//				}
-//				// if we make it to the edge, there is no sink
-//				if (mesh.vertices[point].neighbors < 3) {
-//					sinks[i] = -1;
-//					break;
-//				}
-//				// if we reach a low point, we are done
-//				int x = downHill[point];
-//				if (x == -1) {
-//					sinks[i] = point;
-//					break;
-//				}
-//				// continue following the down-hill pointers
-//				point = x;
-//			}	
-//		}
 	}
 	
 	/**
@@ -220,7 +349,6 @@ public class Hydrology {
 	 * @return flow speed (meters/second)
 	 * 
 	 * NOTE: velocity ranges from .1m/s to 3m/s
-	 * 		 max sustainable slope is 1/1
 	 */
 	private static double velocity(double slope) {
 		return 3 * slope;
@@ -264,19 +392,19 @@ public class Hydrology {
 	 * 		sedimentation starts at .1m/s and is done by .005m/s
 	 * 			slopes between .03 and .0015
 	 */
-	// returns M3 soil per M3/s of flow
-	public double erosion( double v ) {
+	// returns M3 soil that will be eroded per M3 of flow
+	private double erosion( double v ) {
 		double Ve = parms.Ve;
 		return (v < Ve) ? 0 : parms.Ce * (v * v)/(Ve * Ve);
 	}
 	
-	// returns fraction of carried load
-	public double sedimentation( double v) {
+	// returns fraction of carried load that will settle out
+	private double sedimentation( double v) {
 		return (v > parms.Vd) ? 0 : parms.Cd/v;
 	}
 	
 	/*
-	 * returns fraction of soil-water lost after a year
+	 * returns fraction of soil-water lost over a year
 	 * 
 	 * 	Note: I read a few articles and, finding them quite complex
 	 * 		  made up a formula that I fit to a few data
@@ -284,7 +412,7 @@ public class Hydrology {
 	 * 			1. there is a half-time, during which 1/2 of the water evaporates
 	 * 			2. the half time decreases exponentially as the temperature rises
 	 */
-	public double evaporation () {
+	private double evaporation () {
 		double degC = parms.meanTemp();
 		double half_time = parms.E35C * Math.pow(2, (35-degC)/parms.Edeg);
 		return 1 - Math.pow(0.5, 365.25/half_time);
@@ -298,21 +426,20 @@ public class Hydrology {
 	private void heightSort(int left, int right) {
 		// find the X coordinate of my middle element
 	    int pivotIndex = left + (right - left) / 2;
-	    double pivotValue = heightMap[byHeight[pivotIndex]];
+	    double pivotValue = height(byHeight[pivotIndex]);
 
 	    // for every point in my range
 	    int i = left, j = right;
 	    while(i <= j) {
 	    	// find the first thing on left that belongs on right
-	        while(heightMap[byHeight[i]] - erodeMap[byHeight[i]] >  pivotValue)
+	        while(height(byHeight[i]) >  pivotValue)
 	            i++;
 	        // find first thing on right that belongs on left
-	        while(heightMap[byHeight[j]] - erodeMap[byHeight[i]]< pivotValue)
+	        while(height(byHeight[j]) < pivotValue)
 	            j--;
 
-	        // swap them
-	        if(i <= j) {
-	        	if (i < j) {
+	        if(i <= j) { 
+	        	if (i < j) {	// swap them
 	        		int tmp = byHeight[i];
 	        		byHeight[i] = byHeight[j];
 	        		byHeight[j] = tmp;
@@ -322,13 +449,10 @@ public class Hydrology {
 	        }
 	    }
 
-	    // recursively sort everything to my left
-	    if(left < j)
+	    if(left < j)	// recursively sort to the left
 	        heightSort(left, j);
-	    // recursively sort everything to my right
-	    if(right > i)
+	    if(right > i)	// recursively sort to the right
 	        heightSort(i, right);
 	}
-
 }
 

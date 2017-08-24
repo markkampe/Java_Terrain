@@ -44,7 +44,7 @@ public class Map extends JPanel {
 	private static final int MIN_WIDTH = 400;	// min screen width
 	private static final int MIN_HEIGHT = 400;	// min screen height
 	private static final int SMALL_POINT = 2;	// width of a small point
-	//private static final int LARGE_POINT = 4;	// width of a large point
+	private static final int LARGE_POINT = 4;	// width of a large point
 	private static final int TOPO_CELL = 5;		// pixels/topographic cell
 												// CODE DEPENDS ON THIS CONSTANT
 	private Dimension size;
@@ -53,6 +53,9 @@ public class Map extends JPanel {
 	private static final Color SELECT_COLOR = Color.WHITE;
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
+	
+	private Color highLights[];		// points to highlight
+	private boolean highlighting;	// are there points to highlight
 	
 	// the interesting data
 	private Mesh mesh;			// mesh of Voronoi points
@@ -105,12 +108,14 @@ public class Map extends JPanel {
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
 			this.hydrationMap = new double[mesh.vertices.length];
+			this.highLights = new Color[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
 			//this.parms = Parameters.getInstance();
 			
 			// ensure that the map is not perfectly flat
 			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);	
-			hydro.reCalculate();
+			this.erosion = 1;
+			hydro.reCalculate(true);
 		}
 		selectNone();
 	}
@@ -133,11 +138,13 @@ public class Map extends JPanel {
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
 			this.hydrationMap = new double[mesh.vertices.length];
+			this.highLights = new Color[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
 			
 			// ensure that the map is not perfectly flat
 			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);
-			hydro.reCalculate();
+			this.erosion = 1;
+			hydro.reCalculate(true);
 		} else {
 			this.map = null;
 			this.heightMap = null;
@@ -147,6 +154,7 @@ public class Map extends JPanel {
 			this.erodeMap = null;
 			this.soilMap = null;
 			this.hydrationMap = null;
+			this.highLights = null;
 			this.hydro = null;
 		}
 		
@@ -158,7 +166,8 @@ public class Map extends JPanel {
 	public double[] setHeightMap(double newHeight[]) {
 		double old[] = heightMap; 
 		heightMap = newHeight; 
-		hydro.reCalculate();
+		for(int i = 0; i < erosion; i++)
+			hydro.reCalculate(i == 0);
 		repaint();
 		return old;
 	}
@@ -168,6 +177,8 @@ public class Map extends JPanel {
 	public double[] setRainMap(double newRain[]) {
 		double old[] = rainMap; 
 		rainMap = newRain; 
+		for(int i = 0; i < erosion; i++)
+			hydro.reCalculate(i == 0);
 		repaint();
 		return old;
 	}
@@ -177,7 +188,8 @@ public class Map extends JPanel {
 	public int setErosion(int cycles) {
 		int old = erosion;
 		erosion = cycles;
-		hydro.reCalculate();
+		for(int i = 0; i < erosion; i++)
+			hydro.reCalculate(i == 0);
 		repaint();
 		return old;
 	}
@@ -251,6 +263,7 @@ public class Map extends JPanel {
 		
 		repaint();
 	}
+	
 	/**
 	 * highlight a rectangular selection
 	 * 
@@ -302,6 +315,23 @@ public class Map extends JPanel {
 		sel_type = Selection.NONE;
 		repaint();
 	}
+	
+	/**
+	 * highlight points (typically for diagnostic purposes
+	 * 
+	 * @param point number (-1 = reset)
+	 * @param color
+	 */
+	public void highlight(int point, Color c) {
+		if (point >= 0) {
+			highLights[point] = c;
+			highlighting = true;
+		} else {
+			for(int i = 0; i < highLights.length; i++)
+				highLights[i] = null;
+			highlighting = false;
+		}
+	}
 
 	/**
 	 * repaint the map pane
@@ -335,7 +365,8 @@ public class Map extends JPanel {
 					width/TOPO_CELL, height/TOPO_CELL);
 		
 		// make sure all the rainfall/river/erosion data is up-to-date
-		hydro.reCalculate();
+		for(int i = 0; i < erosion; i++)
+			hydro.reCalculate(i == 0);
 		
 		// start by rendering backgrounds (rain, altitude, erosion, and water bodies)
 		if ((display & SHOW_RAIN) != 0) {
@@ -405,6 +436,17 @@ public class Map extends JPanel {
 			RiverMap r = new RiverMap(this);
 			r.paint(g, width, height);
 		}
+		
+		// see if we have points to highlight
+		if (highlighting)
+			for(int i = 0; i < highLights.length; i++)
+				if (highLights[i] != null) {
+					g.setColor(highLights[i]);
+					MeshPoint p = mesh.vertices[i];
+					double x = ((p.x + x_extent / 2) * width) - LARGE_POINT / 2;
+					double y = ((p.y + y_extent / 2) * height) - LARGE_POINT / 2;
+					g.drawOval((int) x, (int) y, LARGE_POINT, LARGE_POINT);
+				}
 	
 		// see if we have a selection area to highlight
 		switch(sel_type) {

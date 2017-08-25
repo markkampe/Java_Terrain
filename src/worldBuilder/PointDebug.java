@@ -31,7 +31,7 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			// create the dialog box
 			Container mainPane = getContentPane();
 			((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
-			setTitle("Point Info");
+			setTitle("Point Details");
 			addWindowListener( this );
 			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			
@@ -49,9 +49,9 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			info.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
 			info.add(new JLabel("Index:"));
 			info.add(infoIndex);
-			info.add(new JLabel("Map:"));
+			info.add(new JLabel("Map Location:"));
 			info.add(infoMap);
-			info.add(new JLabel("Lat,Lon"));
+			info.add(new JLabel("Lat,Lon:"));
 			info.add(infoWorld);
 			info.add(new JLabel("Altitude:"));
 			info.add(infoAlt);
@@ -59,11 +59,11 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			info.add(infoFlux);
 			info.add(new JLabel("Erosion/Deposition:"));
 			info.add(infoErode);
-			info.add(new JLabel("Soil Type"));
+			info.add(new JLabel("Soil Type:"));
 			info.add(infoSoil);
 			info.add(new JLabel("Hydration:"));
 			info.add(infoHydro);
-			info.add(new JLabel("Downhill"));
+			info.add(new JLabel("Down-hill:"));
 			info.add(infoDownhill);
 
 			mainPane.add(info,  BorderLayout.CENTER);
@@ -83,9 +83,10 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			int x = e.getX();
 			int y = e.getY();
 			MeshPoint point = choosePoint(x, y);
+			
 			infoIndex.setText(String.format("%d", point.index));
-			infoMap.setText(String.format("x=%.7f, y=%.7f", point.x, point.y));
-			infoWorld.setText(String.format("<%.6f,%.6f>", parms.latitude(point.y), parms.longitude(point.x)));
+			infoMap.setText(String.format("<%.7f, %.7f>", point.x, point.y));
+			infoWorld.setText(String.format("<%.6f, %.6f>", parms.latitude(point.y), parms.longitude(point.x)));
 			
 			double heightMap[] = map.getHeightMap();
 			infoAlt.setText(String.format("%.1f%s MSL", parms.altitude(heightMap[point.index]), Parameters.unit_z));
@@ -107,6 +108,11 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			
 			int downHill[] = map.getDownHill();
 			infoDownhill.setText(String.format("%d", downHill[point.index]));
+			
+			// highlight selected point
+			map.highlight(-1, null);
+			map.highlight(point.index, Color.MAGENTA);
+			map.repaint();
 		}
 
 		public MeshPoint choosePoint(int screen_x, int screen_y) {

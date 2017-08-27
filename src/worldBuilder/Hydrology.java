@@ -194,7 +194,6 @@ public class Hydrology {
 					}
 					
 					// merge this depression into the escape point's depression
-					double bottomHeight = heightMap[s];
 					for(int i = 0; i < mesh.vertices.length; i++) {
 						// only consider points in selected depression
 						if (sinkMap[i] != s)
@@ -218,13 +217,17 @@ public class Hydrology {
 			}
 		} while (gotSome);
 		
-		// any point below sea level that drains to the sea is ocean
-		for(int i = byHeight.length - 1; i >= 0; i--) {
-			int point = byHeight[i];
-			double z = height(point);
-			if (z > parms.sea_level)
+		// ocean is points below sea-level that drain below sea-level
+		for(int i = 0; i < mesh.vertices.length; i++) {
+			double z = heightMap[i] - erodeMap[i];
+			if (z >= parms.sea_level)
 				continue;
-			hydrationMap[point] = 1 - parms.altitude(heightMap[point] - erodeMap[point]);
+			double h = height(i);	// height at which it drains
+			if (h >= parms.sea_level)
+				continue;
+			
+			hydrationMap[i] = -parms.altitude(z);
+			surface[i] = 0;		// so we don't compute flux
 		}
 		
 		// collect rain-fall information from the Map

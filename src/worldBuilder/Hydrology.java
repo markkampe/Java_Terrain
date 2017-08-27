@@ -177,10 +177,10 @@ public class Hydrology {
 						int n = mesh.vertices[point].neighbor[j].index;
 						if (sinkMap[n] == s)
 							continue;
-						double z = height(n);
+						double z = heightMap[n] - erodeMap[n];
 						if (z < escapeHeight) {
 							escapePoint = n;
-							escapeHeight = z;
+							escapeHeight = heightMap[n] - erodeMap[n];
 						}
 					}
 				}
@@ -200,16 +200,15 @@ public class Hydrology {
 							continue;
 						
 						// redirect flow from local sink to new escape point
-						if (downHill[i] == -1) {
+						int dh = downHill[i];
+						if (dh == -1 || heightMap[i] - erodeMap[i] <= escapeHeight) {
 							downHill[i] = escapePoint;
-						}
+							surface[i] = EPSILON + escapeHeight - (heightMap[i] - erodeMap[i]);
+						} else
+							surface[i] = 0;
 						
 						// reassign this point to the surrounding basin
 						sinkMap[i] = sinkMap[escapePoint];
-						
-						// pad this point to slightly above escape level
-						surface[i] = escapeHeight - heightMap[i];
-						surface[i] += (heightMap[i] + Parameters.z_extent/2) * EPSILON;	// preserve relative height
 						
 						gotSome = true;
 					}
@@ -218,13 +217,13 @@ public class Hydrology {
 			}
 		} while (gotSome);
 		
-		// for now, any point below sea level is ocean
+		// any point below sea level that drains to the sea is ocean
 		for(int i = byHeight.length - 1; i >= 0; i--) {
 			int point = byHeight[i];
 			double z = height(point);
-			if (z >= parms.sea_level)
+			if (z > parms.sea_level)
 				continue;
-			hydrationMap[point] = 1 - parms.altitude(z);
+			hydrationMap[point] = 1 - parms.altitude(heightMap[point] - erodeMap[point]);
 		}
 		
 		// collect rain-fall information from the Map

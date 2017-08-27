@@ -57,7 +57,7 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			info.add(infoAlt);
 			info.add(new JLabel("Water Flux:"));
 			info.add(infoFlux);
-			info.add(new JLabel("Erosion/Deposition:"));
+			info.add(new JLabel("Erosion/(Deposition):"));
 			info.add(infoErode);
 			info.add(new JLabel("Soil Type:"));
 			info.add(infoSoil);
@@ -96,18 +96,31 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			pack();
 			
 			double erodeMap[] = map.getErodeMap();
-			infoErode.setText(String.format("%.2f%s", parms.altitude(-erodeMap[point.index]), Parameters.unit_z));
+			double h = parms.height(erodeMap[point.index]);
+			String desc;
+			if (h < 0)
+				desc = String.format("(%.3f%s)",- h, Parameters.unit_z);
+			else
+				desc = String.format("%.3f%s", h, Parameters.unit_z);
+			infoErode.setText(desc);
 			
 			double soilMap[] = map.getSoilMap();
-			infoSoil.setText(Map.soil_names[(int) soilMap[point.index]]);
+			desc = erodeMap[point.index] < 0 ? Map.soil_names[Map.ALLUVIAL] + "/" : "";
+			infoSoil.setText(desc + Map.soil_names[(int) soilMap[point.index]]);
 			
 			double hydroMap[] = map.getHydrationMap();
-			double h = hydroMap[point.index];
-			infoHydro.setText(h < 1.0 ? String.format("%.0f%%",h) : 
-										String.format("%d%s under water", (int) h - 1, Parameters.unit_z));		
+			h = hydroMap[point.index];
+			if (h <= Hydrology.SOIL_SATURATION)
+				desc = String.format("%.0f%%",h * 100);
+			else if (h < 1.0)
+				desc = String.format("%.1f%s under water", h, Parameters.unit_z);
+			else 
+				desc = String.format("%d%s under water", (int) h, Parameters.unit_z);	
+			infoHydro.setText(desc);
 			
 			int downHill[] = map.getDownHill();
 			infoDownhill.setText(String.format("%d", downHill[point.index]));
+			pack();
 			
 			// highlight selected point
 			map.highlight(-1, null);

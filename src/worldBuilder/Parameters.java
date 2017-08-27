@@ -452,7 +452,7 @@ import javax.json.stream.JsonParser;
 	 * @return	meters
 	 */
 	public double height(double z) {
-		return sea_level * z_extent * z_range;
+		return z * z_extent * z_range;
 	}
 	
 	/**

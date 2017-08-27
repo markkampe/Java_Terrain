@@ -29,6 +29,7 @@ public class Hydrology {
 		0.10,	// max water content of igneous soil
 		0.40	// max water content of alluvial soil
 	};
+	public static double SOIL_SATURATION = 0.40;
 	
 	// XXX soil-type specific erosion rates
 	

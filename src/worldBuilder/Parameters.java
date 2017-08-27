@@ -446,7 +446,17 @@ import javax.json.stream.JsonParser;
 	}
 	
 	/**
-	 * turn a map coordinate into a world altitude
+	 * turn a map z value into a world height
+	 * 
+	 * @param z (map coordinate)
+	 * @return	meters
+	 */
+	public double height(double z) {
+		return sea_level * z_extent * z_range;
+	}
+	
+	/**
+	 * turn a map z coordinate into a world altitude
 	 * 
 	 * @param z (map coordinate)
 	 * @return	meters (above sea level)

@@ -376,6 +376,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		y_end = e.getY();
 		selecting = false;
 		selected = true;
+		map.selectNone();
 		redraw();	
 	}
 	
@@ -386,6 +387,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		y_end = y_start + 1;
 		selecting = false;
 		selected = true;
+		map.selectNone();
 		redraw();
 	}
 	

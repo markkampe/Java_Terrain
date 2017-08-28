@@ -316,11 +316,11 @@ public class Hydrology {
 		
 		// fill the lakes in to their surface altitudes
 		for(int i = 0; i < mesh.vertices.length; i++) {
-			if (surface[i] == 0)
+			if (surface[i] == 0)	// not in a sink
 				continue;
-			if (fluxMap[i] <= 0)
+			if (fluxMap[i] <= 0)	// no excess water
 				continue;
-			// hydrationMap[i] = 1 + surface[i];
+			hydrationMap[i] = -surface[i];
 		}
 		
 		// TODO flood planes

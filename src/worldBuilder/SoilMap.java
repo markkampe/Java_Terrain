@@ -11,11 +11,11 @@ public class SoilMap {
 	private static final int BRITE = 255;
 	
 	private Map map;
-	private Parameters parms;
+	//private Parameters parms;
 	
 	public SoilMap(Map map) {
 		this.map = map;
-		this.parms = Parameters.getInstance();
+		//this.parms = Parameters.getInstance();
 	}
 
 	/**
@@ -34,7 +34,6 @@ public class SoilMap {
 			Cartesian cart = map.getCartesian();
 			double sArray[][] = cart.interpolate(map.getSoilMap());
 			double hArray[][] = cart.interpolate(map.getHydrationMap());
-			double zArray[][] = cart.interpolate(map.getHeightMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			
 			// use soil type/hydration to generate background colors

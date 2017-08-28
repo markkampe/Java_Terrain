@@ -44,7 +44,6 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem editErode;
 	private JMenuItem editCity;
 	private JMenuItem editRoads;
-	private JMenuItem viewPoints;
 	private JMenuItem viewMesh;
 	private JMenuItem viewTopo;
 	private JMenuItem viewRain;

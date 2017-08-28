@@ -30,19 +30,18 @@ public class SoilMap {
 			int h = height/cellWidth;
 			int w = width/cellWidth;
 			
-			// interpolate Z values from the latest mesh
+			// interpolate values from the latest mesh
 			Cartesian cart = map.getCartesian();
 			double sArray[][] = cart.interpolate(map.getSoilMap());
 			double hArray[][] = cart.interpolate(map.getHydrationMap());
 			double zArray[][] = cart.interpolate(map.getHeightMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			
-			// use height to generate background colors
+			// use soil type/hydration to generate background colors
 			for(int r = 0; r < h; r++)
 				for(int c = 0; c < w; c++) {
-					if (zArray[r][c] < parms.sea_level)
+					if (hArray[r][c] < 0)	// ignore under water
 						continue;
-					
 					int s = (int) sArray[r][c];	// soil type
 					if (eArray[r][c] < 0)
 						s = Map.ALLUVIAL;

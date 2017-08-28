@@ -246,8 +246,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 					output.write(NEW_POINT);
 					double z = heights[r][c]-erode[r][c];
 					double hydro = hydration[r][c];
-					if (z < parms.sea_level)
-						hydro = -parms.altitude(z);
 					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(z)));
 					output.write(COMMA);
 					output.write(String.format(FORMAT_CM, "rainfall", rain[r][c]));

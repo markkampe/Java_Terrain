@@ -29,7 +29,6 @@ public class Hydrology {
 		0.10,	// max water content of igneous soil
 		0.40	// max water content of alluvial soil
 	};
-	public static double SOIL_SATURATION = 0.40;
 	
 	// XXX soil-type specific erosion rates
 	
@@ -226,7 +225,7 @@ public class Hydrology {
 			if (h >= parms.sea_level)
 				continue;
 			
-			hydrationMap[i] = -parms.altitude(z);
+			hydrationMap[i] = parms.altitude(z);
 			surface[i] = 0;		// so we don't compute flux
 		}
 		
@@ -255,7 +254,7 @@ public class Hydrology {
 			int x = byHeight[i];
 			
 			// flux in the ocean is meaningless
-			if (hydrationMap[x] >= 1.0 && surface[x] == 0) {
+			if (hydrationMap[x] < 0 && surface[x] == 0) {
 				fluxMap[x] = 0;
 				continue;
 			}

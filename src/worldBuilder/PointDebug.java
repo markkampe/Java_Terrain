@@ -110,12 +110,11 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			
 			double hydroMap[] = map.getHydrationMap();
 			h = hydroMap[point.index];
-			if (h <= Hydrology.SOIL_SATURATION)
+			if (h >= 0)
 				desc = String.format("%.0f%%",h * 100);
-			else if (h < 1.0)
-				desc = String.format("%.1f%s under water", h, Parameters.unit_z);
-			else 
-				desc = String.format("%d%s under water", (int) h, Parameters.unit_z);	
+			else
+				desc = String.format("%.1f%s under water", -h, Parameters.unit_z);
+				
 			infoHydro.setText(desc);
 			
 			int downHill[] = map.getDownHill();

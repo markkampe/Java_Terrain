@@ -35,16 +35,16 @@ public class WaterMap {
 				int sum = 0;
 				if (r < h-1 && c < w-1) {
 					// see which of our neighbors are above water
-					if (hArray[r][c] < 1.0)
+					if (hArray[r][c] >= 0)
 						sum += 8;
-					if (hArray[r][c + 1] < 1.0)
+					if (hArray[r][c + 1] >= 0)
 						sum += 4;
-					if (hArray[r + 1][c] < 1.0)
+					if (hArray[r + 1][c] >= 0)
 						sum += 1;
-					if (hArray[r + 1][c + 1] < 1.0)
+					if (hArray[r + 1][c + 1] >= 0)
 						sum += 2;
 				} else
-						sum = (hArray[r][c] < 1.0) ? 15 : 0;
+						sum = (hArray[r][c] >= 0) ? 15 : 0;
 				
 				// render a cell of the appropriate shape
 				waterCell(g, r, c, cellWidth, sum);

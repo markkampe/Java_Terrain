@@ -43,7 +43,9 @@
 	"improvements": 1,
 	"topo_major": 10,
 	"topo_minor": 5,
-	"stream": 0.25
+	"stream": 0.25,
+	"river": 2.5,
+	"artery": 25
     },
     "display": {
     	"mesh": false,

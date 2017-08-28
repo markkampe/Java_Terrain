@@ -34,7 +34,9 @@ public class RiverMap {
 		// calculate the color curve (blue vs flow)
 		int blue_range = 255 - WATER_DIM;
 		double min_stream = parms.stream_flux;
-		double dBdF = blue_range/(map.max_flux - min_stream);
+		double min_river = parms.river_flux;
+		double min_artery = parms.artery_flux;
+		double dBdF = blue_range/(min_river - min_stream);
 		
 		// draw the streams, rivers, lakes and oceans
 		for(int i = 0; i < flux.length; i++) {
@@ -49,11 +51,17 @@ public class RiverMap {
 				
 				// blue gets brighter, green dimmer w/increasing flow
 				double delta = (flux[i] - min_stream) * dBdF;
-				if (delta >= 127) delta = 127;	// we didn't count under-sea rivers
+				if (delta >= (255-WATER_DIM)) delta = (255-WATER_DIM);
 				double blue = WATER_DIM + delta;
 				double green = Math.max(0, WATER_DIM - delta);
 				g.setColor(new Color(0, (int) green, (int) blue));
 				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+				if (flux[i] < min_river)
+					continue;
+				g.drawLine((int) (x1+1), (int) (y1+1), (int) (x2+1), (int) (y2+1));
+				if (flux[i] < min_artery)
+					continue;
+				g.drawLine((int) (x1-1), (int) (y1-1), (int) (x2-1), (int) (y2-1));
 			}
 		}
 	}

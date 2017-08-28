@@ -45,6 +45,7 @@ import javax.json.stream.JsonParser;
 	public int mountain_divisor = 2;	// world/mountain width
 	public int erosion_max = 10;		// erosion cycles
 	public int tiles_max = 10000;		// export warning limit
+	public int tribute_max = 1000;		// max incoming river flow
 	
 	// world size slider units
 	public int diameter_scale = 100;	// slider labeling unit (km)
@@ -90,6 +91,7 @@ import javax.json.stream.JsonParser;
 	public int dAmount;			// annual rainfall
 	public int dRainHeight;		// mean height of incoming rain
 	public int dErosion;		// erosion cycles
+	public int dTribute;		// incoming river
 	
 	// tunable physical process parameters
 	//		others (less likely to change) are in Hydrology.java
@@ -143,6 +145,9 @@ import javax.json.stream.JsonParser;
 		
 		// default erosion
 		dErosion = erosion_max/2;
+		
+		// default watershed
+		dTribute = tribute_max/10;	// pretty studly
 	}
 	
 	// public constructor to read from configuration file
@@ -266,6 +271,9 @@ import javax.json.stream.JsonParser;
 				case "erosion_max":
 					erosion_max = new Integer(parser.getString());
 					break;
+				case "tribute_max":
+					tribute_max = new Integer(parser.getString());
+					break;
 				case "tiles_max":
 					tiles_max = new Integer(parser.getString());
 					break;
@@ -353,6 +361,7 @@ import javax.json.stream.JsonParser;
 			System.out.println("               mountain diameter=world/" + mountain_divisor);
 			System.out.println("               rainfall=" + rain_max + unit_r + 
 											   " (bottoms at " + alt_maxrain + unit_z + ")");
+			System.out.println("               watershed=" + tribute_max + " " + unit_f);
 			System.out.println("   warnings:   tiles=" + tiles_max);
 			System.out.println("   verbosity:  " + debug_level);
 			worldParms();

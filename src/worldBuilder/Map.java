@@ -71,6 +71,8 @@ public class Map extends JPanel {
 	private int downHill[];		// down-hill neighbor
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	private int erosion;		// number of erosion cycles
+	private MeshPoint artery;	// artery entry point
+	private double artery_flow;	// incoming arterial flow
 	
 	// hydrological results
 	public double max_slope;		// maximum slope
@@ -110,6 +112,7 @@ public class Map extends JPanel {
 			this.hydrationMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
+			this.artery = null;
 			//this.parms = Parameters.getInstance();
 			
 			// ensure that the map is not perfectly flat
@@ -140,6 +143,7 @@ public class Map extends JPanel {
 			this.hydrationMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
+			this.artery = null;
 			
 			// ensure that the map is not perfectly flat
 			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);
@@ -156,6 +160,7 @@ public class Map extends JPanel {
 			this.hydrationMap = null;
 			this.highLights = null;
 			this.hydro = null;
+			this.artery = null;
 		}
 		
 		repaint();
@@ -193,6 +198,15 @@ public class Map extends JPanel {
 		repaint();
 		return old;
 	}
+	
+	/* incoming arterial river	*/
+	public void setArtery(MeshPoint point, double flow) {
+		artery = point;
+		artery_flow = flow;
+		repaint();
+	}
+	public MeshPoint getArtery() { return artery; }
+	public double getArterial() { return artery_flow; }
 	
 	/*
 	 * these arrays are regularly re-calculated from height/rain
@@ -332,6 +346,33 @@ public class Map extends JPanel {
 			highlighting = false;
 		}
 	}
+	
+	/**
+	 * find the mesh point closest to a screen location
+	 * @param screen_x
+	 * @param screen_y
+	 * @return nearest MeshPoint
+	 */
+	public MeshPoint choosePoint(int screen_x, int screen_y) {
+		
+		double x = x(screen_x);
+		double y = y(screen_y);
+		MeshPoint spot = new MeshPoint(x, y);
+		MeshPoint closest = null;
+		double distance = 2 * Parameters.x_extent;
+		
+		for(int i = 0; i < mesh.vertices.length; i++) {
+			MeshPoint point = mesh.vertices[i];
+			double d = spot.distance(point);
+			if (d < distance) {
+				closest = point;
+				distance = d;
+			}
+		}
+		
+		return closest;
+	}
+	
 
 	/**
 	 * repaint the map pane

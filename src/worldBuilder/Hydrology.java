@@ -229,10 +229,17 @@ public class Hydrology {
 			surface[i] = 0;		// so we don't compute flux
 		}
 		
-		// collect rain-fall information from the Map
+		// collect rain-fall and tributary information from the Map
+		MeshPoint artery = map.getArtery();
+		double incoming = map.getArterial();
 		double[] rainMap = map.getRainMap();
-		if (rainMap == null)
+		if (rainMap == null && incoming == 0)
 			return;
+		
+		// consider a major incoming river
+		if (artery != null) {
+			fluxMap[artery.index] = incoming;
+		}
 
 		// figure out the mapping from rainfall (cm/y) to water flow (m3/s)
 		double area = 1000000 * (parms.xy_range * parms.xy_range) / byHeight.length;
@@ -260,13 +267,14 @@ public class Hydrology {
 			}
 			
 			// figure how much water comes into this cell
-			double rain = rainMap[x] * rain_to_flow;
+			double rain = (rainMap == null) ? 0 : rainMap[x] * rain_to_flow;
 			fluxMap[x] += rain;
 			
 			// how much water can it hold, how much evaporates in a year
 			int soilType = erodeMap[x] < 0 ? Map.ALLUVIAL : (int) soilMap[x];
 			double maxH2O = saturation[soilType] * parms.Dp * area;
 			double lost = maxH2O *= evaporation();
+			
 			
 			// figure out if any water leaves this cell
 			if (fluxMap[x] * year <= lost) {
@@ -318,11 +326,13 @@ public class Hydrology {
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			if (surface[i] == 0)	// not in a sink
 				continue;
+			// FIX unlike rain, rivers don't fill depressions
 			if (fluxMap[i] <= 0)	// no excess water
 				continue;
 			hydrationMap[i] = -surface[i];
 		}
 		
+		// FIX rivers don't flow around mountains (fill non-depressions)
 		// TODO flood planes
 		// do
 		//		from highest to lowest

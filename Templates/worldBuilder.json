@@ -20,6 +20,7 @@
 	"msl_range": 1000,
 	"rain_max": 500,
 	"erosion_max": 10,
+	"tribute_max": 1000,
 	"tiles_max": 16384
 	},
     "world": {

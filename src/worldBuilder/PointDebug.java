@@ -82,7 +82,7 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 		public void mouseClicked(MouseEvent e) {
 			int x = e.getX();
 			int y = e.getY();
-			MeshPoint point = choosePoint(x, y);
+			MeshPoint point = map.choosePoint(x, y);
 			
 			infoIndex.setText(String.format("%d", point.index));
 			infoMap.setText(String.format("<%.7f, %.7f>", point.x, point.y));
@@ -127,26 +127,6 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			map.repaint();
 		}
 
-		public MeshPoint choosePoint(int screen_x, int screen_y) {
-			
-			double x = map.x(screen_x);
-			double y = map.y(screen_y);
-			MeshPoint spot = new MeshPoint(x, y);
-			MeshPoint closest = null;
-			double distance = 2 * Parameters.x_extent;
-			
-			Mesh m = map.getMesh();
-			for(int i = 0; i < m.vertices.length; i++) {
-				MeshPoint point = m.vertices[i];
-				double d = spot.distance(point);
-				if (d < distance) {
-					closest = point;
-					distance = d;
-				}
-			}
-			
-			return closest;
-		}
 		
 		/**
 		 * Window Close event handler ... do nothing

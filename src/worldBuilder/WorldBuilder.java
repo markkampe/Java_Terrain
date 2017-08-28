@@ -40,6 +40,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem editWorld;
 	private JMenuItem editMountain;
 	private JMenuItem editSlope;
+	private JMenuItem editRiver;
 	private JMenuItem editRain;
 	private JMenuItem editErode;
 	private JMenuItem editCity;
@@ -152,9 +153,11 @@ public class WorldBuilder  extends JFrame
 		editMountain.addActionListener(this);
 		editSlope = new JMenuItem("define slope");
 		editSlope.addActionListener(this);
-		editRain = new JMenuItem("rainfall");
+		editRain = new JMenuItem("define rainfall");
 		editRain.addActionListener(this);
-		editErode = new JMenuItem("erosion");
+		editRiver = new JMenuItem("add arterial river");
+		editRiver.addActionListener(this);
+		editErode = new JMenuItem("erosion/deposition");
 		editErode.addActionListener(this);
 		editCity = new JMenuItem("add city");
 		editCity.addActionListener(this);
@@ -164,6 +167,7 @@ public class WorldBuilder  extends JFrame
 		editMenu.add(editWorld);
 		editMenu.add(editSlope);
 		editMenu.add(editMountain);
+		editMenu.add(editRiver);
 		editMenu.add(editRain);
 		editMenu.add(editErode);
 		editMenu.add(new JSeparator());
@@ -330,6 +334,8 @@ public class WorldBuilder  extends JFrame
 			new SlopeDialog(map);
 		} else if (o == editRain) {
 			new RainDialog(map);
+		} else if (o == editRiver) {
+			new RiverDialog(map);
 		} else if (o == editErode) {
 			new ErosionDialog(map);
 		} else if (o == editCity) {

@@ -30,7 +30,13 @@ public class Hydrology {
 		0.40	// max water content of alluvial soil
 	};
 	
-	// XXX soil-type specific erosion rates
+	// relative erosion resistances for various bed rocks
+	public static double competence[] = {
+		1.0,	// sedimentary erosion resistance
+		4.0,	// metamorphic erosion resistance
+		2.5,	// igneous erosion resistance
+		0.3		// alluvial erosion resistance
+	};
 	
 	// drainage notations
 	public static final int UNKNOWN = -666;
@@ -302,7 +308,7 @@ public class Hydrology {
 					map.max_velocity = v;
 				double e = erosion(v);
 				if (e > 0) {
-					double taken = e * fluxMap[x] * zScale;
+					double taken = e * fluxMap[x] * zScale / competence[soilType];
 					erodeMap[x] += taken;
 					if (heightMap[x] - erodeMap[x] < -Parameters.z_extent/2)
 						erodeMap[x] = heightMap[x] + Parameters.z_extent/2;

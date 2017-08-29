@@ -172,7 +172,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			y -= dy;
 			dy = -dy;
 		}
-		// TODO does export work w/zoom?
+		// FIX: zoomed export writes wrong region
 		// get Cartesian interpolations of tile characteristics
 		Cartesian cart = new Cartesian(map.getMesh(), x, y, x+dx, y+dy, x_points, y_points);
 		double heights[][] = cart.interpolate(map.getHeightMap());

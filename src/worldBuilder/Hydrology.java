@@ -332,7 +332,7 @@ public class Hydrology {
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			if (surface[i] == 0)	// not in a sink
 				continue;
-			// FIX unlike rain, rivers don't fill depressions
+			// TODO unlike rain, rivers don't fill depressions
 			if (fluxMap[i] <= 0)	// no excess water
 				continue;
 			hydrationMap[i] = -surface[i];

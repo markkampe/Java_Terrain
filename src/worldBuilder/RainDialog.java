@@ -146,7 +146,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	/**
 	 * calculate the rainfall received at each Mesh point
 	 * 
-	 * TODO: rain shadows in 1 pass
+	 * XXX: rain shadows in 1 pass
 	 * 		define a set of stripes, originating off screen
 	 * 		sort the mesh points by proximity to the source
 	 * 		enumerate the mesh points, calculating how much rain hits each

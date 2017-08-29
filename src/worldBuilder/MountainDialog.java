@@ -204,7 +204,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			double dh_circ = Math.cos(Math.PI*d/(4*radius)) * zMax;
 			double dh_cyl = zMax;
 			double delta_h = (Fcone * dh_cone) + (Fcirc * dh_circ) + (Fcyl * dh_cyl);
-			// TODO: asymmetric mountain profiles
+			// XXX: asymmetric mountain profiles
 
 			// make sure the new height is legal
 			double newZ = heights[i] + delta_h;
@@ -271,7 +271,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			double dh_circ = Math.cos(Math.PI*dist/(4*radius)) * zMax;
 			double dh_cyl = zMax;
 			double delta_h = (Fcone * dh_cone) + (Fcirc * dh_circ) + (Fcyl * dh_cyl);
-			// TODO: asymmetric mountain profiles
+			// XXX: asymmetric mountain profiles
 
 			// make sure the new height is legal
 			double newZ = heights[i] + delta_h;
@@ -327,7 +327,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// get the shape
 		int shape = rounding.getValue();
 		
-		// TODO: piece-wise mountain ranges
+		// XXX: piece-wise mountain ranges
 		// how many mountains can we create
 		if (mountains < 2) {
 			// one mountain goes in the center (likely volcanic)

@@ -96,5 +96,13 @@ public class Tester extends JFrame {
 				System.out.print(s);
 			}
 		}
+		
+		System.out.print("\nmean temp");
+		for(int row = 0; row < r.height(); row++) {
+			System.out.print("\n    ");
+			for(int col = 0; col < r.width(); col++) {
+				System.out.print(String.format("%.1fC ", r.meanTemp(row, col, MapReader.Seasons.SPRING)));
+			}
+		}
 	}
 }

@@ -24,6 +24,14 @@ public class MapReader {
 	};
 	private static final double MIN_SLOPE = .1;	//
 	
+	// seasons
+	public enum Seasons {
+		SPRING, SUMMER, FALL, WINTER
+	}
+	
+	// adiabatic temperature lapse rate
+	private static final double DEGC_PER_KM = -6.4;
+	
 	// per map state
 	private String region;
 	private double lat;
@@ -31,6 +39,9 @@ public class MapReader {
 	private int height;
 	private int width;
 	private int tileSize;
+	private double mean_temp;
+	private double summer_temp;
+	private double winter_temp;
 	
 	// per cell state
 	private double altitude[][];
@@ -141,6 +152,30 @@ public class MapReader {
 						soil[row][col] = SoilType.UNKNOWN;
 						break;	
 					}
+					break;
+					
+				// temperatures
+				case "mean":
+					s = parser.getString();
+					x = s.indexOf('C');
+					if (x != -1)
+						s = s.substring(0, x-1);
+					mean_temp = new Double(s);
+					break;
+				case "summer":
+					s = parser.getString();
+					x = s.indexOf('C');
+					if (x != -1)
+						s = s.substring(0, x-1);
+					summer_temp = new Double(s);
+					break;
+				case "winter":
+					s = parser.getString();
+					x = s.indexOf('C');
+					if (x != -1)
+						s = s.substring(0, x-1);
+					winter_temp = new Double(s);
+					break;
 				}
 				break;
 				
@@ -266,5 +301,27 @@ public class MapReader {
 		return soil[row][col];
 	}
 	
-	// TODO: add mean/summer/winter temperature functions w/altitude
+	/**
+	 * temperature
+	 */
+	public double meanTemp(int row, int col, Seasons season) {
+		double temp = 0;
+		// if it is not ocean, correct it for altitude
+		if (hydration[row][col] != altitude[row][col])
+			temp = DEGC_PER_KM * altitude[row][col] / 1000;
+		
+		switch(season) {
+		case SPRING:
+		case FALL:
+			temp += mean_temp;
+			break;
+		case SUMMER:
+			temp += summer_temp;
+			break;
+		case WINTER:
+			temp += winter_temp;
+			break;
+		}
+		return temp;
+	}
 }

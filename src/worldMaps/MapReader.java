@@ -251,8 +251,9 @@ public class MapReader {
 	
 	/**
 	 * soil hydration
-	 *	100% = shallow water
-	 *	200% = deep water
+	 *	<50%: soil water content by volume
+	 *	>50%: swamp
+	 *  negative: meters under water
 	 */
 	public double hydration(int row, int col) {
 		return hydration[row][col];
@@ -264,4 +265,6 @@ public class MapReader {
 	public SoilType soilType(int row, int col) {
 		return soil[row][col];
 	}
+	
+	// TODO: add mean/summer/winter temperature functions w/altitude
 }

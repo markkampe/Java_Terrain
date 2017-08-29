@@ -84,7 +84,7 @@ public class Map extends JPanel {
 	public double max_erosion;		// maximum soil loss due to erosion
 	public double max_deposition;	// maximum soil gain due to sedimentation
 
-	// private Parameters parms;
+	private Parameters parms;
 	
 	private static final long serialVersionUID = 1L;
 
@@ -99,13 +99,11 @@ public class Map extends JPanel {
 	 *            ... background color
 	 */
 	public Map(Mesh mesh, int width, int height) {
-		size = new Dimension(width, height);
-		x_min = -Parameters.x_extent/2;
-		y_min = -Parameters.y_extent/2;
-		x_max = Parameters.x_extent/2;
-		y_max = Parameters.y_extent/2;
-		
+		this.size = new Dimension(width, height);
 		this.mesh = mesh;
+		this.parms = Parameters.getInstance();
+		setWindow(-Parameters.x_extent/2, -Parameters.y_extent/2, Parameters.x_extent/2, Parameters.y_extent/2);
+		
 		if (mesh != null) {
 			this.map = new Cartesian(mesh, x_min, y_min, x_max, y_max, width/TOPO_CELL, height/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
@@ -118,7 +116,6 @@ public class Map extends JPanel {
 			this.highLights = new Color[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
 			this.artery = null;
-			//this.parms = Parameters.getInstance();
 			
 			// ensure that the map is not perfectly flat
 			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);	
@@ -402,6 +399,10 @@ public class Map extends JPanel {
 		x_max = (x1 >= x0) ? x1 : x0;
 		y_max = (y1 >= y0) ? y1: y0;
 		map = new Cartesian(mesh, x_min, y_min, x_max, y_max, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
+		repaint();
+		
+		if (parms.debug_level > 0)
+			System.out.println("Display window <" + x_min + ", " + y_min + "> to <" + x_max + ", " + y_max + ">");
 	}
 
 	/**

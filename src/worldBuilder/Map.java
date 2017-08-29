@@ -424,10 +424,6 @@ public class Map extends JPanel {
 		} else
 			setBackground(Color.GRAY);
 		
-		// get scaling factors
-		double x_extent = Parameters.x_extent;
-		double y_extent = Parameters.y_extent;
-		
 		// make sure the Cartesian translation is up-to-date
 		if (map.height != height/TOPO_CELL || map.width != width/TOPO_CELL)
 			map = new Cartesian(mesh, x_min, y_min, x_max, y_max, width/TOPO_CELL, height/TOPO_CELL);

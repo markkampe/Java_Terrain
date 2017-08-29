@@ -167,12 +167,12 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			dx = -dx;
 		}
 		double y = map.map_y(y_start);
-		double dy = map.map_x(y_end) - y;
+		double dy = map.map_y(y_end) - y;
 		if (dy < 0) {
 			y -= dy;
 			dy = -dy;
 		}
-		// FIX: zoomed export writes wrong region
+	
 		// get Cartesian interpolations of tile characteristics
 		Cartesian cart = new Cartesian(map.getMesh(), x, y, x+dx, y+dy, x_points, y_points);
 		double heights[][] = cart.interpolate(map.getHeightMap());
@@ -269,7 +269,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		
 		if (parms.debug_level > 0)
 			System.out.println("Exported: " + x_points + "x" + y_points + " " + meters + "m tiles " +
-					"from <" + lat + "," + lon + "> to " + filename);
+					"from <" + String.format("%.6f", lat) + "," + String.format("%.6f", lon) + 
+					"> to " + filename);
 	}
 	
 	/**

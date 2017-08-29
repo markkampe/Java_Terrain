@@ -44,10 +44,14 @@ public class RiverMap {
 				continue;	// don't display flux below stream cut-off
 			if (downHill[i] >= 0) {
 				int d = downHill[i];
-				double x1 = (mesh.vertices[i].x + Parameters.x_extent/2) * width;
-				double y1 = (mesh.vertices[i].y + Parameters.y_extent/2) * height;
-				double x2 = (mesh.vertices[d].x + Parameters.x_extent/2) * width;
-				double y2 = (mesh.vertices[d].y + Parameters.y_extent/2) * height;
+				double x1 = map.screen_x(mesh.vertices[i].x);
+				double y1 = map.screen_y(mesh.vertices[i].y);
+				double x2 = map.screen_x(mesh.vertices[d].x);
+				double y2 = map.screen_y(mesh.vertices[d].y);
+				
+				// make sure coordinates are all on-screen
+				if (x1 < 0 || x2 < 0 || y1 < 0 || y2 < 0)
+					continue;
 				
 				// blue gets brighter, green dimmer w/increasing flow
 				double delta = (flux[i] - min_stream) * dBdF;

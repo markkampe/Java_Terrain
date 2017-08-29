@@ -48,6 +48,9 @@ public class Map extends JPanel {
 	private static final int TOPO_CELL = 5;		// pixels/topographic cell
 												// CODE DEPENDS ON THIS CONSTANT
 	private Dimension size;
+	
+	// displayed window offset and size
+	double x_min, y_min, x_max, y_max;
 
 	// display colors
 	private static final Color SELECT_COLOR = Color.WHITE;
@@ -97,12 +100,14 @@ public class Map extends JPanel {
 	 */
 	public Map(Mesh mesh, int width, int height) {
 		size = new Dimension(width, height);
+		x_min = -Parameters.x_extent/2;
+		y_min = -Parameters.y_extent/2;
+		x_max = Parameters.x_extent/2;
+		y_max = Parameters.y_extent/2;
+		
 		this.mesh = mesh;
 		if (mesh != null) {
-			this.map = new Cartesian(mesh, 
-					-Parameters.x_extent/2, -Parameters.y_extent/2, 
-					Parameters.x_extent/2, Parameters.y_extent/2,
-					width/TOPO_CELL, height/TOPO_CELL);
+			this.map = new Cartesian(mesh, x_min, y_min, x_max, y_max, width/TOPO_CELL, height/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
 			this.downHill = new int[mesh.vertices.length];
@@ -130,10 +135,7 @@ public class Map extends JPanel {
 	public void setMesh(Mesh mesh) {
 		this.mesh = mesh;	
 		if (mesh != null) {
-			this.map = new Cartesian(mesh, 
-					-Parameters.x_extent/2, -Parameters.y_extent/2, 
-					Parameters.x_extent/2, Parameters.y_extent/2,
-					getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
+			this.map = new Cartesian(mesh, x_min, y_min, x_max, y_max, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
 			this.downHill = new int[mesh.vertices.length];
@@ -241,16 +243,33 @@ public class Map extends JPanel {
 	/**
 	 * convert a screen coordinate into a map coordinate
 	 */
-	double x(int screen_x) {
+	public double map_x(int screen_x) {
 		double x = (double) screen_x / getWidth();
-		x -= .5;
-		return x * Parameters.x_extent;	
+		double range = x_max - x_min;
+		return x_min + (x * range);
 	}
 
-	double y(int screen_y) {
+	public double map_y(int screen_y) {
 		double y = (double) screen_y / getHeight();
-		y -= .5;
-		return y * Parameters.y_extent;	
+		double range = y_max - y_min;
+		return y_min + (y * range);
+	}
+	
+	/**
+	 * convert a map coordinate into a screen coordinate
+	 */
+	public int screen_x(double x) {
+		if (x < x_min || x > x_max)
+			return -1;
+		double X = getWidth() * (x - x_min)/(x_max - x_min);
+		return (int) X;
+	}
+	
+	public int screen_y(double y) {
+		if (y < y_min || y > y_max)
+			return -1;
+		double Y = getHeight() * (y - y_min)/(y_max - y_min);
+		return (int) Y;
 	}
 
 	// description of the area to be highlighted
@@ -263,10 +282,10 @@ public class Map extends JPanel {
 	/**
 	 * highlight a rectangular selection
 	 * 
-	 * @param x0	
-	 * @param y0	
-	 * @param x1	
-	 * @param y1	
+	 * @param x0	screen x
+	 * @param y0	screen y
+	 * @param x1	screen x
+	 * @param y1	screen y
 	 */
 	public void selectLine(int x0, int y0, int x1, int y1) {
 		sel_x0 = x0;
@@ -281,10 +300,10 @@ public class Map extends JPanel {
 	/**
 	 * highlight a rectangular selection
 	 * 
-	 * @param x0	
-	 * @param y0	
-	 * @param x1	
-	 * @param y1	
+	 * @param x0	screen x
+	 * @param y0	screen y
+	 * @param x1	screen x
+	 * @param y1	screen y
 	 */
 	public void selectRect(int x0, int y0, int width, int height) {
 		// normalize boxes defined upwards or to the left
@@ -309,9 +328,9 @@ public class Map extends JPanel {
 	/**
 	 * highlight a circular selection
 	 * 
-	 * @param x
-	 * @param y
-	 * @param radius
+	 * @param x		screen x
+	 * @param y		screen y
+	 * @param radius	screen radius
 	 */
 	public void selectCircle(int x, int y, int radius) {
 		sel_x0 = x;
@@ -355,8 +374,8 @@ public class Map extends JPanel {
 	 */
 	public MeshPoint choosePoint(int screen_x, int screen_y) {
 		
-		double x = x(screen_x);
-		double y = y(screen_y);
+		double x = map_x(screen_x);
+		double y = map_y(screen_y);
 		MeshPoint spot = new MeshPoint(x, y);
 		MeshPoint closest = null;
 		double distance = 2 * Parameters.x_extent;
@@ -373,6 +392,17 @@ public class Map extends JPanel {
 		return closest;
 	}
 	
+	/*
+	 * change the display window to the specified range
+	 * @param map x/y upper left, lower right
+	 */
+	public void setWindow(double x0, double y0, double x1, double y1) {
+		x_min = (x1 >= x0) ? x0 : x1;
+		y_min = (y1 >= y0) ? y0 : y1;
+		x_max = (x1 >= x0) ? x1 : x0;
+		y_max = (y1 >= y0) ? y1: y0;
+		map = new Cartesian(mesh, x_min, y_min, x_max, y_max, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
+	}
 
 	/**
 	 * repaint the map pane
@@ -400,10 +430,7 @@ public class Map extends JPanel {
 		
 		// make sure the Cartesian translation is up-to-date
 		if (map.height != height/TOPO_CELL || map.width != width/TOPO_CELL)
-			map = new Cartesian(mesh, 
-					-Parameters.x_extent/2, -Parameters.y_extent/2, 
-					Parameters.x_extent/2, Parameters.y_extent/2,
-					width/TOPO_CELL, height/TOPO_CELL);
+			map = new Cartesian(mesh, x_min, y_min, x_max, y_max, width/TOPO_CELL, height/TOPO_CELL);
 		
 		// make sure all the rainfall/river/erosion data is up-to-date
 		for(int i = 0; i < erosion; i++)
@@ -429,9 +456,10 @@ public class Map extends JPanel {
 			MeshPoint[] points = mesh.vertices;
 			for (int i = 0; i < points.length; i++) {
 				MeshPoint p = points[i];
-				double x = ((p.x + x_extent / 2) * width) - SMALL_POINT / 2;
-				double y = ((p.y + y_extent / 2) * height) - SMALL_POINT / 2;
-				g.drawOval((int) x, (int) y, SMALL_POINT, SMALL_POINT);
+				double x = screen_x(p.x) - SMALL_POINT / 2;
+				double y = screen_y(p.y) - SMALL_POINT / 2;
+				if (x >= 0 && y >= 0)
+					g.drawOval((int) x, (int) y, SMALL_POINT, SMALL_POINT);
 			}
 		}
 
@@ -446,10 +474,15 @@ public class Map extends JPanel {
 					MeshPoint n = m.neighbor[j];
 					if (n.index < i)
 						continue;	// we already got this one
-					double x1 = (m.x + x_extent / 2) * width;
-					double y1 = (m.y + y_extent / 2) * height;
-					double x2 = (n.x + x_extent / 2) * width;
-					double y2 = (n.y + y_extent / 2) * height;
+					double x1 = screen_x(m.x);
+					double y1 = screen_y(m.y);
+					double x2 = screen_x(n.x);
+					double y2 = screen_y(n.y);
+					
+					// make sure it is on the screen
+					if (x1 < 0 || x2 < 0 || y1 < 0 || y2 < 0)
+						continue;
+					
 					g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 				}
 			}
@@ -481,8 +514,8 @@ public class Map extends JPanel {
 				if (highLights[i] != null) {
 					g.setColor(highLights[i]);
 					MeshPoint p = mesh.vertices[i];
-					double x = ((p.x + x_extent / 2) * width) - LARGE_POINT / 2;
-					double y = ((p.y + y_extent / 2) * height) - LARGE_POINT / 2;
+					double x = screen_x(p.x) - LARGE_POINT / 2;
+					double y = screen_y(p.y) - LARGE_POINT / 2;
 					g.drawOval((int) x, (int) y, LARGE_POINT, LARGE_POINT);
 				}
 	

@@ -160,14 +160,14 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	public void export(String filename) {
 		// figure out the selected region (in map coordinates)
-		double x = map.x(x_start);
-		double dx = map.x(x_end) - x;
+		double x = map.map_x(x_start);
+		double dx = map.map_x(x_end) - x;
 		if (dx < 0) {
 			x -= dx;
 			dx = -dx;
 		}
-		double y = map.y(y_start);
-		double dy = map.x(y_end) - y;
+		double y = map.map_y(y_start);
+		double dy = map.map_x(y_end) - y;
 		if (dy < 0) {
 			y -= dy;
 			dy = -dy;
@@ -277,15 +277,15 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	private void select(int x0, int y0, int x1, int y1, int res) {
 		// selected area in map coordinates
-		double X0 = map.x(x0);
-		double X1 = map.x(x1);
+		double X0 = map.map_x(x0);
+		double X1 = map.map_x(x1);
 		double dx = X1 - X0;
 		if (dx < 0) {
 			X0 = X1;
 			dx *= -1;
 		}
-		double Y0 = map.y(y0);	
-		double Y1 = map.y(y1);
+		double Y0 = map.map_y(y0);	
+		double Y1 = map.map_y(y1);
 		double dy = Y1 - Y0;
 		if (dy < 0) {
 			Y0 = -Y1;

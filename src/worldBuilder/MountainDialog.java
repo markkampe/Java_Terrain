@@ -304,10 +304,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			newHeight[i] = oldHeight[i];
 		
 		// convert screen coordinates into map coordinates
-		double X0 = map.x(x_start);
-		double Y0 = map.y(y_start);
-		double X1 = map.x(x_end);
-		double Y1 = map.y(y_end);
+		double X0 = map.map_x(x_start);
+		double Y0 = map.map_y(y_start);
+		double X1 = map.map_x(x_end);
+		double Y1 = map.map_y(y_end);
 
 		// turn the diameter into map units
 		double d = (double) diameter.getValue();

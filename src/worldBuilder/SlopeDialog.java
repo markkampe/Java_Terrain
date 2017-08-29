@@ -139,10 +139,10 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 
 		// height of every point is its distance (+/-) from the axis
 		for(int i = 0; i < newHeight.length; i++) {
-			double X0 = map.x(x0);
-			double Y0 = map.y(y0);
-			double X1 = map.x(x1);
-			double Y1 = map.y(y1);
+			double X0 = map.map_x(x0);
+			double Y0 = map.map_y(y0);
+			double X1 = map.map_x(x1);
+			double Y1 = map.map_y(y1);
 			double d = m.vertices[i].distanceLine(X0, Y0, X1, Y1);
 			
 			// make sure the new height is legal

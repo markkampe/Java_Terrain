@@ -146,10 +146,12 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 				dy = (int) ((double) dx / mapAspect); 
 			else
 				dx = (int) ((double) dy * mapAspect);
+			x_end = x_start + dx;
+			y_end = y_start + dy;
 			
 			// indicate the selected region
 			map.selectRect(x_start, y_start, dx, dy);
-			describe(x_start, y_start, x_start+dx, y_start+dy);
+			describe(x_start, y_start, x_end, y_end);
 			selecting = false;
 			selected = true;
 		}
@@ -177,7 +179,12 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 			sel_pixels.setText("DISMISS DIALOG TO UNZOOM");
 			map.setWindow(map.map_x(x_start), map.map_y(y_start), map.map_x(x_end), map.map_y(y_end));
 			zoomed = true;
+			
+			// we accept no further input
 			accept.setVisible(false);
+			map.removeMouseListener(this);
+			map.removeMouseMotionListener(this);
+			accept.removeActionListener(this);
 		}
 	}
 

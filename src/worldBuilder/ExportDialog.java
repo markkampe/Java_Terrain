@@ -298,12 +298,12 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		y_km = parms.km(dy);
 
 		// selected area in tiles
-		x_points = (int) x_km * 1000/res;
-		y_points = (int) y_km * 1000/res;
+		x_points = (int) (x_km * 1000 / res);
+		y_points = (int) (y_km * 1000 / res);
 		int tiles = x_points * y_points;
 		
 		sel_center.setText(String.format("%.6f, %.6f", parms.latitude((Y1+Y0)/2),  parms.longitude((X1+X0)/2)));
-		sel_km.setText((int) x_km + "x" + (int) y_km);
+		sel_km.setText(String.format("%.1fx%.1f", x_km, y_km));
 		sel_t_size.setText(res + " meters");
 		sel_points.setText(x_points + "x" + y_points);
 		sel_points.setForeground( tiles > parms.tiles_max ? Color.RED : Color.BLACK);

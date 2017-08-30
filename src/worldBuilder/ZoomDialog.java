@@ -9,7 +9,6 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	private Parameters parms;
 		
 	private JButton accept;
-	private JButton cancel;
 	private JLabel sel_pixels;
 	private JLabel sel_km;
 	
@@ -37,9 +36,8 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		
 		// create the basic widgets
 		accept = new JButton("ZOOM");
-		cancel = new JButton("CANCEL");
 		sel_pixels = new JLabel("SELECT THE AREA TO ZOOM INTO");
-		sel_km = new JLabel("CANCEL TO RETURN TO FULL SCALE");
+		sel_km = new JLabel("");
 
 		/*
 		 * Pack them into:
@@ -55,8 +53,6 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		descPanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,10));
 
 		JPanel buttons = new JPanel();
-		buttons.setLayout(new BoxLayout(buttons, BoxLayout.LINE_AXIS));
-		buttons.add(cancel);
 		buttons.add(Box.createRigidArea(new Dimension(40,0)));
 		buttons.add(accept);
 		buttons.setBorder(BorderFactory.createEmptyBorder(20,20,20,10));
@@ -70,7 +66,6 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		
 		// add the action listeners
 		accept.addActionListener(this);
-		cancel.addActionListener(this);
 		map.addMouseListener(this);
 		map.addMouseMotionListener(this);
 		
@@ -111,30 +106,6 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 			selecting = true;
 		}
 	}
-
-	/**
-	 * finish defining a zoom window
-	 */
-	public void mouseReleased(MouseEvent e) {
-		if (selecting) {
-			x_end = e.getX();
-			y_end = e.getY();
-			if (x_start > x_end) {
-				int tmp = x_end;
-				x_end = x_start;
-				x_start = tmp;
-			}
-			if (y_start > y_end) {
-				int tmp = y_end;
-				y_end = y_start;
-				y_start = tmp;
-			}
-			map.selectRect(x_start, y_start, x_end-x_start, y_end-y_start);
-			selecting = false;
-			selected = true;
-			describe(x_start, y_start, x_end, y_end);
-		}
-	}
 	
 	/**
 	 * progress in region selection
@@ -142,9 +113,48 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	public void mouseDragged(MouseEvent e) {
 		if (selecting) {
 			map.selectRect(x_start, y_start, e.getX()-x_start, e.getY()-y_start);
+			describe(x_start, y_start, e.getX(), e.getY());
 		}	
 	}
 	
+	/**
+	 * finish defining a zoom window
+	 */
+	public void mouseReleased(MouseEvent e) {
+		if (selecting) {
+			x_end = e.getX();
+			y_end = e.getY();
+			int dx = x_end - x_start;
+			int dy = y_end - y_start;
+			
+			// deal with negatively defined regions
+			if (dx < 0) {
+				x_start = x_end;
+				dx = -dx;
+			}
+			if (dy < 0) {
+				y_start = y_end;
+				dy = -dy;
+			}
+			
+			// enforce the map aspect ratio
+			int height = map.getHeight();
+			int width = map.getWidth();
+			double mapAspect = (double) width / height;
+			double selAspect = (double) dx / dy;
+			if (selAspect >= mapAspect)
+				dy = (int) ((double) dx / mapAspect); 
+			else
+				dx = (int) ((double) dy * mapAspect);
+			
+			// indicate the selected region
+			map.selectRect(x_start, y_start, dx, dy);
+			describe(x_start, y_start, x_start+dx, y_start+dy);
+			selecting = false;
+			selected = true;
+		}
+	}
+
 	/**
 	 * Window Close event handler ... do nothing
 	 */
@@ -164,13 +174,10 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		map.selectNone();
 		
 		if (e.getSource() == accept && selected && !zoomed) {
+			sel_pixels.setText("DISMISS DIALOG TO UNZOOM");
 			map.setWindow(map.map_x(x_start), map.map_y(y_start), map.map_x(x_end), map.map_y(y_end));
 			zoomed = true;
-		} else if (e.getSource() == cancel) {
-			map.setWindow(-Parameters.x_extent/2, -Parameters.y_extent/2, Parameters.x_extent/2, Parameters.y_extent/2);
-			this.dispose();
-			map.removeMouseListener(this);
-			map.removeMouseMotionListener(this);
+			accept.setVisible(false);
 		}
 	}
 

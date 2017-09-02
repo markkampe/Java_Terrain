@@ -126,7 +126,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 				double dMax = centre.distance(corner);
 				for(int i = 0; i < m.vertices.length; i++) {
 					double d = centre.distance(m.vertices[i]);
-					heightMap[i] = (dMax - d) * parms.slope_min;
+					heightMap[i] = (dMax - d) * parms.slope_init;
 				}
 				map.setHeightMap(heightMap);
 			}

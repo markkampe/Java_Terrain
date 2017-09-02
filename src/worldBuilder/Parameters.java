@@ -42,11 +42,11 @@ import javax.json.stream.JsonParser;
 	public int diameter_max = 5000;		// max world diameter (km)
 	public int msl_range = 1000;		// +/- (m)
 	public int rain_max = 1000;			// rain (cm/y)
-	public int slope_max = 5;			// slope m/km
 	public int mountain_divisor = 2;	// world/mountain width
 	public int erosion_max = 10;		// erosion cycles
 	public int tiles_max = 10000;		// export warning limit
 	public int tribute_max = 1000;		// max incoming river flow
+	public double slope_init = 0.00001;	// initial slope for new mesh
 	
 	// world size slider units
 	public int diameter_scale = 100;	// slider labeling unit (km)
@@ -286,6 +286,9 @@ import javax.json.stream.JsonParser;
 				case "tiles_max":
 					tiles_max = new Integer(parser.getString());
 					break;
+				case "slope_min":
+					slope_init = new Double(parser.getString());
+					break;
 					
 				// physical process parameters
 				case "Ve":	// critical velocity for erosion
@@ -371,6 +374,7 @@ import javax.json.stream.JsonParser;
 					", altitude +/-" + alt_max + unit_z + 
 					", msl +/-" + msl_range + unit_z);
 			System.out.println("               mountain diameter=world/" + mountain_divisor);
+			System.out.println("               initial slope=" + String.format("%.6f",  slope_init));
 			System.out.println("               sedimentary layer=" + String.format("%.0f%s",  sediment, unit_z));
 			System.out.println("               rainfall=" + rain_max + unit_r + 
 											   " (bottoms at " + alt_maxrain + unit_z + ")");

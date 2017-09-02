@@ -118,6 +118,17 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 				Mesh m = new Mesh();
 				m.create();
 				map.setMesh(m);
+				
+				// make it a very short cone, flat maps don't drain
+				double[] heightMap = new double[m.vertices.length];
+				MeshPoint centre = new MeshPoint(0, 0);
+				MeshPoint corner = new MeshPoint(Parameters.x_extent/2, Parameters.y_extent/2);
+				double dMax = centre.distance(corner);
+				for(int i = 0; i < m.vertices.length; i++) {
+					double d = centre.distance(m.vertices[i]);
+					heightMap[i] = (dMax - d) * parms.slope_min;
+				}
+				map.setHeightMap(heightMap);
 			}
 			// discard the window
 			this.dispose();

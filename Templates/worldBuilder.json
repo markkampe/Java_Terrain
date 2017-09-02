@@ -27,7 +27,8 @@
 	"radius": 6371,
 	"tilt": 23.5,
 	"latitude": 30.0,
-	"longitude": -90.0
+	"longitude": -90.0,
+	"sediment": 100
 	},
     "hydro-physics": {
     	"Ve": 0.75,

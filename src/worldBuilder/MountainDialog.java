@@ -13,8 +13,6 @@ import javax.swing.event.*;
  */
 public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, WindowListener {	
 	
-	private static final double MIN_MOUNTAIN = 0.05;	// minerals pop through	
-	
 	private Map map;
 	private double[] oldHeight;	// per MeshPoint altitude at entry
 	private double[] newHeight;	// edited per MeshPoint altitude
@@ -172,6 +170,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * compute the delta_h associated with placing one mountain
 	 * 	find all points within the effective diameter
 	 * 	compute the height as a function of the distance from center
+	 * 
+	 * NOTE:
+	 * 	this is a static method, so it can be used w/o the dialog
 	 */
 	public static void placeMountain(Map map, double x, double y, double radius, double zMax, int shape, int mineral) {
 		// figure out the shape coefficients
@@ -187,6 +188,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			Fcirc = (double) (fullscale - shape) / midscale;
 			Fcyl =	(double) (shape - midscale) / midscale;
 		}
+		
+		// figure out how high it has to be to pierce the sediment
+		Parameters parms = Parameters.getInstance();	// this is a static method
+		double minZ = parms.z(parms.sediment);
 		
 		// see which points are within the scope of this mountain
 		Mesh m = map.getMesh();
@@ -216,7 +221,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 				heights[i] = newZ;
 			
 			// if mountain is tall enough, set the mineral type
-			if (newZ > MIN_MOUNTAIN)
+			if (newZ > minZ)
 				soil[i] = mineral;
 		}
 	}
@@ -233,7 +238,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * 	find all points within the effective elipse
 	 * 	compute the height as a function of the distance from center
 	 */
-	public static void placeRidge(Map map, double x0, double y0, double x1, double y1,
+	public void placeRidge(Map map, double x0, double y0, double x1, double y1,
 			double radius, double zMax, int shape, int mineral) {
 		// figure out the shape coefficients
 		int fullscale = Parameters.CYLINDRICAL;
@@ -257,6 +262,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		MeshPoint second = new MeshPoint(x1,y1);
 		double minDist = first.distance(second);
 		double maxDist = minDist + radius;
+		double minZ = parms.z(parms.sediment);
 		
 		for(int i = 0; i < heights.length; i++) {
 			MeshPoint p = m.vertices[i];
@@ -264,6 +270,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			double d1 = second.distance(p);
 			if (d0 + d1 > maxDist)
 				continue;
+			// TODO add rectangular ridges
 			
 			// calculate the deltaH for this point
 			double dist = d0 + d1 - minDist;
@@ -282,8 +289,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			else
 				heights[i] = newZ;
 			
-			// if mountain is tall enough, set the mineral type
-			if (newZ > MIN_MOUNTAIN)
+			// if rise pierces the sediment, set mineral type
+			if (newZ > minZ)
 				soil[i] = mineral;
 		}
 	}
@@ -313,7 +320,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		double d = (double) diameter.getValue();
 		if (d == 0)
 			d = 1;
-		d /= parms.xy_range * Parameters.x_extent;
+		d = parms.x(d);
 		
 		// figure out how long the mountain range is (in map coordinates)
 		double l = Math.sqrt(((X1-X0)*(X1-X0)) + (Y1-Y0)*(Y1-Y0));
@@ -322,7 +329,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		// get the height
 		int alt = altitude.getValue();
-		double z = (double) alt / parms.z_range *  Parameters.z_extent;
+		double z = parms.z((double) alt);
 		
 		// get the shape
 		int shape = rounding.getValue();
@@ -422,6 +429,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			if (selected)
 				redraw();
 	}
+	
+	// TODO ENTER=ACCEPT
 
 	/**
 	 * click events on ACCEPT/CANCEL buttons

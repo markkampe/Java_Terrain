@@ -105,6 +105,7 @@ import javax.json.stream.JsonParser;
 	public double Dp = 1.0;		// rain penetration (m)
 	public double Edeg = 10;	// degC to halve evaporation rate
 	public double E35C = 100;	// transpiration half-time at 35C (days)
+	public double sediment = 100;	// thickness of sedimentry layer (m)
 	
 	
 	// map generation parameters
@@ -303,6 +304,9 @@ import javax.json.stream.JsonParser;
 				case "E35C":	// evaporation half-time for 35C
 					E35C = new Double(parser.getString());
 					break;
+				case "sediment":	// sedimentary layer thickness
+					sediment = new Double(parser.getString());
+					break;
 					
 				// map rendering parameters
 				case "topo_major":
@@ -359,6 +363,7 @@ import javax.json.stream.JsonParser;
 					", altitude +/-" + alt_max + unit_z + 
 					", msl +/-" + msl_range + unit_z);
 			System.out.println("               mountain diameter=world/" + mountain_divisor);
+			System.out.println("               sedimentary layer=" + String.format("%.0f%s",  sediment, unit_z));
 			System.out.println("               rainfall=" + rain_max + unit_r + 
 											   " (bottoms at " + alt_maxrain + unit_z + ")");
 			System.out.println("               watershed=" + tribute_max + " " + unit_f);
@@ -465,6 +470,15 @@ import javax.json.stream.JsonParser;
 	}
 	
 	/**
+	 * turn a world distance into a map x/y value
+	 * @param distance (km)
+	 * @return map delta-x
+	 */
+	public double x(double km) {
+		return x_extent * km / xy_range;
+	}
+	
+	/**
 	 * turn a map z value into a world height
 	 * 
 	 * @param z (map coordinate)
@@ -482,5 +496,14 @@ import javax.json.stream.JsonParser;
 	 */
 	public double altitude(double z) {
 		return (z - sea_level) * z_extent * z_range;
+	}
+	
+	/**
+	 * turn a world height into a map z value
+	 * @param height (m)
+	 * @return map delta-z
+	 */
+	public double z(double height) {
+		return z_extent * height / z_range;
 	}
 }

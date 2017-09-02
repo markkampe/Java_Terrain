@@ -11,7 +11,7 @@ import javax.swing.event.*;
  * SlopeDialog allows the user to choose an axis and inclination to
  * cause a uniform slope to the entire map.  
  */
-public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, WindowListener {	
+public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, KeyListener, WindowListener {	
 	
 	private Map map;
 	private double[] oldHeight;	// per MeshPoint altitude at entry
@@ -65,8 +65,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// create the basic widgets
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
-		accept = new JButton("ACCEPT");
-		cancel = new JButton("CANCEL");
+		accept = new JButton("ACCEPT (enter)");
+		cancel = new JButton("CANCEL (esc)");
 		
 		altitude = new JSlider(JSlider.HORIZONTAL, -this.a_max, this.a_max, parms.dAltitude);
 		altitude.setMajorTickSpacing(Parameters.niceTics(-a_max, a_max, true));
@@ -154,6 +154,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		cancel.addActionListener(this);
 		map.addMouseListener(this);
 		map.addMouseMotionListener(this);
+		map.addKeyListener(this);
+		map.requestFocus();
 		
 		selecting = false;
 		selected = false;
@@ -408,9 +410,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 	
 	/**
-	 * Window Close event handler ... implicit CANCEL
+	 * restore previous height map exit dialog
 	 */
-	public void windowClosing(WindowEvent e) {
+	private void cancelDialog() {
 		map.selectNone();
 		if (oldHeight != null) {
 			map.setHeightMap(oldHeight);
@@ -420,6 +422,39 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		this.dispose();
 		map.removeMouseListener(this);
 		map.removeMouseMotionListener(this);
+		map.removeKeyListener(this);
+	}
+	
+	/**
+	 * make the most recently created mountain official
+	 */
+	private void acceptMountain() {
+		// save the current values as defaults
+		parms.dDiameter = diameter.getValue();
+		parms.dAltitude = altitude.getValue();
+		parms.dShape = rounding.getValue();
+		
+		// save a new copy of current height map
+		for(int i = 0; i < oldHeight.length; i++)
+			oldHeight[i] = newHeight[i];
+		
+		// clean up the selection graphics
+		map.selectNone();
+		selected = false;
+		selecting = false;
+		
+		if (!placed.equals("") && parms.debug_level > 0) {
+			System.out.print(placed);
+			System.out.println("   max slope=" + String.format("%.4f", map.max_slope));
+		}
+		placed = "";
+	}
+				
+	/**
+	 * Window Close event handler ... implicit CANCEL
+	 */
+	public void windowClosing(WindowEvent e) {
+		cancelDialog();
 	}
 	
 	/**
@@ -430,45 +465,25 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 				redraw();
 	}
 	
-	// TODO ENTER=ACCEPT
+	/**
+	 * look for ENTER or ESC
+	 */
+	public void keyTyped(KeyEvent e) {
+		int key = e.getKeyChar();
+		if (key == KeyEvent.VK_ENTER)
+			acceptMountain();
+		else if (key == KeyEvent.VK_ESCAPE)
+			cancelDialog();	
+	}
 
 	/**
 	 * click events on ACCEPT/CANCEL buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
-			// revert to previous height map
-			map.setHeightMap(oldHeight);
-			map.repaint();
-			oldHeight = null;
-			
-			// clean up the graphics
-			map.selectNone();
-			this.dispose();
-			
-			// un-register for mouse events
-			map.removeMouseListener(this);
-			map.removeMouseMotionListener(this);
+			cancelDialog();
 		} else if (e.getSource() == accept) {
-			// save the current values as defaults
-			parms.dDiameter = diameter.getValue();
-			parms.dAltitude = altitude.getValue();
-			parms.dShape = rounding.getValue();
-			
-			// save a new copy of current height map
-			for(int i = 0; i < oldHeight.length; i++)
-				oldHeight[i] = newHeight[i];
-			
-			// clean up the selection graphics
-			map.selectNone();
-			selected = false;
-			selecting = false;
-			
-			if (!placed.equals("") && parms.debug_level > 0) {
-				System.out.print(placed);
-				System.out.println("   max slope=" + String.format("%.4f", map.max_slope));
-			}
-			placed = "";
+			acceptMountain();
 		}
 		
 	}
@@ -483,4 +498,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	public void windowDeiconified(WindowEvent arg0) {}
 	public void windowIconified(WindowEvent arg0) {}
 	public void windowOpened(WindowEvent arg0) {}
+	public void keyPressed(KeyEvent arg0) {}
+	public void keyReleased(KeyEvent arg0) {}
+	
+	
 }

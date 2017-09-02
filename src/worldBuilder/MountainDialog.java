@@ -19,8 +19,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private Parameters parms;
 	
 	private JSlider altitude;
-	private JSlider diameter;
-	private JSlider rounding;
+	private JSlider diameter1;
+	private JSlider diameter2;
+	private JSlider rounding1;
+	private JSlider rounding2;
 	private JButton accept;
 	private JButton cancel;
 	
@@ -65,8 +67,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// create the basic widgets
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
-		accept = new JButton("ACCEPT (enter)");
-		cancel = new JButton("CANCEL (esc)");
+		accept = new JButton("ACCEPT (Enter)");
+		cancel = new JButton("CANCEL (Esc)");
 		
 		altitude = new JSlider(JSlider.HORIZONTAL, -this.a_max, this.a_max, parms.dAltitude);
 		altitude.setMajorTickSpacing(Parameters.niceTics(-a_max, a_max, true));
@@ -77,70 +79,98 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		JLabel altitudeLabel = new JLabel("Altitude(m)", JLabel.CENTER);
 		altitudeLabel.setFont(fontLarge);
 
-		diameter = new JSlider(JSlider.HORIZONTAL, 0, d_max, parms.dDiameter);
-		diameter.setMajorTickSpacing(Parameters.niceTics(0, d_max,true));
-		diameter.setMinorTickSpacing(Parameters.niceTics(0, d_max,false));
-		diameter.setFont(fontSmall);
-		diameter.setPaintTicks(true);
-		diameter.setPaintLabels(true);
-		JLabel diameterLabel = new JLabel("Diameter(km)", JLabel.CENTER);
-		diameterLabel.setFont(fontLarge);
+		diameter1 = new JSlider(JSlider.HORIZONTAL, 0, d_max, parms.dDiameter);
+		diameter1.setMajorTickSpacing(Parameters.niceTics(0, d_max,true));
+		diameter1.setMinorTickSpacing(Parameters.niceTics(0, d_max,false));
+		diameter1.setFont(fontSmall);
+		diameter1.setPaintTicks(true);
+		diameter1.setPaintLabels(true);
+		JLabel diameter1Label = new JLabel("Top/Right Width (km)", JLabel.CENTER);
+		diameter1Label.setFont(fontLarge);
 		
-		rounding = new JSlider(JSlider.HORIZONTAL, Parameters.CONICAL, Parameters.CYLINDRICAL, parms.dShape);
-		rounding.setMajorTickSpacing(4);
-		rounding.setMinorTickSpacing(1);
-		rounding.setFont(fontSmall);
-		rounding.setPaintTicks(true);
-		JLabel roundLabel = new JLabel("Profile", JLabel.CENTER);
-		roundLabel.setFont(fontLarge);
+		diameter2 = new JSlider(JSlider.HORIZONTAL, 0, d_max, parms.dDiameter);
+		diameter2.setMajorTickSpacing(Parameters.niceTics(0, d_max,true));
+		diameter2.setMinorTickSpacing(Parameters.niceTics(0, d_max,false));
+		diameter2.setFont(fontSmall);
+		diameter2.setPaintTicks(true);
+		diameter2.setPaintLabels(true);
+		JLabel diameter2Label = new JLabel("Bottom/Left Width (km)", JLabel.CENTER);
+		diameter2Label.setFont(fontLarge);
+		
+		rounding1 = new JSlider(JSlider.HORIZONTAL, Parameters.CONICAL, Parameters.CYLINDRICAL, parms.dShape);
+		rounding1.setMajorTickSpacing(4);
+		rounding1.setMinorTickSpacing(1);
+		rounding1.setFont(fontSmall);
+		rounding1.setPaintTicks(true);
+		JLabel roundLabel1 = new JLabel("Profile (top/right)", JLabel.CENTER);
+		roundLabel1.setFont(fontLarge);
+		rounding2 = new JSlider(JSlider.HORIZONTAL, Parameters.CONICAL, Parameters.CYLINDRICAL, parms.dShape);
+		rounding2.setMajorTickSpacing(4);
+		rounding2.setMinorTickSpacing(1);
+		rounding2.setFont(fontSmall);
+		rounding2.setPaintTicks(true);
+		JLabel roundLabel2 = new JLabel("Profile (bottom/left)", JLabel.CENTER);
+		roundLabel2.setFont(fontLarge);
 		
 		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
 		labels.put(Parameters.CONICAL, new JLabel("cone"));
 		labels.put(Parameters.SPHERICAL, new JLabel("round"));
 		labels.put(Parameters.CYLINDRICAL, new JLabel("flat"));
-		rounding.setLabelTable(labels);
-		rounding.setPaintLabels(true);
+		rounding1.setLabelTable(labels);
+		rounding1.setPaintLabels(true);
+		rounding2.setLabelTable(labels);
+		rounding2.setPaintLabels(true);
 		
 		/*
 		 * Pack them into:
-		 * 		a vertical Box layout containing sliders and buttons
-		 * 		sliders are a 1x2 grid layout
-		 * 			each being a vertical Box w/label and slider
-		 * 		buttons a horizontal Box layout
+		 * 		a 3x2 grid
 		 */
 		JPanel altPanel = new JPanel();
 		altPanel.setLayout(new BoxLayout(altPanel, BoxLayout.PAGE_AXIS));
 		altPanel.add(altitudeLabel);
 		altPanel.add(altitude);
 		
-		JPanel diaPanel = new JPanel();
-		diaPanel.setLayout(new BoxLayout(diaPanel, BoxLayout.PAGE_AXIS));
-		diaPanel.add(diameterLabel);
-		diaPanel.add(diameter);
+		JPanel diaPanel1 = new JPanel();
+		diaPanel1.setLayout(new BoxLayout(diaPanel1, BoxLayout.PAGE_AXIS));
+		diaPanel1.add(diameter1Label);
+		diaPanel1.add(diameter1);
 		
-		JPanel rndPanel = new JPanel();
-		rndPanel.setLayout(new BoxLayout(rndPanel, BoxLayout.PAGE_AXIS));
-		rndPanel.add(roundLabel);
-		rndPanel.add(rounding);
+		JPanel diaPanel2 = new JPanel();
+		diaPanel2.setLayout(new BoxLayout(diaPanel2, BoxLayout.PAGE_AXIS));
+		diaPanel2.add(diameter2Label);
+		diaPanel2.add(diameter2);
+		
+		JPanel rndPanel1 = new JPanel();
+		rndPanel1.setLayout(new BoxLayout(rndPanel1, BoxLayout.PAGE_AXIS));
+		rndPanel1.add(roundLabel1);
+		rndPanel1.add(rounding1);
+		
+		JPanel rndPanel2 = new JPanel();
+		rndPanel2.setLayout(new BoxLayout(rndPanel2, BoxLayout.PAGE_AXIS));
+		rndPanel2.add(roundLabel2);
+		rndPanel2.add(rounding2);
+		
+		JPanel butPanel = new JPanel();
+		butPanel.setLayout(new BoxLayout(butPanel, BoxLayout.LINE_AXIS));
+		butPanel.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
+		butPanel.add(cancel);
+		butPanel.add(accept);
 
-		JPanel sliders = new JPanel();
-		sliders.setLayout(new BoxLayout(sliders, BoxLayout.LINE_AXIS));
+		JPanel controls = new JPanel();
+		controls.setLayout(new GridLayout(2,3));
 		altPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
-		diaPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 15));
-		rndPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
-		sliders.add(altPanel);
-		sliders.add(diaPanel);
-		sliders.add(rndPanel);
-		
-		JPanel buttons = new JPanel();
-		buttons.setLayout(new BoxLayout(buttons, BoxLayout.LINE_AXIS));
-		buttons.add(cancel);
-		buttons.add(Box.createRigidArea(new Dimension(40,0)));
-		buttons.add(accept);
-		buttons.setBorder(BorderFactory.createEmptyBorder(20,100, 20, 10));
-
-		mainPane.add(sliders);
-		mainPane.add(buttons, BorderLayout.SOUTH);
+		diaPanel1.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 15));
+		diaPanel2.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+		rndPanel1.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
+		rndPanel2.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 10));
+		controls.add(altPanel);
+		controls.add(diaPanel1);
+		controls.add(rndPanel1);
+		controls.add(butPanel);
+		controls.add(diaPanel2);
+		controls.add(rndPanel2);
+	
+		mainPane.add(controls);
 		
 		pack();
 		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
@@ -148,13 +178,16 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		// add the action listeners
 		altitude.addChangeListener(this);
-		diameter.addChangeListener(this);
-		rounding.addChangeListener(this);
+		diameter1.addChangeListener(this);
+		diameter2.addChangeListener(this);
+		rounding1.addChangeListener(this);
+		rounding2.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		map.addMouseListener(this);
 		map.addMouseMotionListener(this);
 		map.addKeyListener(this);
+		addKeyListener(this);
 		map.requestFocus();
 		
 		selecting = false;
@@ -241,19 +274,29 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * 	compute the height as a function of the distance from center
 	 */
 	public void placeRidge(Map map, double x0, double y0, double x1, double y1,
-			double radius, double zMax, int shape, int mineral) {
+			double radius1, double radius2, double zMax, 
+			int shape1, int shape2, int mineral) {
 		// figure out the shape coefficients
 		int fullscale = Parameters.CYLINDRICAL;
 		int midscale = fullscale/2;
-		double Fcone, Fcirc, Fcyl;
-		if (shape <= midscale) {
-			Fcone = (double) (midscale - shape) / midscale;
-			Fcirc = (double) shape / midscale;
-			Fcyl = 0;
+		double fCone1, fCone2, fCirc1, fCirc2, fCyl1, fCyl2;
+		if (shape1 <= midscale) {
+			fCone1 = (double) (midscale - shape1) / midscale;
+			fCirc1 = (double) shape1 / midscale;
+			fCyl1 = 0;
 		} else {	// circ-flat
-			Fcone = 0;
-			Fcirc = (double) (fullscale - shape) / midscale;
-			Fcyl =	(double) (shape - midscale) / midscale;
+			fCone1 = 0;
+			fCirc1 = (double) (fullscale - shape1) / midscale;
+			fCyl1 =	(double) (shape1 - midscale) / midscale;
+		}
+		if (shape2 <= midscale) {
+			fCone2 = (double) (midscale - shape2) / midscale;
+			fCirc2 = (double) shape2 / midscale;
+			fCyl2 = 0;
+		} else {	// circ-flat
+			fCone2 = 0;
+			fCirc2 = (double) (fullscale - shape2) / midscale;
+			fCyl2 =	(double) (shape2 - midscale) / midscale;
 		}
 		
 		// see which points are within the scope of this mountain
@@ -263,15 +306,20 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		MeshPoint first = new MeshPoint(x0,y0);
 		MeshPoint second = new MeshPoint(x1,y1);
 		double minDist = first.distance(second);
-		double maxDist = minDist + radius;
+		double maxDist1 = minDist + radius1;
+		double maxDist2 = minDist + radius2;
 		double minZ = parms.z(parms.sediment);
 		
 		for(int i = 0; i < heights.length; i++) {
 			MeshPoint p = m.vertices[i];
 			double d0 = first.distance(p);
 			double d1 = second.distance(p);
-			if (d0 + d1 > maxDist)
+			double d2 = p.distanceLine(x0,  y0,  x1,  y1);
+			double max = (d2 > 0) ? maxDist1 : maxDist2;
+			double radius = (d2 > 0) ? radius1 : radius2;
+			if (d0 + d1 > max)
 				continue;
+			
 			// TODO add rectangular ridges
 			
 			// calculate the deltaH for this point
@@ -279,8 +327,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			double dh_cone = (radius - dist) * zMax / radius;
 			double dh_circ = Math.cos(Math.PI*dist/(4*radius)) * zMax;
 			double dh_cyl = zMax;
-			double delta_h = (Fcone * dh_cone) + (Fcirc * dh_circ) + (Fcyl * dh_cyl);
-			// XXX: asymmetric mountain profiles
+			double delta_h1 = (fCone1 * dh_cone) + (fCirc1 * dh_circ) + (fCyl1 * dh_cyl);
+			double delta_h2 = (fCone2 * dh_cone) + (fCirc2 * dh_circ) + (fCyl2 * dh_cyl);
+			double delta_h = (d2 > 0) ? delta_h1 : delta_h2;
 
 			// make sure the new height is legal
 			double newZ = heights[i] + delta_h;
@@ -319,14 +368,18 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		double Y1 = map.map_y(y_end);
 
 		// turn the diameter into map units
-		double d = (double) diameter.getValue();
-		if (d == 0)
-			d = 1;
-		d = parms.x(d);
+		double d1 = (double) diameter1.getValue();
+		if (d1 == 0)
+			d1 = 1;
+		d1 = parms.x(d1);
+		double d2 = (double) diameter2.getValue();
+		if (d2 == 0)
+			d2 = 1;
+		d2 = parms.x(d2);
 		
 		// figure out how long the mountain range is (in map coordinates)
 		double l = Math.sqrt(((X1-X0)*(X1-X0)) + (Y1-Y0)*(Y1-Y0));
-		double m = l/d;
+		double m = 2 * l/(d1 + d2);
 		int mountains = (int) (m + 0.5);
 		
 		// get the height
@@ -334,35 +387,35 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		double z = parms.z((double) alt);
 		
 		// get the shape
-		int shape = rounding.getValue();
+		int shape1 = rounding1.getValue();
+		int shape2 = rounding2.getValue();
 		
-		// XXX: piece-wise mountain ranges
 		// how many mountains can we create
 		if (mountains < 2) {
 			// one mountain goes in the center (likely volcanic)
-			int composition = (shape <= (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNEOUS : Map.METAMORPHIC;
-			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d/2, z, shape, composition);
+			int composition = (shape1 <= (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNEOUS : Map.METAMORPHIC;
+			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d1/2, z, shape1, composition);
 			String form;
 			if (z < 0)
 				form = "caldera";
-			else if (shape >= (Parameters.SPHERICAL + Parameters.CYLINDRICAL)/2)
+			else if (shape1 >= (Parameters.SPHERICAL + Parameters.CYLINDRICAL)/2)
 				form = "plateau";
 			else
 				form = "mountain";
-			placed = "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
+			placed = "Placed " + parms.km(d1) + Parameters.unit_xy + " wide, " +
 					alt + Parameters.unit_z + " " + Map.soil_names[composition] + " " + form + " at <" +
 					String.format(POS_FMT, parms.latitude(X0+X1/2)) + "," + String.format(POS_FMT, parms.longitude(Y0+Y1/2)) + 
-					"> shape=" + shape + "/" + Parameters.CYLINDRICAL + "\n";
+					"> shape=" + shape1 + "/" + Parameters.CYLINDRICAL + "\n";
 		} else {
 			int composition = (alt > 0) ? Map.METAMORPHIC : Map.SEDIMENTARY;
-			placeRidge(map, X0, Y0, X1, Y1, d/2, z, shape, composition);
+			placeRidge(map, X0, Y0, X1, Y1, d1/2, d2/2, z, shape1, shape2, composition);
 			String form = (alt > 0) ? "ridge" : "trench";
-			placed = "Placed " + parms.km(d) + Parameters.unit_xy + " wide, " +
+			placed = "Placed " + parms.km(d1+d2)/2 + Parameters.unit_xy + " wide, " +
 					alt + Parameters.unit_z + " " +
 					Map.soil_names[composition] + " " + form + " from <" +
 					String.format(POS_FMT, parms.latitude(X0)) + "," + String.format(POS_FMT, parms.longitude(Y0)) + "> to <" +
 							String.format(POS_FMT, parms.latitude(X1)) + "," + String.format(POS_FMT, parms.longitude(Y1)) + 
-							"> shape=" + shape + "/" + Parameters.CYLINDRICAL + "\n";
+							"> shape=" + shape1 + "," + shape2 + "/" + Parameters.CYLINDRICAL + "\n";
 		}
 		// tell the map about the update
 		map.setHeightMap(newHeight);
@@ -430,9 +483,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	private void acceptMountain() {
 		// save the current values as defaults
-		parms.dDiameter = diameter.getValue();
+		parms.dDiameter = diameter1.getValue();
 		parms.dAltitude = altitude.getValue();
-		parms.dShape = rounding.getValue();
+		parms.dShape = rounding1.getValue();
 		
 		// save a new copy of current height map
 		for(int i = 0; i < oldHeight.length; i++)

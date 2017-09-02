@@ -15,7 +15,7 @@
 	"diameter_grain": 10,
 	"altitude_unit": 100,
 	"altitude_max": 5000,
-	"mountain_fraction": 4,
+	"mountain_fraction": 2,
 	"altitude_rain": 3000,
 	"msl_range": 1000,
 	"rain_max": 500,

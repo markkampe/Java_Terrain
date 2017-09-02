@@ -3,6 +3,7 @@ package worldBuilder;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+//import java.io.InputStreamReader;
 
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -155,11 +156,18 @@ import javax.json.stream.JsonParser;
 	public Parameters(String filename, int debug) {
 		debug_level = debug;
 		singleton = this;
+		BufferedReader r;
 		JsonParser parser;
+		char c = filename.charAt(0);
 		try {
-			parser = Json.createParser(new BufferedReader(new FileReader(filename)));
+			// TODO Parameters(name, dbg) cannot read from Jar
+			//if (c == '.' || c == '/')
+				r = new BufferedReader(new FileReader(filename));
+			//else
+			//	r = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(filename)));
+			parser = Json.createParser(r);
 		} catch (FileNotFoundException e) {
-			System.err.println("FATAL: unable to open configuration file file " + filename);
+			System.out.println("ERROR: Unable to open configuration file " + filename);
 			return;
 		}
 

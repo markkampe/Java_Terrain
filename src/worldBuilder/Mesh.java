@@ -89,6 +89,7 @@ public class Mesh {
 	 */
 	public void read(String filename) {
 		JsonParser parser;
+		// TODO Mesh.read() cannot read from jar
 		try {
 			parser = Json.createParser(new BufferedReader(new FileReader(filename)));
 		} catch (FileNotFoundException e) {
@@ -96,7 +97,7 @@ public class Mesh {
 			vertices = new MeshPoint[0];
 			return;
 		}
-
+		// TODO mesh read/write z coordinates
 		String thisKey = "";
 		boolean inPoints = false;
 		boolean inMesh = false;

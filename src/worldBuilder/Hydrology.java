@@ -157,6 +157,7 @@ public class Hydrology {
 			// any point with no down-hill neighbors is a sink
 			sinkMap[point] = point;
 		}
+		// FIX Erosion computation fails for neighbors at same height
 		
 		// find escape points and consolidate sinks into larger ones
 		int escapePoint;

@@ -98,30 +98,10 @@ public class Map extends JPanel {
 	 * @param background
 	 *            ... background color
 	 */
-	public Map(Mesh mesh, int width, int height) {
+	public Map(int width, int height) {
 		this.size = new Dimension(width, height);
-		this.mesh = mesh;
 		this.parms = Parameters.getInstance();
 		setWindow(-Parameters.x_extent/2, -Parameters.y_extent/2, Parameters.x_extent/2, Parameters.y_extent/2);
-		
-		if (mesh != null) {
-			this.map = new Cartesian(mesh, x_min, y_min, x_max, y_max, width/TOPO_CELL, height/TOPO_CELL);
-			this.heightMap = new double[mesh.vertices.length];
-			this.rainMap = new double[mesh.vertices.length];
-			this.downHill = new int[mesh.vertices.length];
-			this.fluxMap = new double[mesh.vertices.length];
-			this.erodeMap = new double[mesh.vertices.length];
-			this.soilMap = new double[mesh.vertices.length];
-			this.hydrationMap = new double[mesh.vertices.length];
-			this.highLights = new Color[mesh.vertices.length];
-			this.hydro = new Hydrology(this);
-			this.artery = null;
-			
-			// ensure that the map is not perfectly flat
-			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);	
-			this.erosion = 1;
-			hydro.reCalculate(true);
-		}
 		selectNone();
 	}
 
@@ -143,10 +123,7 @@ public class Map extends JPanel {
 			this.highLights = new Color[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
 			this.artery = null;
-			
-			// ensure that the map is not perfectly flat
-			MountainDialog.placeMountain(this, 0, 0, Parameters.x_extent, Parameters.z_extent/10000, Parameters.CONICAL, ALLUVIAL);
-			this.erosion = 1;
+			this.erosion = 1; // FIX s.b parms.dErosion;
 			hydro.reCalculate(true);
 		} else {
 			this.map = null;

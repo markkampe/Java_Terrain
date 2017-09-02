@@ -99,15 +99,19 @@ public class WorldBuilder  extends JFrame
 		addComponentListener(this);
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
+		// create the display map generator
+		map = new Map(parms.width, parms.height);
+		mainPane.add(map, BorderLayout.CENTER);	
+		
 		// if we were given an input file, use it
 		Mesh m = new Mesh();
+		double[] heightMap = null;
 		if (filename != null)
-			m.read(filename);
-		modified = false;
-		
-		// create the main map panel, capture mouse events within it
-		map = new Map(m, parms.width, parms.height);
-		mainPane.add(map, BorderLayout.CENTER);	
+			heightMap = m.read(filename);
+		map.setMesh(m);
+		if (heightMap != null)
+			map.setHeightMap(heightMap);
+		modified = false;	
 		
 		// create menus and widgets, put up the display
 		createMenus();
@@ -269,7 +273,7 @@ public class WorldBuilder  extends JFrame
 			String dir = d.getDirectory();
 			if (dir != null)
 				filename = dir + filename;
-			map.getMesh().write(filename);
+			map.getMesh().write(filename, map.getHeightMap());
 			modified = false;
 		}
 	}
@@ -305,8 +309,9 @@ public class WorldBuilder  extends JFrame
 				String dir = d.getDirectory();
 				if (dir != null)
 					filename = dir + filename;
-				m.read(filename);
+				double[] heightMap = m.read(filename);
 				map.setMesh(m);
+				map.setHeightMap(heightMap);
 				modified = false;
 			}
 		} else if (o == fileSave) {

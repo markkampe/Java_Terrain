@@ -86,8 +86,11 @@ public class Mesh {
 	
 	/**
 	 * read mesh of MapPoints from a file
+	 * 
+	 * @param name of input file
+	 * @return heightMap
 	 */
-	public void read(String filename) {
+	public double[] read(String filename) {
 		JsonParser parser;
 		// TODO Mesh.read() cannot read from jar
 		try {
@@ -95,18 +98,21 @@ public class Mesh {
 		} catch (FileNotFoundException e) {
 			System.err.println("FATAL: unable to open input file " + filename);
 			vertices = new MeshPoint[0];
-			return;
+			return null;
 		}
-		// TODO mesh read/write z coordinates
+		
 		String thisKey = "";
 		boolean inPoints = false;
 		boolean inMesh = false;
 		boolean inNeighbors = false;
 		double x = 0;
 		double y = 0;
+		double z = 0;
 		int length = 0;	// expected number of points
 		int points = 0;	// number of points read
 		int paths = 0;	// number of paths created
+		double[] heightMap = null;
+		
 		while(parser.hasNext()) {
 			JsonParser.Event e = parser.next();
 			switch(e) {		
@@ -137,6 +143,7 @@ public class Mesh {
 					case "length":
 						length = new Integer(parser.getString());
 						vertices = new MeshPoint[length];
+						heightMap = new double[length];
 						break;
 						
 					case "x":
@@ -146,12 +153,42 @@ public class Mesh {
 					case "y":
 						y = new Double(parser.getString());
 						break;
+					
+					case "z":
+						z = new Double(parser.getString());
+						break;
+						
+					case "amount":
+						parms.dAmount = new Integer(parser.getString());
+						break;
+						
+					case "direction":
+						parms.dDirection = new Integer(parser.getString());
+						break;
+						
+					case "cloudbase":
+						parms.dRainHeight = new Integer(parser.getString());
+						break;
+						
+					case "erosion":
+						parms.dErosion = new Integer(parser.getString());
+						break;
+						
+					case "meshpoint":
+						// TODO: how to read/set artery meshpoint
+						break;
+						
+					case "flux":
+						parms.dTribute = new Integer(parser.getString());
+						break;
 				}
 				break;
 				
 			case END_OBJECT:
 				if (inPoints) {
 					vertices[points] = new MeshPoint(x,y,points);
+					if (heightMap != null)
+						heightMap[points] = z;
 					points++;
 				}
 				break;
@@ -180,16 +217,22 @@ public class Mesh {
 		
 		if (parms.debug_level > 0)
 			System.out.println("Loaded " + points + "/" + length + " points, " + paths + " paths from file " + filename);
+		
+		return heightMap;
 	}
 	
 	/**
 	 * write a mesh of MapPoints out to a file
 	 */
-	public boolean write(String filename) {
+	public boolean write(String filename, double[] heightMap) {
 		try {
 			FileWriter output = new FileWriter(filename);
-			final String C_FORMAT = "        { \"x\":\"%10.7f\", \"y\":\"%10.7f\" }";
-			
+			final String FORMAT_2 = "        { \"x\":%10.7f, \"y\":%10.7f }";
+			final String FORMAT_3 = "        { \"x\":%10.7f, \"y\":%10.7f, \"z\":%10.7f }";
+			final String R_FORMAT = "    \"rainfall\": { \"amount\": %d, \"direction\": %d, \"cloudbase\": %d },\n";
+			final String A_FORMAT = "    \"artery\": { \"meshpoint\": %d, \"flux\": %d },\n";
+			final String E_FORMAT = "    \"erosion\": %d\n";
+		
 			// write out the Mesh wrapper
 			output.write( "{   \"length\":" + vertices.length + ",\n");
 			// first write out the points
@@ -198,7 +241,10 @@ public class Mesh {
 				if (i != 0)
 					output.write(",\n");
 				MeshPoint m = vertices[i];
-				output.write(String.format(C_FORMAT, m.x, m.y));
+				if (heightMap == null)
+					output.write(String.format(FORMAT_2, m.x, m.y));
+				else
+					output.write(String.format(FORMAT_3, m.x, m.y, heightMap[i]));	
 			}
 			output.write(" ],\n");
 			
@@ -217,7 +263,20 @@ public class Mesh {
 				output.write(" ]");
 			}
 		
-			output.write( "\n    ]\n");
+			output.write( "\n    ],\n");
+			
+			// then write out rainfall configuration
+			output.write(String.format(R_FORMAT, parms.dAmount, parms.dDirection, parms.dRainHeight));
+			
+			// TODO: how to write out artery
+			MeshPoint m = null;
+			if (m != null) {
+				output.write(String.format(A_FORMAT, m.index, parms.dTribute));
+			}
+			
+			// then write out erosion configuration
+			output.write(String.format(E_FORMAT, parms.dErosion));
+			
 			output.write( "}\n");
 			output.close();
 			return true;

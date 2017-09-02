@@ -159,7 +159,11 @@ public class Mesh {
 						break;
 						
 					case "amount":
-						parms.dAmount = new Integer(parser.getString());
+						String s = parser.getString();
+						int u = s.indexOf(Parameters.unit_r);
+						if (u != -1)
+							s = s.substring(0, u);
+						parms.dAmount = new Integer(s);
 						break;
 						
 					case "direction":
@@ -167,7 +171,11 @@ public class Mesh {
 						break;
 						
 					case "cloudbase":
-						parms.dRainHeight = new Integer(parser.getString());
+						s = parser.getString();
+						u = s.indexOf(Parameters.unit_z);
+						if (u != -1)
+							s = s.substring(0, u);
+						parms.dRainHeight = new Integer(s);
 						break;
 						
 					case "erosion":
@@ -179,7 +187,11 @@ public class Mesh {
 						break;
 						
 					case "flux":
-						parms.dTribute = new Integer(parser.getString());
+						s = parser.getString();
+						u = s.indexOf(Parameters.unit_f);
+						if (u != -1)
+							s = s.substring(0, u);
+						parms.dTribute = new Integer(s);
 						break;
 				}
 				break;
@@ -228,13 +240,13 @@ public class Mesh {
 		try {
 			FileWriter output = new FileWriter(filename);
 			final String FORMAT_2 = "        { \"x\":%10.7f, \"y\":%10.7f }";
-			final String FORMAT_3 = "        { \"x\":%10.7f, \"y\":%10.7f, \"z\":%10.7f }";
-			final String R_FORMAT = "    \"rainfall\": { \"amount\": %d, \"direction\": %d, \"cloudbase\": %d },\n";
-			final String A_FORMAT = "    \"artery\": { \"meshpoint\": %d, \"flux\": %d },\n";
+			final String FORMAT_3 = "        { \"x\":%10.7f, \"y\":%10.7f, \"z\":%11.8f }";
+			final String R_FORMAT = "    \"rainfall\": { \"amount\": \"%d%s\", \"direction\": %d, \"cloudbase\": \"%d%s\" },\n";
+			final String A_FORMAT = "    \"artery\": { \"meshpoint\": %d, \"flux\": \"%d%s\" },\n";
 			final String E_FORMAT = "    \"erosion\": %d\n";
 		
 			// write out the Mesh wrapper
-			output.write( "{   \"length\":" + vertices.length + ",\n");
+			output.write( "{   \"length\": " + vertices.length + ",\n");
 			// first write out the points
 			output.write( "    \"points\": [\n" );
 			for(int i = 0; i < vertices.length; i++) {
@@ -249,6 +261,7 @@ public class Mesh {
 			output.write(" ],\n");
 			
 			// then write out the neighbor connections
+			int paths = 0;
 			output.write( "    \"mesh\": [\n" );
 			for(int i = 0; i < vertices.length; i++) {
 				if (i != 0)
@@ -259,6 +272,7 @@ public class Mesh {
 					if (n != 0)
 						output.write(", ");
 					output.write(String.format("%d",  m.neighbor[n].index));
+					paths++;
 				}
 				output.write(" ]");
 			}
@@ -266,12 +280,13 @@ public class Mesh {
 			output.write( "\n    ],\n");
 			
 			// then write out rainfall configuration
-			output.write(String.format(R_FORMAT, parms.dAmount, parms.dDirection, parms.dRainHeight));
+			output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r, 
+					parms.dDirection, parms.dRainHeight, Parameters.unit_z));
 			
 			// TODO: how to write out artery
 			MeshPoint m = null;
 			if (m != null) {
-				output.write(String.format(A_FORMAT, m.index, parms.dTribute));
+				output.write(String.format(A_FORMAT, m.index, parms.dTribute, Parameters.unit_f));
 			}
 			
 			// then write out erosion configuration
@@ -279,6 +294,9 @@ public class Mesh {
 			
 			output.write( "}\n");
 			output.close();
+			
+			if (parms.debug_level > 0)
+				System.out.println("saved " + vertices.length + " vertices, " + paths/2 + " unique paths to file " + filename);
 			return true;
 		} catch (IOException e) {
 			System.err.println("Unable to create output file " + filename);

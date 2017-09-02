@@ -158,7 +158,7 @@ import javax.json.stream.JsonParser;
 		singleton = this;
 		BufferedReader r;
 		JsonParser parser;
-		char c = filename.charAt(0);
+		//char c = filename.charAt(0);
 		try {
 			// TODO Parameters(name, dbg) cannot read from Jar
 			//if (c == '.' || c == '/')

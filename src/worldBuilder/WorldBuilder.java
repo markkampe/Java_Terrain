@@ -15,6 +15,7 @@ public class WorldBuilder  extends JFrame
 	private static final String author = "Author: Mark Kampe (mark.kampe@gmail.com)";
 	private static final String credit = "Based on Martin O'Leary's Uncharted Atlas terrain generator (mewo2.com)";
 	private static final String license = "";	// TBD
+	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [mesh file]";
 	
 	// active file
 	private String filename;	// name of current input/output file
@@ -420,17 +421,33 @@ public class WorldBuilder  extends JFrame
 	public static void main(String[] args) {
 		// process the arguments
 		String filename = DEFAULT_TEMPLATE;
+		String configname = DEFAULT_CONFIG;
 		int debug = 0;
 		for( int i = 0; i < args.length; i++ ) {
+			// eclipse does not honor argv[0] == command
+			if (i == 0 && !args[i].startsWith(SWITCH_CHAR))
+				continue;
 			if (args[i].startsWith(SWITCH_CHAR)) {	
-				if (args[i].startsWith("-d"))
-					debug = new Integer(args[i].substring(2));
+				if (args[i].startsWith("-d")) {
+					if (args[i].length() > 2)
+						debug = new Integer(args[i].substring(2));
+					else
+						debug = new Integer(args[++i]);
+				} else if (args[i].startsWith("-c")) {
+					if (args[i].length() > 2)
+						configname = args[i].substring(2);
+					else
+						configname = args[++i];
+				} else if (args[i].startsWith("-v")) {
+					debug = 1;
+				} else
+					System.out.println(usage);
 			} else {
-				filename = args[i];		// Do I have non-switch args?
+				filename = args[i];
 			}
 		}
 		// instantiate the parameters singleton
-		parms = new Parameters(DEFAULT_CONFIG, debug);
+		parms = new Parameters(configname, debug);
 
 		// create our display
 		WorldBuilder w = new WorldBuilder(filename);

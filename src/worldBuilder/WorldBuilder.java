@@ -312,6 +312,9 @@ public class WorldBuilder  extends JFrame
 				double[] heightMap = m.read(filename);
 				map.setMesh(m);
 				map.setHeightMap(heightMap);
+				if (parms.arteryX >= 0) {
+					map.setArtery(m.vertices[parms.arteryX], parms.dTribute);
+				}
 				modified = false;
 			}
 		} else if (o == fileSave) {

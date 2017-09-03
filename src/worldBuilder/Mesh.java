@@ -112,6 +112,7 @@ public class Mesh {
 		int points = 0;	// number of points read
 		int paths = 0;	// number of paths created
 		double[] heightMap = null;
+		parms.arteryX = -1;	// start with none
 		
 		while(parser.hasNext()) {
 			JsonParser.Event e = parser.next();
@@ -183,9 +184,9 @@ public class Mesh {
 						break;
 						
 					case "meshpoint":
-						// TODO: how to read/set artery meshpoint
+						parms.arteryX = new Integer(parser.getString());
 						break;
-						
+				
 					case "flux":
 						s = parser.getString();
 						u = s.indexOf(Parameters.unit_f);

@@ -2,6 +2,7 @@ package worldBuilder;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 
 public class RiverMap {
 	private Map map;		// mesh to which we correspond
@@ -44,14 +45,16 @@ public class RiverMap {
 				continue;	// don't display flux below stream cut-off
 			if (downHill[i] >= 0) {
 				int d = downHill[i];
-				double x1 = map.screen_x(mesh.vertices[i].x);
-				double y1 = map.screen_y(mesh.vertices[i].y);
-				double x2 = map.screen_x(mesh.vertices[d].x);
-				double y2 = map.screen_y(mesh.vertices[d].y);
+				// ignore lines that are completely off map
+				if (!map.on_screen(mesh.vertices[i].x, mesh.vertices[i].y) &&
+				    !map.on_screen(mesh.vertices[d].x, mesh.vertices[d].y))
+				   		continue;
 				
-				// make sure coordinates are all on-screen
-				if (x1 < 0 || x2 < 0 || y1 < 0 || y2 < 0)
-					continue;
+				// figure out where the end-points are on screen
+				int x1 = map.screen_x(mesh.vertices[i].x);
+				int y1 = map.screen_y(mesh.vertices[i].y);
+				int x2 = map.screen_x(mesh.vertices[d].x);
+				int y2 = map.screen_y(mesh.vertices[d].y);
 				
 				// blue gets brighter, green dimmer w/increasing flow
 				double delta = (flux[i] - min_stream) * dBdF;
@@ -59,6 +62,7 @@ public class RiverMap {
 				double blue = WATER_DIM + delta;
 				double green = Math.max(0, WATER_DIM - delta);
 				g.setColor(new Color(0, (int) green, (int) blue));
+				// XXX use stroke-width for rivers
 				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 				if (flux[i] < min_river)
 					continue;

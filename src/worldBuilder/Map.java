@@ -2,6 +2,7 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 
 import javax.swing.*;
 
@@ -233,19 +234,26 @@ public class Map extends JPanel {
 	 * convert a map coordinate into a screen coordinate
 	 */
 	public int screen_x(double x) {
-		if (x < x_min || x > x_max)
-			return -1;
 		double X = getWidth() * (x - x_min)/(x_max - x_min);
 		return (int) X;
 	}
 	
 	public int screen_y(double y) {
-		if (y < y_min || y > y_max)
-			return -1;
 		double Y = getHeight() * (y - y_min)/(y_max - y_min);
 		return (int) Y;
 	}
 
+	/**
+	 * is a screen coordinate within the current display window
+	 */
+	public boolean on_screen(double x, double y) {
+		if (x < x_min || x > x_max)
+			return false;
+		if (y < y_min || y > y_max)
+			return false;
+		return true;
+	}
+	
 	// description of the area to be highlighted
 	private int sel_x0, sel_y0, sel_x1, sel_y1;
 	private int sel_height, sel_width;
@@ -448,15 +456,16 @@ public class Map extends JPanel {
 					MeshPoint n = m.neighbor[j];
 					if (n.index < i)
 						continue;	// we already got this one
+					
+					// see if it is completely off screen
+					if (!on_screen(m.x, m.y) && !on_screen(n.x, n.y))
+							continue;
+					
+					// draw it
 					double x1 = screen_x(m.x);
 					double y1 = screen_y(m.y);
 					double x2 = screen_x(n.x);
 					double y2 = screen_y(n.y);
-					
-					// make sure it is on the screen
-					if (x1 < 0 || x2 < 0 || y1 < 0 || y2 < 0)
-						continue;
-					
 					g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 				}
 			}

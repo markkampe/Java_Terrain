@@ -244,8 +244,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			double dh_circ = Math.cos(Math.PI*d/(4*radius)) * zMax;
 			double dh_cyl = zMax;
 			double delta_h = (Fcone * dh_cone) + (Fcirc * dh_circ) + (Fcyl * dh_cyl);
-			// XXX: asymmetric mountain profiles
-
+			
 			// make sure the new height is legal
 			double newZ = heights[i] + delta_h;
 			if (newZ > Parameters.z_extent/2)

@@ -100,6 +100,7 @@ import javax.json.stream.JsonParser;
 	public double Ce = 1.5;		// coefficient of erosion
 								// erosion = flow * Ce * (V/Ve)^2
 	public double Vd = 0.15;	// maximum velocity for deposition
+	public double vMin = 0.005;	// minimum water velocity
 	public double Cd = .001;	// coefficient of deposition
 								// deposition = load * Cd/V
 	public double dRdX = .005;	// fraction of rain that falls per km

@@ -157,7 +157,6 @@ public class Hydrology {
 			// any point with no down-hill neighbors is a sink
 			sinkMap[point] = point;
 		}
-		// FIX Erosion computation fails for neighbors at same height
 		
 		// find escape points and consolidate sinks into larger ones
 		int escapePoint;
@@ -370,7 +369,9 @@ public class Hydrology {
 	 * NOTE: velocity ranges from .1m/s to 3m/s
 	 */
 	private static double velocity(double slope) {
-		return 3 * slope;
+		double v = 3 * slope;
+		double vMin = Parameters.getInstance().vMin;
+		return (v < vMin) ? vMin : v;
 	}
 	
 	/**
@@ -419,7 +420,9 @@ public class Hydrology {
 	
 	// returns fraction of carried load that will settle out
 	private double sedimentation( double v) {
-		return (v > parms.Vd) ? 0 : parms.Cd/v;
+		if (v > parms.Vd)
+			return 0;
+		return parms.Cd/v;
 	}
 	
 	/*

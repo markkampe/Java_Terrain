@@ -299,13 +299,15 @@ public class Hydrology {
 			// calculate the down-hill flow and erosion
 			double v = 0;
 			if (downHill[x] >= 0) {
-				fluxMap[downHill[x]] += fluxMap[x];
+				// figure out slope and velocity
 				double s = slope(downHill[x], x);
 				if (s > map.max_slope)
 					map.max_slope = s;
 				v = velocity(s);
 				if (v > map.max_velocity)
 					map.max_velocity = v;
+				
+				// are we eroding or depositing
 				double e = erosion(v);
 				if (e > 0) {
 					double taken = e * fluxMap[x] * zScale / competence[soilType];
@@ -314,14 +316,17 @@ public class Hydrology {
 						erodeMap[x] = heightMap[x] + Parameters.z_extent/2;
 					if (erodeMap[x] > map.max_erosion)
 						map.max_erosion = erodeMap[x];
+					fluxMap[downHill[x]] += fluxMap[x];
 					load[downHill[x]] = load[x] + taken;
 				} else {
 					double d = sedimentation(v);
 					if (d > 0) {
+						// TODO flood plains spread to all neighbors
 						double given = d * load[x] * zScale;
 						erodeMap[x] -= given;
 						if (erodeMap[x] < - map.max_deposition)
 							map.max_deposition = - erodeMap[x];
+						fluxMap[downHill[x]] += fluxMap[x];
 						load[downHill[x]] = load[x] - given;
 					}
 				}
@@ -332,23 +337,21 @@ public class Hydrology {
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			if (surface[i] == 0)	// not in a sink
 				continue;
-			// TODO unlike rain, rivers don't fill depressions
-			if (fluxMap[i] <= 0)	// no excess water
+			
+			// see if I (or my exit point) have excess flow
+			double f = fluxMap[i];
+			int d = downHill[i];
+			if (d >= 0)
+				f = fluxMap[d];
+			if (f <= 0)
 				continue;
+				
+			// this point should be under water
 			hydrationMap[i] = -surface[i];
 		}
 		
 		// FIX rivers don't flow around mountains (fill non-depressions)
 		// TODO flood planes
-		// do
-		//		from highest to lowest
-		//		if erode >= 0
-		//			continue
-		//		for each neighbor
-		//			if higher than me - epsilon
-		//				continue
-		//			give them half of delta-epsilon
-		// while did something
 	}
 	
 	/**

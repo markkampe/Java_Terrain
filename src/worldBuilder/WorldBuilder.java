@@ -273,7 +273,7 @@ public class WorldBuilder  extends JFrame
 			String dir = d.getDirectory();
 			if (dir != null)
 				filename = dir + filename;
-			map.getMesh().write(filename, map.getHeightMap());
+			map.getMesh().write(filename, map.getHeightMap(), map.getArtery());
 			modified = false;
 		}
 	}

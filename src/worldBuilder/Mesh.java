@@ -236,7 +236,7 @@ public class Mesh {
 	/**
 	 * write a mesh of MapPoints out to a file
 	 */
-	public boolean write(String filename, double[] heightMap) {
+	public boolean write(String filename, double[] heightMap, MeshPoint artery) {
 		try {
 			FileWriter output = new FileWriter(filename);
 			final String FORMAT_2 = "        { \"x\":%10.7f, \"y\":%10.7f }";
@@ -283,10 +283,9 @@ public class Mesh {
 			output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r, 
 					parms.dDirection, parms.dRainHeight, Parameters.unit_z));
 			
-			// TODO: how to write out artery
-			MeshPoint m = null;
-			if (m != null) {
-				output.write(String.format(A_FORMAT, m.index, parms.dTribute, Parameters.unit_f));
+			// then write out the arterial river
+			if (artery != null) {
+				output.write(String.format(A_FORMAT, artery.index, parms.dTribute, Parameters.unit_f));
 			}
 			
 			// then write out erosion configuration

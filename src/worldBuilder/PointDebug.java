@@ -89,7 +89,7 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			infoWorld.setText(String.format("<%.6f, %.6f>", parms.latitude(point.y), parms.longitude(point.x)));
 			
 			double heightMap[] = map.getHeightMap();
-			infoAlt.setText(String.format("%.1f%s MSL", parms.altitude(heightMap[point.index]), Parameters.unit_z));
+			infoAlt.setText(String.format("%.6f%s MSL", parms.altitude(heightMap[point.index]), Parameters.unit_z));
 			
 			double fluxMap[] = map.getFluxMap();
 			infoFlux.setText(String.format("%.1f%s", fluxMap[point.index], Parameters.unit_f));

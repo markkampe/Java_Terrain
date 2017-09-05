@@ -350,8 +350,7 @@ public class Hydrology {
 			hydrationMap[i] = -surface[i];
 		}
 		
-		// FIX rivers don't flow around mountains (fill non-depressions)
-		// TODO flood planes
+		// FIX rivers don't flow around mountains (fill non-depressions)	
 	}
 	
 	/**

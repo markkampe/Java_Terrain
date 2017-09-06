@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -53,6 +55,9 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
  *         three neighbors).
  */
 public class Mesh {
+	// default mesh to load on start-up
+	private static final String DEFAULT_TEMPLATE = "/Templates/default_%d.json";
+	
 	public MeshPoint[] vertices;	// grid vertices		
 	private Parameters parms;		// global options
 	
@@ -93,14 +98,21 @@ public class Mesh {
 	 */
 	public double[] read(String filename) {
 		JsonParser parser;
-		// TODO Mesh.read() cannot read from jar
-		try {
-			parser = Json.createParser(new BufferedReader(new FileReader(filename)));
-		} catch (FileNotFoundException e) {
-			System.err.println("FATAL: unable to open input file " + filename);
-			vertices = new MeshPoint[0];
-			return null;
+		BufferedReader r;
+		if (filename == null) {
+			filename = String.format(DEFAULT_TEMPLATE, parms.points);
+			InputStream s = getClass().getResourceAsStream(filename);
+			r = new BufferedReader(new InputStreamReader(s));
+		} else {
+			try {
+				r = new BufferedReader(new FileReader(filename));
+			} catch (FileNotFoundException e) {
+				System.err.println("FATAL: unable to open input file " + filename);
+				vertices = new MeshPoint[0];
+				return null;
+			}
 		}
+		parser = Json.createParser(r);
 		
 		String thisKey = "";
 		boolean inPoints = false;

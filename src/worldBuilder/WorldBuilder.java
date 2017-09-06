@@ -1,9 +1,7 @@
 package worldBuilder;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.util.ArrayList;
-
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -74,10 +72,6 @@ public class WorldBuilder  extends JFrame
 	};
 
 	private static final String SWITCH_CHAR = "-";			// command line switches
-	
-	private static final String DEFAULT_TEMPLATE = "Templates/default_4096.json";
-	private static final String DEFAULT_CONFIG = "Templates/worldBuilder.json";
-	
 	private static final long serialVersionUID = 0xdeadbeef;	// this is stupid
 	
 	/**
@@ -107,8 +101,7 @@ public class WorldBuilder  extends JFrame
 		// if we were given an input file, use it
 		Mesh m = new Mesh();
 		double[] heightMap = null;
-		if (filename != null)
-			heightMap = m.read(filename);
+		heightMap = m.read(filename);
 		map.setMesh(m);
 		if (heightMap != null)
 			map.setHeightMap(heightMap);
@@ -456,16 +449,7 @@ public class WorldBuilder  extends JFrame
 			}
 		}
 		// instantiate the parameters singleton
-		if (configname == null)
-			configname = DEFAULT_CONFIG;
 		parms = new Parameters(configname, debug);
-
-		// choose an initial mesh to load
-		if (filename == null) {
-			File f = new File(DEFAULT_TEMPLATE);
-			if (f.exists() && !f.isDirectory())
-				filename = DEFAULT_TEMPLATE;
-		}
 		
 		// and create the map
 		WorldBuilder w = new WorldBuilder(filename);

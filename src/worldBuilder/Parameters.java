@@ -1,6 +1,8 @@
 package worldBuilder;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.InputStream;
 //import java.io.InputStreamReader;
 import java.io.InputStreamReader;
@@ -15,6 +17,8 @@ import javax.json.stream.JsonParser;
  */
 
 public class Parameters {
+	// default configuration file
+	private static final String DEFAULT_CONFIG = "/Templates/worldBuilder.json";
 
 	// operating units ... hard-wired into the code
 	public static final String unit_xy = "km";
@@ -55,72 +59,72 @@ public class Parameters {
 
 	// default display parameters (override in config.json)
 	private static final int PIXELS = 800; // display height/width
-	public int height = PIXELS; // screen height
-	public int width = PIXELS; // screen width
-	public int border; // screen border width
-	public int dialogDX; // X offset for dialog boxes
-	public int dialogDY; // Y offset for dialog boxes
-	public int dialogDelta; // per dialog offsets
-	public int dialogBorder; // dialog box border
+	public int height = PIXELS;		// screen height
+	public int width = PIXELS; 		// screen width
+	public int border; 				// screen border width
+	public int dialogDX; 			// X offset for dialog boxes
+	public int dialogDY; 			// Y offset for dialog boxes
+	public int dialogDelta; 		// per dialog offsets
+	public int dialogBorder; 		// dialog box border
 
 	public String title = "WorldBuilder 0.1 WIP";
 
 	// map rendering thresholds
-	public double stream_flux = 0.1; // stream threshold (m3/s)
-	public double river_flux = 1.0; // river threshold (m3/s)
-	public double artery_flux = 10.0; // artery threshold (m3/s)
-	public int topo_major = 10; // max 10 major lines
-	public int topo_minor = 5; // minor lines per major
+	public double stream_flux = 0.1;	// stream threshold (m3/s)
+	public double river_flux = 1.0;		// river threshold (m3/s)
+	public double artery_flux = 10.0; 	// artery threshold (m3/s)
+	public int topo_major = 10; 		// max 10 major lines
+	public int topo_minor = 5; 			// minor lines per major
 
 	// user selected world size/location parameters
-	public int xy_range; // X/Y range (km)
-	public int z_range; // Z range (m)
-	public int mountain_max; // widest mountain (km)
-	public double latitude; // central point latitude
-	public double longitude; // central point longitude
+	public int xy_range; 		// X/Y range (km)
+	public int z_range; 		// Z range (m)
+	public int mountain_max; 	// widest mountain (km)
+	public double latitude; 	// central point latitude
+	public double longitude; 	// central point longitude
 
 	// persistent defaults
 	public double sea_level = 0;// sea level (map space)
-	public int dSlope; // continental slope
-	public int dDiameter; // mountain diameter
-	public int dAltitude; // mountain altitude
-	public int dShape; // mountain shape
+	public int dSlope; 			// continental slope
+	public int dDiameter; 		// mountain diameter
+	public int dAltitude; 		// mountain altitude
+	public int dShape; 			// mountain shape
 	public static final int CONICAL = 0;
 	public static final int SPHERICAL = 4;
 	public static final int CYLINDRICAL = 8;
-	public int dDirection; // incoming weather
-	public int dAmount; // annual rainfall
-	public int dRainHeight; // mean height of incoming rain
-	public int dErosion; // erosion cycles
-	public int dTribute; // incoming river
+	public int dDirection; 		// incoming weather
+	public int dAmount; 		// annual rainfall
+	public int dRainHeight; 	// mean height of incoming rain
+	public int dErosion; 		// erosion cycles
+	public int dTribute; 		// incoming river
 
 	// tunable physical process parameters
 	// others (less likely to change) are in Hydrology.java
-	public double Ve = 0.75; // minimum velocity for erosion
-	public double Ce = 1.5; // coefficient of erosion
-							// erosion = flow * Ce * (V/Ve)^2
-	public double Vd = 0.15; // maximum velocity for deposition
+	public double Ve = 0.75; 	// minimum velocity for erosion
+	public double Ce = 1.5; 	// coefficient of erosion
+								// erosion = flow * Ce * (V/Ve)^2
+	public double Vd = 0.15; 	// maximum velocity for deposition
 	public double vMin = 0.005; // minimum water velocity
-	public double Cd = .001; // coefficient of deposition
+	public double Cd = .001; 	// coefficient of deposition
 								// deposition = load * Cd/V
-	public double dRdX = .005; // fraction of rain that falls per km
-	public double Dp = 1.0; // rain penetration (m)
-	public double Edeg = 10; // degC to halve evaporation rate
-	public double E35C = 100; // transpiration half-time at 35C (days)
+	public double dRdX = .005; 	// fraction of rain that falls per km
+	public double Dp = 1.0; 	// rain penetration (m)
+	public double Edeg = 10; 	// degC to halve evaporation rate
+	public double E35C = 100; 	// transpiration half-time at 35C (days)
 	public double sediment = 100; // thickness of sedimentry layer (m)
 
 	// map generation parameters
 	public int improvements = 1; // number of smoothing iterations
-	public int points = 4096; // desired number of grid points
+	public int points = 4096; 	// desired number of grid points
 
 	// diagnostic options
-	public int debug_level; // level of verbosity
+	public int debug_level; 	// level of verbosity
 
 	// default display
 	public int display_options;
 
 	// crocks to get around class structure
-	public int arteryX; // passed from Mesh.read to Map
+	public int arteryX; 		// passed from Mesh.read to Map
 
 	private static Parameters singleton = null;
 
@@ -130,7 +134,7 @@ public class Parameters {
 	}
 
 	// default values are a function of configured limits
-	private void setDefaults() {
+	private void setDefaults() {	
 		// default world size
 		xy_range = diameter_max / 5;
 		z_range = alt_max;
@@ -161,10 +165,18 @@ public class Parameters {
 		singleton = this;
 		BufferedReader r;
 		JsonParser parser;
-		InputStream s = getClass().getResourceAsStream(filename);
-		if (s == null)
-			System.out.println("unable to open input stream " + filename);
-		r = new BufferedReader(new InputStreamReader(s));
+		if (filename == null) {
+			filename = DEFAULT_CONFIG;
+			InputStream s = getClass().getResourceAsStream(filename);
+			r = new BufferedReader(new InputStreamReader(s));
+		} else {
+			try {
+				r = new BufferedReader(new FileReader(filename));
+			} catch (FileNotFoundException e) {
+				System.out.println("ERROR: unable to open configuration file " + filename);
+				return;
+			}
+		}
 		parser = Json.createParser(r);
 
 		String thisKey = "";

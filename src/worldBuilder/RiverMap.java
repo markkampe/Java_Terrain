@@ -2,7 +2,6 @@ package worldBuilder;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Point;
 
 public class RiverMap {
 	private Map map;		// mesh to which we correspond

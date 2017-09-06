@@ -1,9 +1,9 @@
 package worldBuilder;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.InputStream;
 //import java.io.InputStreamReader;
+import java.io.InputStreamReader;
 
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -161,200 +161,194 @@ public class Parameters {
 		singleton = this;
 		BufferedReader r;
 		JsonParser parser;
-		// char c = filename.charAt(0);
-		try {
-			// TODO Parameters(name, dbg) cannot read from Jar
-			// if (c == '.' || c == '/')
-			r = new BufferedReader(new FileReader(filename));
-			// else
-			// r = new BufferedReader(new
-			// InputStreamReader(getClass().getResourceAsStream(filename)));
-			parser = Json.createParser(r);
+		InputStream s = getClass().getResourceAsStream(filename);
+		if (s == null)
+			System.out.println("unable to open input stream " + filename);
+		r = new BufferedReader(new InputStreamReader(s));
+		parser = Json.createParser(r);
 
-			String thisKey = "";
-			while (parser.hasNext()) {
-				JsonParser.Event e = parser.next();
-				switch (e) {
-				case KEY_NAME:
-					thisKey = parser.getString();
+		String thisKey = "";
+		while (parser.hasNext()) {
+			JsonParser.Event e = parser.next();
+			switch (e) {
+			case KEY_NAME:
+				thisKey = parser.getString();
+				break;
+
+			case VALUE_TRUE:
+				switch (thisKey) {
+				case "points":
+					display_options |= Map.SHOW_POINTS;
+					break;
+				case "mesh":
+					display_options |= Map.SHOW_MESH;
+					break;
+				case "topo":
+					display_options |= Map.SHOW_TOPO;
+					break;
+				case "rain":
+					display_options |= Map.SHOW_RAIN;
+					break;
+				case "water":
+					display_options |= Map.SHOW_WATER;
+					break;
+				case "soil":
+					display_options |= Map.SHOW_SOIL;
+					break;
+				}
+				break;
+
+			case VALUE_STRING:
+				switch (thisKey) {
+				case "title":
+					title = parser.getString();
+					break;
+				}
+				break;
+
+			case VALUE_NUMBER:
+				switch (thisKey) {
+				// default window parameters
+				case "height":
+					height = new Integer(parser.getString());
+					break;
+				case "width":
+					width = new Integer(parser.getString());
+					break;
+				case "border":
+					border = new Integer(parser.getString());
+					break;
+				case "dialog_x":
+					dialogDX = new Integer(parser.getString());
+					break;
+				case "dialog_y":
+					dialogDY = new Integer(parser.getString());
+					break;
+				case "dialog_delta":
+					dialogDelta = new Integer(parser.getString());
+					break;
+				case "dialog_border":
+					dialogBorder = new Integer(parser.getString());
 					break;
 
-				case VALUE_TRUE:
-					switch (thisKey) {
-					case "points":
-						display_options |= Map.SHOW_POINTS;
-						break;
-					case "mesh":
-						display_options |= Map.SHOW_MESH;
-						break;
-					case "topo":
-						display_options |= Map.SHOW_TOPO;
-						break;
-					case "rain":
-						display_options |= Map.SHOW_RAIN;
-						break;
-					case "water":
-						display_options |= Map.SHOW_WATER;
-						break;
-					case "soil":
-						display_options |= Map.SHOW_SOIL;
-						break;
-					}
+				// default planetary parameters
+				case "latitude":
+					latitude = new Double(parser.getString());
+					break;
+				case "longitude":
+					longitude = new Double(parser.getString());
+					break;
+				case "radius":
+					radius = new Integer(parser.getString());
+					break;
+				case "tilt":
+					tilt = new Double(parser.getString());
 					break;
 
-				case VALUE_STRING:
-					switch (thisKey) {
-					case "title":
-						title = parser.getString();
-						break;
-					}
+				// limits on configuration sliders
+				case "diameter_unit":
+					diameter_scale = new Integer(parser.getString());
+					break;
+				case "diameter_max":
+					diameter_max = new Integer(parser.getString());
+					break;
+				case "diameter_grain":
+					diameter_grain = new Integer(parser.getString());
+					break;
+				case "mountain_fraction":
+					mountain_divisor = new Integer(parser.getString());
+					break;
+				case "altitude_unit":
+					alt_scale = new Integer(parser.getString());
+					break;
+				case "altitude_max":
+					alt_max = new Integer(parser.getString());
+					break;
+				case "msl_range":
+					msl_range = new Integer(parser.getString());
+					break;
+				case "rain_max":
+					rain_max = new Integer(parser.getString());
+					break;
+				case "altitude_rain":
+					alt_maxrain = new Integer(parser.getString());
+					break;
+				case "erosion_max":
+					erosion_max = new Integer(parser.getString());
+					break;
+				case "tribute_max":
+					tribute_max = new Integer(parser.getString());
+					break;
+				case "tiles_max":
+					tiles_max = new Integer(parser.getString());
+					break;
+				case "slope_min":
+					slope_init = new Double(parser.getString());
 					break;
 
-				case VALUE_NUMBER:
-					switch (thisKey) {
-					// default window parameters
-					case "height":
-						height = new Integer(parser.getString());
-						break;
-					case "width":
-						width = new Integer(parser.getString());
-						break;
-					case "border":
-						border = new Integer(parser.getString());
-						break;
-					case "dialog_x":
-						dialogDX = new Integer(parser.getString());
-						break;
-					case "dialog_y":
-						dialogDY = new Integer(parser.getString());
-						break;
-					case "dialog_delta":
-						dialogDelta = new Integer(parser.getString());
-						break;
-					case "dialog_border":
-						dialogBorder = new Integer(parser.getString());
-						break;
+				// physical process parameters
+				case "Ve": // critical velocity for erosion
+					Ve = new Double(parser.getString());
+					break;
+				case "Ce": // coefficient of erosion
+					Ce = new Double(parser.getString());
+					break;
+				case "Vd": // critical velocity for deposition
+					Vd = new Double(parser.getString());
+					break;
+				case "Cd": // coefficient of deposition
+					Cd = new Double(parser.getString());
+					break;
+				case "dR/dX": // precipitation/km
+					dRdX = new Double(parser.getString());
+					break;
+				case "Dp": // rain penetration depth (m)
+					Dp = new Double(parser.getString());
+					break;
+				case "Edeg": // evaporation half-time doubling temp
+					Edeg = new Double(parser.getString());
+					break;
+				case "E35C": // evaporation half-time for 35C
+					E35C = new Double(parser.getString());
+					break;
+				case "sediment": // sedimentary layer thickness
+					sediment = new Double(parser.getString());
+					break;
 
-					// default planetary parameters
-					case "latitude":
-						latitude = new Double(parser.getString());
-						break;
-					case "longitude":
-						longitude = new Double(parser.getString());
-						break;
-					case "radius":
-						radius = new Integer(parser.getString());
-						break;
-					case "tilt":
-						tilt = new Double(parser.getString());
-						break;
+				// map rendering parameters
+				case "topo_major":
+					topo_major = new Integer(parser.getString());
+					break;
+				case "toppo_minor":
+					topo_minor = new Integer(parser.getString());
+					break;
+				case "stream":
+					stream_flux = new Double(parser.getString());
+					break;
+				case "river":
+					river_flux = new Double(parser.getString());
+					break;
+				case "artery":
+					artery_flux = new Double(parser.getString());
+					break;
 
-					// limits on configuration sliders
-					case "diameter_unit":
-						diameter_scale = new Integer(parser.getString());
-						break;
-					case "diameter_max":
-						diameter_max = new Integer(parser.getString());
-						break;
-					case "diameter_grain":
-						diameter_grain = new Integer(parser.getString());
-						break;
-					case "mountain_fraction":
-						mountain_divisor = new Integer(parser.getString());
-						break;
-					case "altitude_unit":
-						alt_scale = new Integer(parser.getString());
-						break;
-					case "altitude_max":
-						alt_max = new Integer(parser.getString());
-						break;
-					case "msl_range":
-						msl_range = new Integer(parser.getString());
-						break;
-					case "rain_max":
-						rain_max = new Integer(parser.getString());
-						break;
-					case "altitude_rain":
-						alt_maxrain = new Integer(parser.getString());
-						break;
-					case "erosion_max":
-						erosion_max = new Integer(parser.getString());
-						break;
-					case "tribute_max":
-						tribute_max = new Integer(parser.getString());
-						break;
-					case "tiles_max":
-						tiles_max = new Integer(parser.getString());
-						break;
-					case "slope_min":
-						slope_init = new Double(parser.getString());
-						break;
+				// mesh creation parameters
+				case "points":
+					points = new Integer(parser.getString());
+					break;
+				case "improvements":
+					improvements = new Integer(parser.getString());
+					break;
 
-					// physical process parameters
-					case "Ve": // critical velocity for erosion
-						Ve = new Double(parser.getString());
-						break;
-					case "Ce": // coefficient of erosion
-						Ce = new Double(parser.getString());
-						break;
-					case "Vd": // critical velocity for deposition
-						Vd = new Double(parser.getString());
-						break;
-					case "Cd": // coefficient of deposition
-						Cd = new Double(parser.getString());
-						break;
-					case "dR/dX": // precipitation/km
-						dRdX = new Double(parser.getString());
-						break;
-					case "Dp": // rain penetration depth (m)
-						Dp = new Double(parser.getString());
-						break;
-					case "Edeg": // evaporation half-time doubling temp
-						Edeg = new Double(parser.getString());
-						break;
-					case "E35C": // evaporation half-time for 35C
-						E35C = new Double(parser.getString());
-						break;
-					case "sediment": // sedimentary layer thickness
-						sediment = new Double(parser.getString());
-						break;
-
-					// map rendering parameters
-					case "topo_major":
-						topo_major = new Integer(parser.getString());
-						break;
-					case "toppo_minor":
-						topo_minor = new Integer(parser.getString());
-						break;
-					case "stream":
-						stream_flux = new Double(parser.getString());
-						break;
-					case "river":
-						river_flux = new Double(parser.getString());
-						break;
-					case "artery":
-						artery_flux = new Double(parser.getString());
-						break;
-
-					// mesh creation parameters
-					case "points":
-						points = new Integer(parser.getString());
-						break;
-					case "improvements":
-						improvements = new Integer(parser.getString());
-						break;
-
-					default:
-						break;
-					}
 				default:
 					break;
 				}
+			default:
+				break;
 			}
-			parser.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("WARNING: Unable to open configuration file " + filename);
 		}
+		parser.close();
+
 		setDefaults();
 
 		if (debug_level > 0) {

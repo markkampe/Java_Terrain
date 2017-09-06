@@ -1,6 +1,7 @@
 package worldBuilder;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -428,8 +429,8 @@ public class WorldBuilder  extends JFrame
 
 	public static void main(String[] args) {
 		// process the arguments
-		String filename = DEFAULT_TEMPLATE;
-		String configname = DEFAULT_CONFIG;
+		String filename = null;
+		String configname = null;
 		int debug = 0;
 		for( int i = 0; i < args.length; i++ ) {
 			// eclipse does not honor argv[0] == command
@@ -455,9 +456,18 @@ public class WorldBuilder  extends JFrame
 			}
 		}
 		// instantiate the parameters singleton
+		if (configname == null)
+			configname = DEFAULT_CONFIG;
 		parms = new Parameters(configname, debug);
 
-		// create our display
+		// choose an initial mesh to load
+		if (filename == null) {
+			File f = new File(DEFAULT_TEMPLATE);
+			if (f.exists() && !f.isDirectory())
+				filename = DEFAULT_TEMPLATE;
+		}
+		
+		// and create the map
 		WorldBuilder w = new WorldBuilder(filename);
 		
 		// initialize the display type and options menus

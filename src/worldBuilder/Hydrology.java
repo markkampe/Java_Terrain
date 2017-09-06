@@ -90,7 +90,7 @@ public class Hydrology {
 	public void reCalculate(boolean reset) {
 		// collect topographic data from the map
 		mesh = map.getMesh();
-		if (mesh == null)
+		if (mesh == null || mesh.vertices.length == 0)
 			return;
 		heightMap = map.getHeightMap();
 		if (heightMap == null)

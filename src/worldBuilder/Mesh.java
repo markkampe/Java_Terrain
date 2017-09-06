@@ -62,6 +62,7 @@ public class Mesh {
 	 */
 	public Mesh() {
 		parms = Parameters.getInstance();
+		vertices = new MeshPoint[0];
 	}
 	
 	/**

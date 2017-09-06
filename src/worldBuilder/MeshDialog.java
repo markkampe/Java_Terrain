@@ -123,7 +123,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 				double[] heightMap = new double[m.vertices.length];
 				double minX = -Parameters.x_extent/2;
 				double maxX = Parameters.x_extent/2;
-				double minY = -Parameters.x_extent/2;
+				// double minY = -Parameters.x_extent/2;
 				double maxY = Parameters.x_extent/2;
 				for(int i = 0; i < m.vertices.length; i++) {
 					double d = m.vertices[i].distanceLine(minX, maxY, maxX, maxY);

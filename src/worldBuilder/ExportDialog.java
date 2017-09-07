@@ -181,12 +181,14 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		double soil[][] = cart.interpolate(map.getSoilMap());
 		double hydration[][] = cart.interpolate(map.getHydrationMap());
 		
+		// figure out where the rivers are
+		add_rivers(hydration);
+		
 		double lat = parms.latitude(y + dy/2);
 		double lon = parms.longitude(x + dx/2);
 		
 		int meters = tile_sizes[resolution.getValue()];
-		// create the appropriate height map
-		// create an appropriate water map
+		
 		try {
 			FileWriter output = new FileWriter(filename);
 			final String FORMAT_S = " \"%s\": \"%s\"";
@@ -273,6 +275,35 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 					"> to " + filename);
 	}
 	
+	private void add_rivers(double[][] hydration) {
+		
+		Mesh mesh = map.getMesh();
+		double[] fluxMap = map.getFluxMap();
+		int[] downHill = map.getDownHill();
+		
+		// consider all points in the Mesh
+		for(int i = 0; i < mesh.vertices.length; i++) {
+			// ignore any w/no downhill flow
+			if (downHill[i] < 0)
+				continue;
+			// ignore any that fall below stream flux
+			if (fluxMap[i] < parms.stream_flux)
+				continue;
+			
+			// ignore any with no downhill flow
+			for(int n = 0; n <)
+		}
+		// for each point
+		//		for each path to a lower numbered point
+		//			is at least one end in the export area
+		//			does the flow reach stream status
+		//			figure out the width (in tiles) and depth (in meters)
+		//			figure out the starting point and length
+		//			for each tile along the path
+		//				set hydration map
+		
+	}
+
 	/**
 	 * describe the selected area
 	 */

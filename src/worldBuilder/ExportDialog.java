@@ -155,39 +155,65 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		selected = false;
 	}
 	
+	// export box (in map coordinates)
+	private double box_x, box_y;
+	private double box_width, box_height;
+	
+	/**
+	 * return the export row associated with a y coordinate
+	 */
+	int box_row(double y) {
+		if (y < box_y || y >= box_y + box_height)
+			return(-1);
+		double dy = (y - box_y)/box_height;
+		dy *= y_points;
+		return (int) dy;
+	}
+	
+	/**
+	 * return the export column associated with an x coordinate
+	 */
+	int box_col(double x) {
+		if (x < box_x || x >= box_x + box_width)
+			return(-1);
+		double dx = (x - box_x)/box_width;
+		dx *= x_points;
+		return (int) dx;
+	}
+	
 	/**
 	 * export a map as high resolution tiles
 	 */
 	public void export(String filename) {
 		// figure out the selected region (in map coordinates)
-		double x = map.map_x(x_start);
-		double dx = map.map_x(x_end) - x;
-		if (dx < 0) {
-			x -= dx;
-			dx = -dx;
+		box_x = map.map_x(x_start);
+		box_width = map.map_x(x_end) - box_x;
+		if (box_width < 0) {
+			box_x -= box_width;
+			box_width = -box_width;
 		}
-		double y = map.map_y(y_start);
-		double dy = map.map_y(y_end) - y;
-		if (dy < 0) {
-			y -= dy;
-			dy = -dy;
+		box_y = map.map_y(y_start);
+		box_height = map.map_y(y_end) - box_y;
+		if (box_height < 0) {
+			box_y -= box_height;
+			box_height = -box_height;
 		}
 	
 		// get Cartesian interpolations of tile characteristics
-		Cartesian cart = new Cartesian(map.getMesh(), x, y, x+dx, y+dy, x_points, y_points);
+		Cartesian cart = new Cartesian(map.getMesh(), box_x, box_y, box_x+box_width, box_y+box_height, x_points, y_points);
 		double heights[][] = cart.interpolate(map.getHeightMap());
 		double erode[][] = cart.interpolate(map.getErodeMap());
 		double rain[][] = cart.interpolate(map.getRainMap());
 		double soil[][] = cart.interpolate(map.getSoilMap());
 		double hydration[][] = cart.interpolate(map.getHydrationMap());
 		
-		// figure out where the rivers are
-		add_rivers(hydration);
-		
-		double lat = parms.latitude(y + dy/2);
-		double lon = parms.longitude(x + dx/2);
-		
+		// add rivers to the hydration map
 		int meters = tile_sizes[resolution.getValue()];
+		add_rivers(hydration, meters);
+		
+		// figure out our real world coordinates
+		double lat = parms.latitude(box_y + box_height/2);
+		double lon = parms.longitude(box_x + box_width/2);
 		
 		try {
 			FileWriter output = new FileWriter(filename);
@@ -233,10 +259,10 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 				output.write(COMMA);
 				output.write(String.format(FORMAT_T, "winter", parms.meanWinter()));
 				output.write(" },");
-		output.write(NEWLINE);
+			output.write(NEWLINE);
 			
 			output.write(String.format(FORMAT_A, "points"));
-			// TODO: river exporting
+
 			boolean first = true;
 			for(int r = 0; r < y_points; r++) {
 				for(int c = 0; c < x_points; c++) {
@@ -275,33 +301,83 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 					"> to " + filename);
 	}
 	
-	private void add_rivers(double[][] hydration) {
+	/**
+	 * overlay rivers on top of interpolated hydration map
+	 * 
+	 * Note: this cannot simply be interpolated like the rest of
+	 * 		the maps because a river is not distributed over the
+	 * 		entire MeshPoint, but only in specific tiles.
+	 * 
+	 * @param	cartesian hydration map (to update)
+	 * @param 	tile size (in meters)
+	 */
+	private void add_rivers(double[][] hydration, int tilesize) {
 		
 		Mesh mesh = map.getMesh();
 		double[] fluxMap = map.getFluxMap();
 		int[] downHill = map.getDownHill();
+		double[] hydroMap = map.getHydrationMap();
+		double[] heightMap = map.getHeightMap();
+		double[] erodeMap = map.getErodeMap();
 		
 		// consider all points in the Mesh
 		for(int i = 0; i < mesh.vertices.length; i++) {
-			// ignore any w/no downhill flow
-			if (downHill[i] < 0)
+			// ignore any already under water
+			if (hydroMap[i] < 0)
 				continue;
+			
+			// ignore any w/no downhill flow
+			int d = downHill[i];
+			if (d < 0)
+				continue;
+			
 			// ignore any that fall below stream flux
 			if (fluxMap[i] < parms.stream_flux)
 				continue;
+	
+			// ignore flows that are entirely outside the box
+			double x0 = mesh.vertices[i].x;
+			double y0 = mesh.vertices[i].y;
+			double x1 = mesh.vertices[d].x;
+			double y1 = mesh.vertices[d].y;
+			if (x0 < box_x && x1 < box_x)
+				continue;		// all to the west
+			if (x0 >= box_x + box_width && x1 >= box_x + box_width)
+				continue;		// all to the east
+			if (y0 < box_y && y1 < box_y)
+				continue;		// all to the north
+			if (y0 >= box_y + box_height && y1 >= box_y + box_height)
+				continue;		// all to the south
+
+			// figure out the length and slope
+			double dist = 1000 * parms.km(mesh.vertices[i].distance(mesh.vertices[d]));
+			double z0 = heightMap[i] - erodeMap[i];
+			double z1 = heightMap[d] - erodeMap[d];
+			double slope = parms.height(z0 - z1)/dist;
 			
-			// ignore any with no downhill flow
-			for(int n = 0; n <)
+			// figure out the river depth and width
+			double v = Hydrology.velocity(slope);
+			double depth = Hydrology.depth(fluxMap[i],  v);
+			double width = Hydrology.width(fluxMap[i],  v);
+			
+			// figure out the length, dx and dy (in tiles)
+			int length = (int) dist / tilesize;
+			double dx = (x1 - x0)/length;
+			double dy = (y1 - y0)/length;
+			
+			// set depth for each point along the course
+			double x = x0;
+			double y = y0;
+			while(length-- > 0) {
+				// TODO river width for small tiles
+				int r = box_row(y);
+				int c = box_col(x);
+				if (r >= 0 && c >= 0)
+					hydration[r][c] = -depth;
+				x += dx;
+				y += dy;
+			}		
 		}
-		// for each point
-		//		for each path to a lower numbered point
-		//			is at least one end in the export area
-		//			does the flow reach stream status
-		//			figure out the width (in tiles) and depth (in meters)
-		//			figure out the starting point and length
-		//			for each tile along the path
-		//				set hydration map
-		
 	}
 
 	/**

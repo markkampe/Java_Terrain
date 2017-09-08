@@ -44,6 +44,7 @@ public class Hydrology {
 	public static final int OFF_MAP = -2;
 	
 	private static final double EPSILON = .0000001;
+	private static final double MAX_RATIO = 20;	// max river W/D
 	
 	public Hydrology(Map map) {
 		this.map = map;
@@ -370,7 +371,7 @@ public class Hydrology {
 	 * 
 	 * NOTE: velocity ranges from .1m/s to 3m/s
 	 */
-	private static double velocity(double slope) {
+	public static double velocity(double slope) {
 		double v = 3 * slope;
 		double vMin = Parameters.getInstance().vMin;
 		return (v < vMin) ? vMin : v;
@@ -385,23 +386,30 @@ public class Hydrology {
 	 * NOTE: W/D ranges from 2-20 ... call it 6/V
 	 * 	1. Area = Flow/Velocity
 	 * 	2. Area = W x D
-	 * 	3. W / D = 6/V
+	 * 	3. R = W / D (~6/V)
 	 * 
 	 *  from (3):
-	 *  	(3a) W=6D/V or (3b) D=WV/6
-	 *  substituting (3a) into (2)
-	 *  	A = 6D/V * D = 6D^2/V; D = sqrt(AV/6)
-	 *  substituting (3b) into (2)
-	 *  	A = W * WV/6 = W^2V/6; W = sqrt(6A/V)
+	 *  	(3a) W=RD or (3b) D=W/R
+	 *  combining (3a) with (2)
+	 *  	W = RD = RA/W = sqrt(AR)
+	 *  combining (3b) with (2)
+	 *  	D = W/R = A/DR = sqrt(A/R) 
 	 */
+	private static double widthToDepth(double velocity) {
+		double ratio = 6/velocity;
+		return (ratio > MAX_RATIO) ? MAX_RATIO : ratio;
+	}
+	
 	public static double width(double flow, double velocity) {
 		double area = flow / velocity;
-		return Math.sqrt(6 * area / velocity);
+		double ratio = widthToDepth(velocity);
+		return Math.sqrt(area * ratio);
 	}
 
 	public static double depth(double flow, double velocity) {
 		double area = flow / velocity;
-		return Math.sqrt(area * velocity / 6);
+		double ratio = widthToDepth(velocity);
+		return Math.sqrt(area / ratio);
 	}
 	
 	/**

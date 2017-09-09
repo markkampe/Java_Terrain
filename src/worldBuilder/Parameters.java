@@ -73,8 +73,8 @@ public class Parameters {
 	public double stream_flux = 0.1;	// stream threshold (m3/s)
 	public double river_flux = 1.0;		// river threshold (m3/s)
 	public double artery_flux = 10.0; 	// artery threshold (m3/s)
-	public int topo_major = 10; 		// max 10 major lines
-	public int topo_minor = 5; 			// minor lines per major
+	public int topo_major = 5; 			// minor lines per major line
+	public int topo_minor = 100; 		// meters per minor line
 
 	// user selected world size/location parameters
 	public int xy_range; 		// X/Y range (km)
@@ -331,7 +331,7 @@ public class Parameters {
 				case "topo_major":
 					topo_major = new Integer(parser.getString());
 					break;
-				case "toppo_minor":
+				case "topo_minor":
 					topo_minor = new Integer(parser.getString());
 					break;
 				case "stream":
@@ -368,7 +368,6 @@ public class Parameters {
 			System.out.println("   window:     " + width + "x" + height + ", border=" + border);
 			System.out.println("   dialogs:    x+" + dialogDX + ", y+" + dialogDY + " + " + dialogBorder + "/, border="
 					+ dialogBorder);
-			System.out.println("   topo maps:  " + topo_major + " major lines, " + topo_minor * topo_major + " minor");
 			System.out.println("   waterways:  stream=" + stream_flux + unit_f + ", river=" + river_flux + unit_f
 					+ ", artery=" + artery_flux + unit_f);
 			System.out.println("   erosion:    cycles=" + erosion_max + "  Ve=" + String.format("%.2f", Ve) + unit_v
@@ -406,6 +405,7 @@ public class Parameters {
 		System.out.println("               Tmean=" + String.format("%.1f", meanTemp()) + unit_t + ", Tsummer="
 				+ String.format("%.1f", meanSummer()) + unit_t + ", Twinter=" + String.format("%.1f", meanWinter())
 				+ unit_t);
+		System.out.println("   topo maps:  " + topo_minor + unit_z + "/line, " + topo_major + " minors/major");
 	}
 
 	/**

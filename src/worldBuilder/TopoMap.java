@@ -46,11 +46,12 @@ public class TopoMap {
 		boolean over_under[][] = new boolean[zArray.length][zArray[0].length];
 
 		// figure out how many topographic lines we have to render
-		int maxLines = parms.topo_major * parms.topo_minor;
-		double deltaH = Parameters.z_extent / maxLines;
+		double deltaH = parms.z(parms.topo_minor);
+		int maxLines = (int) (1 + (Parameters.z_extent / deltaH));
+		
 		for (int line = 0; line < maxLines; line++) {
 			double z = line * deltaH - Parameters.z_extent / 2;
-			boolean major = (line % parms.topo_minor) == 0;
+			boolean major = (line % parms.topo_major) == 0;
 
 			// create an over/under bitmap for this isoline
 			for (int r = 0; r < h; r++)

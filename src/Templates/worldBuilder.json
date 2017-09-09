@@ -44,7 +44,7 @@
 	"points": 4096,
 	"improvements": 1,
 	"topo_major": 10,
-	"topo_minor": 5,
+	"topo_minor": 100,
 	"stream": 0.25,
 	"river": 2.5,
 	"artery": 25

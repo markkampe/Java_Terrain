@@ -2,6 +2,8 @@ package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Hashtable;
+
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -13,8 +15,13 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		private JButton cancel;
 		private JSlider diameter;
 		private JSlider altitude;
+		private JSlider topo_minor;
+		private JSlider topo_major;
 		private JTextField latitude;
 		private JTextField longitude;
+		
+		private static final int minor_choices[] = {1, 5, 10, 50, 100, 500, 1000};
+		private static final int major_choices[] = {5, 10, 20};
 		
 		private static final int DIALOG_OFFSET = 0;
 		
@@ -27,7 +34,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			// create the dialog box
 			Container mainPane = getContentPane();
 			((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(parms.border, parms.border, parms.border, parms.border, Color.LIGHT_GRAY));
-			setTitle("Map Size/Location");
+			setTitle("Map Scale/Location");
 			addWindowListener( this );
 			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			
@@ -68,10 +75,38 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			JLabel altLabel = new JLabel(label, JLabel.CENTER);
 			altLabel.setFont(fontLarge);
 			
+			for(dflt = 0; dflt < minor_choices.length; dflt++)
+				if (minor_choices[dflt] >= parms.topo_minor)
+					break;
+			topo_minor = new JSlider(JSlider.HORIZONTAL, 0, minor_choices.length-1, dflt);
+			topo_minor.setFont(fontSmall);;
+			label = Parameters.unit_z + " per minor line";
+			JLabel minorLabel = new JLabel(label, JLabel.CENTER);
+			minorLabel.setFont(fontLarge);
+			Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
+			for(int i = 0; i < minor_choices.length; i++)
+				labels.put(i, new JLabel(String.format("%d", minor_choices[i])));
+			topo_minor.setLabelTable(labels);
+			topo_minor.setPaintLabels(true);
+			
+			for(dflt = 0; dflt < major_choices.length; dflt++)
+				if (major_choices[dflt] >= parms.topo_major)
+					break;
+			topo_major = new JSlider(JSlider.HORIZONTAL, 0, major_choices.length-1, dflt);
+			topo_major.setFont(fontSmall);
+			label = "minor lines per major line";
+			JLabel majorLabel = new JLabel(label, JLabel.CENTER);
+			majorLabel.setFont(fontLarge);
+			labels = new Hashtable<Integer, JLabel>();
+			for(int i = 0; i < major_choices.length; i++)
+				labels.put(i, new JLabel(String.format("%d", major_choices[i])));
+			topo_major.setLabelTable(labels);
+			topo_major.setPaintLabels(true);
+			
 			/*
 			 * Pack them into:
 			 * 		vertical Box layout w/ sliders, input fields, and buttons
-			 * 		sliders are a 1x2 grid layout
+			 * 		sliders are a 2x2 grid layout
 			 * 			each being a vertical Box w/label and slider
 			 * 		text fiels are a 1x2 grid layout
 			 * 			each being a vertical Box w/label and text field
@@ -87,6 +122,16 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			a_panel.add(altLabel);
 			a_panel.add(altitude);
 			
+			JPanel min_panel = new JPanel();
+			min_panel.setLayout(new BoxLayout(min_panel, BoxLayout.PAGE_AXIS));
+			min_panel.add(minorLabel);
+			min_panel.add(topo_minor);
+			
+			JPanel maj_panel = new JPanel();
+			maj_panel.setLayout(new BoxLayout(maj_panel, BoxLayout.PAGE_AXIS));
+			maj_panel.add(majorLabel);
+			maj_panel.add(topo_major);
+				
 			JPanel lt_panel = new JPanel();
 			lt_panel.setLayout(new BoxLayout(lt_panel, BoxLayout.PAGE_AXIS));
 			lt_panel.add(latLabel);
@@ -99,11 +144,15 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			
 			
 			JPanel sliders = new JPanel();
-			sliders.setLayout(new BoxLayout(sliders, BoxLayout.LINE_AXIS));
+			sliders.setLayout(new GridLayout(2,2));
 			d_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
 			a_panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
+			min_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
+			maj_panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
 			sliders.add(d_panel);
 			sliders.add(a_panel);
+			sliders.add(min_panel);
+			sliders.add(maj_panel);
 			
 			JPanel inputs = new JPanel();
 			inputs.setLayout(new BoxLayout(inputs, BoxLayout.LINE_AXIS));
@@ -130,6 +179,8 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			// add the action listeners
 			diameter.addChangeListener(this);
 			altitude.addChangeListener(this);
+			topo_minor.addChangeListener(this);
+			topo_major.addChangeListener(this);
 			accept.addActionListener(this);
 			cancel.addActionListener(this);
 			latitude.addActionListener(this);
@@ -163,6 +214,9 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 				}
 				parms.latitude = Double.parseDouble(latitude.getText());
 				parms.longitude = Double.parseDouble(longitude.getText());
+				parms.topo_minor = minor_choices[topo_minor.getValue()];
+				parms.topo_major = major_choices[topo_major.getValue()];
+				
 				if (parms.debug_level > 0)
 					parms.worldParms();
 				

@@ -66,7 +66,11 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		accept = new JButton("EXPORT");
 		cancel = new JButton("CANCEL");
 		
-		resolution = new JSlider(JSlider.HORIZONTAL, 0, 8, 2);
+		int dflt;
+		for(dflt = 0; dflt < tile_sizes.length; dflt++)
+			if (tile_sizes[dflt] >= 1000)
+				break;
+		resolution = new JSlider(JSlider.HORIZONTAL, 0, tile_sizes.length-1, dflt);
 		resolution.setMajorTickSpacing(2);
 		resolution.setMinorTickSpacing(1);
 		resolution.setFont(fontSmall);
@@ -359,6 +363,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			double v = Hydrology.velocity(slope);
 			double depth = Hydrology.depth(fluxMap[i],  v);
 			double width = Hydrology.width(fluxMap[i],  v);
+			int stroke = (width <= tilesize) ? 1 : (int) ((width + width - 1) / tilesize);
 			
 			// figure out the length, dx and dy (in tiles)
 			int length = (int) dist / tilesize;
@@ -369,7 +374,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			double x = x0;
 			double y = y0;
 			while(length-- > 0) {
-				// TODO river width for small tiles
+				// TODO stroke width for river export
 				int r = box_row(y);
 				int c = box_col(x);
 				if (r >= 0 && c >= 0)

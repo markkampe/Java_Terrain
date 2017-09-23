@@ -10,7 +10,7 @@
     	"dialog_border": 5
     },
     "limits": {
-	"diameter_unit": 100,
+	"diameter_unit": 10,
 	"diameter_max": 1000,
 	"diameter_grain": 10,
 	"altitude_unit": 100,

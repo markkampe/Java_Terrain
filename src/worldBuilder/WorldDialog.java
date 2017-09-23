@@ -52,7 +52,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			lonLabel.setFont(fontLarge);
 		
 			int max = parms.diameter_max/parms.diameter_scale;
-			int dflt = parms.xy_range/parms.diameter_scale;
+			int dflt = parms.dDiameter;
 			diameter = new JSlider(JSlider.HORIZONTAL, 0, max, dflt);
 			diameter.setMajorTickSpacing(Parameters.niceTics(0, max, true));
 			diameter.setMinorTickSpacing(Parameters.niceTics(0, max, false));

@@ -139,7 +139,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		setDirection(direction.getValue());
 		
 		// initialize the rainfall to default values
-		rainFall(map, newRain, direction.getValue(), (double) amount.getValue());
+		rainFall(map, direction.getValue(), (double) amount.getValue());
 	}
 
 	/**
@@ -158,9 +158,10 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 * 		rain that falls decreases what remains in the stripe
 	 * 
 	 */
-	public static void rainFall(Map map, double[] rainmap, int degrees, double incoming) {
+	public static void rainFall(Map map, int degrees, double incoming) {
 		// we need to do these so we can be called statically
 		Mesh m = map.getMesh();
+		double[] rainmap = map.getRainMap();
 		Parameters parms = Parameters.getInstance();
 		
 		// rain originates along an imaginary line that is a corner
@@ -267,11 +268,11 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	public void stateChanged(ChangeEvent e) {
 			if (e.getSource() == direction) {
 				setDirection(direction.getValue());
-				rainFall(map, newRain, direction.getValue(), (double) amount.getValue());
+				rainFall(map, direction.getValue(), (double) amount.getValue());
 			} else if (e.getSource() == amount) {
-				rainFall(map, newRain, direction.getValue(), (double) amount.getValue());
+				rainFall(map, direction.getValue(), (double) amount.getValue());
 			} else if (e.getSource() == altitude) {
-				rainFall(map, newRain, direction.getValue(), (double) amount.getValue());
+				rainFall(map, direction.getValue(), (double) amount.getValue());
 			}
 	}
 

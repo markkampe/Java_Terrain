@@ -105,7 +105,7 @@ public class WorldBuilder  extends JFrame
 		map.setMesh(m);
 		if (heightMap != null) {
 			map.setHeightMap(heightMap);
-			RainDialog.rainFall(map, map.getRainMap(), parms.dDirection, parms.dAmount);
+			RainDialog.rainFall(map, parms.dDirection, parms.dAmount);
 		}
 		modified = false;	
 		

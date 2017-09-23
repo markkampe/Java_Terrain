@@ -103,8 +103,10 @@ public class WorldBuilder  extends JFrame
 		double[] heightMap = null;
 		heightMap = m.read(filename);
 		map.setMesh(m);
-		if (heightMap != null)
+		if (heightMap != null) {
 			map.setHeightMap(heightMap);
+			RainDialog.rainFall(map, map.getRainMap(), parms.dDirection, parms.dAmount);
+		}
 		modified = false;	
 		
 		// create menus and widgets, put up the display

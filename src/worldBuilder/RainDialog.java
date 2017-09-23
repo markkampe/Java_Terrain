@@ -15,7 +15,6 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	private Map map;
 	private double[] oldRain;	// per MeshPoint rainfall at entry
 	private double[] newRain;	// edited per MeshPoint rainfall
-	private double meanRain;	// mean rainfal (over entire map)
 	private int x0, x1, y0, y1;	// weather axis line
 	
 	private Parameters parms;

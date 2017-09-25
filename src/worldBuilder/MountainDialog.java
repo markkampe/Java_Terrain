@@ -11,13 +11,15 @@ import javax.swing.event.*;
  * SlopeDialog allows the user to choose an axis and inclination to
  * cause a uniform slope to the entire map.  
  */
-public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, KeyListener, WindowListener {	
+public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, ItemListener, KeyListener, WindowListener {	
 	
 	private Map map;
 	private double[] oldHeight;	// per MeshPoint altitude at entry
 	private double[] newHeight;	// edited per MeshPoint altitude
 	private Parameters parms;
 	
+	private JCheckBox symmetric;
+	private JComboBox<String> form;
 	private JSlider altitude;
 	private JSlider diameter1;
 	private JSlider diameter2;
@@ -32,6 +34,20 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	
 	private int d_max;				// diameter: full scale
 	private int a_max;				// altitude: full scale
+	
+	// landforms settings come from these arrays
+	private static String landFormNames[] = {
+			"volcano", "plateau", "caldera", "crevase"
+	};
+	private static int landFormWidths[] = {
+			40,	40,	20,	1
+	};
+	private static int landFormHeights[] = {
+			1500, 500, -250, -300
+	};
+	private static int landFormShapes[] = {
+			0, 8, 4, 7
+	};
 	
 	private String placed;			// debug message
 	private static final String POS_FMT = "%.6f";
@@ -65,11 +81,22 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
 		// create the basic widgets
-		// TODO: add mountain profile combobox
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		accept = new JButton("ACCEPT (Enter)");
 		cancel = new JButton("CANCEL (Esc)");
+		
+		symmetric = new JCheckBox("Symmetric");
+		symmetric.setFont(fontLarge);
+		symmetric.setSelected(true);
+		
+		form = new JComboBox<String>();
+		JLabel formLabel = new JLabel("Land Form", JLabel.CENTER);
+		formLabel.setFont(fontLarge);
+		for(int i = 0; i < landFormNames.length; i++) {
+			form.addItem(landFormNames[i]);
+		}
+		form.setSelectedIndex(0);
 		
 		altitude = new JSlider(JSlider.HORIZONTAL, -this.a_max, this.a_max, parms.dAltitude);
 		altitude.setMajorTickSpacing(Parameters.niceTics(-a_max, a_max, true));
@@ -123,9 +150,19 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		rounding2.setPaintLabels(true);
 		
 		/*
-		 * Pack them into:
-		 * 		a 3x2 grid
+		 * Then pack all the controls into a 3x3 grid
 		 */
+		JPanel p0 = new JPanel();
+		p0.add(symmetric);
+		
+		JPanel formPanel = new JPanel();
+		formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.PAGE_AXIS));
+		formPanel.add(formLabel);
+		formPanel.add(form);
+		formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 15));
+		JPanel p6 = new JPanel();
+		p6.add(formPanel);
+		
 		JPanel altPanel = new JPanel();
 		altPanel.setLayout(new BoxLayout(altPanel, BoxLayout.PAGE_AXIS));
 		altPanel.add(altitudeLabel);
@@ -151,26 +188,33 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		rndPanel2.add(roundLabel2);
 		rndPanel2.add(rounding2);
 		
-		JPanel butPanel = new JPanel();
-		butPanel.setLayout(new BoxLayout(butPanel, BoxLayout.LINE_AXIS));
-		butPanel.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
-		butPanel.add(cancel);
-		butPanel.add(accept);
+		JPanel p7 = new JPanel();
+		p7.add(cancel);
+		
+		JPanel p8 = new JPanel();
+		p8.add(accept);
 
 		JPanel controls = new JPanel();
-		controls.setLayout(new GridLayout(2,3));
+		controls.setLayout(new GridLayout(3,3));
+		p0.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 		altPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
 		diaPanel1.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 15));
 		diaPanel2.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 		rndPanel1.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
 		rndPanel2.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 10));
-		controls.add(altPanel);
+		formPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+		p7.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
+		p8.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
+		controls.add(p0);
 		controls.add(diaPanel1);
 		controls.add(rndPanel1);
-		controls.add(butPanel);
+		controls.add(altPanel);
 		controls.add(diaPanel2);
 		controls.add(rndPanel2);
-	
+		controls.add(p6);
+		controls.add(p7);
+		controls.add(p8);
+		
 		mainPane.add(controls);
 		
 		pack();
@@ -189,6 +233,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		map.addMouseMotionListener(this);
 		map.addKeyListener(this);
 		addKeyListener(this);
+		symmetric.addItemListener(this);
+		form.addActionListener(this);
 		map.requestFocus();
 		
 		selecting = false;
@@ -322,6 +368,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			
 			// TODO add rectangular ridges
 			// TODO add continued off-map ridges
+			// 		peak at edge rather than in radius from edge
 			
 			// calculate the deltaH for this point
 			double dist = d0 + d1 - minDist;
@@ -512,9 +559,19 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 	
 	/**
-	 * updates to the axis/inclination/profile sliders
+	 * updates to the diameter/rounding sliders
 	 */
 	public void stateChanged(ChangeEvent e) {
+			if (symmetric.isSelected()) {
+				if (e.getSource() == rounding1)
+					rounding2.setValue(rounding1.getValue());
+				if (e.getSource() == rounding2)
+					rounding1.setValue(rounding2.getValue());
+				if (e.getSource() == diameter1)
+					diameter2.setValue(diameter1.getValue());
+				if (e.getSource() == diameter2)
+					diameter1.setValue(diameter2.getValue());
+			}
 			if (selected)
 				redraw();
 	}
@@ -531,15 +588,38 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 
 	/**
-	 * click events on ACCEPT/CANCEL buttons
+	 * click events on ACCEPT/CANCEL buttons or form selector
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			cancelDialog();
 		} else if (e.getSource() == accept) {
 			acceptMountain();
+		} else if (e.getSource() == form) {
+			int x = form.getSelectedIndex();
+			altitude.setValue(landFormHeights[x]);
+			rounding1.setValue(landFormShapes[x]);
+			rounding2.setValue(landFormShapes[x]);
+			diameter1.setValue(landFormWidths[x]);
+			diameter1.setValue(landFormWidths[x]);
+			if (selected)
+				redraw();
 		}
-		
+	}
+	
+	/**
+	 * symmetric checkbox has changed state
+	 * 
+	 * @param e
+	 */
+	public void itemStateChanged(ItemEvent e) {
+		if (symmetric.isSelected()) {
+			diameter2.setValue(diameter1.getValue());
+			rounding2.setValue(rounding1.getValue());
+			
+			if (selected)
+				redraw();
+		}
 	}
 	
 	// perfunctory methods

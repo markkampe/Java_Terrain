@@ -35,18 +35,30 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private int d_max;				// diameter: full scale
 	private int a_max;				// altitude: full scale
 	
-	// landforms settings come from these arrays
-	private static String landFormNames[] = {
-			"volcano", "plateau", "caldera", "crevase"
+	/**
+	 * a LandForm is a macro for a collection of mountain settings
+	 */
+	private static class LandForm {
+		public String name;
+		public int altitude;
+		public int width;
+		public int shape;
+		
+		private LandForm(String name, int shape, int width, int altitude) {
+			this.name = name;
+			this.altitude = altitude;
+			this.width = width;
+			this.shape = shape;
+		}
 	};
-	private static int landFormWidths[] = {
-			40,	40,	20,	1
-	};
-	private static int landFormHeights[] = {
-			1500, 500, -250, -300
-	};
-	private static int landFormShapes[] = {
-			0, 8, 4, 7
+	
+	// this is the list of known landforms
+	private static final LandForm landforms[] = {
+		//           name		shp	dia	altitude
+		new LandForm("volcano",	0,	40,	1500),
+		new LandForm("plateau",	8,	40,	500),
+		new LandForm("caldera",	4,	20,	-250),
+		new LandForm("canyon",	7,	1,	-300)
 	};
 	
 	private String placed;			// debug message
@@ -93,8 +105,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		form = new JComboBox<String>();
 		JLabel formLabel = new JLabel("Land Form", JLabel.CENTER);
 		formLabel.setFont(fontLarge);
-		for(int i = 0; i < landFormNames.length; i++) {
-			form.addItem(landFormNames[i]);
+		for(int i = 0; i < landforms.length; i++) {
+			form.addItem(landforms[i].name);
 		}
 		form.setSelectedIndex(0);
 		
@@ -597,11 +609,11 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			acceptMountain();
 		} else if (e.getSource() == form) {
 			int x = form.getSelectedIndex();
-			altitude.setValue(landFormHeights[x]);
-			rounding1.setValue(landFormShapes[x]);
-			rounding2.setValue(landFormShapes[x]);
-			diameter1.setValue(landFormWidths[x]);
-			diameter1.setValue(landFormWidths[x]);
+			altitude.setValue(landforms[x].altitude);
+			rounding1.setValue(landforms[x].shape);
+			rounding2.setValue(landforms[x].shape);
+			diameter1.setValue(landforms[x].width);
+			diameter1.setValue(landforms[x].width);
 			if (selected)
 				redraw();
 		}

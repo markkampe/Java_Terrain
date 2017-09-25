@@ -172,6 +172,10 @@ public class Mesh {
 						z = new Double(parser.getString());
 						break;
 						
+					case "sealevel":
+						parms.sea_level = new Double(parser.getString());
+						break;
+						
 					case "amount":
 						String s = parser.getString();
 						int u = s.indexOf(Parameters.unit_r);
@@ -255,10 +259,11 @@ public class Mesh {
 			FileWriter output = new FileWriter(filename);
 			final String FORMAT_2 = "        { \"x\":%10.7f, \"y\":%10.7f }";
 			final String FORMAT_3 = "        { \"x\":%10.7f, \"y\":%10.7f, \"z\":%11.8f }";
+			final String S_FORMAT = "    \"sealevel\": %f,\n";
 			final String R_FORMAT = "    \"rainfall\": { \"amount\": \"%d%s\", \"direction\": %d, \"cloudbase\": \"%d%s\" },\n";
 			final String A_FORMAT = "    \"artery\": { \"meshpoint\": %d, \"flux\": \"%d%s\" },\n";
 			final String E_FORMAT = "    \"erosion\": %d\n";
-		
+			
 			// write out the Mesh wrapper
 			output.write( "{   \"length\": " + vertices.length + ",\n");
 			// first write out the points
@@ -273,6 +278,9 @@ public class Mesh {
 					output.write(String.format(FORMAT_3, m.x, m.y, heightMap[i]));	
 			}
 			output.write(" ],\n");
+			
+			// then write out the sea-level
+			output.write(String.format(S_FORMAT, parms.sea_level));
 			
 			// then write out the neighbor connections
 			int paths = 0;

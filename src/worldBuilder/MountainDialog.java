@@ -65,6 +65,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
 		// create the basic widgets
+		// TODO: add mountain profile combobox
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		accept = new JButton("ACCEPT (Enter)");

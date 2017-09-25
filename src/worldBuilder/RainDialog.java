@@ -196,7 +196,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		// tell the map about the update
 		map.setRainMap(rainmap);
 		
-		if (parms.debug_level > 0)
+		if (parms.debug_level > 1)
 			System.out.println("Rainfall: " + (int) incoming + Parameters.unit_r + ", from " + 
 					parms.dDirection + ", cloud bottoms at " + parms.dRainHeight + Parameters.unit_z);
 	}

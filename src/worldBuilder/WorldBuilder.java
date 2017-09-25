@@ -308,6 +308,7 @@ public class WorldBuilder  extends JFrame
 				double[] heightMap = m.read(filename);
 				map.setMesh(m);
 				map.setHeightMap(heightMap);
+				RainDialog.rainFall(map, parms.dDirection, parms.dAmount);
 				if (parms.arteryX >= 0) {
 					map.setArtery(m.vertices[parms.arteryX], parms.dTribute);
 				}

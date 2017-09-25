@@ -323,8 +323,8 @@ public class WorldBuilder  extends JFrame
 				checkSave();
 			map.setMesh(null);
 			modified = false;
-		} else if (o == fileExport) {
-			new ExportDialog(map);
+		} else if (o == fileExport) {	// TODO serialize mouseListeners: export
+			new ExportDialog(map);	
 		} else if (o == fileExit) {
 			if (modified)
 				checkSave();
@@ -334,13 +334,13 @@ public class WorldBuilder  extends JFrame
 		// edit menus pop up the corresponding dialogs
 		else if (o == editWorld) {
 			new WorldDialog();
-		} else if (o == editMountain) {
+		} else if (o == editMountain) {	// TODO serialize mouseListeners: mountainDialog
 			new MountainDialog(map);
 		} else if (o == editSlope) {
 			new SlopeDialog(map);
 		} else if (o == editRain) {
 			new RainDialog(map);
-		} else if (o == editRiver) {
+		} else if (o == editRiver) {	// TODO serialize mouseListeners: riverDialog
 			new RiverDialog(map);
 		} else if (o == editErode) {
 			new ErosionDialog(map);
@@ -365,9 +365,9 @@ public class WorldBuilder  extends JFrame
 			parms.display_options = map.setDisplay(Map.SHOW_ERODE, (parms.display_options & Map.SHOW_ERODE) == 0);
 		else if (o == viewSoil)
 			parms.display_options = map.setDisplay(Map.SHOW_SOIL, (parms.display_options & Map.SHOW_SOIL) == 0);
-		else if (o == viewZoom)
+		else if (o == viewZoom)		// TODO serialize mouseListeners: zoomDialog
 			new ZoomDialog(map);
-		else if (o == viewDebug)
+		else if (o == viewDebug)	// TODO serialize mouseListeners: pointDebug
 			new PointDebug(map);
 		// help menu just shows info
 		else if (o == helpInfo) {

@@ -321,6 +321,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 				continue;
 			
 			// TODO add rectangular ridges
+			// TODO add continued off-map ridges
 			
 			// calculate the deltaH for this point
 			double dist = d0 + d1 - minDist;

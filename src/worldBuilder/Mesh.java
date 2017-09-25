@@ -173,12 +173,16 @@ public class Mesh {
 						break;
 						
 					case "sealevel":
-						parms.sea_level = new Double(parser.getString());
+						String s = parser.getString();
+						int u = s.indexOf(Parameters.unit_z);
+						if (u != -1)
+							s = s.substring(0, u);
+						parms.sea_level = new Double(s) / parms.z_range;
 						break;
 						
 					case "amount":
-						String s = parser.getString();
-						int u = s.indexOf(Parameters.unit_r);
+						s = parser.getString();
+						u = s.indexOf(Parameters.unit_r);
 						if (u != -1)
 							s = s.substring(0, u);
 						parms.dAmount = new Integer(s);
@@ -259,7 +263,7 @@ public class Mesh {
 			FileWriter output = new FileWriter(filename);
 			final String FORMAT_2 = "        { \"x\":%10.7f, \"y\":%10.7f }";
 			final String FORMAT_3 = "        { \"x\":%10.7f, \"y\":%10.7f, \"z\":%11.8f }";
-			final String S_FORMAT = "    \"sealevel\": %f,\n";
+			final String S_FORMAT = "    \"sealevel\": \"%d%s\",\n";
 			final String R_FORMAT = "    \"rainfall\": { \"amount\": \"%d%s\", \"direction\": %d, \"cloudbase\": \"%d%s\" },\n";
 			final String A_FORMAT = "    \"artery\": { \"meshpoint\": %d, \"flux\": \"%d%s\" },\n";
 			final String E_FORMAT = "    \"erosion\": %d\n";
@@ -280,7 +284,8 @@ public class Mesh {
 			output.write(" ],\n");
 			
 			// then write out the sea-level
-			output.write(String.format(S_FORMAT, parms.sea_level));
+			double l = parms.sea_level * parms.z_range;
+			output.write(String.format(S_FORMAT, (int) l, Parameters.unit_z));
 			
 			// then write out the neighbor connections
 			int paths = 0;

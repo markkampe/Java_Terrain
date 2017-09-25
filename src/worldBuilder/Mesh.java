@@ -132,10 +132,10 @@ public class Mesh {
 			switch(e) {		
 			case KEY_NAME:
 				thisKey = parser.getString();
-				if (thisKey.equals("points")) {
+				if (length > 0 && thisKey.equals("points")) {
 					inPoints = true;
 					points = 0;
-				} else if (thisKey.equals("mesh")) {
+				} else if (length > 0 && thisKey.equals("mesh")) {
 					inMesh = true;
 					points = 0;
 				}
@@ -249,6 +249,10 @@ public class Mesh {
 		}
 		parser.close();
 		
+		if (points == 0) {
+			System.out.println("ERROR: file " + filename + " does not contain any mesh points");
+			return null;
+		}
 		if (parms.debug_level > 0)
 			System.out.println("Loaded " + points + "/" + length + " points, " + paths + " paths from file " + filename);
 		

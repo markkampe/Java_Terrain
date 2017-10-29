@@ -31,6 +31,7 @@ public class WorldBuilder  extends JFrame
 	
 	// menu bar items
 	private JMenuItem fileNew;
+	private JMenuItem fileRegion;
 	private JMenuItem fileOpen;
 	private JMenuItem fileSave;
 	private JMenuItem fileSaveAs;
@@ -123,8 +124,10 @@ public class WorldBuilder  extends JFrame
 	private void createMenus() {
 		
 		// create File menu
-		fileNew = new JMenuItem("New");
+		fileNew = new JMenuItem("New Mesh");
 		fileNew.addActionListener(this);
+		fileRegion = new JMenuItem("New sub-region");
+		fileRegion.addActionListener(this);
 		fileOpen = new JMenuItem("Open");
 		fileOpen.addActionListener(this);
 		fileSave = new JMenuItem("Save");
@@ -139,6 +142,7 @@ public class WorldBuilder  extends JFrame
 		fileExit.addActionListener(this);
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.add(fileNew);
+		fileMenu.add(fileRegion);
 		fileMenu.add(fileOpen);
 		fileMenu.add(fileSave);
 		fileMenu.add(fileSaveAs);
@@ -293,6 +297,10 @@ public class WorldBuilder  extends JFrame
 			filename = null;
 			new MeshDialog(map);
 			modified = true;
+		} else if (o == fileRegion) {
+			if (modified)
+				checkSave();
+			new RegionDialog(map);
 		} else if (o == fileOpen) {
 			if (modified)
 				checkSave();

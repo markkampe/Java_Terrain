@@ -2,8 +2,6 @@ package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Hashtable;
 
 import javax.swing.*;
@@ -16,17 +14,14 @@ import javax.swing.event.*;
 public class ExportDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, WindowListener {	
 	private Map map;
 	private Parameters parms;
-	
-	private static final String soilTypes[] = {
-			"sedimentary", "metamorphic", "igneous", "alluvial"
-	};
-	
+
 	private JTextField sel_name;
 	private JLabel sel_center;
 	private JLabel sel_km;
 	private JLabel sel_t_size;
 	private JLabel sel_points;
 	private JSlider resolution;
+	private JComboBox<String> format;
 	private JButton accept;
 	private JButton cancel;
 	
@@ -60,6 +55,11 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		sel_name.setText("Happyville");
 		JLabel nameLabel = new JLabel("Name of this region", JLabel.CENTER);
 		nameLabel.setFont(fontLarge);
+		
+		format = new JComboBox<String>();
+		format.addItem("json");
+		format.addItem("RPGMaker");
+		format.setSelectedItem("RPGMaker");
 		
 		accept = new JButton("EXPORT");
 		cancel = new JButton("CANCEL");
@@ -128,10 +128,12 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new BoxLayout(buttons, BoxLayout.LINE_AXIS));
+		buttons.add(format);
+		buttons.add(Box.createRigidArea(new Dimension(40,0)));
 		buttons.add(cancel);
 		buttons.add(Box.createRigidArea(new Dimension(40,0)));
 		buttons.add(accept);
-		buttons.setBorder(BorderFactory.createEmptyBorder(20,100, 20, 10));
+		buttons.setBorder(BorderFactory.createEmptyBorder(20, 100, 20, 10));
 		
 		JPanel controls = new JPanel();
 		controls.setLayout(new BoxLayout(controls, BoxLayout.PAGE_AXIS));
@@ -185,6 +187,23 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 * export a map as high resolution tiles
 	 */
 	public void export(String filename) {
+		// create an appropriate exporter
+		Exporter export;
+		String f = (String) format.getSelectedItem();
+		if (f.equals("json"))
+			export = new JsonExporter(filename);
+		//else if (f.equals("RPGMaker"))
+		//	export = new RpgmExporter(filename);
+		else {
+			System.err.println("Unknown export format: " + f);
+			return;
+		}
+		export.name(sel_name.getText());
+		export.dimensions(x_points, y_points);
+		int meters = tile_sizes[resolution.getValue()];
+		export.tileSize(meters);
+		export.temps(parms.meanTemp(), parms.meanSummer(), parms.meanWinter());
+		
 		// figure out the selected region (in map coordinates)
 		box_x = map.map_x(x_start);
 		box_width = map.map_x(x_end) - box_x;
@@ -198,107 +217,34 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			box_y -= box_height;
 			box_height = -box_height;
 		}
+		double lat = parms.latitude(box_y + box_height/2);
+		double lon = parms.longitude(box_x + box_width/2);
+		export.position(lat, lon);
 	
 		// get Cartesian interpolations of tile characteristics
 		Cartesian cart = new Cartesian(map.getMesh(), box_x, box_y, box_x+box_width, box_y+box_height, x_points, y_points);
-		double heights[][] = cart.interpolate(map.getHeightMap());
-		double erode[][] = cart.interpolate(map.getErodeMap());
-		double rain[][] = cart.interpolate(map.getRainMap());
-		double soil[][] = cart.interpolate(map.getSoilMap());
+		
+		export.heightMap(cart.interpolate(map.getHeightMap()));
+		export.erodeMap(cart.interpolate(map.getErodeMap()));
+		export.rainMap(cart.interpolate(map.getRainMap()));
+		export.soilMap(cart.interpolate(map.getSoilMap()));
 		double hydration[][] = cart.interpolate(map.getHydrationMap());
-		
-		// add rivers to the hydration map
-		int meters = tile_sizes[resolution.getValue()];
-		add_rivers(hydration, meters);
-		
-		// figure out our real world coordinates
-		double lat = parms.latitude(box_y + box_height/2);
-		double lon = parms.longitude(box_x + box_width/2);
-		
-		try {
-			FileWriter output = new FileWriter(filename);
-			final String FORMAT_S = " \"%s\": \"%s\"";
-			final String FORMAT_D = " \"%s\": %d";
-			final String FORMAT_DM = " \"%s\": \"%dm\"";
-			final String FORMAT_DP = " \"%s\": %.2f";
-			final String FORMAT_FM = " \"%s\": \"%.2fm\"";
-			final String FORMAT_CM = " \"%s\": \"%.0fcm\"";
-			final String FORMAT_L = " \"%s\": %.6f";
-			final String FORMAT_O = " \"%s\": {";
-			final String FORMAT_A = " \"%s\": [";
-			final String FORMAT_T = " \"%s\": \"%.1fC\"";
-			final String NEW_POINT = "\n        { ";
-			final String NEWLINE = "\n    ";
-			final String COMMA = ", ";
-			
-			// write out the grid wrapper
-			output.write("{");
-			output.write(NEWLINE);
-			output.write(String.format(FORMAT_S,  "name", sel_name.getText()));
-			output.write(",");
-			output.write(NEWLINE);
-			output.write(String.format(FORMAT_O, "dimensions"));
-				output.write(String.format(FORMAT_D, "height", y_points));
-				output.write(COMMA);
-				output.write(String.format(FORMAT_D, "width", x_points));
-				output.write(" },");
-				output.write(NEWLINE);
-			output.write(String.format(FORMAT_DM, "tilesize", meters));
-			output.write(",");
-			output.write(NEWLINE);
-			output.write(String.format(FORMAT_O, "center"));
-				output.write(String.format(FORMAT_L, "latitude", lat));
-				output.write(COMMA);
-				output.write(String.format(FORMAT_L, "longitude", lon));
-				output.write(" },");
-			output.write(NEWLINE);
-			output.write(String.format(FORMAT_O, "temperatures"));
-				output.write(String.format(FORMAT_T, "mean", parms.meanTemp()));
-				output.write(COMMA);
-				output.write(String.format(FORMAT_T, "summer", parms.meanSummer()));
-				output.write(COMMA);
-				output.write(String.format(FORMAT_T, "winter", parms.meanWinter()));
-				output.write(" },");
-			output.write(NEWLINE);
-			
-			output.write(String.format(FORMAT_A, "points"));
+		add_rivers(hydration, meters);	// add rivers to hydration map
+		export.waterMap(hydration);
 
-			boolean first = true;
-			for(int r = 0; r < y_points; r++) {
-				for(int c = 0; c < x_points; c++) {
-
-					if (first)
-						first = false;
-					else
-						output.write(",");
-					output.write(NEW_POINT);
-					double z = heights[r][c]-erode[r][c];
-					double hydro = hydration[r][c];
-					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(z)));
-					output.write(COMMA);
-					output.write(String.format(FORMAT_CM, "rainfall", rain[r][c]));
-					output.write(COMMA);
-					output.write(String.format(FORMAT_DP, "hydration", hydro));
-					output.write(COMMA);
-					
-					int st = (int) Math.round(soil[r][c]);
-					output.write(String.format(FORMAT_S, "soil", 
-							soilTypes[erode[r][c] < 0 ? Map.ALLUVIAL : st]));
-					output.write(" }");
-				}
+		// and force it all out
+		if (export.flush()) {
+			if (parms.debug_level > 0) {
+				System.out.println("Exported(" + f + ") " +
+						x_points + "x" + y_points + 
+						" " + meters + " meter tiles, centered at <" + 
+						String.format("%9.6f", lat) + "," + 
+						String.format("%9.6f", lon) + 
+						"> to file " + filename);
 			}
-			output.write(NEWLINE);
-			output.write("]\n");	// end of points
-			output.write( "}\n");	// end of grid
-			output.close();
-		} catch (IOException e) {
-			System.err.println("Unable to create output file " + filename);		
+		} else {
+			System.err.println("Unable to export map to file " + filename);
 		}
-		
-		if (parms.debug_level > 0)
-			System.out.println("Exported: " + x_points + "x" + y_points + " " + meters + "m tiles " +
-					"from <" + String.format("%.6f", lat) + "," + String.format("%.6f", lon) + 
-					"> to " + filename);
 	}
 	
 	/**

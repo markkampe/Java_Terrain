@@ -25,8 +25,6 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 		};
 		private static final int DEFAULT_PROFILE = 1;
 		
-		private static final int DIALOG_OFFSET = 2;
-		
 		private static final long serialVersionUID = 1L;
 		
 		public MeshDialog(Map map)  {
@@ -133,7 +131,6 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 			mainPane.add(buttons, BorderLayout.SOUTH);
 			
 			pack();
-			setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 			setVisible(true);
 			
 			// add the action listeners

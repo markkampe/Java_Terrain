@@ -62,9 +62,6 @@ public class Parameters {
 	public int height = PIXELS;		// screen height
 	public int width = PIXELS; 		// screen width
 	public int border; 				// screen border width
-	public int dialogDX; 			// X offset for dialog boxes
-	public int dialogDY; 			// Y offset for dialog boxes
-	public int dialogDelta; 		// per dialog offsets
 	public int dialogBorder; 		// dialog box border
 
 	public String title = "WorldBuilder 0.1 WIP";
@@ -230,15 +227,7 @@ public class Parameters {
 				case "border":
 					border = new Integer(parser.getString());
 					break;
-				case "dialog_x":
-					dialogDX = new Integer(parser.getString());
-					break;
-				case "dialog_y":
-					dialogDY = new Integer(parser.getString());
-					break;
-				case "dialog_delta":
-					dialogDelta = new Integer(parser.getString());
-					break;
+
 				case "dialog_border":
 					dialogBorder = new Integer(parser.getString());
 					break;
@@ -366,8 +355,6 @@ public class Parameters {
 		if (debug_level > 0) {
 			System.out.println("Configuration Parameters (" + filename + ")");
 			System.out.println("   window:     " + width + "x" + height + ", border=" + border);
-			System.out.println("   dialogs:    x+" + dialogDX + ", y+" + dialogDY + " + " + dialogBorder + "/, border="
-					+ dialogBorder);
 			System.out.println("   waterways:  stream=" + stream_flux + unit_f + ", river=" + river_flux + unit_f
 					+ ", artery=" + artery_flux + unit_f);
 			System.out.println("   erosion:    cycles=" + erosion_max + "  Ve=" + String.format("%.2f", Ve) + unit_v

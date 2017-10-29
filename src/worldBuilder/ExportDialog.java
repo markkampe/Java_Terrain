@@ -38,8 +38,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 
 	private static final int tile_sizes[] = {1, 5, 10, 50, 100, 500, 1000, 5000, 10000};
 	
-	private static final int DIALOG_OFFSET = 4;
-	
 	private static final long serialVersionUID = 1L;
 	
 	public ExportDialog(Map map)  {
@@ -143,9 +141,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 
 		mainPane.add(descPanel, BorderLayout.NORTH);
 		mainPane.add(controls, BorderLayout.SOUTH);
-		
 		pack();
-		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners
@@ -493,7 +489,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		if (e.getSource() == accept && selected) {
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText()+".json");
-			d.setLocation(parms.dialogDX, parms.dialogDY);
 			d.setVisible(true);
 			String export_file = d.getFile();
 			if (export_file != null) {

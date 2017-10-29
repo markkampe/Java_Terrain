@@ -15,8 +15,6 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 	private JButton accept;
 	private JButton cancel;
 	
-	private static final int DIALOG_OFFSET = 6;
-	
 	private static final long serialVersionUID = 1L;
 	
 	public ErosionDialog(Map map)  {
@@ -78,7 +76,6 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 		mainPane.add(buttons, BorderLayout.SOUTH);
 		
 		pack();
-		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners

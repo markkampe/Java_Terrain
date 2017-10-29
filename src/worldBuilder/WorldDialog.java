@@ -23,8 +23,6 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		private static final int minor_choices[] = {1, 5, 10, 50, 100, 500, 1000};
 		private static final int major_choices[] = {5, 10, 20};
 		
-		private static final int DIALOG_OFFSET = 0;
-		
 		private static final long serialVersionUID = 1L;
 		
 		public WorldDialog()  {
@@ -173,7 +171,6 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			mainPane.add(buttons, BorderLayout.SOUTH);
 			
 			pack();
-			setLocation(parms.dialogDX + DIALOG_OFFSET*parms.dialogDelta, parms.dialogDY+ DIALOG_OFFSET*parms.dialogDelta);
 			setVisible(true);
 			
 			// add the action listeners

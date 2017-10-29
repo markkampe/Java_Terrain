@@ -64,8 +64,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private String placed;			// debug message
 	private static final String POS_FMT = "%.6f";
 	
-	private static final int DIALOG_OFFSET = 5;
-	
 	private static final long serialVersionUID = 1L;
 	
 	public MountainDialog(Map map)  {
@@ -230,7 +228,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		mainPane.add(controls);
 		
 		pack();
-		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners

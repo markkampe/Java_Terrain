@@ -9,7 +9,6 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 		private Parameters parms;
 			
 		private static final int BORDER_WIDTH = 5;
-		private static final int DIALOG_OFFSET = 7;
 		
 		private static final long serialVersionUID = 1L;
 		
@@ -69,7 +68,6 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			mainPane.add(info,  BorderLayout.CENTER);
 			
 			pack();
-			setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 			setVisible(true);
 			
 			// add the action listeners

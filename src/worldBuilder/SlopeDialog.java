@@ -24,7 +24,6 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	
 	private int x0, y0, x1, y1;		// chosen slope axis
 	
-	private static final int DIALOG_OFFSET = 1;
 	private static final long serialVersionUID = 1L;
 	
 	public SlopeDialog(Map map)  {
@@ -109,7 +108,6 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		mainPane.add(buttons, BorderLayout.SOUTH);
 		
 		pack();
-		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners

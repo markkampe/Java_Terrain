@@ -20,8 +20,6 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	private MeshPoint oldArtery, newArtery;
 	private double oldFlow, newFlow;
 	
-	private static final int DIALOG_OFFSET = 8;
-	
 	private static final long serialVersionUID = 1L;
 	
 	public RiverDialog(Map map)  {
@@ -98,7 +96,6 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		mainPane.add(buttons, BorderLayout.SOUTH);
 		
 		pack();
-		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners

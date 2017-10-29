@@ -25,8 +25,6 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	private JButton accept;
 	private JButton cancel;
 	
-	private static final int DIALOG_OFFSET = 3;
-	
 	private static final long serialVersionUID = 1L;
 	
 	public RainDialog(Map map)  {
@@ -125,7 +123,6 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		mainPane.add(buttons, BorderLayout.SOUTH);
 		
 		pack();
-		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners

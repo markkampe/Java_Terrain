@@ -29,6 +29,10 @@ public class WorldBuilder  extends JFrame
 	private Container mainPane;
 	private Map map;
 	
+	// counter to position off-map dialogs
+	private int numDialogs = 0;
+	private static final int MAX_DIALOGS = 4;
+	
 	// menu bar items
 	private JMenuItem fileNew;
 	private JMenuItem fileRegion;
@@ -266,7 +270,6 @@ public class WorldBuilder  extends JFrame
 		String title = (filename == null) ? "Save As" : "Save";
 		FileDialog d = new FileDialog(this, title, FileDialog.SAVE);
 		d.setFile(filename == null ? "world.json" : filename);
-		d.setLocation(parms.dialogDX, parms.dialogDY);
 		d.setVisible(true);
 		filename = d.getFile();
 		if (filename != null) {
@@ -295,17 +298,16 @@ public class WorldBuilder  extends JFrame
 			if (modified)
 				checkSave();
 			filename = null;
-			new MeshDialog(map);
+			placeDialog(new MeshDialog(map), true);
 			modified = true;
 		} else if (o == fileRegion) {
 			if (modified)
 				checkSave();
-			new RegionDialog(map);
+			placeDialog(new RegionDialog(map), false);
 		} else if (o == fileOpen) {
 			if (modified)
 				checkSave();
 			FileDialog d = new FileDialog(this, "Choose input file", FileDialog.LOAD);
-			d.setLocation(parms.dialogDX, parms.dialogDY);
 			d.setVisible(true);
 			filename = d.getFile();
 			if (filename != null) {
@@ -332,7 +334,7 @@ public class WorldBuilder  extends JFrame
 			map.setMesh(null);
 			modified = false;
 		} else if (o == fileExport) {	// TODO serialize mouseListeners: export
-			new ExportDialog(map);	
+			placeDialog(new ExportDialog(map), false);	
 		} else if (o == fileExit) {
 			if (modified)
 				checkSave();
@@ -341,17 +343,17 @@ public class WorldBuilder  extends JFrame
 		
 		// edit menus pop up the corresponding dialogs
 		else if (o == editWorld) {
-			new WorldDialog();
+			placeDialog(new WorldDialog(), true);
 		} else if (o == editMountain) {	// TODO serialize mouseListeners: mountainDialog
-			new MountainDialog(map);
+			placeDialog(new MountainDialog(map), false);
 		} else if (o == editSlope) {
-			new SlopeDialog(map);
+			placeDialog(new SlopeDialog(map), false);
 		} else if (o == editRain) {
-			new RainDialog(map);
+			placeDialog(new RainDialog(map), false);
 		} else if (o == editRiver) {	// TODO serialize mouseListeners: riverDialog
-			new RiverDialog(map);
+			placeDialog(new RiverDialog(map), false);
 		} else if (o == editErode) {
-			new ErosionDialog(map);
+			placeDialog(new ErosionDialog(map), true);
 		} else if (o == editCity) {
 			System.out.println("implement edit:City");
 		} else if (o == editRoads) {
@@ -407,6 +409,39 @@ public class WorldBuilder  extends JFrame
 		viewWater.setText( (opts & Map.SHOW_WATER) != 0 ? "~water" : "Water");
 		viewErode.setText( (opts & Map.SHOW_ERODE) != 0 ? "~erosion" : "Erosion");
 		viewSoil.setText( (opts & Map.SHOW_SOIL) != 0 ? "~soil" : "Soil");
+	}
+	
+	/**
+	 * put a dialog in a reasonable place on the screen
+	 * 
+	 * @param dialog to be placed
+	 * @param can it overlap the map
+	 */
+	private void placeDialog(JFrame dialog, boolean overlap) {
+		// figure out where it should go
+		int x = this.getX();
+		int y = this.getY();
+		if (overlap) {
+			// just center it on the screen
+			x += (this.getWidth() - dialog.getWidth())/2;
+			y += (this.getHeight() - dialog.getHeight())/2;
+		} else {
+			// place it above or to the right (depending on where there is space)
+			// and stagger them so that concurrent dialogs don't overlap each other
+			Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+			int xExtra = (int) (d.getWidth() - (this.getWidth() + dialog.getWidth()));
+			int yExtra = (int) (d.getHeight() - (this.getHeight() + dialog.getHeight()));
+			if (xExtra > yExtra) {
+				x += this.getWidth();
+				y += (this.getHeight() * (++numDialogs % MAX_DIALOGS))/MAX_DIALOGS;
+			} else {
+				x += (this.getWidth() * (++numDialogs % MAX_DIALOGS))/MAX_DIALOGS;
+				y += this.getHeight();
+			}
+		}
+		
+		// put it there
+		dialog.setLocation(x, y);
 	}
 	
 	/**

@@ -29,8 +29,6 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 	// mesh points per sub-region
 	private static final int DEFAULT_POINTS = 1024;
 	
-	private static final int DIALOG_OFFSET = -3;
-	
 	private static final long serialVersionUID = 1L;
 	
 	public RegionDialog(Map map)  {
@@ -126,7 +124,6 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		mainPane.add(controls, BorderLayout.SOUTH);
 		
 		pack();
-		setLocation(parms.dialogDX + DIALOG_OFFSET * parms.dialogDelta, parms.dialogDY + DIALOG_OFFSET * parms.dialogDelta);
 		setVisible(true);
 		
 		// add the action listeners
@@ -243,7 +240,6 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		if (e.getSource() == accept && selected) {
 			FileDialog d = new FileDialog(this, "New Sub-Region", FileDialog.SAVE);
 			d.setFile(sel_name.getText()+".json");
-			d.setLocation(parms.dialogDX, parms.dialogDY);
 			d.setVisible(true);
 			String export_file = d.getFile();
 			if (export_file != null) {

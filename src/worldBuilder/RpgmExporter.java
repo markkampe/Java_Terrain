@@ -55,30 +55,18 @@ public class RpgmExporter implements Exporter {
 	private static final int D_BASE = 512;
 	private static final int E_BASE = 768;
 	 */
-
-	/*
-	 * base layer images in selected tile set
-	 */
-	private class BaseLayer {
-		public int offset;
-		public int layer;
-		
-		BaseLayer(int offset, int layer) {
-			this.offset = offset;
-			this.layer = layer;
-		}
-	}
 	
 	// TODO configurable tileset information
+	//	NOTE: choosing a single base tile chooses what can border it
 	private static final int tileSet = 1;
-	private BaseLayer deepWater = new BaseLayer(2096,2);
-	private BaseLayer water = new BaseLayer(2048,1);
-	private BaseLayer dirt = new BaseLayer(2868, 1);
-	private BaseLayer grass = new BaseLayer(2816, 1);
+	private int deepTile = 2096;
+	private int waterTile = 2048;
+	private int dirtTile = 2868;
+	private int grassTile = 2816;
 	
-	// terain thresholds
+	// TODO configurable terrain thresholds
 	private static final double deepThreshold = -3.0;
-	private static final double grassThreshold = 0.1;
+	private static final double grassThreshold = 0.25;
 	
 	/**
 	 * create a new output writer
@@ -87,7 +75,6 @@ public class RpgmExporter implements Exporter {
 	 */
 	public RpgmExporter(String filename) {
 		this.filename = filename;
-		Parameters.getInstance();
 	}
 
 	/**
@@ -102,34 +89,37 @@ public class RpgmExporter implements Exporter {
 			// produce the actual map of tiles
 			startList(output, "data", "[");
 			
+			// 
+			int l1[][] = new int[y_points][x_points];
+			int l2[][] = new int[y_points][x_points];
+			
 			// figure out the base ground cover
-			BaseLayer ground[][] = new BaseLayer[y_points][x_points];
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
 					double h = hydration[i][j];
 					if (h <= deepThreshold)
-						ground[i][j] = new BaseLayer(deepWater.offset, deepWater.layer);
-					else if (h < 0)
-						ground[i][j] = new BaseLayer(water.offset, deepWater.layer);
+						l2[i][j] = deepTile;
+					if (h < 0)
+						l1[i][j] = waterTile;
 					else if (h >= grassThreshold)
-						ground[i][j] = new BaseLayer(grass.offset, grass.layer);
+						l1[i][j] = grassTile;
 					else
-						ground[i][j] = new BaseLayer(dirt.offset, dirt.layer);
+						l1[i][j] = dirtTile;
 				}
 			
-			// level 1 - objects on the ground (A-auto tile)
+			// level 1 objects on the ground
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
-					int tile = (ground[i][j] == null || ground[i][j].layer != 1) ? 0 : ground[i][j].offset;
-					output.write(String.format("%d,", tile));
-				}	
+					int adjustment = 0;
+					if (i > 0 && i < y_points - 1 && j > 0 && j < x_points - 1)
+						adjustment = auto_tile_offset(l1, i, j);
+					output.write(String.format("%d,", l1[i][j] + adjustment));
+				}
 			
-			// level 2 - objects on the ground (A-auto tile)
+			// level 2 objects on the ground drawn over level 1
 			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++) {
-					int tile = (ground[i][j] == null || ground[i][j].layer != 2) ? 0 : ground[i][j].offset;
-					output.write(String.format("%d,", tile));
-				}	
+				for(int j = 0; j < x_points; j++)
+					output.write(String.format("%d,", l2[i][j]));	
 			
 			// level 3 - foreground trees/structures (B/C object sets)
 			for(int i = 0; i < y_points; i++)
@@ -169,7 +159,65 @@ public class RpgmExporter implements Exporter {
 			return false;
 		}
 	}
-
+	
+	/*
+	 * examine the neighbors and determine the auto-tile offset
+	 * 
+	 * RPGMaker defines 48 different ways to slice up a reference
+	 * 	tile in order to create borders between them
+	 */
+	int auto_tile_offset(int map[][], int row, int col) {
+		int offset[] = {
+			// ... x.. .x. xx. ..x x.x .xx xxx 
+				0,	1,	0,	20,	2,	3,	20,	20,	// .../...	
+				0,	1,	0,	20,	2,	17,	20,	20,	// x*./...	
+				0,	5,	2,	0,	0,	0,	0,	0,	// .*x/...	
+				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/...	
+				8,	9,	0,	0,	10,	11,	0,	22,	// .../x..	
+				0,	16,	0,	0,	0,	17,	0,	34,	// x*./x..	
+				0,	0,	0,	0,	0,	0,	0,	0,	// .*x/x..	
+				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/x..
+				0,	0,	0,	0,	0,	0,	0,	0,	// .../.x.	
+				0,	0,	0,	0,	0,	0,	0,	0,	// x*./.x.	
+				0,	0,	0,	0,	0,	0,	0,	0,	// .*x/.x.	
+				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/.x.
+				0,	0,	0,	0,	0,	0,	0,	0,	// .../xx.	
+				0,	0,	0,	0,	0,	0,	0,	0,	// x*./xx.	
+				0,	0,	0,	0,	0,	0,	0,	0,	// .*x/xx.	
+				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/xx.
+			// ... x.. .x. xx. ..x x.x xx. xxx 
+				4,	5,	0,	0,	6,	7,	0,	21,	// .../..x	
+				0,	0,	0,	0,	0,	0,	0,	0,	// x*./..x	
+				0,	26,	0,	0,	24,	26,	0,	36,	// .*x/..x	
+				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/..x	
+				12,	13,	0,	0,	14,	15,	0,	23,	// .../x.x	
+				0,	18,	0,	0,	0,	19,	0,	35,	// x*./x.x	
+				0,	0,	0,	0,	25,	27,	0,	37,	// .*x/x.x	
+				0,	0,	0,	0,	0,	32,	0,	42,	// x*x/x.x
+				0,	0,	0,	0,	0,	0,	0,	0,	// .../.xx	
+				0,	0,	0,	0,	0,	0,	0,	0,	// x*./.xx	
+				0,	0,	0,	0,	0,	0,	0,	0,	// .*x/.xx	
+				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/.xx
+				28,	29,	0,	0,	30,	31,	0,	33,	// .../xxx	
+				0,	0,	0,	0,	0,	41,	0,	43,	// x*./xxx	
+				0,	40,	0,	0,	38,	39,	0,	45,	// .*x/xxx	
+				0,	0,	0,	0,	0,	44,	0,	46,	// x*x/xxx
+		};
+		
+		// figure out which neighboring values differ
+		int bits = 0;
+		if (map[row-1][col-1] != map[row][col])	bits |= 1;
+		if (map[row-1][col] != map[row][col])	bits |= 2;
+		if (map[row-1][col+1] != map[row][col]) bits |= 4;
+		if (map[row][col-1] != map[row][col])	bits |= 8;
+		if (map[row][col+1] != map[row][col]) 	bits |= 16;
+		if (map[row+1][col-1] != map[row][col]) bits |= 32;
+		if (map[row+1][col] != map[row][col]) 	bits |= 64;
+		if (map[row+1][col+1] != map[row][col]) bits |= 128;
+		
+		return offset[bits];
+	}
+	
 	// attribute/info setting methods (from Exporter.java)
 	public void name(String name) {
 		//this.mapname = name;
@@ -182,7 +230,6 @@ public class RpgmExporter implements Exporter {
 
 	public void tileSize(int meters) {
 		//this.tile_size = meters;
-
 	}
 
 	public void position(double lat, double lon) {

@@ -88,8 +88,6 @@ public class RpgmExporter implements Exporter {
 			
 			// produce the actual map of tiles
 			startList(output, "data", "[");
-			
-			// 
 			int l1[][] = new int[y_points][x_points];
 			int l2[][] = new int[y_points][x_points];
 			
@@ -116,8 +114,10 @@ public class RpgmExporter implements Exporter {
 			
 			// level 2 objects on the ground drawn over level 1
 			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++)
-					output.write(String.format("%d,", l2[i][j]));	
+				for(int j = 0; j < x_points; j++) {
+					int adjustment = l2[i][j] > 0 ? auto_tile_offset(l2, i, j) : 0;
+					output.write(String.format("%d,", l2[i][j] + adjustment));	
+				}
 			
 			// level 3 - foreground trees/structures (B/C object sets)
 			for(int i = 0; i < y_points; i++)
@@ -159,7 +159,8 @@ public class RpgmExporter implements Exporter {
 	}
 	
 	/*
-	 * examine the neighbors and determine the auto-tile offset
+	 * examine the neighbors, identify boundaries, and figure out
+	 * the appropriate tile offsets.
 	 * 
 	 * RPGMaker defines 48 different ways to slice up a reference
 	 * 	tile in order to create borders between them
@@ -167,52 +168,65 @@ public class RpgmExporter implements Exporter {
 	int auto_tile_offset(int map[][], int row, int col) {
 		int offset[] = {
 			// ... x.. .x. xx. ..x x.x .xx xxx 
-				0,	1,	0,	20,	2,	3,	20,	20,	// .../...	
-				0,	1,	0,	20,	2,	17,	20,	20,	// x*./...	
-				0,	5,	2,	0,	0,	0,	0,	0,	// .*x/...	
-				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/...	
-				8,	9,	0,	0,	10,	11,	0,	22,	// .../x..	
-				0,	16,	0,	0,	0,	17,	0,	34,	// x*./x..	
-				0,	0,	0,	0,	0,	0,	0,	0,	// .*x/x..	
-				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/x..
-				0,	0,	0,	0,	0,	0,	0,	0,	// .../.x.	
-				0,	0,	0,	0,	0,	0,	0,	0,	// x*./.x.	
-				0,	0,	0,	0,	0,	0,	0,	0,	// .*x/.x.	
-				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/.x.
-				0,	0,	0,	0,	0,	0,	0,	0,	// .../xx.	
-				0,	0,	0,	0,	0,	0,	0,	0,	// x*./xx.	
-				0,	0,	0,	0,	0,	0,	0,	0,	// .*x/xx.	
-				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/xx.
-			// ... x.. .x. xx. ..x x.x xx. xxx 
-				4,	5,	0,	0,	6,	7,	0,	21,	// .../..x	
-				0,	0,	0,	0,	0,	0,	0,	0,	// x*./..x	
-				0,	26,	0,	0,	24,	26,	0,	36,	// .*x/..x	
-				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/..x	
-				12,	13,	0,	0,	14,	15,	0,	23,	// .../x.x	
-				0,	18,	0,	0,	0,	19,	0,	35,	// x*./x.x	
-				0,	0,	0,	0,	25,	27,	0,	37,	// .*x/x.x	
-				0,	0,	0,	0,	0,	32,	0,	42,	// x*x/x.x
-				0,	0,	0,	0,	0,	0,	0,	0,	// .../.xx	
-				0,	0,	0,	0,	0,	0,	0,	0,	// x*./.xx	
-				0,	0,	0,	0,	0,	0,	0,	0,	// .*x/.xx	
-				0,	0,	0,	0,	0,	0,	0,	0,	// x*x/.xx
-				28,	29,	0,	0,	30,	31,	0,	33,	// .../xxx	
-				0,	0,	0,	0,	0,	41,	0,	43,	// x*./xxx	
-				0,	40,	0,	0,	38,	39,	0,	45,	// .*x/xxx	
-				0,	0,	0,	0,	0,	44,	0,	46,	// x*x/xxx
+				0,	1,	20,	20,	2,	3,	20,	20,	// .*./...	
+				16,	16,	34,	34,	17,	17,	34,	34,	// x*./...	
+				24,	26,	36,	36,	24,	26,	36,	36,	// .*x/...	
+				32,	32,	42,	42,	32,	32,	42,	42,	// x*x/...	
+				8,	9,	34,	34,	10,	11,	37,	22,	// .*./x..	
+				16,	16,	34,	34,	17,	17,	34,	34,	// x*./x..	
+				25,	27,	37,	37,	25,	27,	37,	37,	// .*x/x..	
+				32,	32,	42,	42,	32,	32,	42,	42,	// x*x/x..
+				28,	29,	33,	33,	30,	31,	33,	33,	// .*./.x.	
+				40,	40,	43,	43,	41,	41,	43,	43,	// x*./.x.	
+				38,	39,	45,	45,	38,	39,	45,	45,	// .*x/.x.	
+				44,	44,	46,	46,	44,	44,	46,	46,	// x*x/.x.
+				28,	29,	33,	33,	30,	31,	33,	33,	// .*./xx.	
+				40,	40,	43,	43,	41,	41,	43,	43,	// x*./xx.	
+				38,	39,	45,	45,	38,	39,	45,	45,	// .*x/xx.	
+				44,	44,	46,	46,	44,	44,	46,	46,	// x*x/xx.
+			// ... x.. .x. xx. ..x x.x .xx xxx 
+				4,	5,	21,	21,	6,	7,	21,	21,	// .*./..x	
+				18,	18,	35,	35,	19,	19,	35,	35,	// x*./..x	
+				24,	26,	36,	36,	24,	26,	36,	36,	// .*x/..x	
+				32,	32,	42,	42,	32,	32,	42,	42,	// x*x/..x	
+				12,	13,	23,	23,	14,	15,	23,	23,	// .*./x.x	
+				18,	18,	35,	35,	19,	19,	35,	35,	// x*./x.x	
+				25,	27,	37,	37,	25,	27,	37,	37,	// .*x/x.x	
+				32,	32,	42,	42,	32,	32,	42,	42,	// x*x/x.x
+				28,	29,	33,	33,	30,	31,	33,	33,	// .../.xx	
+				40,	40,	43,	43,	41,	41,	43,	43,	// x*./.xx	
+				38,	39,	45,	45,	38,	39,	45,	45,	// .*x/.xx	
+				44,	44,	46,	46,	44,	44,	46,	46,	// x*x/.xx
+				28,	29,	33,	33,	30,	31,	33,	33,	// .../xxx	
+				40,	40,	43,	43,	41,	41,	43,	43,	// x*./xxx	
+				38,	39,	45,	45,	38,	39,	45,	45,	// .*x/xxx	
+				44,	44,	46,	46,	44,	44,	46,	46,	// x*x/xxx
 		};
 		
-		// figure out which neighboring values differ
+		// look at neighbors to identify boundaries
 		int bits = 0;
+		int lastrow = map.length - 1;
+		int lastcol = map[row].length - 1;
 		int same = map[row][col];
-		bits |= (map[row-1][col-1]	!= same) ? 1 : 0;
-		bits |= (map[row-1][col]	!= same) ? 2 : 0;
-		bits |= (map[row-1][col+1]	!= same) ? 4 : 0;
-		bits |= (map[row][col-1]	!= same) ? 8 : 0;
-		bits |= (map[row][col+1]	!= same) ? 16 : 0;
-		bits |= (map[row+1][col-1]	!= same) ? 32 : 0;
-		bits |= (map[row+1][col]	!= same) ? 64 : 0;
-		bits |= (map[row+1][col+1]	!= same) ? 128 : 0;
+		if (row > 0) {
+			if (col > 0)
+				bits |= (map[row-1][col-1] != same) ? 1 : 0;
+			bits |= (map[row-1][col] != same) ? 2 : 0;
+			if (col < lastcol)
+				bits |= (map[row-1][col+1] != same) ? 4 : 0;
+		}
+		if (col > 0)
+			bits |= (map[row][col-1] != same) ? 8 : 0;
+		if (col < lastcol)
+			bits |= (map[row][col+1] != same) ? 16 : 0;
+		
+		if (row < lastrow) {
+			if (col > 0)
+				bits |= (map[row+1][col-1] != same) ? 32 : 0;
+			bits |= (map[row+1][col] != same) ? 64 : 0;
+			if (col < lastcol)
+				bits |= (map[row+1][col+1] != same) ? 128 : 0;
+		}
 		return offset[bits];
 	}
 	

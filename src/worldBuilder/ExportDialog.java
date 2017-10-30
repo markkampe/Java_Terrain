@@ -307,22 +307,35 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			double width = Hydrology.width(fluxMap[i],  v);
 			int stroke = (width <= tilesize) ? 1 : (int) ((width + width - 1) / tilesize);
 			
-			// figure out the length, dx and dy (in tiles)
-			int length = (int) dist / tilesize;
-			double dx = (x1 - x0)/length;
-			double dy = (y1 - y0)/length;
-			
-			// set depth for each point along the course
-			double x = x0;
-			double y = y0;
-			while(length-- > 0) {
-				// TODO stroke width for river export
-				int r = box_row(y);
-				int c = box_col(x);
-				if (r >= 0 && c >= 0)
-					hydration[r][c] = -depth;
-				x += dx;
-				y += dy;
+			// figure out starting and ending positions
+			int r = box_row(y0);
+			int rDest = box_row(y1);
+			int c = box_col(x0);
+			int cDest = box_col(x1);
+
+			// fill the tiles between here and there with water
+			for(;;) {
+				// figure out which direction we want to move in
+				int dR = rDest - r;
+				int dC = cDest - c;
+				if (Math.abs(dR) > Math.abs(dC)) { // vertical flow
+					if ((r >= 0 && c >= 0 && r < y_points && c < x_points)) {
+						int start = c - (stroke/2);
+						for(int j = 0; j < stroke; j++)
+							hydration[r][start + j] = -depth;
+					}
+					r += (dR>0) ? 1 : -1;
+				} else {	// horizontal flow
+					if ((r >= 0 && c >= 0 && r < y_points && c < x_points)) {
+						int start = r - (stroke/2);
+						for(int j = 0; j < stroke; j++)
+							hydration[start + j][c] = -depth;
+					}
+					// see if we are done
+					if (dC == 0 && dR == 0)
+						break;
+					c += (dC>0) ? 1 : -1;
+				}
 			}		
 		}
 	}
@@ -429,9 +442,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 * click events on ACCEPT/CANCEL buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
-		// clear the selection
-		map.selectNone();
-		
 		if (e.getSource() == accept && selected) {
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText()+".json");
@@ -442,10 +452,12 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 				if (dir != null)
 					export_file = dir + export_file;
 				export(export_file);
+				return;
 			}
 		}
 		
 		// discard the window
+		map.selectNone();
 		this.dispose();
 		map.removeMouseListener(this);
 		map.removeMouseMotionListener(this);

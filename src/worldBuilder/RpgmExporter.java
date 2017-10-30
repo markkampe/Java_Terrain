@@ -58,10 +58,10 @@ public class RpgmExporter implements Exporter {
 	
 	// TODO configurable tileset information
 	//	NOTE: choosing a single base tile chooses what can border it
-	private static final int tileSet = 1;
+	private static final int tileSet = 2;
 	private int deepTile = 2096;
 	private int waterTile = 2048;
-	private int dirtTile = 2868;
+	private int dirtTile = 2864;
 	private int grassTile = 2816;
 	
 	// TODO configurable terrain thresholds
@@ -110,9 +110,7 @@ public class RpgmExporter implements Exporter {
 			// level 1 objects on the ground
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
-					int adjustment = 0;
-					if (i > 0 && i < y_points - 1 && j > 0 && j < x_points - 1)
-						adjustment = auto_tile_offset(l1, i, j);
+					int adjustment = auto_tile_offset(l1, i, j);
 					output.write(String.format("%d,", l1[i][j] + adjustment));
 				}
 			
@@ -206,15 +204,15 @@ public class RpgmExporter implements Exporter {
 		
 		// figure out which neighboring values differ
 		int bits = 0;
-		if (map[row-1][col-1] != map[row][col])	bits |= 1;
-		if (map[row-1][col] != map[row][col])	bits |= 2;
-		if (map[row-1][col+1] != map[row][col]) bits |= 4;
-		if (map[row][col-1] != map[row][col])	bits |= 8;
-		if (map[row][col+1] != map[row][col]) 	bits |= 16;
-		if (map[row+1][col-1] != map[row][col]) bits |= 32;
-		if (map[row+1][col] != map[row][col]) 	bits |= 64;
-		if (map[row+1][col+1] != map[row][col]) bits |= 128;
-		
+		int same = map[row][col];
+		bits |= (map[row-1][col-1]	!= same) ? 1 : 0;
+		bits |= (map[row-1][col]	!= same) ? 2 : 0;
+		bits |= (map[row-1][col+1]	!= same) ? 4 : 0;
+		bits |= (map[row][col-1]	!= same) ? 8 : 0;
+		bits |= (map[row][col+1]	!= same) ? 16 : 0;
+		bits |= (map[row+1][col-1]	!= same) ? 32 : 0;
+		bits |= (map[row+1][col]	!= same) ? 64 : 0;
+		bits |= (map[row+1][col+1]	!= same) ? 128 : 0;
 		return offset[bits];
 	}
 	

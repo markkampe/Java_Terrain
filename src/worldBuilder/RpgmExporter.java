@@ -8,23 +8,21 @@ import java.io.IOException;
  */
 public class RpgmExporter implements Exporter {
 
-	private Parameters parms;	// world builder parameters
-
 	private String filename;	// output file name
-	private String mapname;		// name of this map
+	//private String mapname;		// name of this map
 
 	// physical map parameters
 	private int x_points; 		// width of map (in points)
 	private int y_points; 		// height of map (in points)
-	private int tile_size; 		// tile size (in meters)
-	private double lat;			// latitude
-	private double lon;			// longitude
+	//private int tile_size; 		// tile size (in meters)
+	//private double lat;			// latitude
+	//private double lon;			// longitude
 
 	// plant influencing parameters
-	private double Tmean; 		// mean temperature (degC)
-	private double Tsummer; 	// mean summer temperature
-	private double Twinter; 	// mean winter temperature
-	private double[][] rain;	// per point rainfall (meters)
+	//private double Tmean; 		// mean temperature (degC)
+	//private double Tsummer; 	// mean summer temperature
+	//private double Twinter; 	// mean winter temperature
+	//private double[][] rain;	// per point rainfall (meters)
 
 	// basic ground tile selection
 	private double[][] heights;	// per point height (meters)
@@ -32,21 +30,56 @@ public class RpgmExporter implements Exporter {
 	private double[][] hydration; // per point water depth (meters)
 	private double[][] soil;	// per point soil type
 
-	// RPGMaker tile address space
-	private static final int tileSet = 1;
-	private static final int A0_BASE = 0;	// auto-tile ground cover
-	private static final int DIRT_BASE = 0;
-	private static final int GRASS_BASE = 0;
-	private static final int ROCK_BASE = 0;
-	private static final int WATER_BASE = 0;
-	private static final int SNOW_BASE = 0;
-	private static final int MARSH_BASE = 0;
-	
-	private static final int A1_BASE = 0;	// tile sets
+	/*
+	 * RPGMaker tile address space
+	 * The RPGMaker database configures a few tile sets.
+	 * A tile-set is a .png containing tiles (of known size)
+	 * The maximum number of tiles within a tile set is 48x16=768
+	 * A tile number is the base number of its tile set
+	 *   plus its offset within the tile set.
+	 * In auto-tile tile-sets the images seem to come in
+	 *   a well defined order (which enables corners,
+	 *   borders, and other transitions)
+	 *   
+	 * The intention seems to be that one can replace the
+	 * individual images while preserving the spatial sense,
+	 * switch tile sets, and the same game will have a different
+	 * look.
+	private static final int A1_BASE = 2048;
+	private static final int A2_BASE = A1_BASE + 768;
+	private static final int A3_BASE = A2_BASE + (2*768);
+	private static final int A4_BASE = A3_BASE + (2*768);
+	private static final int A5_BASE = A1_BASE - 512;
 	private static final int B_BASE = 0;
-	private static final int C_BASE = 0;
-	private static final int D_BASE = 0;
+	private static final int C_BASE = 256;
+	private static final int D_BASE = 512;
+	private static final int E_BASE = 768;
+	 */
 
+	/*
+	 * base layer images in selected tile set
+	 */
+	private class BaseLayer {
+		public int offset;
+		public int layer;
+		
+		BaseLayer(int offset, int layer) {
+			this.offset = offset;
+			this.layer = layer;
+		}
+	}
+	
+	// TODO configurable tileset information
+	private static final int tileSet = 1;
+	private BaseLayer deepWater = new BaseLayer(2096,2);
+	private BaseLayer water = new BaseLayer(2048,1);
+	private BaseLayer dirt = new BaseLayer(2868, 1);
+	private BaseLayer grass = new BaseLayer(2816, 1);
+	
+	// terain thresholds
+	private static final double deepThreshold = -3.0;
+	private static final double grassThreshold = 0.1;
+	
 	/**
 	 * create a new output writer
 	 * 
@@ -54,7 +87,7 @@ public class RpgmExporter implements Exporter {
 	 */
 	public RpgmExporter(String filename) {
 		this.filename = filename;
-		parms = Parameters.getInstance();
+		Parameters.getInstance();
 	}
 
 	/**
@@ -64,40 +97,57 @@ public class RpgmExporter implements Exporter {
 		try {
 			FileWriter output = new FileWriter(filename);
 			output.write("{\n");
-			
 			boilerPlate(output);
 			
 			// produce the actual map of tiles
 			startList(output, "data", "[");
 			
-			// level 0 - ground level
+			// figure out the base ground cover
+			BaseLayer ground[][] = new BaseLayer[y_points][x_points];
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
-					output.write("0,");	// TODO terrain tiles
+					double h = hydration[i][j];
+					if (h <= deepThreshold)
+						ground[i][j] = new BaseLayer(deepWater.offset, deepWater.layer);
+					else if (h < 0)
+						ground[i][j] = new BaseLayer(water.offset, deepWater.layer);
+					else if (h >= grassThreshold)
+						ground[i][j] = new BaseLayer(grass.offset, grass.layer);
+					else
+						ground[i][j] = new BaseLayer(dirt.offset, dirt.layer);
 				}
 			
-			// level 1 - objects on the ground
+			// level 1 - objects on the ground (A-auto tile)
 			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++)
-					output.write("0,");	// TODO rock and tree tiles
+				for(int j = 0; j < x_points; j++) {
+					int tile = (ground[i][j] == null || ground[i][j].layer != 1) ? 0 : ground[i][j].offset;
+					output.write(String.format("%d,", tile));
+				}	
 			
-			// level 2 - ground level structures
+			// level 2 - objects on the ground (A-auto tile)
+			for(int i = 0; i < y_points; i++)
+				for(int j = 0; j < x_points; j++) {
+					int tile = (ground[i][j] == null || ground[i][j].layer != 2) ? 0 : ground[i][j].offset;
+					output.write(String.format("%d,", tile));
+				}	
+			
+			// level 3 - foreground trees/structures (B/C object sets)
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
 					output.write("0,");
 			
-			// level 3 - above ground level structures
+			// level 4 - background trees/structures (B/C object sets)
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
 					output.write("0,");
 			
-			// level 4 - shadows
+			// level 5 - shadows
 			//	UL = 1, UR = 2, BL = 4, BR = 8. 
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
 					output.write("0,");
 			
-			// level 5 - encounters
+			// level 6 - encounters
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
 					output.write("0");
@@ -122,7 +172,7 @@ public class RpgmExporter implements Exporter {
 
 	// attribute/info setting methods (from Exporter.java)
 	public void name(String name) {
-		this.mapname = name;
+		//this.mapname = name;
 	}
 
 	public void dimensions(int x_points, int y_points) {
@@ -131,19 +181,19 @@ public class RpgmExporter implements Exporter {
 	}
 
 	public void tileSize(int meters) {
-		this.tile_size = meters;
+		//this.tile_size = meters;
 
 	}
 
 	public void position(double lat, double lon) {
-		this.lat = lat;
-		this.lon = lon;
+		//this.lat = lat;
+		//this.lon = lon;
 	}
 
 	public void temps(double meanTemp, double meanSummer, double meanWinter) {
-		this.Tmean = meanTemp;
-		this.Tsummer = meanSummer;
-		this.Twinter = meanWinter;
+		//this.Tmean = meanTemp;
+		//this.Tsummer = meanSummer;
+		//this.Twinter = meanWinter;
 	}
 
 	public void heightMap(double[][] heights) {
@@ -155,7 +205,7 @@ public class RpgmExporter implements Exporter {
 	}
 
 	public void rainMap(double[][] rain) {
-		this.rain = rain;
+		//this.rain = rain;
 	}
 
 	public void soilMap(double[][] soil) {

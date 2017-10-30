@@ -192,8 +192,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		String f = (String) format.getSelectedItem();
 		if (f.equals("json"))
 			export = new JsonExporter(filename);
-		//else if (f.equals("RPGMaker"))
-		//	export = new RpgmExporter(filename);
+		else if (f.equals("RPGMaker"))
+			export = new RpgmExporter(filename);
 		else {
 			System.err.println("Unknown export format: " + f);
 			return;

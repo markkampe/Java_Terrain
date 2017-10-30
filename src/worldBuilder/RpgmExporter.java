@@ -119,6 +119,7 @@ public class RpgmExporter implements Exporter {
 					output.write(String.format("%d,", l2[i][j] + adjustment));	
 				}
 			
+			// TODO add rocks and mountains
 			// level 3 - foreground trees/structures (B/C object sets)
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)

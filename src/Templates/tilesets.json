@@ -1,10 +1,12 @@
 { 
   "tilesets":[
     { "id":1, "name":"OverWorld",
-      "water":2048, "deep":2096, "grass":2816, "dirt":3584
+      "water":2048, "deep":2096, "grass":2816, "dirt":3584, "snow":3968, "sand":3584,
+      "grassHill":3104, "dirtHill":3488, "snowHill":4016, "rocks":3344,
+      "mountain":3152, "peak":3536, "snowPeak":4034
     }, 
     { "id":2, "name":"Outside",
-      "water":2048, "deep":2096, "grass":2816, "dirt":2864
+      "water":2048, "deep":2096, "grass":2816, "dirt":2864, "snow":3968, "sand":3584
     }
   ] 
 }

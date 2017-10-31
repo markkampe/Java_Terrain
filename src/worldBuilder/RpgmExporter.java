@@ -204,6 +204,8 @@ public class RpgmExporter implements Exporter {
 					grid[i][j] = snowTile;
 				else if (h >= grassThreshold)
 					grid[i][j] = grassTile;
+				else if (rocky(i,j))
+					grid[i][j] = rocksTile;
 				else if (h >= dirtThreshold)
 					grid[i][j] = dirtTile;
 				else
@@ -215,9 +217,10 @@ public class RpgmExporter implements Exporter {
 	 * L2 is ground cover on top of the base texture
 	 */
 	void populate_l2(int[][] grid) {
-		double min_hill = 50;		// TODO parms.min_hill
+		double min_hill = 100;		// TODO parms.min_hill
 		double min_mountain = 500;	// TODO parms.min_mountain
 		double min_peak = 1500;		// TODO parms.min_peak
+		double min_slope = .05;		// TODO parms.min_slope
 		double deepThreshold = 15;	// TODO parms.deepThreshold
 		double tree_line = 2000;	// TODO parms.tree_line
 		double tree_hydro = 0.3;	// TODO parms.tree_hydro
@@ -230,11 +233,12 @@ public class RpgmExporter implements Exporter {
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
 				double h = hydration[i][j];
-				double alt = heights[i][j];
+				double alt = parms.altitude(heights[i][j] - erode[i][j]);
+				double m = slope(i,j);
 				
-				if (h < -deepThreshold)
-					grid[i][j] = deepTile;
-				else if (mountains && alt >= min_hill) {
+				if (h < 0)
+					grid[i][j] = (h <= deepThreshold) ? deepTile : 0;
+				else if (mountains && alt >= min_hill && m >= min_slope) {
 					if (alt >= min_peak)
 						grid[i][j] = snowy(i,j) ? snowPeakTile : peakTile;
 					else if (alt >= min_mountain)
@@ -252,9 +256,7 @@ public class RpgmExporter implements Exporter {
 						grid[i][j] = pineTile;
 					else
 						grid[i][j] = treeTile;
-				} else if (rocky(i,j))
-					grid[i][j] = rocksTile;
-				else
+				} else
 					grid[i][j] = 0;
 			}
 	}
@@ -283,16 +285,13 @@ public class RpgmExporter implements Exporter {
 	 * return the slope at a point
 	 */
 	private double slope(int row, int col) {
-		double dzdx, dzdy;
-		if (col > 0)
-			dzdx = (heights[row][col] - heights[row][col-1])/tile_size;
-		else
-			dzdx = (heights[row][col+1] - heights[row][col])/tile_size;
-		if (row > 0)
-			dzdy = (heights[row][col] - heights[row-1][col])/tile_size;
-		else
-			dzdy = (heights[row+1][col-1] - heights[row][col])/tile_size;
-		return Math.sqrt((dzdx*dzdx)+(dzdy*dzdy));
+		double z0 = heights[row][col] - erode[row][col];
+		double zx1 = (col > 0) ? heights[row][col-1] - erode[row][col-1] :
+								 heights[row][col+1] - erode[row][col+1];
+		double zy1 = (row > 0) ? heights[row-1][col] - erode[row-1][col] :
+								 heights[row+1][col] - erode[row+1][col];
+		double dz = Math.sqrt((z0-zx1)*(z0-zx1) + (z0-zy1)*(z0-zy1));
+		return parms.altitude(dz) / tile_size;
 	}
 	
 	/*

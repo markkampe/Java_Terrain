@@ -32,6 +32,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	private double x_km, y_km;		// selection width/height (in km)
 
 	private static final int tile_sizes[] = {1, 5, 10, 50, 100, 500, 1000, 5000, 10000};
+	private static final String RAW_JSON = "raw json";
+	private static final String DEFAULT_OUTPUT = "Map004"; // TODO Parms.default_output
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -52,12 +54,12 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		sel_name = new JTextField();
-		sel_name.setText("Happyville");
+		sel_name.setText(DEFAULT_OUTPUT);
 		JLabel nameLabel = new JLabel("Name of this region", JLabel.CENTER);
 		nameLabel.setFont(fontLarge);
 		
 		format = new JComboBox<String>();
-		format.addItem("raw json");
+		format.addItem(RAW_JSON);
 		TileConfiguration c = TileConfiguration.getInstance();
 		for(TileConfiguration.TileSet t:c.tilesets)
 			format.addItem(t.name);
@@ -192,7 +194,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		// create an appropriate exporter
 		Exporter export;
 		String f = (String) format.getSelectedItem();
-		if (f.equals("json"))
+		if (f.equals(RAW_JSON))
 			export = new JsonExporter(filename);
 		else
 			export = new RpgmExporter(filename, f);

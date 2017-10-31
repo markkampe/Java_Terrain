@@ -144,7 +144,12 @@ public class RpgmExporter implements Exporter {
 					int adjustment = l[i][j] > 0 ? auto_tile_offset(l, i, j) : 0;
 					output.write(String.format("%d,", l[i][j] + adjustment));	
 				}
+<<<<<<< HEAD
 	
+=======
+			
+			// TODO add rocks and mountains
+>>>>>>> branch 'master' of https://github.com/markkampe/Java_Terrain.git
 			// level 3 - foreground trees/structures (B/C object sets)
 			populate_l3(l);
 			for(int i = 0; i < y_points; i++)

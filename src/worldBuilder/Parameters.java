@@ -37,6 +37,7 @@ public class Parameters {
 	// planetary characteristics
 	public int radius = 6371; // planetary radius (km)
 	public double tilt = 23.5; // (seasonal) axis tilt
+	public double lapse_rate = 0.01;	// adiabatic lapse rate (degC/M)
 	private double Tmin = -5; // mean temperature at poles
 	private double Tmax = 30; // mean temperature at equator
 

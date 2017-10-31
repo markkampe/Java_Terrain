@@ -57,9 +57,11 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		nameLabel.setFont(fontLarge);
 		
 		format = new JComboBox<String>();
-		format.addItem("json");
-		format.addItem("RPGMaker");
-		format.setSelectedItem("RPGMaker");
+		format.addItem("raw json");
+		TileConfiguration c = TileConfiguration.getInstance();
+		for(TileConfiguration.TileSet t:c.tilesets)
+			format.addItem(t.name);
+		format.setSelectedIndex(1);
 		
 		accept = new JButton("EXPORT");
 		cancel = new JButton("CANCEL");
@@ -192,12 +194,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		String f = (String) format.getSelectedItem();
 		if (f.equals("json"))
 			export = new JsonExporter(filename);
-		else if (f.equals("RPGMaker"))
-			export = new RpgmExporter(filename);
-		else {
-			System.err.println("Unknown export format: " + f);
-			return;
-		}
+		else
+			export = new RpgmExporter(filename, f);
 		export.name(sel_name.getText());
 		export.dimensions(x_points, y_points);
 		int meters = tile_sizes[resolution.getValue()];

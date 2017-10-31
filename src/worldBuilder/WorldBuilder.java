@@ -14,7 +14,7 @@ public class WorldBuilder  extends JFrame
 	private static final String author = "Author: Mark Kampe (mark.kampe@gmail.com)";
 	private static final String credit = "Based on Martin O'Leary's Uncharted Atlas terrain generator (mewo2.com)";
 	private static final String license = "";	// TBD
-	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [mesh file]";
+	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [ -t tilecfg] [mesh file]";
 	
 	// active file
 	private String filename;	// name of current input/output file
@@ -470,6 +470,7 @@ public class WorldBuilder  extends JFrame
 		// process the arguments
 		String filename = null;
 		String configname = null;
+		String tilecfgname = null;
 		int debug = 0;
 		for( int i = 0; i < args.length; i++ ) {
 			// eclipse does not honor argv[0] == command
@@ -486,7 +487,12 @@ public class WorldBuilder  extends JFrame
 						configname = args[i].substring(2);
 					else
 						configname = args[++i];
-				} else if (args[i].startsWith("-v")) {
+				} else if (args[i].startsWith("-t")) {
+					if (args[i].length() > 2)
+						tilecfgname = args[i].substring(2);
+					else
+						tilecfgname = args[++i];
+				}else if (args[i].startsWith("-v")) {
 					debug = 1;
 				} else
 					System.out.println(usage);
@@ -494,8 +500,9 @@ public class WorldBuilder  extends JFrame
 				filename = args[i];
 			}
 		}
-		// instantiate the parameters singleton
+		// instantiate the parameters singletons
 		parms = new Parameters(configname, debug);
+		new TileConfiguration(tilecfgname, debug);
 		
 		// and create the map
 		WorldBuilder w = new WorldBuilder(filename);

@@ -1,0 +1,10 @@
+{ 
+  "tilesets":[
+    { "id":1, "name":"OverWorld",
+      "water":2048, "deep":2096, "grass":2816, "dirt":3584
+    }, 
+    { "id":2, "name":"Outside",
+      "water":2048, "deep":2096, "grass":2816, "dirt":2864
+    }
+  ] 
+}

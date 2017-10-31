@@ -58,7 +58,7 @@ public class RpgmExporter implements Exporter {
 	
 	// TODO configurable tileset information
 	//	NOTE: choosing a single base tile chooses what can border it
-	private static final int tileSet = 2;
+	private int tileSet = 2;
 	private int deepTile = 2096;
 	private int waterTile = 2048;
 	private int dirtTile = 2864;
@@ -73,8 +73,22 @@ public class RpgmExporter implements Exporter {
 	 * 
 	 * @param filename
 	 */
-	public RpgmExporter(String filename) {
+	public RpgmExporter(String filename, String tileset) {
 		this.filename = filename;
+		
+		// load configuration for the selected tile set
+		TileConfiguration c = TileConfiguration.getInstance();
+		for(TileConfiguration.TileSet t:c.tilesets) {
+			if (tileset.equals(t.name)) {
+				tileSet = t.id;
+				deepTile = t.deepNum;
+				waterTile = t.waterNum;
+				dirtTile = t.dirtNum;
+				grassTile = t.grassNum;
+				return;
+			}
+		}
+		System.err.println("ERROR - Unknown tileset: " + tileset);
 	}
 
 	/**

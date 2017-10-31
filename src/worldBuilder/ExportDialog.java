@@ -303,7 +303,13 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			double v = Hydrology.velocity(slope);
 			double depth = Hydrology.depth(fluxMap[i],  v);
 			double width = Hydrology.width(fluxMap[i],  v);
+			
+			// figure out how many tiles wide the river should be
 			int stroke = (width <= tilesize) ? 1 : (int) ((width + width - 1) / tilesize);
+			if (tilesize/width > 10 && fluxMap[i] >= parms.river_flux)
+				stroke++;
+			if (tilesize/width > 100 && fluxMap[i] >= parms.artery_flux)
+				stroke++;
 			
 			// figure out starting and ending positions
 			int r = box_row(y0);

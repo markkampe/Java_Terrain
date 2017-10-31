@@ -70,6 +70,7 @@ public class Parameters {
 	public double stream_flux = 0.1;	// stream threshold (m3/s)
 	public double river_flux = 1.0;		// river threshold (m3/s)
 	public double artery_flux = 10.0; 	// artery threshold (m3/s)
+	public double deep_threshold = 10;	// deep water threshold (m)
 	public int topo_major = 5; 			// minor lines per major line
 	public int topo_minor = 100; 		// meters per minor line
 
@@ -332,6 +333,10 @@ public class Parameters {
 				case "artery":
 					artery_flux = new Double(parser.getString());
 					break;
+				case "deep":
+					deep_threshold = new Integer(parser.getString());
+					break;
+					
 
 				// mesh creation parameters
 				case "points":
@@ -356,7 +361,7 @@ public class Parameters {
 			System.out.println("Configuration Parameters (" + filename + ")");
 			System.out.println("   window:     " + width + "x" + height + ", border=" + border);
 			System.out.println("   waterways:  stream=" + stream_flux + unit_f + ", river=" + river_flux + unit_f
-					+ ", artery=" + artery_flux + unit_f);
+					+ ", artery=" + artery_flux + unit_f + ", deep=" + deep_threshold);
 			System.out.println("   erosion:    cycles=" + erosion_max + "  Ve=" + String.format("%.2f", Ve) + unit_v
 					+ ", Ce=" + String.format("%.4f", Ce) + ", Vd=" + String.format("%.2f", Vd) + unit_v + ", Cd="
 					+ String.format("%.4f", Cd));

@@ -47,7 +47,8 @@
 	"topo_minor": 100,
 	"stream": 0.25,
 	"river": 2.5,
-	"artery": 25
+	"artery": 25,
+	"deep": 10
     },
     "display": {
     	"mesh": false,

@@ -40,11 +40,16 @@ public class JsonExporter implements Exporter {
 	 */
 	public JsonExporter(String filename, int width, int height) {
 		this.filename = filename;
-		int dot = filename.lastIndexOf('.');
-		this.mapname = (dot == -1) ? filename : filename.substring(0, dot);
 		this.x_points = width;
 		this.y_points = height;
 		parms = Parameters.getInstance();
+		
+		// strip off suffix and leading directories to get base name
+		int dot = filename.lastIndexOf('.');
+		this.mapname = (dot == -1) ? filename : filename.substring(0, dot);
+		int slash = this.mapname.lastIndexOf('/');
+		if (slash == -1) slash = this.mapname.lastIndexOf('\\');
+		if (slash != -1) this.mapname = this.mapname.substring(slash+1);
 	}
 
 	public void tileSize(int meters) {

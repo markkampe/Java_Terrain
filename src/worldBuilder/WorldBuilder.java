@@ -16,6 +16,9 @@ public class WorldBuilder  extends JFrame
 	private static final String license = "";	// TBD
 	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [ -t tilecfg] [mesh file]";
 	
+	// active mouse-hogging dialog (for serialization)
+	public static boolean activeDialog;
+	
 	// active file
 	private String filename;	// name of current input/output file
 	private boolean modified;	// should this file be saved
@@ -333,8 +336,13 @@ public class WorldBuilder  extends JFrame
 				checkSave();
 			map.setMesh(null);
 			modified = false;
-		} else if (o == fileExport) {	// FIXME serialize mouseListeners: export
-			placeDialog(new ExportDialog(map), false);	
+		} else if (o == fileExport) {
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new ExportDialog(map), false);
+				activeDialog = true;
+			}
 		} else if (o == fileExit) {
 			if (modified)
 				checkSave();
@@ -344,14 +352,24 @@ public class WorldBuilder  extends JFrame
 		// edit menus pop up the corresponding dialogs
 		else if (o == editWorld) {
 			placeDialog(new WorldDialog(), true);
-		} else if (o == editMountain) {	// FIXME serialize mouseListeners: mountainDialog
-			placeDialog(new MountainDialog(map), false);
+		} else if (o == editMountain) {
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new MountainDialog(map), false);
+				activeDialog = true;
+			}
 		} else if (o == editSlope) {
 			placeDialog(new SlopeDialog(map), false);
 		} else if (o == editRain) {
 			placeDialog(new RainDialog(map), false);
-		} else if (o == editRiver) {	// FIXME serialize mouseListeners: riverDialog
-			placeDialog(new RiverDialog(map), false);
+		} else if (o == editRiver) {
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new RiverDialog(map), false);
+				activeDialog = true;
+			}
 		} else if (o == editErode) {
 			placeDialog(new ErosionDialog(map), true);
 		} else if (o == editCity) {
@@ -375,12 +393,21 @@ public class WorldBuilder  extends JFrame
 			parms.display_options = map.setDisplay(Map.SHOW_ERODE, (parms.display_options & Map.SHOW_ERODE) == 0);
 		else if (o == viewSoil)
 			parms.display_options = map.setDisplay(Map.SHOW_SOIL, (parms.display_options & Map.SHOW_SOIL) == 0);
-		else if (o == viewZoom)		// FIXME serialize mouseListeners: zoomDialog
-			new ZoomDialog(map);
-		else if (o == viewDebug)	// FIXME serialize mouseListeners: pointDebug
-			new PointDebug(map);
-		// help menu just shows info
-		else if (o == helpInfo) {
+		else if (o == viewZoom)	{
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new ZoomDialog(map), false);
+				activeDialog = true;
+			}
+		} else if (o == viewDebug) {
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new PointDebug(map), false);
+				activeDialog = true;
+			}
+		} else if (o == helpInfo) {		// help menu just shows info
 			JOptionPane.showMessageDialog(new JFrame(), 
 					version +"\n" + author + "\n" + credit + "\n" + license, 
 					"Information", JOptionPane.INFORMATION_MESSAGE);
@@ -442,6 +469,12 @@ public class WorldBuilder  extends JFrame
 		
 		// put it there
 		dialog.setLocation(x, y);
+	}
+	
+	private void twoDialogError() {
+		String message = "\nUnable to create this dialog until previous\n" +
+						 "map window selection dialog is closed.";
+		JOptionPane.showMessageDialog(new JFrame(),  message, "Dialog", JOptionPane.ERROR_MESSAGE);
 	}
 	
 	/**

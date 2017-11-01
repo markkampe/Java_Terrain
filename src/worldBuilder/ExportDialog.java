@@ -434,6 +434,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		this.dispose();
 		map.removeMouseListener(this);
 		map.removeMouseMotionListener(this);
+		WorldBuilder.activeDialog = false;
 	}
 	
 	/**
@@ -471,6 +472,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		this.dispose();
 		map.removeMouseListener(this);
 		map.removeMouseMotionListener(this);
+		WorldBuilder.activeDialog = false;
 	}
 
 	public void mouseClicked(MouseEvent arg0) {}

@@ -533,6 +533,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		map.removeMouseListener(this);
 		map.removeMouseMotionListener(this);
 		map.removeKeyListener(this);
+		WorldBuilder.activeDialog = false;
 	}
 	
 	/**

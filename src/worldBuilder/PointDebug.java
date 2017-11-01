@@ -132,6 +132,7 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 		public void windowClosing(WindowEvent e) {
 			this.dispose();
 			map.removeMouseListener(this);
+			WorldBuilder.activeDialog = false;
 		}
 
 		public void mouseMoved(MouseEvent arg0) {}

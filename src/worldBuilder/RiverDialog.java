@@ -113,6 +113,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	public void windowClosing(WindowEvent e) {
 		map.setArtery(oldArtery,  oldFlow);
 		map.removeMouseListener(this);
+		WorldBuilder.activeDialog = false;
 		this.dispose();
 	}
 	
@@ -154,6 +155,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		
 		// clean up the graphics
 		map.removeMouseListener(this);
+		WorldBuilder.activeDialog = false;
 		this.dispose();
 	}
 	

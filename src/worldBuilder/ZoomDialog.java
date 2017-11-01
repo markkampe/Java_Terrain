@@ -163,6 +163,7 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		this.dispose();
 		map.removeMouseListener(this);
 		map.removeMouseMotionListener(this);
+		WorldBuilder.activeDialog = false;
 	}
 
 	/**
@@ -181,6 +182,7 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 			accept.setVisible(false);
 			map.removeMouseListener(this);
 			map.removeMouseMotionListener(this);
+			WorldBuilder.activeDialog = false;
 			accept.removeActionListener(this);
 		}
 	}

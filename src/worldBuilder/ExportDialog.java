@@ -33,7 +33,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 
 	private static final int tile_sizes[] = {1, 5, 10, 50, 100, 500, 1000, 5000, 10000};
 	private static final String RAW_JSON = "raw json";
-	private static final String DEFAULT_OUTPUT = "Map004"; // TODO Parms.default_output
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -54,7 +53,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		sel_name = new JTextField();
-		sel_name.setText(DEFAULT_OUTPUT);
+		sel_name.setText(parms.output_filename);
 		JLabel nameLabel = new JLabel("Name of this region", JLabel.CENTER);
 		nameLabel.setFont(fontLarge);
 		
@@ -458,6 +457,9 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 				if (dir != null)
 					export_file = dir + export_file;
 				export(export_file);
+				
+				// make this the new default output file name
+				parms.output_filename = sel_name.getText();
 				return;
 			}
 		}

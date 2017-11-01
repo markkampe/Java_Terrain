@@ -333,7 +333,7 @@ public class WorldBuilder  extends JFrame
 				checkSave();
 			map.setMesh(null);
 			modified = false;
-		} else if (o == fileExport) {	// TODO serialize mouseListeners: export
+		} else if (o == fileExport) {	// FIXME serialize mouseListeners: export
 			placeDialog(new ExportDialog(map), false);	
 		} else if (o == fileExit) {
 			if (modified)
@@ -344,13 +344,13 @@ public class WorldBuilder  extends JFrame
 		// edit menus pop up the corresponding dialogs
 		else if (o == editWorld) {
 			placeDialog(new WorldDialog(), true);
-		} else if (o == editMountain) {	// TODO serialize mouseListeners: mountainDialog
+		} else if (o == editMountain) {	// FIXME serialize mouseListeners: mountainDialog
 			placeDialog(new MountainDialog(map), false);
 		} else if (o == editSlope) {
 			placeDialog(new SlopeDialog(map), false);
 		} else if (o == editRain) {
 			placeDialog(new RainDialog(map), false);
-		} else if (o == editRiver) {	// TODO serialize mouseListeners: riverDialog
+		} else if (o == editRiver) {	// FIXME serialize mouseListeners: riverDialog
 			placeDialog(new RiverDialog(map), false);
 		} else if (o == editErode) {
 			placeDialog(new ErosionDialog(map), true);
@@ -375,9 +375,9 @@ public class WorldBuilder  extends JFrame
 			parms.display_options = map.setDisplay(Map.SHOW_ERODE, (parms.display_options & Map.SHOW_ERODE) == 0);
 		else if (o == viewSoil)
 			parms.display_options = map.setDisplay(Map.SHOW_SOIL, (parms.display_options & Map.SHOW_SOIL) == 0);
-		else if (o == viewZoom)		// TODO serialize mouseListeners: zoomDialog
+		else if (o == viewZoom)		// FIXME serialize mouseListeners: zoomDialog
 			new ZoomDialog(map);
-		else if (o == viewDebug)	// TODO serialize mouseListeners: pointDebug
+		else if (o == viewDebug)	// FIXME serialize mouseListeners: pointDebug
 			new PointDebug(map);
 		// help menu just shows info
 		else if (o == helpInfo) {
@@ -471,6 +471,7 @@ public class WorldBuilder  extends JFrame
 		String filename = null;
 		String configname = null;
 		String tilecfgname = null;
+		String outputfilename = null;
 		int debug = 0;
 		for( int i = 0; i < args.length; i++ ) {
 			// eclipse does not honor argv[0] == command
@@ -492,6 +493,11 @@ public class WorldBuilder  extends JFrame
 						tilecfgname = args[i].substring(2);
 					else
 						tilecfgname = args[++i];
+				} else if (args[i].startsWith("-o")) {
+					if (args[i].length() > 2)
+						outputfilename = args[i].substring(2);
+					else
+						outputfilename = args[++i];
 				}else if (args[i].startsWith("-v")) {
 					debug = 1;
 				} else
@@ -502,6 +508,8 @@ public class WorldBuilder  extends JFrame
 		}
 		// instantiate the parameters singletons
 		parms = new Parameters(configname, debug);
+		if (outputfilename != null)
+			parms.output_filename = outputfilename;
 		new TileConfiguration(tilecfgname, debug);
 		
 		// and create the map

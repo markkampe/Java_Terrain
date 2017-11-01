@@ -19,6 +19,7 @@ import javax.json.stream.JsonParser;
 public class Parameters {
 	// default configuration file
 	private static final String DEFAULT_CONFIG = "/Templates/worldBuilder.json";
+	public String output_filename = "WoldMap";
 
 	// operating units ... hard-wired into the code
 	public static final String unit_xy = "km";
@@ -213,6 +214,9 @@ public class Parameters {
 				switch (thisKey) {
 				case "title":
 					title = parser.getString();
+					break;
+				case "output":
+					output_filename = parser.getString();
 					break;
 				}
 				break;

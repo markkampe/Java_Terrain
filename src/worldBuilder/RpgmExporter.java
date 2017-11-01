@@ -236,10 +236,10 @@ public class RpgmExporter implements Exporter {
 	 * likelihood of snow at a point
 	 */
 	private boolean snowy(int row, int col) {
-		double snowThreshold = 0.3;	// FIX tunable snow threshold
-		if (rain[row][col] < snowThreshold)
+		if (rain[row][col] < parms.min_snow)
 			return false;
-		double temp = (Twinter + Tmean)/2 - (heights[row][col] * parms.lapse_rate);
+		double alt = parms.altitude(heights[row][col] - erode[row][col]);
+		double temp = (Twinter + Tmean)/2 - (alt * parms.lapse_rate);
 		return (temp < 0);
 	}
 	

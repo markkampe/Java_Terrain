@@ -317,7 +317,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			int rDest = box_row(y1);
 			int c = box_col(x0);
 			int cDest = box_col(x1);
-			// FIXME horiz lines in RPGM rivers
+			
 			// FIXME discontinuous RPGM rivers
 			// fill the tiles between here and there with water
 			for(;;) {
@@ -332,6 +332,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 					}
 					r += (dR>0) ? 1 : -1;
 				} else {	// horizontal flow
+					// FIXME horiz lines in RPGM rivers
 					if ((r >= 0 && c >= 0 && r < y_points && c < x_points)) {
 						int start = r - (stroke/2);
 						for(int j = 0; j < stroke; j++)

@@ -65,6 +65,7 @@
     	"min_mountain": 500,
     	"min_peak": 1500,
     	"min_slope": 0.10,
+    	"min_snow": 15,
     	"tree_line": 2000,
     	"pine_line": 1500,
     	"tree_hydro": 0.3,

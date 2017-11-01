@@ -118,16 +118,17 @@ public class Parameters {
 	public int points = 4096; 	// desired number of grid points
 	
 	// RPGMaler export parameters
-	public int deep_water = 16;
-	public double min_slope = 0.11;
-	public int min_hill = 101;
-	public int min_mountain = 5001;
-	public int min_peak = 1501;
-	public int tree_line = 2001;
-	public int pine_line = 1501;
-	public double tree_hydro = 0.31;
-	public double grass_hydro = 0.26;
-	public double dirt_hydro = 0.11;
+	public int deep_water = 15;
+	public double min_slope = 0.10;
+	public int min_hill = 100;
+	public int min_mountain = 5000;
+	public int min_peak = 1500;
+	public int tree_line = 2000;
+	public int pine_line = 1500;
+	public int min_snow = 10;
+	public double tree_hydro = 0.30;
+	public double grass_hydro = 0.20;
+	public double dirt_hydro = 0.10;
 
 	// diagnostic options
 	public int debug_level; 	// level of verbosity
@@ -383,6 +384,10 @@ public class Parameters {
 					min_slope = new Double(parser.getString());
 					break;
 					
+				case "min_snow":
+					min_snow = new Integer(parser.getString());
+					break;
+					
 				case "tree_hydro":
 					tree_hydro = new Double(parser.getString());
 					break;
@@ -436,7 +441,8 @@ public class Parameters {
 			System.out.println("   export:     name=" + output_filename + ", deep_water=" + deep_water);
 			System.out.println("               tree_hydro=" + String.format("%.2f", tree_hydro) +
 											   ", grass_hydro=" + String.format("%.2f", grass_hydro) +
-											   ", dirt_hydro=" + String.format("%.2f", dirt_hydro));
+											   ", dirt_hydro=" + String.format("%.2f", dirt_hydro) +
+											   ", min_snow=" + min_snow + unit_r);
 			System.out.println("               min_slope=" + String.format("%.2f", min_slope) +
 											   ", min_hill=" + min_hill + ", min_mountain=" + min_mountain +
 											   ", min_peak=" + min_peak);

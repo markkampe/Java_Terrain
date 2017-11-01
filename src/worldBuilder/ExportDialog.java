@@ -325,23 +325,23 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 				int dR = rDest - r;
 				int dC = cDest - c;
 				if (Math.abs(dR) > Math.abs(dC)) { // vertical flow
-					if ((r >= 0 && c >= 0 && r < y_points && c < x_points)) {
-						int start = c - (stroke/2);
+					int start = c - (stroke/2);
+					if (r >= 0 && r < y_points && start >= 0 && start + stroke <= x_points) {
 						for(int j = 0; j < stroke; j++)
 							hydration[r][start + j] = -depth;
 					}
 					r += (dR>0) ? 1 : -1;
 				} else {	// horizontal flow
-					// FIXME horiz lines in RPGM rivers
-					if ((r >= 0 && c >= 0 && r < y_points && c < x_points)) {
-						int start = r - (stroke/2);
+					int start = r - (stroke/2);
+					if (c >= 0 && c < x_points && start >= 0 && start + stroke <= y_points) {
 						for(int j = 0; j < stroke; j++)
 							hydration[start + j][c] = -depth;
 					}
 					// see if we are done
 					if (dC == 0 && dR == 0)
 						break;
-					c += (dC>0) ? 1 : -1;
+					if (dC != 0)
+						c += (dC>0) ? 1 : -1;
 				}
 			}		
 		}

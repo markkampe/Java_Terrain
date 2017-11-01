@@ -1,61 +1,74 @@
 {
     "window": {
-	"title": "Worldbuilder 0.1 - Demo",
-	"height": 1000,
-	"width": 1000,
-	"border": 10,
-	"dialog_x": 250,
-	"dialog_y": 1000,
-	"dialog_delta": 50,
+		"title": "Worldbuilder 0.1 - Demo",
+		"height": 1000,
+		"width": 1000,
+		"border": 10,
+		"dialog_x": 250,
+		"dialog_y": 1000,
+		"dialog_delta": 50,
     	"dialog_border": 5
     },
     "limits": {
-	"diameter_unit": 10,
-	"diameter_max": 1000,
-	"diameter_grain": 10,
-	"altitude_unit": 100,
-	"altitude_max": 5000,
-	"mountain_fraction": 2,
-	"altitude_rain": 3000,
-	"msl_range": 1000,
-	"rain_max": 500,
-	"erosion_max": 10,
-	"tribute_max": 1000,
-	"tiles_max": 16384
+		"diameter_unit": 10,
+		"diameter_max": 1000,
+		"diameter_grain": 10,
+		"altitude_unit": 100,
+		"altitude_max": 5000,
+		"mountain_fraction": 2,
+		"altitude_rain": 3000,
+		"msl_range": 1000,
+		"rain_max": 500,
+		"erosion_max": 10,
+		"tribute_max": 1000,
+		"tiles_max": 16384
 	},
     "world": {
-	"radius": 6371,
-	"tilt": 23.5,
-	"latitude": 30.0,
-	"longitude": -90.0,
-	"sediment": 100
+		"radius": 6371,
+		"tilt": 23.5,
+		"latitude": 30.0,
+		"longitude": -90.0,
+		"sediment": 100
 	},
     "hydro-physics": {
     	"Ve": 0.75,
-	"Ce": 150.0,
-	"Vd": 0.15,
+		"Ce": 150.0,
+		"Vd": 0.15,
     	"Cd": 10.0,
     	"dR/dX": 0.005,
     	"Dp": 1.0,
-	"Edeg": 10,
-	"E35C": 100
+		"Edeg": 10,
+		"E35C": 100
     },
     "map": {
-	"points": 4096,
-	"improvements": 1,
-	"topo_major": 10,
-	"topo_minor": 100,
-	"stream": 0.25,
-	"river": 2.5,
-	"artery": 25,
-	"deep": 10
+		"points": 4096,
+		"improvements": 1,
+		"topo_major": 10,
+		"topo_minor": 100,
+		"stream": 0.25,
+		"river": 2.5,
+		"artery": 25,
+		"deep": 10
     },
     "display": {
     	"mesh": false,
-	"topo": true,
-	"rain": false,
-	"water": true,
+		"topo": true,
+		"rain": false,
+		"water": true,
     	"erosion": true,
-	"soil": false
+		"soil": false
+    },
+    "export": {
+    	"output": "worldmap",
+    	"deep_water": 15,
+    	"min_hill": 100,
+    	"min_mountain": 500,
+    	"min_peak": 1500,
+    	"min_slope": 0.10,
+    	"tree_line": 2000,
+    	"pine_line": 1500,
+    	"tree_hydro": 0.3,
+    	"grass_hydro": 0.2,
+    	"dirt_hydro": 0.05
     }
 }

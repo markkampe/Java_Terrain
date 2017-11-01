@@ -130,8 +130,8 @@ public class RpgmExporter implements Exporter {
 	 * L1 is the color/texture of the ground
 	 */
 	void populate_l1(int[][] grid) {
-		double dirtThreshold = 0.10; 	// TODO parms.dirtTHreshold
-		double grassThreshold = 0.25; 	// TODO parms.grassThreshold
+		double dirtThreshold = parms.dirt_hydro;
+		double grassThreshold = parms.grass_hydro;
 
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
@@ -155,15 +155,15 @@ public class RpgmExporter implements Exporter {
 	 * L2 is ground cover on top of the base texture
 	 */
 	void populate_l2(int[][] grid) {
-		double min_hill = 100;		// TODO parms.min_hill
-		double min_mountain = 500;	// TODO parms.min_mountain
-		double min_peak = 1500;		// TODO parms.min_peak
-		double min_slope = .05;		// TODO parms.min_slope
-		double deepThreshold = 15;	// TODO parms.deepThreshold
-		double tree_line = 2000;	// TODO parms.tree_line
-		double tree_hydro = 0.3;	// TODO parms.tree_hydro
-		double connifer_alt = 1500;	// TODO parms.connifer_alt
-		double grassThreshold = 0.25; 	// TODO parms.grassThreshold
+		double min_hill = parms.min_hill;
+		double min_mountain = parms.min_mountain;
+		double min_peak = parms.min_peak;
+		double min_slope = parms.min_slope;
+		double deepThreshold = parms.deep_water;
+		double tree_line = parms.tree_line;
+		double tree_hydro = parms.tree_hydro;
+		double connifer_alt = parms.pine_line;
+		double grassThreshold = parms.grass_hydro;
 
 		// does our tileset support mountains and hills?
 		boolean mountains = (tiles.dirtHillNum + tiles.mountainNum + tiles.snowPeakNum) > 0;

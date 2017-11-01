@@ -19,7 +19,7 @@ import javax.json.stream.JsonParser;
 public class Parameters {
 	// default configuration file
 	private static final String DEFAULT_CONFIG = "/Templates/worldBuilder.json";
-	public String output_filename = "WoldMap";
+	public String output_filename = "Happyville";
 
 	// operating units ... hard-wired into the code
 	public static final String unit_xy = "km";
@@ -116,6 +116,18 @@ public class Parameters {
 	// map generation parameters
 	public int improvements = 1; // number of smoothing iterations
 	public int points = 4096; 	// desired number of grid points
+	
+	// RPGMaler export parameters
+	public int deep_water = 16;
+	public double min_slope = 0.11;
+	public int min_hill = 101;
+	public int min_mountain = 5001;
+	public int min_peak = 1501;
+	public int tree_line = 2001;
+	public int pine_line = 1501;
+	public double tree_hydro = 0.31;
+	public double grass_hydro = 0.26;
+	public double dirt_hydro = 0.11;
 
 	// diagnostic options
 	public int debug_level; 	// level of verbosity
@@ -342,7 +354,47 @@ public class Parameters {
 					deep_threshold = new Integer(parser.getString());
 					break;
 					
-
+				// export parameters
+				case "deep_water":
+					deep_water = new Integer(parser.getString());
+					break;
+					
+				case "min_hill":
+					min_hill = new Integer(parser.getString());
+					break;
+					
+				case "min_mountain":
+					min_mountain = new Integer(parser.getString());
+					break;
+					
+				case "min_peak":
+					min_peak = new Integer(parser.getString());
+					break;
+					
+				case "tree_line":
+					tree_line = new Integer(parser.getString());
+					break;
+					
+				case "pine_line":
+					pine_line = new Integer(parser.getString());
+					break;
+					
+				case "min_slope":
+					min_slope = new Double(parser.getString());
+					break;
+					
+				case "tree_hydro":
+					tree_hydro = new Double(parser.getString());
+					break;
+					
+				case "grass_hydro":
+					grass_hydro = new Double(parser.getString());
+					break;
+					
+				case "dirt_hydro":
+					dirt_hydro = new Double(parser.getString());
+					break;
+					
 				// mesh creation parameters
 				case "points":
 					points = new Integer(parser.getString());
@@ -381,6 +433,14 @@ public class Parameters {
 			System.out.println(
 					"               rainfall=" + rain_max + unit_r + " (bottoms at " + alt_maxrain + unit_z + ")");
 			System.out.println("               watershed=" + tribute_max + " " + unit_f);
+			System.out.println("   export:     name=" + output_filename + ", deep_water=" + deep_water);
+			System.out.println("               tree_hydro=" + String.format("%.2f", tree_hydro) +
+											   ", grass_hydro=" + String.format("%.2f", grass_hydro) +
+											   ", dirt_hydro=" + String.format("%.2f", dirt_hydro));
+			System.out.println("               min_slope=" + String.format("%.2f", min_slope) +
+											   ", min_hill=" + min_hill + ", min_mountain=" + min_mountain +
+											   ", min_peak=" + min_peak);
+			System.out.println("               tree_line=" + tree_line + ", pine_line=" + pine_line);
 			System.out.println("   warnings:   tiles=" + tiles_max);
 			System.out.println("   verbosity:  " + debug_level);
 			worldParms();

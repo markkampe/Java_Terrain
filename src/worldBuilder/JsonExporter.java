@@ -38,24 +38,17 @@ public class JsonExporter implements Exporter {
 	 * create a new output file
 	 * @param filename
 	 */
-	public JsonExporter(String filename) {
+	public JsonExporter(String filename, int width, int height) {
 		this.filename = filename;
+		int dot = filename.lastIndexOf('.');
+		this.mapname = (dot == -1) ? filename : filename.substring(0, dot);
+		this.x_points = width;
+		this.y_points = height;
 		parms = Parameters.getInstance();
-	}
-	
-	
-	public void name(String name) {
-		this.mapname = name;
-	}
-
-	public void dimensions(int x_points, int y_points) {
-		this.x_points = x_points;
-		this.y_points = y_points;	
 	}
 
 	public void tileSize(int meters) {
 		this.tile_size = meters;
-		
 	}
 
 	public void position(double lat, double lon) {
@@ -83,14 +76,12 @@ public class JsonExporter implements Exporter {
 
 	public void soilMap(double[][] soil) {
 		this.soil = soil;
-		
 	}
 
 	public void waterMap(double[][] hydration) {
 		this.hydration = hydration;
 	}
 
-	
 	/**
 	 * export a map as high resolution tiles
 	 */
@@ -147,7 +138,6 @@ public class JsonExporter implements Exporter {
 			boolean first = true;
 			for(int r = 0; r < y_points; r++) {
 				for(int c = 0; c < x_points; c++) {
-
 					if (first)
 						first = false;
 					else

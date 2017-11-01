@@ -195,11 +195,9 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		Exporter export;
 		String f = (String) format.getSelectedItem();
 		if (f.equals(RAW_JSON))
-			export = new JsonExporter(filename);
+			export = new JsonExporter(filename, x_points, y_points);
 		else
-			export = new RpgmExporter(filename, f);
-		export.name(sel_name.getText());
-		export.dimensions(x_points, y_points);
+			export = new RpgmExporter(filename, f, x_points, y_points);
 		int meters = tile_sizes[resolution.getValue()];
 		export.tileSize(meters);
 		export.temps(parms.meanTemp(), parms.meanSummer(), parms.meanWinter());
@@ -231,6 +229,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		double hydration[][] = cart.interpolate(map.getHydrationMap());
 		add_rivers(hydration, meters);	// add rivers to hydration map
 		export.waterMap(hydration);
+		
+		// TODO place plants, ultimately trees
 
 		// and force it all out
 		if (export.flush()) {

@@ -23,6 +23,12 @@ public class TileConfiguration {
 		public int grassNum;
 		public int snowNum;
 		public int waterNum;
+		
+		public int treeNum;
+		public int palmNum;
+		public int pineNum;
+		public int xmasNum;
+		
 		public int deepNum;
 		public int grassHillNum;
 		public int dirtHillNum;
@@ -64,6 +70,7 @@ public class TileConfiguration {
 
 		String name = "", thisKey = "";
 		int id = 0, deep = 0, water = 0, grass = 0, sand = 0, dirt = 0, snow = 0;
+		int tree = 0, palm = 0, pine = 0, xmas = 0;
 		int grassHill = 0, dirtHill = 0, snowHill = 0, rocks = 0;
 		int mountain = 0, peak = 0, snowPeak = 0;
 		parser = Json.createParser(r);
@@ -126,6 +133,22 @@ public class TileConfiguration {
 				case "snowHill":
 					snowHill = new Integer(parser.getString());
 					break;
+					
+				case "tree":
+					tree = new Integer(parser.getString());
+					break;
+					
+				case "palm":
+					palm = new Integer(parser.getString());
+					break;
+					
+				case "pine":
+					pine = new Integer(parser.getString());
+					break;
+					
+				case "xmas":
+					xmas = new Integer(parser.getString());
+					break;
 						
 				case "mountain":
 					mountain = new Integer(parser.getString());
@@ -157,6 +180,10 @@ public class TileConfiguration {
 					set.grassHillNum = grassHill;
 					set.snowNum = snow;
 					set.snowHillNum = snowHill;
+					set.treeNum = tree;
+					set.palmNum = palm;
+					set.pineNum = pine;
+					set.xmasNum = xmas;
 					set.mountainNum = mountain;
 					set.peakNum = peak;
 					set.snowPeakNum = snowPeak;
@@ -171,6 +198,10 @@ public class TileConfiguration {
 					grass = 0;
 					dirt = 0;
 					rocks = 0;
+					tree = 0;
+					palm = 0;
+					pine = 0;
+					xmas = 0;
 					grassHill = 0;
 					dirtHill = 0;
 					snowHill = 0;
@@ -195,6 +226,8 @@ public class TileConfiguration {
 					System.out.println("      sand=" + t.sandNum + ", dirt=" + t.dirtNum + 
 							                  ", rocks=" + t.rockNum + ", grass=" + t.grassNum + 
 							                  ", snow=" + t.snowNum );
+					System.out.println("      tree=" + t.treeNum + ", palm=" + t.palmNum +
+											  ", pine=" + t.pineNum + ", xmas=" + t.xmasNum);
 					if (t.dirtHillNum + t.grassHillNum + t.snowHillNum > 0)
 						System.out.println("      dirtHill=" + t.dirtHillNum +
 											  ", grassHill=" + t.grassHillNum +

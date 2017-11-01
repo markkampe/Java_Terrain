@@ -10,8 +10,8 @@ public class RpgmExporter implements Exporter {
 
 	private String filename;	// output file name
 	private Parameters parms;	// general parameters
-	//private String mapname;		// name of this map
-
+	private TileConfiguration.TileSet tiles;// tile set information
+	
 	// physical map parameters
 	private int x_points; 		// width of map (in points)
 	private int y_points; 		// height of map (in points)
@@ -21,7 +21,7 @@ public class RpgmExporter implements Exporter {
 
 	// plant/terrain influencing parameters
 	private double Tmean; 		// mean temperature (degC)
-	private double Tsummer; 	// mean summer temperature (degC)
+	//private double Tsummer; 	// mean summer temperature (degC)
 	private double Twinter; 	// mean winter temperature (degC)
 	private double[][] rain;	// per point rainfall (meters)
 
@@ -31,80 +31,23 @@ public class RpgmExporter implements Exporter {
 	private double[][] hydration; // per point water depth (meters)
 	private double[][] soil;	// per point soil type
 
-	/*
-	 * RPGMaker tile address space
-	 * The RPGMaker database configures a few tile sets.
-	 * A tile-set is a .png containing tiles (of known size)
-	 * The maximum number of tiles within a tile set is 48x16=768
-	 * A tile number is the base number of its tile set
-	 *   plus its offset within the tile set.
-	 * In auto-tile tile-sets the images seem to come in
-	 *   a well defined order (which enables corners,
-	 *   borders, and other transitions)
-	 *   
-	 * The intention seems to be that one can replace the
-	 * individual images while preserving the spatial sense,
-	 * switch tile sets, and the same game will have a different
-	 * look.
-	private static final int A1_BASE = 2048;
-	private static final int A2_BASE = A1_BASE + 768;
-	private static final int A3_BASE = A2_BASE + (2*768);
-	private static final int A4_BASE = A3_BASE + (2*768);
-	private static final int A5_BASE = A1_BASE - 512;
-	private static final int B_BASE = 0;
-	private static final int C_BASE = 256;
-	private static final int D_BASE = 512;
-	private static final int E_BASE = 768;
-	 */
-	
-	private int tileSet = 2;	// Outdoors 
-	// L1 ground level auto-tile
-	private int waterTile = 2048;
-	private int sandTile = 3584;
-	private int dirtTile = 2864;
-	private int grassTile = 2816;
-	private int snowTile = 3968;
-	// L2 above ground auto-tile
-	private int rocksTile = 3384;	// L2
-	private int deepTile = 2096;	// L2
-	private int treeTile = 3006;	// L2
-	private int pineTile = 3056;	// L2
-	private int palmTile = 3776;	// L2
-	private int xmasTile = 4160;	// L2
-	private int grassHill = 0;	// OverLand L2 only
-	private int dirtHill = 0;	// OverLand L2 only
-	private int snowHill = 0;	// OverLand L2 only
-	private int mountainTile = 0; // OverLand L2 only
-	private int peakTile = 0;	// OverLand L2 only
-	private int snowPeakTile = 0; // OverLand L2 only
 	
 	/**
 	 * create a new output writer
 	 * 
 	 * @param filename
 	 */
-	public RpgmExporter(String filename, String tileset) {
+	public RpgmExporter(String filename, String tileset, int width, int height) {
 		this.filename = filename;
 		this.parms = Parameters.getInstance();
+		this.x_points = width;
+		this.y_points = height;
 		
 		// load configuration for the selected tile set
 		TileConfiguration c = TileConfiguration.getInstance();
 		for(TileConfiguration.TileSet t:c.tilesets) {
 			if (tileset.equals(t.name)) {
-				tileSet = t.id;
-				deepTile = t.deepNum;
-				waterTile = t.waterNum;
-				dirtTile = t.dirtNum;
-				sandTile = t.sandNum;
-				rocksTile = t.rockNum;
-				snowTile = t.snowNum;
-				grassTile = t.grassNum;
-				grassHill = t.grassHillNum;
-				dirtHill = t.dirtHillNum;
-				snowHill = t.snowHillNum;
-				mountainTile = t.mountainNum;
-				peakTile = t.peakNum;
-				snowPeakTile = t.snowPeakNum;
+				tiles = t;
 				return;
 			}
 		}
@@ -115,11 +58,6 @@ public class RpgmExporter implements Exporter {
 	 * write out an RPGMaker map
 	 */
 	public boolean flush() {
-		double deepThreshold = -parms.deep_threshold;
-
-		double slopeThreshold = 0.25;	// TODO move into parms
-		double altThreshold = 50.0;		// TODO move into parms
-		
 		try {
 			FileWriter output = new FileWriter(filename);
 			output.write("{\n");
@@ -199,17 +137,17 @@ public class RpgmExporter implements Exporter {
 			for (int j = 0; j < x_points; j++) {
 				double h = hydration[i][j];
 				if (h < 0)
-					grid[i][j] = waterTile;
+					grid[i][j] = tiles.waterNum;
 				else if (snowy(i, j))
-					grid[i][j] = snowTile;
+					grid[i][j] = tiles.snowNum;
 				else if (h >= grassThreshold)
-					grid[i][j] = grassTile;
+					grid[i][j] = tiles.grassNum;
 				else if (rocky(i,j))
-					grid[i][j] = rocksTile;
+					grid[i][j] = tiles.rockNum;
 				else if (h >= dirtThreshold)
-					grid[i][j] = dirtTile;
+					grid[i][j] = tiles.dirtNum;
 				else
-					grid[i][j] = sandTile;
+					grid[i][j] = tiles.sandNum;
 			}
 	}
 	
@@ -225,10 +163,10 @@ public class RpgmExporter implements Exporter {
 		double tree_line = 2000;	// TODO parms.tree_line
 		double tree_hydro = 0.3;	// TODO parms.tree_hydro
 		double connifer_alt = 1500;	// TODO parms.connifer_alt
-		double dirtThreshold = 0.10; 	// TODO parms.dirtTHreshold
 		double grassThreshold = 0.25; 	// TODO parms.grassThreshold
 
-		boolean mountains = (dirtHill + mountainTile + snowPeakTile) > 0;
+		// does our tileset support mountains and hills?
+		boolean mountains = (tiles.dirtHillNum + tiles.mountainNum + tiles.snowPeakNum) > 0;
 
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
@@ -237,25 +175,25 @@ public class RpgmExporter implements Exporter {
 				double m = slope(i,j);
 				
 				if (h < 0)
-					grid[i][j] = (h <= deepThreshold) ? deepTile : 0;
+					grid[i][j] = (h <= deepThreshold) ? tiles.deepNum : 0;
 				else if (mountains && alt >= min_hill && m >= min_slope) {
 					if (alt >= min_peak)
-						grid[i][j] = snowy(i,j) ? snowPeakTile : peakTile;
+						grid[i][j] = snowy(i,j) ? tiles.snowPeakNum : tiles.peakNum;
 					else if (alt >= min_mountain)
-						grid[i][j] = mountainTile;
+						grid[i][j] = tiles.mountainNum;
 					else if (snowy(i,j))
-						grid[i][j] = snowHill;
+						grid[i][j] = tiles.snowHillNum;
 					else if (h >= grassThreshold)
-						grid[i][j] = grassHill;
+						grid[i][j] = tiles.grassHillNum;
 					else
-						grid[i][j] = dirtHill;
+						grid[i][j] = tiles.dirtHillNum;
 				} else if (h >= tree_hydro && alt <= tree_line) {
 					if (snowy(i,j))
-						grid[i][j] = xmasTile;
+						grid[i][j] = tiles.xmasNum;
 					else if (alt >= connifer_alt)
-						grid[i][j] = pineTile;
+						grid[i][j] = tiles.pineNum;
 					else
-						grid[i][j] = treeTile;
+						grid[i][j] = tiles.treeNum;
 				} else
 					grid[i][j] = 0;
 			}
@@ -265,7 +203,7 @@ public class RpgmExporter implements Exporter {
 	 * L3 is trees and other impassable above-ground objects
 	 */
 	void populate_l3(int[][] grid) {
-		// TODO populate L3 w/trees
+		// TODO populate L3 of area maps w/trees
 		for(int i = 0; i < y_points; i++)
 			for(int j = 0; j < x_points; j++)
 				grid[i][j] = 0;
@@ -394,16 +332,6 @@ public class RpgmExporter implements Exporter {
 		// index into offset array to choose which image to use
 		return offset[bits];
 	}
-	
-	// attribute/info setting methods (from Exporter.java)
-	public void name(String name) {
-		//this.mapname = name;
-	}
-
-	public void dimensions(int x_points, int y_points) {
-		this.x_points = x_points;
-		this.y_points = y_points;
-	}
 
 	public void tileSize(int meters) {
 		this.tile_size = meters;
@@ -416,7 +344,7 @@ public class RpgmExporter implements Exporter {
 
 	public void temps(double meanTemp, double meanSummer, double meanWinter) {
 		this.Tmean = meanTemp;
-		this.Tsummer = meanSummer;
+		//this.Tsummer = meanSummer;
 		this.Twinter = meanWinter;
 	}
 
@@ -450,7 +378,7 @@ public class RpgmExporter implements Exporter {
 		// patch in the array height and width
 		setparm("height", String.format("%d", y_points));
 		setparm("width", String.format("%d", x_points));
-		setparm("tilesetId", String.format("%d", tileSet));
+		setparm("tilesetId", String.format("%d", tiles.id));
 
 		// output all the standard parameters in the standard order
 		writeParmList(out, parms1);

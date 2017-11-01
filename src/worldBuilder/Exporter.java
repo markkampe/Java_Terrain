@@ -6,18 +6,6 @@ package worldBuilder;
  *
  */
 public interface Exporter {
-
-	/**
-	 * @param name of this map (as opposed to file)
-	 */
-	void name(String text);
-
-	/**
-	 * @param x_points map width
-	 * @param y_points map height
-	 */
-	void dimensions(int x_points, int y_points);
-
 	/**
 	 * @param meters real-world width of a tile
 	 */

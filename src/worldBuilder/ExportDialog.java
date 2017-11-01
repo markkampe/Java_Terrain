@@ -41,6 +41,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		this.map = map;
 		this.parms = Parameters.getInstance();
 		
+		// TODO: control #tiles vs tile size
+		
 		// create the dialog box
 		Container mainPane = getContentPane();
 		int border = parms.dialogBorder;

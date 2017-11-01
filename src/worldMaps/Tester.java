@@ -1,14 +1,18 @@
 package worldMaps;
 
 import java.awt.FileDialog;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+
 import javax.swing.JFrame;
 
 public class Tester extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
 	public String filename;
+	private static PrintStream output = System.out;
 	
-	public Tester() {
+	public Tester() throws FileNotFoundException {
 		FileDialog d = new FileDialog(this, "Select WorldBuilder Export to load", FileDialog.LOAD);
 		d.setFile(filename == null ? "Happyville.json" : filename);
 		d.setVisible(true);
@@ -18,36 +22,50 @@ public class Tester extends JFrame {
 			if (dir != null)
 				filename = dir + filename;
 		}
+		
+		d = new FileDialog(this, "Select output file", FileDialog.LOAD);
+		d.setVisible(true);
+		String outfile = d.getFile();
+		if (outfile != null) {
+			String dir = d.getDirectory();
+			output = new PrintStream((dir==null) ? outfile : dir + outfile);
+		}
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 		String filename = (args.length > 1) ? args[1] : new Tester().filename;
 		if (filename == null)
 			System.exit(-1);
 		MapReader r = new MapReader(filename);
-		System.out.println("File: " + filename);
-		System.out.println("Region: " + r.name());
-		System.out.println("location: " + r.latitude() + ", " + r.longitude());
-		System.out.println("size: " + r.height() + "x" + r.width() + " x " + r.tileSize() + "m");
-		System.out.print("altitude");
+
+		output.println("File: " + filename);
+		output.println("Region: " + r.name());
+		output.println("location: " + r.latitude() + ", " + r.longitude());
+		output.println("size: " + r.height() + "x" + r.width() + " x " + r.tileSize() + "m");
+		output.print("altitude");
 		for(int row = 0; row < r.height(); row++) {
-			System.out.print("\n    ");
+			output.println();
+			output.print("    ");
 			for(int col = 0; col < r.width(); col++) {
-				System.out.print(String.format("%4.0f ", r.altitude(row, col)));
+				output.print(String.format("%4.0f ", r.altitude(row, col)));
 			}
 		}
 		
-		System.out.print("\nslope:");
+		output.println();
+		output.print("slope:");
 		for(int row = 0; row < r.height(); row++) {
-			System.out.print("\n    ");
+			output.println();
+			output.print("    ");
 			for(int col = 0; col < r.width(); col++) {
-				System.out.print(String.format("%3.1f ", r.slope(row, col)));
+				output.print(String.format("%3.1f ", r.slope(row, col)));
 			}
 		}
 		
-		System.out.print("\nface:");
+		output.println();
+		output.print("face:");
 		for(int row = 0; row < r.height(); row++) {
-			System.out.print("\n    ");
+			output.println();
+			output.print("    ");
 			for(int col = 0; col < r.width(); col++) {
 				String d = "   ";
 				switch(r.face(row, col)) {
@@ -61,29 +79,35 @@ public class Tester extends JFrame {
 				case WEST: d = " W "; break;
 				case EAST: d = " E "; break;
 				}
-				System.out.print(d);
+				output.print(d);
 			}
 		}
 		
-		System.out.print("\nrainfall:");
+		output.println();
+		output.print("rainfall:");
 		for(int row = 0; row < r.height(); row++) {
-			System.out.print("\n    ");
+			output.println();
+			output.print("    ");
 			for(int col = 0; col < r.width(); col++) {
-				System.out.print(String.format("%3d ", r.rainfall(row, col)));
+				output.print(String.format("%3d ", r.rainfall(row, col)));
 			}
 		}
 		
-		System.out.print("\nhydration");
+		output.println();
+		output.print("hydration");
 		for(int row = 0; row < r.height(); row++) {
-			System.out.print("\n    ");
+			output.println();
+			output.print("    ");
 			for(int col = 0; col < r.width(); col++) {
-				System.out.print(String.format("%.2f ", r.hydration(row, col)));
+				output.print(String.format("%6.2f ", r.hydration(row, col)));
 			}
 		}
 		
-		System.out.print("\nsoil");
+		output.println();
+		output.print("soil");
 		for(int row = 0; row < r.height(); row++) {
-			System.out.print("\n    ");
+			output.println();
+			output.print("    ");
 			for(int col = 0; col < r.width(); col++) {
 				String s = "? ";
 				switch(r.soilType(row, col)) {
@@ -93,15 +117,17 @@ public class Tester extends JFrame {
 				case SEDIMENTARY: s = "S "; break;
 				case ALLUVIAL: s = "A "; break;
 				}
-				System.out.print(s);
+				output.print(s);
 			}
 		}
 		
-		System.out.print("\nmean temp");
+		output.println();
+		output.print("mean temp");
 		for(int row = 0; row < r.height(); row++) {
-			System.out.print("\n    ");
+			output.println();
+			output.print("    ");
 			for(int col = 0; col < r.width(); col++) {
-				System.out.print(String.format("%.1fC ", r.meanTemp(row, col, MapReader.Seasons.SPRING)));
+				output.print(String.format("%.1fC ", r.meanTemp(row, col, MapReader.Seasons.SPRING)));
 			}
 		}
 	}

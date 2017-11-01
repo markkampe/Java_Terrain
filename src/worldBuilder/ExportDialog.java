@@ -317,7 +317,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			int rDest = box_row(y1);
 			int c = box_col(x0);
 			int cDest = box_col(x1);
-
+			// FIXME horiz lines in RPGM rivers
+			// FIXME discontinuous RPGM rivers
 			// fill the tiles between here and there with water
 			for(;;) {
 				// figure out which direction we want to move in

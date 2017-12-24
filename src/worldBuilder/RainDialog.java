@@ -192,10 +192,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		
 		// tell the map about the update
 		map.setRainMap(rainmap);
-		
 		if (parms.debug_level > 1)
-			System.out.println("Rainfall: " + (int) incoming + Parameters.unit_r + ", from " + 
-					parms.dDirection + ", cloud bottoms at " + parms.dRainHeight + Parameters.unit_z);
+			parms.rainParms((int)incoming);
 	}
 
 	/**
@@ -288,11 +286,12 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			parms.dDirection = direction.getValue();
 			parms.dRainHeight = altitude.getValue();
 			
-			if (parms.debug_level > 0)
-				System.out.println("Rainfall: mean " + (int) meanRain() + Parameters.unit_r + ", from " + 
-						parms.dDirection + ", cloud bottoms at " + parms.dRainHeight + Parameters.unit_z +
-						", max flow " + String.format("%.2f", map.max_flux) + Parameters.unit_f +
+			if (parms.debug_level > 0) {
+				parms.rainParms((int) meanRain());
+				System.out.println("Rivers:    " +
+						"max flow " + String.format("%.2f", map.max_flux) + Parameters.unit_f +
 						", max speed " + String.format("%.2f",  map.max_velocity) + Parameters.unit_v);
+			}
 			// we no longer need the old rain map
 			oldRain = null;
 		}

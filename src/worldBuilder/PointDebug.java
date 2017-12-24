@@ -22,6 +22,8 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 		private JLabel infoHydro;
 		private JLabel infoDownhill;
 		
+		// FIX indicate read-only-attributes
+		
 		public PointDebug(Map map)  {
 			// pick up references
 			this.map = map;

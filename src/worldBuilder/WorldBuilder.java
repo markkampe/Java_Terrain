@@ -173,8 +173,10 @@ public class WorldBuilder  extends JFrame
 		editErode.addActionListener(this);
 		editCity = new JMenuItem("add city");
 		editCity.addActionListener(this);
+		editCity.setEnabled(false);	// TODO implement city creation
 		editRoads = new JMenuItem("draw roads");
 		editRoads.addActionListener(this);
+		editRoads.setEnabled(false);	// TODO implement city creation
 		JMenu editMenu = new JMenu("Edit");
 		editMenu.add(editWorld);
 		editMenu.add(editSlope);
@@ -279,7 +281,7 @@ public class WorldBuilder  extends JFrame
 			String dir = d.getDirectory();
 			if (dir != null)
 				filename = dir + filename;
-			map.getMesh().write(filename, map.getHeightMap(), map.getArtery());
+			map.getMesh().write(filename, map);
 			modified = false;
 		}
 	}
@@ -293,20 +295,30 @@ public class WorldBuilder  extends JFrame
 		}	
 	}
 
+	/**
+	 * enable/disable menus according to sub-region status
+	 */
+	private void menuEnable(boolean isSubRegion) {
+		editRain.setEnabled(!isSubRegion);
+		editSlope.setEnabled(!isSubRegion);
+		editRiver.setEnabled(!isSubRegion);
+	}
+	
 	public void actionPerformed( ActionEvent e ) {
 		Object o = e.getSource();
-		
 		// file menu opens, closes, saves, and exports files
 		if (o == fileNew) {
 			if (modified)
 				checkSave();
 			filename = null;
 			placeDialog(new MeshDialog(map), true);
+			menuEnable(false);
 			modified = true;
 		} else if (o == fileRegion) {
 			if (modified)
 				checkSave();
 			placeDialog(new RegionDialog(map), false);
+			menuEnable(true);
 		} else if (o == fileOpen) {
 			if (modified)
 				checkSave();
@@ -321,10 +333,16 @@ public class WorldBuilder  extends JFrame
 				double[] heightMap = m.read(filename);
 				map.setMesh(m);
 				map.setHeightMap(heightMap);
+				// FIX rainfall comes from open
 				RainDialog.rainFall(map, parms.dDirection, parms.dAmount);
+				// FIX artery comes from open
 				if (parms.arteryX >= 0) {
 					map.setArtery(m.vertices[parms.arteryX], parms.dTribute);
 				}
+				
+				// newly loaded map may have changed the sea-level
+				seaLevel.setValue((int)(parms.sea_level * parms.z_range));
+				menuEnable(m.isSubRegion);
 				modified = false;
 			}
 		} else if (o == fileSave) {
@@ -351,7 +369,7 @@ public class WorldBuilder  extends JFrame
 		
 		// edit menus pop up the corresponding dialogs
 		else if (o == editWorld) {
-			placeDialog(new WorldDialog(), true);
+			placeDialog(new WorldDialog(map.getMesh().isSubRegion), true);
 		} else if (o == editMountain) {
 			if (activeDialog)
 				twoDialogError();

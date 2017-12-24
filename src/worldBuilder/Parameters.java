@@ -449,7 +449,6 @@ public class Parameters {
 			System.out.println("               tree_line=" + tree_line + ", pine_line=" + pine_line);
 			System.out.println("   warnings:   tiles=" + tiles_max);
 			System.out.println("   verbosity:  " + debug_level);
-			worldParms();
 		}
 	}
 
@@ -459,6 +458,9 @@ public class Parameters {
 		return singleton;
 	}
 
+	/**
+	 * print out the world configuration (after changes and reloads)
+	 */
 	public void worldParms() {
 		System.out.println("World Configuration");
 		System.out.println("   maped area: " + xy_range + "x" + xy_range + " " + unit_xy + "^2, max altitude "
@@ -469,6 +471,16 @@ public class Parameters {
 				+ String.format("%.1f", meanSummer()) + unit_t + ", Twinter=" + String.format("%.1f", meanWinter())
 				+ unit_t);
 		System.out.println("   topo maps:  " + topo_minor + unit_z + "/line, " + topo_major + " minors/major");
+	}
+	
+	/**
+	 * print out the rain parameters (after changes and reloads)
+	 * 
+	 * @param	annual rainfall (cm/y)
+	 */
+	public void rainParms(int incoming) {
+		System.out.println("Rainfall: " + incoming + unit_r + ", from " + 
+				dDirection + ", cloud bottoms at " + dRainHeight + unit_z);
 	}
 
 	/**

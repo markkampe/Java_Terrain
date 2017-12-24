@@ -25,7 +25,12 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		
 		private static final long serialVersionUID = 1L;
 		
-		public WorldDialog()  {
+		/**
+		 * put up a world parameters Dialog
+		 * 
+		 * @param readOnly ... sub-region w/fixed world parameters
+		 */
+		public WorldDialog(boolean readOnly)  {
 			// pick up references
 			this.parms = Parameters.getInstance();
 			
@@ -48,9 +53,11 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			longitude = new JTextField(Double.toString(parms.longitude));
 			JLabel lonLabel = new JLabel("longitude (center of map)");
 			lonLabel.setFont(fontLarge);
+			latitude.setEditable(!readOnly);
+			longitude.setEditable(!readOnly);
 		
 			int max = parms.diameter_max/parms.diameter_scale;
-			int dflt = parms.dDiameter;
+			int dflt = parms.xy_range/parms.diameter_scale;
 			diameter = new JSlider(JSlider.HORIZONTAL, 0, max, dflt);
 			diameter.setMajorTickSpacing(Parameters.niceTics(0, max, true));
 			diameter.setMinorTickSpacing(Parameters.niceTics(0, max, false));
@@ -60,6 +67,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			String label = "Height/Width (" + Parameters.unit_xy + " x " + parms.diameter_scale + ")";
 			JLabel diameterLabel = new JLabel(label, JLabel.CENTER);
 			diameterLabel.setFont(fontLarge);
+			diameter.setEnabled(!readOnly);
 			
 			max = parms.alt_max / parms.alt_scale;
 			dflt = parms.z_range / (2 * parms.alt_scale);

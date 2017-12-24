@@ -273,7 +273,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		
 		// consider all points in the Mesh
 		for(int i = 0; i < mesh.vertices.length; i++) {
-			// ignore any already under water
+			// ignore any source point already under water
 			if (hydroMap[i] < 0)
 				continue;
 			

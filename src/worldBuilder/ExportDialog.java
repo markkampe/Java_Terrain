@@ -170,8 +170,10 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 * return the export row associated with a y coordinate
 	 */
 	int box_row(double y) {
-		if (y < box_y || y >= box_y + box_height)
-			return(-1);
+		if (y < box_y)
+			return(0);
+		if (y >= box_y + box_height)
+			return(y_points - 1);
 		double dy = (y - box_y)/box_height;
 		dy *= y_points;
 		return (int) dy;
@@ -181,8 +183,10 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 * return the export column associated with an x coordinate
 	 */
 	int box_col(double x) {
-		if (x < box_x || x >= box_x + box_width)
-			return(-1);
+		if (x < box_x)
+			return(0);
+		if (x >= box_x + box_width)
+			return(x_points - 1);
 		double dx = (x - box_x)/box_width;
 		dx *= x_points;
 		return (int) dx;
@@ -320,32 +324,36 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			int c = box_col(x0);
 			int cDest = box_col(x1);
 			
-			// FIXME discontinuous RPGM rivers
+			// figure out how far we have to go
+			int drawn = 0;
+			int dR = rDest - r;
+			int dC = cDest - c;
+			
 			// fill the tiles between here and there with water
-			for(;;) {
+			while(drawn++ == 0 || dR != 0 || dC != 0) {
 				// figure out which direction we want to move in
-				int dR = rDest - r;
-				int dC = cDest - c;
 				if (Math.abs(dR) > Math.abs(dC)) { // vertical flow
 					int start = c - (stroke/2);
 					if (r >= 0 && r < y_points && start >= 0 && start + stroke <= x_points) {
 						for(int j = 0; j < stroke; j++)
 							hydration[r][start + j] = -depth;
 					}
+					// move on to the next row
 					r += (dR>0) ? 1 : -1;
-				} else {	// horizontal flow
+					dR = rDest - r;
+				} else {	// horizontal flow or last stroke
 					int start = r - (stroke/2);
 					if (c >= 0 && c < x_points && start >= 0 && start + stroke <= y_points) {
 						for(int j = 0; j < stroke; j++)
 							hydration[start + j][c] = -depth;
 					}
-					// see if we are done
-					if (dC == 0 && dR == 0)
-						break;
-					if (dC != 0)
+					// move on to the next column
+					if (dC != 0) {
 						c += (dC>0) ? 1 : -1;
+						dC = cDest - c;
+					}
 				}
-			}		
+			}
 		}
 	}
 

@@ -9,6 +9,9 @@ import javax.swing.event.*;
 public class WorldBuilder  extends JFrame 
 						   implements ActionListener, ChangeListener,  WindowListener, ComponentListener {
 	
+	// default map/mesh to load on start-up
+	public static final String DEFAULT_TEMPLATE = "/Templates/default_%d.json";
+	
 	// identification information
 	private static final String version = "WorldBuilder 0.1";
 	private static final String author = "Author: Mark Kampe (mark.kampe@gmail.com)";
@@ -107,14 +110,7 @@ public class WorldBuilder  extends JFrame
 		mainPane.add(map, BorderLayout.CENTER);	
 		
 		// if we were given an input file, use it
-		Mesh m = new Mesh();
-		double[] heightMap = null;
-		heightMap = m.read(filename);
-		map.setMesh(m);
-		if (heightMap != null) {
-			map.setHeightMap(heightMap);
-			RainDialog.rainFall(map, parms.dDirection, parms.dAmount);
-		}
+		map.read(filename);
 		modified = false;	
 		
 		// create menus and widgets, put up the display
@@ -281,7 +277,7 @@ public class WorldBuilder  extends JFrame
 			String dir = d.getDirectory();
 			if (dir != null)
 				filename = dir + filename;
-			map.getMesh().write(filename, map);
+			map.write(filename);
 			modified = false;
 		}
 	}
@@ -326,23 +322,14 @@ public class WorldBuilder  extends JFrame
 			d.setVisible(true);
 			filename = d.getFile();
 			if (filename != null) {
-				Mesh m = new Mesh();
 				String dir = d.getDirectory();
 				if (dir != null)
 					filename = dir + filename;
-				double[] heightMap = m.read(filename);
-				map.setMesh(m);
-				map.setHeightMap(heightMap);
-				// FIX rainfall comes from open
-				RainDialog.rainFall(map, parms.dDirection, parms.dAmount);
-				// FIX artery comes from open
-				if (parms.arteryX >= 0) {
-					map.setArtery(m.vertices[parms.arteryX], parms.dTribute);
-				}
-				
+				map.read(filename);
+	
 				// newly loaded map may have changed the sea-level
 				seaLevel.setValue((int)(parms.sea_level * parms.z_range));
-				menuEnable(m.isSubRegion);
+				menuEnable(map.isSubRegion);
 				modified = false;
 			}
 		} else if (o == fileSave) {
@@ -369,7 +356,7 @@ public class WorldBuilder  extends JFrame
 		
 		// edit menus pop up the corresponding dialogs
 		else if (o == editWorld) {
-			placeDialog(new WorldDialog(map.getMesh().isSubRegion), true);
+			placeDialog(new WorldDialog(map.isSubRegion), true);
 		} else if (o == editMountain) {
 			if (activeDialog)
 				twoDialogError();

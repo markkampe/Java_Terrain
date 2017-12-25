@@ -33,6 +33,8 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		newArtery = oldArtery;
 		newFlow = oldFlow;
 		
+		// FIX make arterial influx a per-node attribute
+		
 		// create the dialog box
 		Container mainPane = getContentPane();
 		int border = parms.dialogBorder;

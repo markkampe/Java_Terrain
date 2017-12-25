@@ -175,8 +175,15 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 			System.out.println("Expand sub-region " +
 					"around <" + String.format("%.6f", lat) + "," + String.format("%.6f", lon) + 
 					"> to new " + points + " point mesh in "+ filename);
-		// FIX implement sub-region creation
+
 		System.out.println("Sub-Region Creation not yet implemented");
+		
+		/* FIX define new world parameters	*/
+		/* FIX create new mesh with only contained points	*/
+		/* FIX add new points (w/interpolated values) to mesh	*/
+		/* FIX recreate map for new mesh	*/
+		
+		map.isSubRegion = true;
 	}
 	
 	/**

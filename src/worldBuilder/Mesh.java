@@ -55,11 +55,7 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
  *         three neighbors).
  */
 public class Mesh {
-	// default mesh to load on start-up
-	private static final String DEFAULT_TEMPLATE = "/Templates/default_%d.json";
-	
 	public MeshPoint[] vertices;	// grid vertices	
-	public boolean isSubRegion;		// sub-region of a larger mesh
 	private Parameters parms;		// global options
 	
 	/**
@@ -95,13 +91,12 @@ public class Mesh {
 	 * read mesh of MapPoints from a file
 	 * 
 	 * @param name of input file
-	 * @return heightMap
 	 */
-	public double[] read(String filename) {
+	public void read(String filename) {
 		JsonParser parser;
 		BufferedReader r;
 		if (filename == null) {
-			filename = String.format(DEFAULT_TEMPLATE, parms.points);
+			filename = String.format(WorldBuilder.DEFAULT_TEMPLATE, parms.points);
 			InputStream s = getClass().getResourceAsStream(filename);
 			r = new BufferedReader(new InputStreamReader(s));
 		} else {
@@ -110,14 +105,11 @@ public class Mesh {
 			} catch (FileNotFoundException e) {
 				System.err.println("FATAL: unable to open input file " + filename);
 				vertices = new MeshPoint[0];
-				return null;
+				return;
 			}
 		}
 		parser = Json.createParser(r);
-		// FIX read per-point rainfall
-		// FIX read aterial influx
-		// FIX set region attribute
-		
+
 		// parameters being read
 		String thisKey = "";
 		boolean inPoints = false;
@@ -125,16 +117,10 @@ public class Mesh {
 		boolean inNeighbors = false;
 		double x = 0;
 		double y = 0;
-		double z = 0;
-		double rain = 0;
-		int soil = 0;
-		int influx = 0;
 		
 		int length = 0;	// expected number of points
 		int points = 0;	// number of points read
 		int paths = 0;	// number of paths created
-		double[] heightMap = null;
-		parms.arteryX = -1;	// start with none
 		
 		while(parser.hasNext()) {
 			JsonParser.Event e = parser.next();
@@ -166,7 +152,6 @@ public class Mesh {
 					case "length":
 						length = new Integer(parser.getString());
 						vertices = new MeshPoint[length];
-						heightMap = new double[length];
 						break;
 						
 					case "x":
@@ -176,118 +161,12 @@ public class Mesh {
 					case "y":
 						y = new Double(parser.getString());
 						break;
-					
-					case "z":
-						z = new Double(parser.getString());
-						break;
-						
-					case "soil":
-						String s = parser.getString();
-						for(int i = 0; i < Map.soil_names.length; i++)
-							if (s.equals(Map.soil_names[i])) {
-								soil = i;
-								break;
-							}
-						break;
-						
-					case "rain":
-						s = parser.getString();
-						int u = s.indexOf(Parameters.unit_r);
-						if (u != -1)
-							s = s.substring(0, u);
-						rain = new Double(s);
-						break;
-						
-					case "influx":
-						s = parser.getString();
-						u = s.indexOf(Parameters.unit_f);
-						if (u != -1)
-							s = s.substring(0, u);
-						influx = new Integer(s);
-						break;
-						
-					case "sealevel":
-						s = parser.getString();
-						u = s.indexOf(Parameters.unit_z);
-						if (u != -1)
-							s = s.substring(0, u);
-						parms.sea_level = new Double(s) / parms.z_range;
-						break;
-						
-					case "amount":
-						s = parser.getString();
-						u = s.indexOf(Parameters.unit_r);
-						if (u != -1)
-							s = s.substring(0, u);
-						parms.dAmount = new Integer(s);
-						break;
-						
-					case "direction":
-						parms.dDirection = new Integer(parser.getString());
-						break;
-						
-					case "cloudbase":
-						s = parser.getString();
-						u = s.indexOf(Parameters.unit_z);
-						if (u != -1)
-							s = s.substring(0, u);
-						parms.dRainHeight = new Integer(s);
-						break;
-						
-					case "erosion":
-						parms.dErosion = new Integer(parser.getString());
-						break;
-						
-					case "radius":
-						s = parser.getString();
-						u = s.indexOf(Parameters.unit_xy);
-						if (u != -1)
-							s = s.substring(0, u);
-						parms.radius = new Integer(s);
-						break;
-						
-					case "tilt":
-						parms.tilt = new Double(parser.getString());
-						break;
-						
-					case "xy_range":
-						s = parser.getString();
-						u = s.indexOf(Parameters.unit_xy);
-						if (u != -1)
-							s = s.substring(0, u);
-						parms.xy_range = new Integer(s);
-						break;
-						
-					case "z_range":
-						s = parser.getString();
-						u = s.indexOf(Parameters.unit_z);
-						if (u != -1)
-							s = s.substring(0, u);
-						parms.z_range = new Integer(s);
-						break;
-						
-					case "latitude":
-						parms.latitude = new Double(parser.getString());
-						break;
-						
-					case "longitude":
-						parms.longitude = new Double(parser.getString());
-						break;
 				}
 				break;
 				
 			case END_OBJECT:
 				if (inPoints) {
 					vertices[points] = new MeshPoint(x,y,points);
-					if (heightMap != null)
-						heightMap[points] = z;
-					// FIX arterial flux to be per point
-					if (influx > 0) {
-						parms.arteryX = points;
-						parms.dTribute = influx;
-					}
-					// FIX record per-point rainfall
-					// FIX record per-point soil
 					points++;
 				}
 				break;
@@ -308,131 +187,23 @@ public class Mesh {
 				break;
 				
 			case START_OBJECT:
-				if (inPoints) {
-					influx = -1;
-					soil = -1;
-					rain = -1;
-					x = 0.0;
-					y = 0.0;
-					z = 0.0;
-				}
 			default:
 				break;
 			}
 		}
 		parser.close();
+		try {
+			r.close();
+		} catch (IOException e) {
+			System.err.println("FATAL: close error on input file " + filename);			
+		}
 		
 		if (points == 0) {
 			System.out.println("ERROR: file " + filename + " does not contain any mesh points");
-			return null;
-		}
-		if (parms.debug_level > 0) {
+			return;
+		} else if (parms.debug_level > 0) {
 			System.out.println("Loaded " + points + "/" + length + " points, " + paths + " paths from file " + filename);
-			parms.worldParms();
-			parms.rainParms(parms.dAmount);
 		}
-		
-		return heightMap;
-	}
-	
-	/**
-	 * write a mesh of MapPoints out to a file
-	 */
-	public boolean write(String filename, Map map) {
-		try {
-			FileWriter output = new FileWriter(filename);
-	
-			final String S_FORMAT = "    \"sealevel\": \"%d%s\",\n";
-			final String R_FORMAT = "    \"rainfall\": { \"amount\": \"%d%s\", \"direction\": %d, \"cloudbase\": \"%d%s\" },\n";
-			final String E_FORMAT = "    \"erosion\": %d,\n";
-			final String L_FORMAT = "    \"center:\" { \"latitude\": \"%.6f\", \"longitude\": \"%.6f\" },\n";
-			final String W_FORMAT = "    \"world:\" { \"radius\": \"%d%s\", \"tilt\": \"%.1f\" },\n";
-			final String Z_FORMAT = "    \"mapsize\": { \"xy_range\": \"%d%s\", \"z_range\": \"%d%s\" },\n";
-			
-			output.write( "{\n" );
-			
-			// write out the world parameters:
-			//	planetary radius and tilt, lat/lon, map span
-			//	sea-level, incoming rainfall, erosion coefficient
-			output.write(String.format(W_FORMAT, parms.radius, Parameters.unit_xy, parms.tilt));
-			output.write(String.format(L_FORMAT, parms.latitude, parms.longitude));
-			output.write(String.format(Z_FORMAT, parms.xy_range, Parameters.unit_xy,
-					parms.z_range, Parameters.unit_z));	
-			double l = parms.sea_level * parms.z_range;
-			output.write(String.format(S_FORMAT, (int) l, Parameters.unit_z));
-			output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r, 
-					parms.dDirection, parms.dRainHeight, Parameters.unit_z));
-			output.write(String.format(E_FORMAT, parms.dErosion));
-			
-			// first write out the points and their attributes
-			output.write( "    \"length\": " + vertices.length + ",\n");
-			output.write( "    \"points\": [" );
-			for(int i = 0; i < vertices.length; i++) {
-				output.write((i == 0) ? "\n" : ",\n");
-				MeshPoint p = vertices[i];
-				writePoint(output, p, map);
-			}
-			output.write(" ],\n");
-			
-			// then write out the neighbor connections
-			int paths = 0;
-			output.write( "    \"mesh\": [\n" );
-			for(int i = 0; i < vertices.length; i++) {
-				if (i != 0)
-					output.write(",\n");
-				MeshPoint m = vertices[i];
-				output.write("        [ ");
-				for(int n = 0; n < m.neighbors; n++) {
-					if (n != 0)
-						output.write(", ");
-					output.write(String.format("%d",  m.neighbor[n].index));
-					paths++;
-				}
-				output.write(" ]");
-			}
-		
-			output.write( "\n    ]\n");
-			output.write( "}\n");
-			output.close();
-			
-			if (parms.debug_level > 0)
-				System.out.println("saved " + vertices.length + " vertices, " + paths/2 + " unique paths to file " + filename);
-			return true;
-		} catch (IOException e) {
-			System.err.println("Unable to create output file " + filename);
-			return false;
-		}
-	}
-	
-	/**
-	 * write out the description of a single point
-	 * @param output ... open outputWriter
-	 * @param meshpoint to write
-	 * @param map for other attributes
-	 * @throws IOException 
-	 */
-	private void writePoint(FileWriter output, MeshPoint p, Map m) throws IOException {
-		output.write("        {");
-		output.write(String.format(" \"x\":\"%.7f\"", p.x));
-		output.write(String.format(", \"y\":\"%.7f\"", p.y));
-		
-		if (m != null) {
-			int x = p.index;
-			double h[] = m.getHeightMap();
-			if (h != null)
-				output.write(String.format(", \"z\":\"%.7f\"", h[x]));
-			double r[] = m.getRainMap();
-			if (r != null)
-				output.write(String.format(", \"rain\":\"%.1f%s\"", r[x], Parameters.unit_r));
-			double s[] = m.getSoilMap();
-			if (s != null) {
-				int st = (int) Math.round(s[x]);
-				output.write(String.format(", \"soil\":\"%s\"", Map.soil_names[st]));
-			}
-			if (p == m.getArtery())
-				output.write(String.format(", \"influx\":\"%.3f\"", m.getArterial()));
-		}
-		output.write(" }");
 	}
 	
 	/**

@@ -80,6 +80,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			label = "max Altitude (" + Parameters.unit_z + " x " + parms.alt_scale + ")";
 			JLabel altLabel = new JLabel(label, JLabel.CENTER);
 			altLabel.setFont(fontLarge);
+			altitude.setEnabled(!readOnly);
 			
 			for(dflt = 0; dflt < minor_choices.length; dflt++)
 				if (minor_choices[dflt] >= parms.topo_minor)

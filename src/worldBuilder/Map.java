@@ -424,7 +424,7 @@ public class Map extends JPanel {
 		
 		int x = p.index;
 		if (heightMap[x] != 0)
-			output.write(String.format(", \"z\": %.10f", heightMap[x]));
+			output.write(String.format(", \"z\": %.9f", heightMap[x]));
 		if (isSubRegion)
 			output.write(String.format(", \"rain\": \"%.1f%s\"", rainMap[x], Parameters.unit_r));
 		if (soilMap[x] != 0)

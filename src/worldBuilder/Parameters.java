@@ -136,9 +136,6 @@ public class Parameters {
 	// default display
 	public int display_options;
 
-	// crocks to get around class structure
-	public int arteryX; 		// passed from Mesh.read to Map
-
 	private static Parameters singleton = null;
 
 	// private constructor for singleton use

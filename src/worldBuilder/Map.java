@@ -82,11 +82,10 @@ public class Map extends JPanel {
 	private double fluxMap[];	// Water flow through each point
 	private double erodeMap[];	// erosion/deposition
 	private double hydrationMap[];	// soil hydration
+	private double incoming[];	// incoming water from off-map
 	private int downHill[];		// down-hill neighbor
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	private int erosion;		// number of erosion cycles
-	private MeshPoint artery;	// artery entry point
-	private double artery_flow;	// incoming arterial flow
 	
 	// hydrological results
 	public double max_slope;		// maximum slope
@@ -289,15 +288,7 @@ public class Map extends JPanel {
 					heightMap[points] = z;
 					soilMap[points] = soil;
 					rainMap[points] = rain;
-					fluxMap[points] = influx;
-					
-					// FIX arterial flux to be per point
-					if (influx > 0) {
-						parms.arteryX = points;
-						artery = mesh.vertices[points];
-						parms.dTribute = influx;
-						artery_flow = influx;
-					}
+					incoming[points] = influx;
 					points++;
 				}
 				break;
@@ -429,8 +420,8 @@ public class Map extends JPanel {
 			output.write(String.format(", \"rain\": \"%.1f%s\"", rainMap[x], Parameters.unit_r));
 		if (soilMap[x] != 0)
 			output.write(String.format(", \"soil\": \"%s\"", Map.soil_names[(int) Math.round(soilMap[x])]));
-		if (p == getArtery())
-			output.write(String.format(", \"influx\": \"%d%s\"", (int) getArterial(), Parameters.unit_f));
+		if (incoming[x] != 0)
+			output.write(String.format(", \"influx\": \"%d%s\"", (int) incoming[x], Parameters.unit_f));
 		output.write(" }");
 	}
 	
@@ -450,8 +441,8 @@ public class Map extends JPanel {
 			this.soilMap = new double[mesh.vertices.length];
 			this.hydrationMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
+			this.incoming = new double[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
-			this.artery = null;
 			this.erosion = 1; // FIX s.b parms.dErosion;
 			hydro.reCalculate(true);
 		} else {
@@ -463,9 +454,9 @@ public class Map extends JPanel {
 			this.erodeMap = null;
 			this.soilMap = null;
 			this.hydrationMap = null;
+			this.incoming = null;
 			this.highLights = null;
 			this.hydro = null;
-			this.artery = null;
 		}
 		
 		repaint();
@@ -505,13 +496,8 @@ public class Map extends JPanel {
 	}
 	
 	/* incoming arterial river	*/
-	public void setArtery(MeshPoint point, double flow) {
-		artery = point;
-		artery_flow = flow;
-		repaint();
-	}
-	public MeshPoint getArtery() { return artery; }
-	public double getArterial() { return artery_flow; }
+	public double[] getIncoming() { return incoming; }
+	public void setIncoming() {repaint(); }
 	
 	/*
 	 * these arrays are regularly re-calculated from height/rain

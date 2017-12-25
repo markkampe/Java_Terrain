@@ -101,13 +101,14 @@ public class Hydrology {
 		double[] soilMap = map.getSoilMap();
 		double[] hydrationMap = map.getHydrationMap();
 		double[] sinkMap = new double[mesh.vertices.length];
+		double[] incoming = map.getIncoming();
 		surface = new double[mesh.vertices.length];
 		erodeMap = map.getErodeMap();
 		
 		// initialize each array and find downhill neighbor
 		for( int i = 0; i < downHill.length; i++ ) {
 			downHill[i] = -1;
-			fluxMap[i] = 0;
+			fluxMap[i] = (incoming == null) ? 0 : incoming[i];
 			hydrationMap[i] = 0;
 			surface[i] = 0;
 			sinkMap[i] = UNKNOWN;
@@ -237,16 +238,9 @@ public class Hydrology {
 		}
 		
 		// collect rain-fall and tributary information from the Map
-		MeshPoint artery = map.getArtery();
-		double incoming = map.getArterial();
 		double[] rainMap = map.getRainMap();
-		if (rainMap == null && incoming == 0)
+		if (rainMap == null && incoming == null)
 			return;
-		
-		// consider a major incoming river
-		if (artery != null) {
-			fluxMap[artery.index] = incoming;
-		}
 
 		// figure out the mapping from rainfall (cm/y) to water flow (m3/s)
 		double area = 1000000 * (parms.xy_range * parms.xy_range) / byHeight.length;

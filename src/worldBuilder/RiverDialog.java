@@ -17,23 +17,17 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	private JButton accept;
 	private JButton cancel;
 	
-	private MeshPoint oldArtery, newArtery;
-	private double oldFlow, newFlow;
+	private double[] incoming;
+	private int whichPoint = -1;
+	private double oldFlow;
 	
 	private static final long serialVersionUID = 1L;
 	
 	public RiverDialog(Map map)  {
 		// pick up references
 		this.map = map;
+		this.incoming = map.getIncoming();
 		this.parms = Parameters.getInstance();
-		
-		// note the incoming river at entry
-		oldArtery = map.getArtery();
-		oldFlow = map.getArterial();
-		newArtery = oldArtery;
-		newFlow = oldFlow;
-		
-		// FIX make arterial influx a per-node attribute
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -113,19 +107,36 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.setArtery(oldArtery,  oldFlow);
+		// undo any previous selection
+		if (whichPoint >= 0 && incoming != null) {
+			incoming[whichPoint] = oldFlow;
+			map.setIncoming();
+		}
 		map.removeMouseListener(this);
 		WorldBuilder.activeDialog = false;
 		this.dispose();
 	}
 	
 	public void mouseClicked(MouseEvent e) {
-		newArtery = map.choosePoint(e.getX(), e.getY());
-		double lat = parms.latitude(newArtery.x);
-		double lon = parms.longitude(newArtery.y);
+		if (incoming == null)
+			return;
+		
+		// undo any previous selection
+		if (whichPoint >= 0)
+			incoming[whichPoint] = oldFlow;
+		
+		// choose the new point
+		MeshPoint p = map.choosePoint(e.getX(), e.getY());
+		whichPoint = p.index;
+		double lat = parms.latitude(p.x);
+		double lon = parms.longitude(p.y);
 		entryPoint.setText(String.format("<%.6f, %.6f>", lat, lon));
 		pack();
-		map.setArtery(newArtery,  newFlow);
+		
+		// note the change in flux
+		oldFlow = incoming[whichPoint];
+		incoming[whichPoint] = (int) flow.getValue();
+		map.setIncoming();
 	}
 	
 	/**
@@ -133,11 +144,10 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == flow) {
-			// get the flow
-			newFlow = (int) flow.getValue();
-			if (newFlow == 0)
-				newFlow = 1;
-			map.setArtery(newArtery,  newFlow);
+			if (whichPoint >= 0 && incoming != null) {
+				incoming[whichPoint] = (int) flow.getValue();
+				map.setIncoming();
+			}
 		} 
 	}
 
@@ -145,14 +155,14 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 * click events on ACCEPT/CANCEL buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == cancel || newArtery == null) {
-			map.setArtery(oldArtery,  oldFlow);
-			map.repaint();
+		if (e.getSource() == cancel && whichPoint >= 0) {
+			incoming[whichPoint] = oldFlow;
+			map.setIncoming();
 		} else if (e.getSource() == accept) {
 			// make the new parameters official
-			parms.dTribute = (int) newFlow;
+			parms.dTribute = (int) flow.getValue();
 			if (parms.debug_level > 0)
-				System.out.println("Artial river enters at " + entryPoint.getText() + ", flow=" + (int) newFlow + " " + Parameters.unit_f);
+				System.out.println("Artial river enters at " + entryPoint.getText() + ", flow=" + (int) incoming[whichPoint] + " " + Parameters.unit_f);
 		}
 		
 		// clean up the graphics

@@ -140,50 +140,47 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 	 * describe the selected area
 	 */
 	private void select(int x0, int y0, int x1, int y1) {
+		// square the selection area
+		int width = Math.abs(x1 - x0);
+		int height = Math.abs(y1 - y0);
+		if (width > height)
+			if (y1 > y0)
+				y1 = y0 + width;
+			else
+				y1 = y0 - width;
+		else
+			if (x1 > x0)
+				x1 = x0 + height;
+			else
+				x1 = x0 - height;
+		
 		// selected area in map coordinates
-		double X0 = map.map_x(x0);
-		double X1 = map.map_x(x1);
-		double dx = X1 - X0;
+		double mx0 = map.map_x(x0);
+		double mx1 = map.map_x(x1);
+		double dx = mx1 - mx0;
 		if (dx < 0) {
-			X0 = X1;
+			mx0 = mx1;
 			dx *= -1;
 		}
-		double Y0 = map.map_y(y0);	
-		double Y1 = map.map_y(y1);
-		double dy = Y1 - Y0;
+		double my0 = map.map_y(y0);	
+		double my1 = map.map_y(y1);
+		double dy = my1 - my0;
 		if (dy < 0) {
-			Y0 = -Y1;
+			my0 = -my1;
 			dy *= -1;
 		}
-	
+		
+		// update the selection display
+		map.selectRect(x0, y0, x1-x0, y1-y0);
+		
 		// find selected area location and size
 		x_km = parms.km(dx);
 		y_km = parms.km(dy);
-		lat = parms.latitude((Y0+Y1)/2);
-		lon = parms.longitude((X1+X0)/2);
+		lat = parms.latitude((my0+my1)/2);
+		lon = parms.longitude((mx1+mx0)/2);
 
 		sel_center.setText(String.format("%.6f, %.6f", lat, lon));
 		sel_km.setText(String.format("%.1fx%.1f", x_km, y_km));
-	}
-	
-	/**
-	 * create a new region for selected area at selected resolution
-	 */
-	private void newRegion(String filename) {
-		int points = (int) pointsChooser.getSelectedItem();
-		if (parms.debug_level > 0)
-			System.out.println("Expand sub-region " +
-					"around <" + String.format("%.6f", lat) + "," + String.format("%.6f", lon) + 
-					"> to new " + points + " point mesh in "+ filename);
-
-		System.out.println("Sub-Region Creation not yet implemented");
-		
-		/* FIX define new world parameters	*/
-		/* FIX create new mesh with only contained points	*/
-		/* FIX add new points (w/interpolated values) to mesh	*/
-		/* FIX recreate map for new mesh	*/
-		
-		map.isSubRegion = true;
 	}
 	
 	/**
@@ -200,22 +197,13 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 	 */
 	public void mouseReleased(MouseEvent e) {
 		if (selecting) {
-			if (e.getX() >= x_start)
-				x_end = e.getX();
-			else {
-				x_end = x_start;
-				x_start = e.getX();
-			}
-			if (e.getY() >= y_start)
-				y_end = e.getY();
-			else {
-				y_end = y_start;
-				y_start = e.getY();
-			}
-
+			x_end = e.getX();
+			y_end = e.getY();
+			select(x_start, y_start, x_end, y_end);
+			
+			// and display the selected region
 			selecting = false;
 			selected = true;
-			select(x_start, y_start, x_end, y_end);
 		}
 	}
 	
@@ -224,7 +212,6 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 	 */
 	public void mouseDragged(MouseEvent e) {
 		if (selecting) {
-			map.selectRect(x_start, y_start, e.getX()-x_start, e.getY()-y_start);
 			select(x_start, y_start, e.getX(), e.getY());
 		}	
 	}
@@ -243,18 +230,21 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 	 * click events on ACCEPT/CANCEL buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
-		// if this was an acceptance ...
 		if (e.getSource() == accept && selected) {
-			FileDialog d = new FileDialog(this, "New Sub-Region", FileDialog.SAVE);
-			d.setFile(sel_name.getText()+".json");
-			d.setVisible(true);
-			String export_file = d.getFile();
-			if (export_file != null) {
-				String dir = d.getDirectory();
-				if (dir != null)
-					export_file = dir + export_file;
-				newRegion(export_file);
-			}
+			// update the world location and size
+			map.isSubRegion = true;
+			parms.xy_range = (int) ((x_km >= y_km) ? x_km : y_km);
+			parms.latitude = lat;
+			parms.longitude = lon;
+			
+			// create a new map for the chosen subset
+			int points = (int) pointsChooser.getSelectedItem();
+			if (parms.debug_level > 0)
+				System.out.println("Expand " + (int) x_km + Parameters.unit_xy +
+						" sub-region around <" + 
+						String.format("%.6f", lat) + "," + String.format("%.6f", lon) + 
+						"> to new " + points + " point mesh");
+			map.subregion(points);
 		}
 		
 		// clear the selection

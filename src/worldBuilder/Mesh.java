@@ -68,11 +68,11 @@ public class Mesh {
 	}
 	
 	/**
-	 * create a new mesh
+	 * create a set of mesh points
 	 */
-	public void create() {
+	public MeshPoint[] makePoints( int numpoints ) {
 		// create a set of random points
-		MeshPoint points[] = new MeshPoint[parms.points];
+		MeshPoint points[] = new MeshPoint[numpoints];
 		for (int i = 0; i < points.length; i++) {
 			double x = Parameters.x_extent * (Math.random() - 0.5);
 			double y = Parameters.y_extent * (Math.random() - 0.5);
@@ -83,8 +83,7 @@ public class Mesh {
 		for( int i = 0; i < parms.improvements; i++ )
 			points = improve(points);
 		
-		// create a Voronoi mesh around the improved points
-		makeMesh(points);
+		return(points);
 	}
 	
 	/**
@@ -201,7 +200,7 @@ public class Mesh {
 		if (points == 0) {
 			System.out.println("ERROR: file " + filename + " does not contain any mesh points");
 			return;
-		} else if (parms.debug_level > 0) {
+		} else if (parms.debug_level > 1) {
 			System.out.println("Loaded " + points + "/" + length + " points, " + paths + " paths from file " + filename);
 		}
 	}
@@ -324,7 +323,7 @@ public class Mesh {
 	 * NOTE: that the original points are replaced with the
 	 * 		 vertices of the corresponding Voronoi polygons.
 	 */
-	private void makeMesh( MeshPoint[] points ) {
+	public void makeMesh( MeshPoint[] points ) {
 		int numPaths = 0;
 		
 		// compute the Voronoi teselation of the current point set
@@ -392,7 +391,7 @@ public class Mesh {
 		 * ... which ends at the edges anyway.
 		 */
 
-		if (parms.debug_level > 0)
+		if (parms.debug_level > 1)
 			System.out.println(points.length + " points-> " + vertices.length + "/" + g.num_vertices() + 
 					" mesh vertices, " + numPaths/2 + "/" + g.num_edges() + " mesh paths");
 	}

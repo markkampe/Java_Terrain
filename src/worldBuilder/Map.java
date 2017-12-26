@@ -117,6 +117,84 @@ public class Map extends JPanel {
 	}
 	
 	/**
+	 * create a new sub-region map
+	 * 
+	 * @param points ... number of desired points in new Mesh
+	 */
+	public void subregion(int numpoints) {
+		// compute x/y coordinate translation coefficients
+		double xShift = map_x(sel_x0 + (sel_width/2));
+		double yShift = map_y(sel_y0 + (sel_height/2));
+		double xScale = 1.0/map_x(sel_width);
+		double yScale = 1.0/map_y(sel_height);
+		
+		// create a new mesh w/specified number of points
+		Mesh newMesh = new Mesh();
+		MeshPoint[] points = newMesh.makePoints(numpoints);
+		newMesh.makeMesh(points);
+		
+		// allocate new attribute maps
+		int newlen = newMesh.vertices.length;
+		double[] h = new double[newlen];	// height map
+		double[] r = new double[newlen];	// rain map
+		double[] s = new double[newlen];	// soil map
+		double[] f = new double[newlen];	// incoming map
+		
+		// replace first few points in list w/preserved points
+		int replaced = 0;
+		int tribute = 0;
+		for(int i = 0; i < mesh.vertices.length; i++) {
+			MeshPoint p = mesh.vertices[i];
+			if (inTheBox(p.x, p.y)) {
+				// create the new meshpoint
+				double x = (p.x - xShift) * xScale;
+				double y = (p.y - yShift) * yScale;
+				points[replaced] = new MeshPoint(x, y, replaced);
+				
+				// carry over its attributes
+				h[replaced] = heightMap[i];
+				r[replaced] = rainMap[i];
+				s[replaced] = soilMap[i];
+				
+				// add up its out-of-the-box tributaries
+				for(int j = 0; j < mesh.vertices.length; j++) {
+					MeshPoint p2 = mesh.vertices[j];
+					if (downHill[j] == i && !inTheBox(p2.x, p2.y)) {
+						// TODO create new influx point on the border
+						f[replaced] += fluxMap[j];
+						tribute++;
+					}
+				}
+				replaced++;
+			}
+		}
+
+		// interpolate height/rain/soil for the new points
+		for(int i = replaced; i < newMesh.vertices.length; i++) {
+			// find closest three original points
+			for(int j = 0; j < replaced; j++) {
+				// FIX find closest three original points
+			}
+			
+			// compute interpolated values
+			h[i] = 0;	// FIX interpolate height
+			r[i] = 0;	// FIX interpolate rain
+			s[i] = 0;	// FIX interpolate soil
+		}
+		
+		// install and attribute the new mesh
+		setMesh(newMesh);
+		rainMap = r;
+		soilMap = s;
+		incoming = f;
+		setHeightMap(h);	// force the hydrology recalculation
+		
+		if (parms.debug_level > 1)
+			System.out.println("sub-region includes " + replaced + "/" + newlen + 
+					" original mesh points, " + tribute + " w/external influx");
+	}
+	
+	/**
 	 * read saved map from a file
 	 * 
 	 * @param name of input file
@@ -152,7 +230,7 @@ public class Map extends JPanel {
 		double z = 0;
 		double rain = 0;
 		int soil = 0;
-		int influx = 0;
+		double influx = 0;
 		
 		while(parser.hasNext()) {
 			JsonParser.Event e = parser.next();
@@ -204,7 +282,7 @@ public class Map extends JPanel {
 						u = s.indexOf(Parameters.unit_f);
 						if (u != -1)
 							s = s.substring(0, u);
-						influx = new Integer(s);
+						influx = new Double(s);
 						break;
 						
 					// world attributes
@@ -421,7 +499,7 @@ public class Map extends JPanel {
 		if (soilMap[x] != 0)
 			output.write(String.format(", \"soil\": \"%s\"", Map.soil_names[(int) Math.round(soilMap[x])]));
 		if (incoming[x] != 0)
-			output.write(String.format(", \"influx\": \"%d%s\"", (int) incoming[x], Parameters.unit_f));
+			output.write(String.format(", \"influx\": \"%.2f%s\"", incoming[x], Parameters.unit_f));
 		output.write(" }");
 	}
 	
@@ -499,6 +577,15 @@ public class Map extends JPanel {
 	public double[] getIncoming() { return incoming; }
 	public void setIncoming() {repaint(); }
 	
+	/* soil type for each Mesh point	*/
+	public double [] getSoilMap() {return soilMap;}
+	public double[] setSoilMap(double[] newSoil) {
+		double[] old = soilMap;
+		soilMap = newSoil;
+		repaint();
+		return old;
+	}
+	
 	/*
 	 * these arrays are regularly re-calculated from height/rain
 	 * and so do not need to be explicitly SET
@@ -506,7 +593,6 @@ public class Map extends JPanel {
 	public int[] getDownHill() { return downHill; }
 	public double[] getFluxMap() {return fluxMap;}
 	public double[] getErodeMap() {return erodeMap;}
-	public double [] getSoilMap() {return soilMap;}
 	public double [] getHydrationMap() { return hydrationMap; }
 	
 	/* Meshpoint to Cartesian translation matrix */
@@ -622,6 +708,22 @@ public class Map extends JPanel {
 	}
 	
 	/**
+	 * determine whether or not a Map point is within a selected box
+	 */
+	public boolean inTheBox(double x, double y) {
+
+		if (x < map_x(sel_x0))
+			return false;
+		if (y < map_y(sel_y0))
+			return false;
+		if (x >= map_x(sel_x0 + sel_width))
+			return false;
+		if (y >= map_y(sel_y0 + sel_height))
+			return false;
+		return true;
+	}
+	
+	/**
 	 * highlight a circular selection
 	 * 
 	 * @param x		screen x
@@ -700,7 +802,7 @@ public class Map extends JPanel {
 		map = new Cartesian(mesh, x_min, y_min, x_max, y_max, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
 		repaint();
 		
-		if (parms.debug_level > 0)
+		if (parms.debug_level > 1)
 			System.out.println("Display window <" + x_min + ", " + y_min + "> to <" + x_max + ", " + y_max + ">");
 	}
 

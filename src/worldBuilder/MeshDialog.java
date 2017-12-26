@@ -166,7 +166,8 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 				parms.dDiameter = diameter.getValue();
 				parms.improvements = (Integer) improveChooser.getSelectedItem();
 				Mesh m = new Mesh();
-				m.create();
+				MeshPoint[] points = m.makePoints(parms.points);
+				m.makeMesh(points);
 				map.setMesh(m);
 				
 				// give it a small slope, flat maps don't drain

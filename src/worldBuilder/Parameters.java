@@ -536,7 +536,7 @@ public class Parameters {
 	public double latitude(double y) {
 		double degrees = 180.0 * xy_range / (Math.PI * radius);
 		double offset = y * degrees / y_extent;
-		return latitude + offset;
+		return latitude - offset;
 	}
 
 	/**

@@ -9,7 +9,7 @@ public class Cartesian {
 
 	public int width;			// columns in this map
 	public int height;			// rows in this map
-	private MeshRef cells[][];	// mapping from Cartesian points to MeshPoints
+	private Vicinity cells[][];	// mapping from Cartesian points to MeshPoints
 
 	/**
 	 * create a new Cartesian map
@@ -27,7 +27,7 @@ public class Cartesian {
 		this.width = width;
 		
 		// allocate the arrays
-		cells = new MeshRef[height][width];
+		cells = new Vicinity[height][width];
 		
 		// figure out the spacing
 		double dx = (double)(right - left) / width;
@@ -39,7 +39,7 @@ public class Cartesian {
 			for(int c = 0; c < width; c++) {
 				double x = left + (c * dx);
 				MeshPoint m = new MeshPoint(x,y);
-				MeshRef ref = new MeshRef();
+				Vicinity ref = new Vicinity();
 				cells[r][c] = ref;
 				for(int v = 0; v < mesh.vertices.length; v++) {
 					MeshPoint p = mesh.vertices[v];

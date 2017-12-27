@@ -8,13 +8,13 @@ package worldBuilder;
  * when a new Mesh is created.
  */
 
-public class MeshRef {
+public class Vicinity {
 
 	public static final int NUM_NEIGHBORS = 3;
 	public int[] neighbors;
 	public double[] distances;
 	
-	public MeshRef() {
+	public Vicinity() {
 		neighbors = new int[NUM_NEIGHBORS];
 		distances = new double[NUM_NEIGHBORS];
 		for (int i = 0; i < NUM_NEIGHBORS; i++) {

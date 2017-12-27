@@ -148,7 +148,7 @@ public class Map extends JPanel {
 			
 			// find nearest points from the previous map
 			MeshPoint p = new MeshPoint(x,y);
-			MeshRef nearest = new MeshRef();
+			Vicinity nearest = new Vicinity();
 			for(int j = 0; j < mesh.vertices.length; j++) {
 				nearest.consider(j, p.distance(mesh.vertices[j]));
 			}
@@ -168,11 +168,12 @@ public class Map extends JPanel {
 					MeshPoint p2 = mesh.vertices[j];
 					if (downHill[j] == i && !inTheBox(p2.x, p2.y)) {
 						// we found a point of water entry into the box
-						// find the closest corresponding point
-						double x = (p.x - xShift) * xScale;
-						double y = (p.y - yShift) * yScale;
+						// find the closest point (in new mesh) to the source
+						double x = (p2.x - xShift) * xScale;
+						double y = (p2.y - yShift) * yScale;
 						MeshPoint p3 = newMesh.choosePoint(x,y);
 						f[p3.index] += fluxMap[p2.index];
+						p3.immutable = true;
 					}
 				}
 			}

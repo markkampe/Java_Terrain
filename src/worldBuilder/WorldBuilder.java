@@ -298,6 +298,7 @@ public class WorldBuilder  extends JFrame
 		editRain.setEnabled(!isSubRegion);
 		editSlope.setEnabled(!isSubRegion);
 		editRiver.setEnabled(!isSubRegion);
+		seaLevel.setEnabled(!isSubRegion);
 	}
 	
 	public void actionPerformed( ActionEvent e ) {

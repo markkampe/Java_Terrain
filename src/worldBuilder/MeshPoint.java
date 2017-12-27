@@ -13,6 +13,8 @@ public class MeshPoint {
 	public int neighbors;		// number of neighbors
 	public MeshPoint[] neighbor;	// neighboring points
 	
+	public boolean immutable;
+	
 	private static final String format="%7.5f";
 	
 	public MeshPoint(double x,double y) {

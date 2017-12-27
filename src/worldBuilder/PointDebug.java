@@ -84,7 +84,10 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			int y = e.getY();
 			MeshPoint point = map.choosePoint(x, y);
 			
-			infoIndex.setText(String.format("%d", point.index));
+			if (point.immutable)
+				infoIndex.setText(String.format("%d (immutable)", point.index));
+			else
+				infoIndex.setText(String.format("%d", point.index));
 			infoMap.setText(String.format("<%.7f, %.7f>", point.x, point.y));
 			infoWorld.setText(String.format("<%.6f, %.6f>", parms.latitude(point.y), parms.longitude(point.x)));
 			

@@ -214,6 +214,21 @@ public class Mesh {
 		return false;
 	}
 
+	public MeshPoint choosePoint(double x, double y) {
+		MeshPoint spot = new MeshPoint(x,y);
+		MeshPoint closest = null;
+		double distance = 2 * Parameters.x_extent;
+		
+		for( int i = 0; i < vertices.length; i++ ) {
+			MeshPoint p = vertices[i];
+			double d = p.distance(spot);
+			if (d < distance) {
+				closest = p;
+				distance = d;
+			}
+		}
+		return(closest);
+	}
 
 	/**
 	 * truncate values outside the extent box to the edge of the box

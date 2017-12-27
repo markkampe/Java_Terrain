@@ -226,6 +226,7 @@ public class Map extends JPanel {
 		double rain = 0;
 		int soil = 0;
 		double influx = 0;
+		isSubRegion = false;
 		
 		while(parser.hasNext()) {
 			JsonParser.Event e = parser.next();

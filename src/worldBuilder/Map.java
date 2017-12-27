@@ -125,10 +125,10 @@ public class Map extends JPanel {
 		// compute x/y coordinate translation coefficients
 		double xShift = map_x(sel_x0 + (sel_width/2));
 		double yShift = map_y(sel_y0 + (sel_height/2));
-		double xScale = 1.0/map_x(sel_width);
-		double yScale = 1.0/map_y(sel_height);
+		double xScale = Parameters.x_extent/map_width(sel_width);
+		double yScale = Parameters.y_extent/map_height(sel_height);
 		
-		// create a new mesh w/specified number of points
+		// generate a new mesh, w/requested number of points, where the
 		Mesh newMesh = new Mesh();
 		MeshPoint[] points = newMesh.makePoints(numpoints);
 		newMesh.makeMesh(points);
@@ -139,47 +139,42 @@ public class Map extends JPanel {
 		double[] r = new double[newlen];	// rain map
 		double[] s = new double[newlen];	// soil map
 		double[] f = new double[newlen];	// incoming map
+
+		// interpolate per-point attributes for each mesh point
+		for(int i = 0; i < newlen; i++) {
+			// find the corresponding previous-map coordinates
+			double x = (newMesh.vertices[i].x/xScale) + xShift;
+			double y = (newMesh.vertices[i].y/yScale) + yShift;
+			
+			// find nearest points from the previous map
+			MeshPoint p = new MeshPoint(x,y);
+			MeshRef nearest = new MeshRef();
+			for(int j = 0; j < mesh.vertices.length; j++) {
+				nearest.consider(j, p.distance(mesh.vertices[j]));
+			}
+
+			// interpolate values for height, rain, and soil
+			h[i] = nearest.interpolate(heightMap);
+			r[i] = nearest.interpolate(rainMap);
+			s[i] = nearest.interpolate(soilMap);
+		}
 		
-		// replace first few points in list w/preserved points
-		int replaced = 0;
-		int tribute = 0;
-		for(int i = 0; i < mesh.vertices.length; i++) {
+		// reproduce all water flows into the new sub-region
+		for (int i = 0; i < mesh.vertices.length; i++) {
 			MeshPoint p = mesh.vertices[i];
 			if (inTheBox(p.x, p.y)) {
-				// create the new meshpoint
-				double x = (p.x - xShift) * xScale;
-				double y = (p.y - yShift) * yScale;
-				points[replaced] = new MeshPoint(x, y, replaced);
-				
-				// carry over its attributes
-				h[replaced] = heightMap[i];
-				r[replaced] = rainMap[i];
-				s[replaced] = soilMap[i];
-				
-				// add up its out-of-the-box tributaries
-				for(int j = 0; j < mesh.vertices.length; j++) {
+				for (int j = 0; j < mesh.vertices.length; j++) {
 					MeshPoint p2 = mesh.vertices[j];
 					if (downHill[j] == i && !inTheBox(p2.x, p2.y)) {
-						// TODO create new influx point on the border
-						f[replaced] += fluxMap[j];
-						tribute++;
+						// we found a point of water entry into the box
+						// find the closest corresponding point
+						double x = (p.x - xShift) * xScale;
+						double y = (p.y - yShift) * yScale;
+						MeshPoint p3 = newMesh.choosePoint(x,y);
+						f[p3.index] += fluxMap[p2.index];
 					}
 				}
-				replaced++;
 			}
-		}
-
-		// interpolate height/rain/soil for the new points
-		for(int i = replaced; i < newMesh.vertices.length; i++) {
-			// find closest three original points
-			for(int j = 0; j < replaced; j++) {
-				// FIX find closest three original points
-			}
-			
-			// compute interpolated values
-			h[i] = 0;	// FIX interpolate height
-			r[i] = 0;	// FIX interpolate rain
-			s[i] = 0;	// FIX interpolate soil
 		}
 		
 		// install and attribute the new mesh
@@ -188,11 +183,9 @@ public class Map extends JPanel {
 		soilMap = s;
 		incoming = f;
 		setHeightMap(h);	// force the hydrology recalculation
-		
-		if (parms.debug_level > 1)
-			System.out.println("sub-region includes " + replaced + "/" + newlen + 
-					" original mesh points, " + tribute + " w/external influx");
 	}
+	
+	
 	
 	/**
 	 * read saved map from a file
@@ -630,6 +623,16 @@ public class Map extends JPanel {
 		return y_min + (y * range);
 	}
 	
+	public double map_width(int x_pixels) {
+		double pixels = x_pixels;
+		return pixels/getWidth();
+	}
+	
+	public double map_height(int y_pixels) {
+		double pixels = y_pixels;
+		return pixels/getHeight();
+	}
+	
 	/**
 	 * convert a map coordinate into a screen coordinate
 	 */
@@ -654,7 +657,7 @@ public class Map extends JPanel {
 		return true;
 	}
 	
-	// description of the area to be highlighted
+	// description (screen coordinates) of the area to be highlighted
 	private int sel_x0, sel_y0, sel_x1, sel_y1;
 	private int sel_height, sel_width;
 	private int sel_radius;
@@ -771,23 +774,7 @@ public class Map extends JPanel {
 	 * @return nearest MeshPoint
 	 */
 	public MeshPoint choosePoint(int screen_x, int screen_y) {
-		
-		double x = map_x(screen_x);
-		double y = map_y(screen_y);
-		MeshPoint spot = new MeshPoint(x, y);
-		MeshPoint closest = null;
-		double distance = 2 * Parameters.x_extent;
-		
-		for(int i = 0; i < mesh.vertices.length; i++) {
-			MeshPoint point = mesh.vertices[i];
-			double d = spot.distance(point);
-			if (d < distance) {
-				closest = point;
-				distance = d;
-			}
-		}
-		
-		return closest;
+		return(mesh.choosePoint(map_x(screen_x), map_y(screen_y)));
 	}
 	
 	/*

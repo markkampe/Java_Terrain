@@ -159,6 +159,7 @@ public class Map extends JPanel {
 			s[i] = nearest.interpolate(soilMap);
 		}
 		
+		// FIX sometimes arteries enter but don't flow
 		// reproduce all water flows into the new sub-region
 		for (int i = 0; i < mesh.vertices.length; i++) {
 			MeshPoint p = mesh.vertices[i];

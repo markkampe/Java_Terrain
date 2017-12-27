@@ -12,7 +12,6 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 	private Map map;
 	private Parameters parms;
 	
-	private JTextField sel_name;
 	private JLabel sel_center;
 	private JLabel sel_km;
 	private JButton accept;
@@ -47,11 +46,7 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		// create the basic widgets
 		// Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
-		sel_name = new JTextField();
-		sel_name.setText("Happyville");
-		JLabel nameLabel = new JLabel("Name of this region", JLabel.CENTER);
-		nameLabel.setFont(fontLarge);
-		
+	
 		pointsChooser = new JComboBox<Integer>();
 		JLabel pointsLabel = new JLabel("Points", JLabel.CENTER);
 		pointsLabel.setFont(fontLarge);
@@ -75,23 +70,18 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 
 		/*
 		 * Pack them into:
-		 * 		a name (1x2 grid) name selection panel
 		 * 		a vertical Box layout containing descriptions, sliders and buttons
 		 * 		descriptions are a 1x3 layout of Labels
 		 * 		sliders are a 1x2 grid layout
 		 * 			each being a vertical Box w/label and slider
 		 * 		buttons a horizontal Box layout
 		 */
-		JPanel namePanel = new JPanel(new GridLayout(2,1));
-		namePanel.add(nameLabel);
-		namePanel.add(sel_name);
-		namePanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
 		
 		JPanel descPanel = new JPanel(new GridLayout(2,2));
 		descPanel.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
-		descPanel.add(new JLabel("Center"));
+		descPanel.add(new JLabel("Region Center <lat,lon>"));
 		descPanel.add(sel_center);
-		descPanel.add(new JLabel("km"));
+		descPanel.add(new JLabel("Region Size"));
 		descPanel.add(sel_km);
 		
 		JPanel p_panel = new JPanel();
@@ -117,7 +107,6 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		
 		JPanel controls = new JPanel();
 		controls.setLayout(new BoxLayout(controls, BoxLayout.PAGE_AXIS));
-		controls.add(namePanel);
 		controls.add(buttons);
 
 		mainPane.add(descPanel, BorderLayout.NORTH);
@@ -179,8 +168,8 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		lat = parms.latitude((my0+my1)/2);
 		lon = parms.longitude((mx1+mx0)/2);
 
-		sel_center.setText(String.format("%.6f, %.6f", lat, lon));
-		sel_km.setText(String.format("%.1fx%.1f", x_km, y_km));
+		sel_center.setText(String.format("<%.6f, %.6f>", lat, lon));
+		sel_km.setText(String.format("%.1fx%.1f (%s)", x_km, y_km, Parameters.unit_xy));
 	}
 	
 	/**

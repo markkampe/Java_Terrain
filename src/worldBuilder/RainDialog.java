@@ -192,7 +192,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		
 		// tell the map about the update
 		map.setRainMap(rainmap);
-		if (parms.debug_level > 1)
+		if (parms.debug_level > 2)
 			parms.rainParms((int)incoming);
 	}
 
@@ -288,6 +288,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			
 			if (parms.debug_level > 0) {
 				parms.rainParms((int) meanRain());
+				if (parms.debug_level == 1)
+					parms.rainParms(parms.dAmount);
 				System.out.println("Rivers:    " +
 						"max flow " + String.format("%.2f", map.max_flux) + Parameters.unit_f +
 						", max speed " + String.format("%.2f",  map.max_velocity) + Parameters.unit_v);

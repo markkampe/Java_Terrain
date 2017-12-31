@@ -61,9 +61,8 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		
 		format = new JComboBox<String>();
 		format.addItem(RAW_JSON);
-		TileConfiguration c = TileConfiguration.getInstance();
-		for(TileConfiguration.TileSet t:c.tilesets)
-			format.addItem(t.name);
+		format.addItem("Overworld");
+		format.addItem("Outside");
 		format.setSelectedIndex(1);
 		
 		accept = new JButton("EXPORT");

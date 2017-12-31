@@ -509,7 +509,6 @@ public class WorldBuilder  extends JFrame
 		// process the arguments
 		String filename = null;
 		String configname = null;
-		String tilecfgname = null;
 		String outputfilename = null;
 		int debug = 0;
 		for( int i = 0; i < args.length; i++ ) {
@@ -527,11 +526,6 @@ public class WorldBuilder  extends JFrame
 						configname = args[i].substring(2);
 					else
 						configname = args[++i];
-				} else if (args[i].startsWith("-t")) {
-					if (args[i].length() > 2)
-						tilecfgname = args[i].substring(2);
-					else
-						tilecfgname = args[++i];
 				} else if (args[i].startsWith("-o")) {
 					if (args[i].length() > 2)
 						outputfilename = args[i].substring(2);
@@ -549,7 +543,6 @@ public class WorldBuilder  extends JFrame
 		parms = new Parameters(configname, debug);
 		if (outputfilename != null)
 			parms.output_filename = outputfilename;
-		new TileConfiguration(tilecfgname, debug);
 		
 		// and create the map
 		WorldBuilder w = new WorldBuilder(filename);

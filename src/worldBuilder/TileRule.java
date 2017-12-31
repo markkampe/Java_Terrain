@@ -1,21 +1,11 @@
 package worldBuilder;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.LinkedList;
 
-import javax.json.Json;
-import javax.json.stream.JsonParser;
-
-import worldBuilder.TileConfiguration.TileSet;
 
 public class TileRule {
 	
 	public static LinkedList<TileRule> rules;
-	private static final String DEFAULT_CONFIG = "tilerules.json";
 	
 	public String ruleName;
 	public int level;

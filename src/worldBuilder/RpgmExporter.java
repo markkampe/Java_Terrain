@@ -2,7 +2,6 @@ package worldBuilder;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Random;
 
@@ -26,10 +25,10 @@ public class RpgmExporter implements Exporter {
 	private double lon;			// longitude
 
 	// tile selection parameters
-	private double Tmean; 		// mean temperature (degC)
+	//private double Tmean; 		// mean temperature (degC)
 	private double Tsummer; 	// mean summer temperature (degC)
 	private double Twinter; 	// mean winter temperature (degC)
-	private double[][] rain;	// per point rainfall (meters)
+	//private double[][] rain;	// per point rainfall (meters)
 	private double[][] heights;	// per point height (meters)
 	private double[][] erode;	// per point erosion (meters)
 	private double[][] hydration; // per point water depth (meters)
@@ -274,7 +273,7 @@ public class RpgmExporter implements Exporter {
 	}
 
 	public void temps(double meanTemp, double meanSummer, double meanWinter) {
-		this.Tmean = meanTemp;
+		//this.Tmean = meanTemp;
 		this.Tsummer = meanSummer;
 		this.Twinter = meanWinter;
 	}
@@ -288,7 +287,7 @@ public class RpgmExporter implements Exporter {
 	}
 
 	public void rainMap(double[][] rain) {
-		this.rain = rain;
+		//this.rain = rain;
 	}
 
 	public void soilMap(double[][] soil) {

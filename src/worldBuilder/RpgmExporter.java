@@ -2,30 +2,34 @@ package worldBuilder;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.Random;
 
 /**
  * exporter that creates an RPGMaker map
  */
 public class RpgmExporter implements Exporter {
 
+	private static final int MAXRULES = 20;
+	
 	private String filename;	// output file name
 	private Parameters parms;	// general parameters
-	private TileConfiguration.TileSet tiles;// tile set information
+	private TileRules rules;	// tile selection rules
+	private Random random;		// random # generator
 	
 	// physical map parameters
 	private int x_points; 		// width of map (in points)
 	private int y_points; 		// height of map (in points)
 	private int tile_size; 		// tile size (in meters)
-	//private double lat;			// latitude
-	//private double lon;			// longitude
+	private double lat;			// latitude
+	private double lon;			// longitude
 
-	// plant/terrain influencing parameters
+	// tile selection parameters
 	private double Tmean; 		// mean temperature (degC)
-	//private double Tsummer; 	// mean summer temperature (degC)
+	private double Tsummer; 	// mean summer temperature (degC)
 	private double Twinter; 	// mean winter temperature (degC)
 	private double[][] rain;	// per point rainfall (meters)
-
-	// basic ground tile selection
 	private double[][] heights;	// per point height (meters)
 	private double[][] erode;	// per point erosion (meters)
 	private double[][] hydration; // per point water depth (meters)
@@ -38,26 +42,20 @@ public class RpgmExporter implements Exporter {
 	 * @param filename
 	 */
 	public RpgmExporter(String filename, String tileset, int width, int height) {
-		this.filename = filename;
 		this.parms = Parameters.getInstance();
+		
+		this.filename = filename;
 		this.x_points = width;
 		this.y_points = height;
 		
-		// load configuration for the selected tile set
-		TileConfiguration c = TileConfiguration.getInstance();
-		for(TileConfiguration.TileSet t:c.tilesets) {
-			if (tileset.equals(t.name)) {
-				tiles = t;
-				return;
-			}
-		}
-		System.err.println("ERROR - Unknown tileset: " + tileset);
+		this.rules = new TileRules(tileset);
 	}
 
 	/**
 	 * write out an RPGMaker map
 	 */
 	public boolean flush() {
+		random = new Random((int) (lat * lon * 1000));
 		try {
 			FileWriter output = new FileWriter(filename);
 			output.write("{\n");
@@ -68,7 +66,7 @@ public class RpgmExporter implements Exporter {
 			
 			// level 1 objects on the ground
 			int l[][] = new int[y_points][x_points];
-			populate_l1(l);
+			populate(l, 1);
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
 					int adjustment = auto_tile_offset(l, i, j);
@@ -76,7 +74,7 @@ public class RpgmExporter implements Exporter {
 				}
 			
 			// level 2 objects on the ground drawn over level 1
-			populate_l2(l);
+			populate(l, 2);
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
 					int adjustment = l[i][j] > 0 ? auto_tile_offset(l, i, j) : 0;
@@ -84,13 +82,13 @@ public class RpgmExporter implements Exporter {
 				}
 			
 			// level 3 - foreground trees/structures (B/C object sets)
-			populate_l3(l);
+			populate(l, 3);
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
 					output.write(String.format("%d,", l[i][j]));
 			
 			// level 4 - background trees/structures (B/C object sets)
-			populate_l4(l);
+			populate(l, 4);
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
 					output.write(String.format("%d,", l[i][j]));
@@ -129,95 +127,48 @@ public class RpgmExporter implements Exporter {
 	/*
 	 * L1 is the color/texture of the ground
 	 */
-	void populate_l1(int[][] grid) {
-		double dirtThreshold = parms.dirt_hydro;
-		double grassThreshold = parms.grass_hydro;
-
+	void populate(int[][] grid, int level) {	
+		Bidder bidder = new Bidder(MAXRULES);
+		
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
-				double h = hydration[i][j];
-				if (h < 0)
-					grid[i][j] = tiles.waterNum;
-				else if (snowy(i, j))
-					grid[i][j] = tiles.snowNum;
-				else if (h >= grassThreshold)
-					grid[i][j] = tiles.grassNum;
-				else if (rocky(i,j))
-					grid[i][j] = tiles.rockNum;
-				else if (h >= dirtThreshold)
-					grid[i][j] = tiles.dirtNum;
-				else
-					grid[i][j] = tiles.sandNum;
-			}
-	}
-	
-	/*
-	 * L2 is ground cover on top of the base texture
-	 */
-	void populate_l2(int[][] grid) {
-		double min_hill = parms.min_hill;
-		double min_mountain = parms.min_mountain;
-		double min_peak = parms.min_peak;
-		double min_slope = parms.min_slope;
-		double deepThreshold = parms.deep_water;
-		double tree_line = parms.tree_line;
-		double tree_hydro = parms.tree_hydro;
-		double connifer_alt = parms.pine_line;
-		double grassThreshold = parms.grass_hydro;
-
-		// does our tileset support mountains and hills?
-		boolean mountains = (tiles.dirtHillNum + tiles.mountainNum + tiles.snowPeakNum) > 0;
-
-		for (int i = 0; i < y_points; i++)
-			for (int j = 0; j < x_points; j++) {
-				double h = hydration[i][j];
-				double alt = parms.altitude(heights[i][j] - erode[i][j]);
-				double m = slope(i,j);
+				grid[i][j] = 0;
+				int alt = (int) parms.altitude(heights[i][j] - erode[i][j]);
+				double lapse = alt * parms.lapse_rate;
+				bidder.reset();
+				int bids = 0;
+				int possibles = 0;
+				for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
+					// find rules applicable to this level
+					TileRule r = it.next();
+					if (r.level != level)
+						continue;
+					// ask each applicable rule for its bid
+					int bid = r.bid(alt, hydration[i][j], Twinter - (int) lapse, Tsummer - (int) lapse, soil[i][j]);
+					if (parms.debug_level > 2)
+						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + ") bids " + bid);
+					if (bid > 0) {
+						bidder.bid(r.baseTile, bid);
+						bids++;
+					}
+					
+					possibles++;
+				}
+				if (bids != 0) {
+					int winner = bidder.winner(random.nextFloat());
+					grid[i][j] = winner;
+					if (parms.debug_level > 2)
+						System.out.println("    winner = " + winner);
+				} else if (level == 1) {	// this shouldn't happen
+					System.err.println("ERROR: l1[" + i + "," + j + "] bids = 0/" + possibles);
+					System.err.println("    alt=" + alt + ", hyd=" + 
+							String.format("%.2f", hydration[i][j]) + 
+							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
+							", soil=" + soil[i][j]);
+				}
 				
-				if (h < 0)
-					grid[i][j] = (h <= deepThreshold) ? tiles.deepNum : 0;
-				else if (mountains && alt >= min_hill && m >= min_slope) {
-					if (alt >= min_peak)
-						grid[i][j] = snowy(i,j) ? tiles.snowPeakNum : tiles.peakNum;
-					else if (alt >= min_mountain)
-						grid[i][j] = tiles.mountainNum;
-					else if (snowy(i,j))
-						grid[i][j] = tiles.snowHillNum;
-					else if (h >= grassThreshold)
-						grid[i][j] = tiles.grassHillNum;
-					else
-						grid[i][j] = tiles.dirtHillNum;
-				} else if (h >= tree_hydro && alt <= tree_line) {
-					if (snowy(i,j))
-						grid[i][j] = tiles.xmasNum;
-					else if (alt >= connifer_alt)
-						grid[i][j] = tiles.pineNum;
-					else
-						grid[i][j] = tiles.treeNum;
-				} else
-					grid[i][j] = 0;
 			}
 	}
-	
-	/*
-	 * L3 is trees and other impassable above-ground objects
-	 */
-	void populate_l3(int[][] grid) {
-		// TODO populate L3 of area maps w/trees
-		for(int i = 0; i < y_points; i++)
-			for(int j = 0; j < x_points; j++)
-				grid[i][j] = 0;
-	}
-	
-	/*
-	 * L4 is foreground to L3's background
-	 */
-	void populate_l4(int[][] grid) {
-		for(int i = 0; i < y_points; i++)
-			for(int j = 0; j < x_points; j++)
-				grid[i][j] = 0;
-	}
-
 	
 	/*
 	 * return the slope at a point
@@ -230,17 +181,6 @@ public class RpgmExporter implements Exporter {
 								 heights[row+1][col] - erode[row+1][col];
 		double dz = Math.sqrt((z0-zx1)*(z0-zx1) + (z0-zy1)*(z0-zy1));
 		return parms.altitude(dz) / tile_size;
-	}
-	
-	/*
-	 * likelihood of snow at a point
-	 */
-	private boolean snowy(int row, int col) {
-		if (rain[row][col] < parms.min_snow)
-			return false;
-		double alt = parms.altitude(heights[row][col] - erode[row][col]);
-		double temp = (Twinter + Tmean)/2 - (alt * parms.lapse_rate);
-		return (temp < 0);
 	}
 	
 	/*
@@ -338,13 +278,13 @@ public class RpgmExporter implements Exporter {
 	}
 
 	public void position(double lat, double lon) {
-		//this.lat = lat;
-		//this.lon = lon;
+		this.lat = lat;
+		this.lon = lon;
 	}
 
 	public void temps(double meanTemp, double meanSummer, double meanWinter) {
 		this.Tmean = meanTemp;
-		//this.Tsummer = meanSummer;
+		this.Tsummer = meanSummer;
 		this.Twinter = meanWinter;
 	}
 
@@ -378,7 +318,7 @@ public class RpgmExporter implements Exporter {
 		// patch in the array height and width
 		setparm("height", String.format("%d", y_points));
 		setparm("width", String.format("%d", x_points));
-		setparm("tilesetId", String.format("%d", tiles.id));
+		setparm("tilesetId", String.format("%d", rules.tileset));
 
 		// output all the standard parameters in the standard order
 		writeParmList(out, parms1);

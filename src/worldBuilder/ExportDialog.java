@@ -234,8 +234,6 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		double hydration[][] = cart.interpolate(map.getHydrationMap());
 		add_rivers(hydration, meters);	// add rivers to hydration map
 		export.waterMap(hydration);
-		
-		// TODO place plants, ultimately trees
 
 		// and force it all out
 		if (export.flush()) {

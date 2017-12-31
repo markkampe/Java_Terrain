@@ -49,6 +49,38 @@
 	  "hydro": { "min": 0.3 }
 	},
 
+
+	{ "name": "grasshill", "level": 2, "base": 3104,
+	  "alt": { "min": 100, "max": 1500 },
+	  "temp": { "min": 5 },
+	  "hydro": { "min": 0.1 },
+	  "slope": { "min": 0.1 }
+	},
+	{ "name": "dirthill", "level": 2, "base": 3488,
+	  "alt": { "min": 100, "max": 1500 },
+	  "slope": { "min": 0.1 }
+	},
+	{ "name": "snowhill", "level": 2, "base": 4016,
+	  "alt": { "min": 100, "max": 1500 },
+	  "temp": { "max": 10.0 },
+	  "slope": { "min": 0.1 },
+	  "vigor": 65
+	},
+	{ "name": "mountain", "level": 2, "base": 3152,
+	  "alt": { "min": 1500, "max": 2000 },
+	  "slope": { "min": 0.1 }
+	},
+	{ "name": "peak", "level": 2, "base": 3536,
+	  "alt": { "min": 2000 },
+	  "slope": { "min": 0.2 }
+	},
+	{ "name": "snowpeak", "level": 2, "base": 4304,
+	  "alt": { "min": 1500 },
+	  "temp": { "max": 10.0 },
+	  "slope": { "min": 0.2 },
+	  "vigor": 65
+	},
+
 	{ "name": "template", "level": 666, "base": 666,
 	  "alt": { "min": 0, "max": 0 },
 	  "temp": { "min": 0.0, "max": 0.0 },

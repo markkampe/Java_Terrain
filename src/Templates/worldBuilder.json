@@ -59,17 +59,6 @@
 		"soil": false
     },
     "export": {
-    	"output": "worldmap",
-    	"deep_water": 15,
-    	"min_hill": 100,
-    	"min_mountain": 500,
-    	"min_peak": 1500,
-    	"min_slope": 0.10,
-    	"min_snow": 15,
-    	"tree_line": 2000,
-    	"pine_line": 1500,
-    	"tree_hydro": 0.3,
-    	"grass_hydro": 0.2,
-    	"dirt_hydro": 0.05
+    	"output": "Map001"
     }
 }

@@ -151,7 +151,6 @@ public class RpgmExporter implements Exporter {
 						bidder.bid(r.baseTile, bid);
 						bids++;
 					}
-					
 					possibles++;
 				}
 				if (bids != 0) {

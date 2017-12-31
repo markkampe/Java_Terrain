@@ -19,14 +19,11 @@ public class TileRules {
 	public int tileset;					// associated tile set ID
 	
 	public LinkedList<TileRule> rules;	// the rules
-	private static TileRules instance;
 	private Parameters parms;
-	
-	public static TileRules getInstance() { return instance; };
+
 	
 	public TileRules(String exportType) {
 		parms = Parameters.getInstance();
-		instance = this;
 		rules = new LinkedList<TileRule>();
 	
 		BufferedReader r;

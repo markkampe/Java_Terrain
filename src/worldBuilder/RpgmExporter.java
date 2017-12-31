@@ -144,7 +144,7 @@ public class RpgmExporter implements Exporter {
 					if (r.level != level)
 						continue;
 					// ask each applicable rule for its bid
-					int bid = r.bid(alt, hydration[i][j], Twinter - (int) lapse, Tsummer - (int) lapse, soil[i][j]);
+					int bid = r.bid(alt, hydration[i][j], Twinter - (int) lapse, Tsummer - (int) lapse, soil[i][j], slope(i,j));
 					if (parms.debug_level > 2)
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + ") bids " + bid);
 					if (bid > 0) {
@@ -182,14 +182,6 @@ public class RpgmExporter implements Exporter {
 		return parms.altitude(dz) / tile_size;
 	}
 	
-	/*
-	 * likelihood a point is rocky
-	 */
-	private boolean rocky(int row, int col) {
-		double v = soil[row][col];
-		return( v > Map.SEDIMENTARY || v < Map.ALLUVIAL);
-	}
-
 	/*
 	 * examine the neighbors, identify boundaries, and figure out
 	 * the appropriate tile offsets.

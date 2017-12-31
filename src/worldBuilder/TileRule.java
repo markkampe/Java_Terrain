@@ -98,10 +98,11 @@ public class TileRule {
 	 * @param winter	low temp(degC)
 	 * @param summer	high temp(degC)
 	 * @param soil		soil type
+	 * @param slope		%
 	 * 
 	 * @return			integer bid
 	 */
-	int bid(double alt, double hydro, double winter, double summer, double soil) {
+	int bid(double alt, double hydro, double winter, double summer, double soil, double slope) {
 		// see if any parameters preclude this tile-bid
 		if (alt < minAltitude || alt > maxAltitude)
 			return 0;
@@ -114,6 +115,8 @@ public class TileRule {
 		if (hydro < 0 && ((-hydro < minDepth || -hydro > maxDepth)))
 			return(0);
 		if (soil < minSoil || soil > maxSoil)
+			return 0;
+		if (slope < minSlope || slope > maxSlope)
 			return 0;
 
 		// see if any parameters take us outside of the sweet-zone

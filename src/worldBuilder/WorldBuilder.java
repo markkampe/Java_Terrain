@@ -65,6 +65,11 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem viewZoom;
 	private JMenuItem viewDebug;
 	private JMenuItem helpInfo;
+	private JMenuItem helpDebug;
+	private JMenuItem debug0;
+	private JMenuItem debug1;
+	private JMenuItem debug2;
+	private JMenuItem debug3;
 	
 	// control widgets
 	private JSlider rainfall;
@@ -217,9 +222,24 @@ public class WorldBuilder  extends JFrame
 		
 		// create help menu
 		helpInfo = new JMenuItem("about WorldBuilder");
+		debug0 = new JMenuItem("0");
+		debug1 = new JMenuItem("1");
+		debug2 = new JMenuItem("2");
+		debug3 = new JMenuItem("3");
+		JMenu dbgMenu = new JMenu("Verbosity");
+		dbgMenu.add(debug0);
+		dbgMenu.add(debug1);
+		dbgMenu.add(debug2);
+		dbgMenu.add(debug3);
+		
+		debug0.addActionListener(this);
+		debug1.addActionListener(this);
+		debug2.addActionListener(this);
+		debug3.addActionListener(this);
 		helpInfo.addActionListener(this);
 		JMenu helpMenu = new JMenu("Help");
 		helpMenu.add(helpInfo);
+		helpMenu.add(dbgMenu);
 		
 		// assemble the menu bar
 		JMenuBar menuBar = new JMenuBar();
@@ -417,6 +437,18 @@ public class WorldBuilder  extends JFrame
 			JOptionPane.showMessageDialog(new JFrame(), 
 					version +"\n" + author + "\n" + credit + "\n" + license, 
 					"Information", JOptionPane.INFORMATION_MESSAGE);
+		} else if (o == debug0) {
+			parms.debug_level = 0;
+			System.out.println("   verbosity:  " + parms.debug_level);
+		} else if (o == debug1) {
+			parms.debug_level = 1;
+			System.out.println("   verbosity:  " + parms.debug_level);
+		} else if (o == debug2) {
+			parms.debug_level = 2;
+			System.out.println("   verbosity:  " + parms.debug_level);
+		} else if (o == debug3) {
+			parms.debug_level = 3;
+			System.out.println("   verbosity:  " + parms.debug_level);
 		}
 		updateDisplayMenus(parms.display_options);
 	}

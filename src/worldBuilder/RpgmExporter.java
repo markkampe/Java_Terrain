@@ -121,6 +121,13 @@ public class RpgmExporter implements Exporter {
 			System.err.println("ERROR - unable to write output file: " + filename);
 			return false;
 		}
+		
+		// TODO update MapInfo.json
+		//	find it in the same directory as the map
+		//	read it in
+		//	look for an entry for the current map
+		//	update it (w/location), adding it as necessary
+		//	rewrite
 	}
 	
 	/*
@@ -201,7 +208,7 @@ public class RpgmExporter implements Exporter {
 				16,	16,	34,	34,	17,	17,	34,	34,	// x*./...	
 				24,	26,	36,	36,	24,	26,	36,	36,	// .*x/...	
 				32,	32,	42,	42,	32,	32,	42,	42,	// x*x/...	
-				8,	9,	34,	34,	10,	11,	37,	22,	// .*./x..	
+				8,	9,	22,	22,	10,	11,	22,	22,	// .*./x..	
 				16,	16,	34,	34,	17,	17,	34,	34,	// x*./x..	
 				25,	27,	37,	37,	25,	27,	37,	37,	// .*x/x..	
 				32,	32,	42,	42,	32,	32,	42,	42,	// x*x/x..

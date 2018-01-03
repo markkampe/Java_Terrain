@@ -28,7 +28,7 @@
 	},
 
 
-	{ "name": "tree", "level": 2, "base": 3006,
+	{ "name": "tree", "level": 2, "base": 3008,
 	  "alt": { "max": 1500 },
 	  "temp": { "min": -5 },
 	  "hydro": { "min": 0.3 }

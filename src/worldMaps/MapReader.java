@@ -250,6 +250,20 @@ public class MapReader {
 	}
 	
 	/**
+	 * compass orientation of face
+	 */
+	public double direction(int row, int col) {
+		double dzdy = dZdY(row, col);
+		double dzdx = dZdX(row, col);
+		double theta = Math.atan(-dzdx/dzdy) * 180 /Math.PI;
+		if (dzdy < 0)
+			return theta + 180;
+		if (dzdx > 0)
+			return theta + 360;
+		return theta;
+	}
+	
+	/**
 	 * direction slope faces
 	 */
 	public CompassDirection face(int row, int col ) {

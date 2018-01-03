@@ -87,7 +87,8 @@
 	  "hydro": { "min": 0.0, "max": 0.0 },
 	  "depth": { "min": 0.0, "max": 0.0 },
 	  "slope": { "min": 0.0, "max": 0.0 },
-	  "soil": { "min": 0.0, "max": 0.0 }
+	  "soil": { "min": 0.0, "max": 0.0 },
+	  "face": { "min": 0.0, "max": 360.0 }
 	}
     ]
 }

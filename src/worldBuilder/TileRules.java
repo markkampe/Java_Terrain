@@ -55,6 +55,7 @@ public class TileRules {
 		double tMin = NO_VALUE, tMax = NO_VALUE;	// temperature
 		double mMin = NO_VALUE, mMax = NO_VALUE;	// slope
 		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
+		double fMin = NO_VALUE, fMax = NO_VALUE;	// facing direction
 		int vigor = NO_VALUE;
 		
 		parser = Json.createParser(r);
@@ -90,6 +91,8 @@ public class TileRules {
 						thisRule.minSoil = sMin;
 					if (mMin != NO_VALUE)
 						thisRule.minSlope = mMin;
+					if (fMin != NO_VALUE)
+						thisRule.minFace = fMin;
 					if (aMax != NO_VALUE)
 						thisRule.maxAltitude = aMax;
 					if (hMax != NO_VALUE)
@@ -102,6 +105,8 @@ public class TileRules {
 						thisRule.maxSoil = sMax;
 					if (mMax != NO_VALUE)
 						thisRule.maxSlope = mMax;
+					if (fMax != NO_VALUE)
+						thisRule.maxFace = fMax;
 					if (vigor != NO_VALUE)
 						thisRule.vigor = vigor;
 					
@@ -113,6 +118,7 @@ public class TileRules {
 					hMin = NO_VALUE; hMax = NO_VALUE;
 					tMin = NO_VALUE; tMax = NO_VALUE;	
 					mMin = NO_VALUE; mMax = NO_VALUE;
+					fMin = NO_VALUE; fMax = NO_VALUE;
 					sMin = NO_VALUE; sMax = NO_VALUE;
 					vigor = NO_VALUE;
 					name = "";
@@ -184,6 +190,9 @@ public class TileRules {
 					case "soil":
 						sMin = Double.parseDouble(thisValue);
 						break;
+					case "face":
+						fMin = Double.parseDouble(thisValue);
+						break;
 					}
 					thisKey = "";
 					break;
@@ -207,6 +216,9 @@ public class TileRules {
 						break;
 					case "soil":
 						sMax = Double.parseDouble(thisValue);
+						break;
+					case "face":
+						fMax = Double.parseDouble(thisValue);
 						break;
 					}
 					thisKey = "";

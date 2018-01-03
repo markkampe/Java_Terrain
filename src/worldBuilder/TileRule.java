@@ -24,6 +24,8 @@ public class TileRule {
 	public double maxSlope;
 	public double minSoil;
 	public double maxSoil;
+	public double maxFace;
+	public double minFace;
 	
 	public int vigor;
 	
@@ -49,6 +51,8 @@ public class TileRule {
 		maxSlope = 100.0;
 		minSoil = 0;
 		maxSoil = Map.soil_names.length - 1;
+		minFace = 0;
+		maxFace = 360;
 		vigor = 16;
 	}
 	
@@ -64,6 +68,7 @@ public class TileRule {
 		System.out.println(prefix + "      " + "temp:  " + minTemp + "-" + maxTemp);
 		System.out.println(prefix + "      " + "soil:  " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
 		System.out.println(prefix + "      " + "slope: " + String.format("%.1f", minSlope) + "-" + String.format("%.1f", maxSlope));
+		System.out.println(prefix + "      " + "face:  " + (int) minFace + "-" + (int) maxFace);
 		System.out.println(prefix + "      " + "vigor: " + vigor);
 	}
 	
@@ -88,11 +93,13 @@ public class TileRule {
 	 * @param winter	low temp(degC)
 	 * @param summer	high temp(degC)
 	 * @param soil		soil type
-	 * @param slope		%
+	 * @param slope		dz/dxy
+	 * @param direction	0-360
 	 * 
 	 * @return			integer bid
 	 */
-	int bid(double alt, double hydro, double winter, double summer, double soil, double slope) {
+	int bid(double alt, double hydro, double winter, double summer, double soil,
+			double slope, double direction) {
 		// see if any parameters preclude this tile-bid
 		if (alt < minAltitude || alt > maxAltitude)
 			return 0;
@@ -107,6 +114,8 @@ public class TileRule {
 		if (soil < minSoil || soil > maxSoil)
 			return 0;
 		if (slope < minSlope || slope > maxSlope)
+			return 0;
+		if (direction < minFace || direction > maxFace)
 			return 0;
 
 		// see if any parameters take us outside of the sweet-zone

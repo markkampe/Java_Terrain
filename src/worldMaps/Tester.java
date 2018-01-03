@@ -84,6 +84,17 @@ public class Tester extends JFrame {
 		}
 		
 		output.println();
+		output.print("direction:");
+		for(int row = 0; row < r.height(); row++) {
+			output.println();
+			output.print("    ");
+			for(int col = 0; col < r.width(); col++) {
+				output.print(String.format("%4d", (int) r.direction(row,col)));
+			}
+			output.println("");
+		}
+		
+		output.println();
 		output.print("rainfall:");
 		for(int row = 0; row < r.height(); row++) {
 			output.println();

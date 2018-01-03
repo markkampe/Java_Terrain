@@ -150,7 +150,8 @@ public class RpgmExporter implements Exporter {
 					if (r.level != level)
 						continue;
 					// ask each applicable rule for its bid
-					int bid = r.bid(alt, hydration[i][j], Twinter - (int) lapse, Tsummer - (int) lapse, soil[i][j], slope(i,j));
+					int bid = r.bid(alt, hydration[i][j], Twinter - (int) lapse, Tsummer - (int) lapse, 
+							soil[i][j], slope(i,j), direction(i,j));
 					if (parms.debug_level > 2)
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + ") bids " + bid);
 					if (bid > 0) {
@@ -186,6 +187,46 @@ public class RpgmExporter implements Exporter {
 								 heights[row+1][col] - erode[row+1][col];
 		double dz = Math.sqrt((z0-zx1)*(z0-zx1) + (z0-zy1)*(z0-zy1));
 		return parms.altitude(dz) / tile_size;
+	}
+	
+	/**
+	 * slope upwards to the east
+	 */
+	public double dZdX(int row, int col) {
+		if (col == x_points - 1)
+			col--;
+		double dz = (heights[row][col+1] - erode[row][col+1]) - (heights[row][col] - erode[row][col]) ;
+		double dx = tile_size;
+		return dz/dx;
+	}
+
+	/**
+	 * slope upwards to the south
+	 */
+	public double dZdY(int row, int col) {
+		if (row == y_points - 1)
+			row--;
+		double dz = (heights[row+1][col] - erode[row+1][col]) - (heights[row][col] - erode[row][col]) ;
+		double dy = tile_size;
+		return dz/dy;
+	}
+	
+	/**
+	 * compass orientation of face
+	 * @return
+	 */
+	/**
+	 * compass orientation of face
+	 */
+	public double direction(int row, int col) {
+		double dzdy = dZdY(row, col);
+		double dzdx = dZdX(row, col);
+		double theta = Math.atan(-dzdx/dzdy) * 180 /Math.PI;
+		if (dzdy < 0)
+			return theta + 180;
+		if (dzdx > 0)
+			return theta + 360;
+		return theta;
 	}
 	
 	/*

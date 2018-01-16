@@ -56,7 +56,9 @@ public class TileRules {
 		double mMin = NO_VALUE, mMax = NO_VALUE;	// slope
 		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
 		double fMin = NO_VALUE, fMax = NO_VALUE;	// facing direction
+		int surround = NO_VALUE;					// surrounding tile
 		int vigor = NO_VALUE;
+		int height = 1, width = 1;					// stamp size
 		
 		parser = Json.createParser(r);
 		while (parser.hasNext()) {
@@ -109,10 +111,16 @@ public class TileRules {
 						thisRule.maxFace = fMax;
 					if (vigor != NO_VALUE)
 						thisRule.vigor = vigor;
+					if (surround != NO_VALUE)
+						thisRule.altTile = surround;
+					thisRule.height = height;
+					thisRule.width = width;
 					
 					rules.add(thisRule);
 					level = NO_VALUE;
 					base = NO_VALUE;
+					surround = NO_VALUE;
+					height = 1; width = 1;
 					aMin = NO_VALUE; aMax = NO_VALUE;
 					dMin = NO_VALUE; dMax = NO_VALUE;
 					hMin = NO_VALUE; hMax = NO_VALUE;
@@ -147,6 +155,13 @@ public class TileRules {
 				case "name":
 					name = parser.getString();
 					break;
+				case "stamp":
+					thisValue = parser.getString();
+					if (thisValue.equals("2x2")) {	// FIX generalize stamp size
+						height = 2;
+						width = 2;
+					}
+					break;
 				}
 				thisKey = "";
 				break;
@@ -160,6 +175,9 @@ public class TileRules {
 				case "base":
 					base = parser.getInt();
 					thisKey = "";
+					break;
+				case "surround":
+					surround = parser.getInt();
 					break;
 				case "tileset":
 					tileset = parser.getInt();

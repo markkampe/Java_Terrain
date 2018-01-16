@@ -1,7 +1,7 @@
 { "tileset": 1,
   "Overworld": [
 	{ "name": "water", "level": 1, "base": 2048,
-	  "depth": { "min": 0.000001, "max": 10000 }
+	  "depth": { "min": 0.0, "max": 10000 }
 	},
 
 	{ "name": "deep", "level": 2, "base": 2096,
@@ -70,15 +70,30 @@
 	  "alt": { "min": 1500, "max": 2000 },
 	  "slope": { "min": 0.1 }
 	},
-	{ "name": "peak", "level": 2, "base": 3536,
+
+	{ "name": "peak", "level": 4, "base": 18, "stamp":"2x2", "surround": 34,
 	  "alt": { "min": 2000 },
+	  "slope": { "min": 0.2 },
+	  "temp": { "min": 10.0 },
+	  "soil": { "min": 1.5, "max": 3.0 }
+	},
+	{ "name": "stonepeak", "level": 4, "base": 299, "stamp":"2x2", "surround": 315,
+	  "alt": { "min": 2000 },
+	  "slope": { "min": 0.2 },
+	  "hydro": { "max": 0.1 },
+	  "temp": { "min": 10.0 },
+	  "soil": { "min": 0.0, "max": 1.5 }
+	},
+	{ "name": "snowpeak", "level": 4, "base": 22, "stamp":"2x2", "surround": 38,
+	  "alt": { "min": 2000 },
+	  "temp": { "max": 10.0 },
 	  "slope": { "min": 0.2 }
 	},
-	{ "name": "snowpeak", "level": 2, "base": 4304,
-	  "alt": { "min": 1500 },
-	  "temp": { "max": 10.0 },
+	{ "name": "greenpeak", "level": 4, "base": 301, "stamp":"2x2", "surround": 317,
+	  "alt": { "min": 2000 },
 	  "slope": { "min": 0.2 },
-	  "vigor": 65
+	  "temp": { "max": 10 },
+	  "hydro": { "min": 0.1 }
 	},
 
 	{ "name": "template", "level": 666, "base": 666,

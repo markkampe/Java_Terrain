@@ -8,9 +8,12 @@ public class TileRule {
 	public static LinkedList<TileRule> rules;
 	
 	public String ruleName;
-	public int level;
-	public int tileSet;
-	public int baseTile;
+	public int level;		// map level
+	public int tileSet;		// tile set ID
+	public int baseTile;	// base tile for this rule
+	public int altTile;		// base tile for surrounded version
+	public int height;		// stamp height
+	public int width;		// stamp width
 	
 	public int minAltitude;
 	public int maxAltitude;
@@ -36,6 +39,9 @@ public class TileRule {
 		this.tileSet = tileset;
 		this.level = level;
 		this.baseTile = base;
+		this.height = 1;
+		this.width = 1;
+		this.altTile = 0;
 		
 		
 		// default values will meet any terrestrial conditions
@@ -61,7 +67,12 @@ public class TileRule {
 	 * @param prefix ... leading blankis
 	 */
 	void dump( String prefix ) {
-		System.out.println(prefix + "Rule: " + ruleName + ", level=" + level + ", base=" + baseTile);
+		System.out.print(prefix + "Rule: " + ruleName + ", level=" + level + ", base=" + baseTile);
+		if (altTile > 0)
+			System.out.print(", surround=" + altTile);
+		if (height > 1 || width > 1)
+			System.out.print(", stamp=" + width + "x" + height);
+		System.out.println("");
 		System.out.println(prefix + "      " + "alt:   " + minAltitude + "-" + maxAltitude);
 		System.out.println(prefix + "      " + "depth: " + (int) minDepth + "-" + (int) maxDepth);
 		System.out.println(prefix + "      " + "hydro: " + String.format("%.1f", minHydro) + "-" + String.format("%.1f", maxHydro));
@@ -128,11 +139,6 @@ public class TileRule {
 			if (hydro < (maxHydro + 3*minHydro)/4)
 				score /= 2;
 			else if (hydro > (minHydro+ 3*maxHydro)/4)
-				score /= 2;
-		} else {
-			if (-hydro < (maxDepth + 3*minDepth)/4)
-				score /= 2;
-			else if (-hydro > (minDepth+ 3*maxDepth)/4)
 				score /= 2;
 		}
 		if (winter < (maxTemp + 3*minTemp)/4)

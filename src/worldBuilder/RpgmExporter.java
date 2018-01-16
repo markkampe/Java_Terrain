@@ -65,7 +65,7 @@ public class RpgmExporter implements Exporter {
 			
 			// level 1 objects on the ground
 			int l[][] = new int[y_points][x_points];
-			populate(l, 1);
+			tiles(l, 1);
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
 					int adjustment = auto_tile_offset(l, i, j);
@@ -73,21 +73,22 @@ public class RpgmExporter implements Exporter {
 				}
 			
 			// level 2 objects on the ground drawn over level 1
-			populate(l, 2);
+			tiles(l, 2);
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
 					int adjustment = l[i][j] > 0 ? auto_tile_offset(l, i, j) : 0;
 					output.write(String.format("%d,", l[i][j] + adjustment));	
 				}
 			
-			// level 3 - foreground trees/structures (B/C object sets)
-			populate(l, 3);
+			// level 3 - foreground mountains/trees/structures (B/C object sets)
+			// stamps(l, 3);
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
-					output.write(String.format("%d,", l[i][j]));
+					output.write("0,");
+					//output.write(String.format("%d,", l[i][j]));
 			
-			// level 4 - background trees/structures (B/C object sets)
-			populate(l, 4);
+			// level 4 - background mountains/trees/structures (B/C object sets)
+			stamps(l, 4);
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
 					output.write(String.format("%d,", l[i][j]));
@@ -131,9 +132,9 @@ public class RpgmExporter implements Exporter {
 	}
 	
 	/*
-	 * L1 is the color/texture of the ground
+	 * L1 is the color/texture of the ground, L2 is on the ground
 	 */
-	void populate(int[][] grid, int level) {	
+	void tiles(int[][] grid, int level) {	
 		Bidder bidder = new Bidder(MAXRULES);
 		
 		for (int i = 0; i < y_points; i++)
@@ -175,6 +176,53 @@ public class RpgmExporter implements Exporter {
 				
 			}
 	}
+	
+	/*
+	 * L4 is stamps and L3 fills in between them
+	 */
+	void stamps(int[][] grid, int level) {	
+		Bidder bidder = new Bidder(MAXRULES);
+		
+		for (int i = 0; i < y_points; i++)
+			for (int j = 0; j < x_points; j++) {
+				grid[i][j] = 0;
+				int alt = (int) parms.altitude(heights[i][j] - erode[i][j]);
+				double lapse = alt * parms.lapse_rate;
+				bidder.reset();
+				int bids = 0;
+				int possibles = 0;
+				for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
+					// find rules applicable to this level
+					TileRule r = it.next();
+					if (r.level != level)
+						continue;
+					// ask each applicable rule for its bid
+					int bid = r.bid(alt, hydration[i][j], Twinter - (int) lapse, Tsummer - (int) lapse, 
+							soil[i][j], slope(i,j), direction(i,j));
+					if (parms.debug_level > 2)
+						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + ") bids " + bid);
+					if (bid > 0) {
+						bidder.bid(r.baseTile, bid);
+						bids++;
+					}
+					possibles++;
+				}
+				if (bids != 0) {
+					int winner = bidder.winner(random.nextFloat());
+					grid[i][j] = winner;
+					if (parms.debug_level > 2)
+						System.out.println("    winner = " + winner);
+				} else if (level == 1) {	// this shouldn't happen
+					System.err.println("ERROR: l1[" + i + "," + j + "] bids = 0/" + possibles);
+					System.err.println("    alt=" + alt + ", hyd=" + 
+							String.format("%.2f", hydration[i][j]) + 
+							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
+							", soil=" + soil[i][j]);
+				}
+				
+			}
+	}
+	
 	
 	/*
 	 * return the slope at a point

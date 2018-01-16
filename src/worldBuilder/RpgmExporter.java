@@ -81,11 +81,10 @@ public class RpgmExporter implements Exporter {
 				}
 			
 			// level 3 - foreground mountains/trees/structures (B/C object sets)
-			// stamps(l, 3);
+			stamps(l, 3);
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
-					output.write("0,");
-					//output.write(String.format("%d,", l[i][j]));
+					output.write(String.format("%d,", l[i][j]));
 			
 			// level 4 - background mountains/trees/structures (B/C object sets)
 			stamps(l, 4);
@@ -145,6 +144,12 @@ public class RpgmExporter implements Exporter {
 				bidder.reset();
 				int bids = 0;
 				int possibles = 0;
+				if (parms.debug_level >2)
+					System.out.println("l" + level + "[" + i + "," + j + "]: " +
+						" alt=" + alt + ", hyd=" + 
+						String.format("%.2f", hydration[i][j]) + 
+						String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
+						", soil=" + soil[i][j] + ", slope=" + slope(i,j));
 				for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
 					// find rules applicable to this level
 					TileRule r = it.next();
@@ -168,12 +173,12 @@ public class RpgmExporter implements Exporter {
 						System.out.println("    winner = " + winner);
 				} else if (level == 1) {	// this shouldn't happen
 					System.err.println("ERROR: l1[" + i + "," + j + "] bids = 0/" + possibles);
-					System.err.println("    alt=" + alt + ", hyd=" + 
-							String.format("%.2f", hydration[i][j]) + 
-							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
-							", soil=" + soil[i][j]);
+					if (parms.debug_level <= 2)
+						System.err.println("    alt=" + alt + ", hyd=" + 
+								String.format("%.2f", hydration[i][j]) + 
+								String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
+								", soil=" + soil[i][j]);
 				}
-				
 			}
 	}
 	
@@ -207,19 +212,6 @@ public class RpgmExporter implements Exporter {
 					}
 					possibles++;
 				}
-				if (bids != 0) {
-					int winner = bidder.winner(random.nextFloat());
-					grid[i][j] = winner;
-					if (parms.debug_level > 2)
-						System.out.println("    winner = " + winner);
-				} else if (level == 1) {	// this shouldn't happen
-					System.err.println("ERROR: l1[" + i + "," + j + "] bids = 0/" + possibles);
-					System.err.println("    alt=" + alt + ", hyd=" + 
-							String.format("%.2f", hydration[i][j]) + 
-							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
-							", soil=" + soil[i][j]);
-				}
-				
 			}
 	}
 	
@@ -234,7 +226,7 @@ public class RpgmExporter implements Exporter {
 		double zy1 = (row > 0) ? heights[row-1][col] - erode[row-1][col] :
 								 heights[row+1][col] - erode[row+1][col];
 		double dz = Math.sqrt((z0-zx1)*(z0-zx1) + (z0-zy1)*(z0-zy1));
-		return parms.altitude(dz) / tile_size;
+		return Math.abs(parms.altitude(dz) / tile_size);
 	}
 	
 	/**

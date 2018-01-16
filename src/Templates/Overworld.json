@@ -1,7 +1,7 @@
 { "tileset": 1,
   "Overworld": [
 	{ "name": "water", "level": 1, "base": 2048,
-	  "depth": { "min": 0.0, "max": 10000 }
+	  "depth": { "min": 0.00001, "max": 10000 }
 	},
 
 	{ "name": "deep", "level": 2, "base": 2096,

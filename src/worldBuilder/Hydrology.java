@@ -46,6 +46,8 @@ public class Hydrology {
 	private static final double EPSILON = .0000001;
 	private static final double MAX_RATIO = 20;	// max river W/D
 	
+	private static final int HYDRO_DEBUG = 2;
+	
 	public Hydrology(Map map) {
 		this.map = map;
 		this.parms = Parameters.getInstance();
@@ -133,7 +135,7 @@ public class Hydrology {
 		heightSort(0, byHeight.length - 1);
 		
 		// identify sinks (scan lowest to highest)
-		if (parms.debug_level > 1)
+		if (parms.debug_level >= HYDRO_DEBUG)
 			map.highlight(-1, null);
 		for(int i = byHeight.length - 1; i >= 0; i--) {
 			int point = byHeight[i];
@@ -195,7 +197,7 @@ public class Hydrology {
 				
 				// re-route all drainage from that depression to escape point
 				if (escapePoint >= 0) {
-					if (parms.debug_level > 1) {
+					if (parms.debug_level >= HYDRO_DEBUG) {
 						map.highlight(escapePoint, sinkMap[escapePoint] == OCEAN ? Color.BLUE : Color.GREEN);
 						map.highlight(s,  Color.ORANGE);
 					}
@@ -219,7 +221,7 @@ public class Hydrology {
 						
 						gotSome = true;
 					}
-				} else if (parms.debug_level > 1)
+				} else if (parms.debug_level >= HYDRO_DEBUG)
 					map.highlight(s, Color.RED);
 			}
 		} while (gotSome);

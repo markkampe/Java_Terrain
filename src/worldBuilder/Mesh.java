@@ -57,6 +57,8 @@ public class Mesh {
 	public MeshPoint[] vertices;	// grid vertices	
 	private Parameters parms;		// global options
 	
+	private static final int MESH_DEBUG = 3;
+	
 	/**
 	 * create an initial set of points
 	 * 
@@ -199,7 +201,7 @@ public class Mesh {
 		if (points == 0) {
 			System.out.println("ERROR: file " + filename + " does not contain any mesh points");
 			return;
-		} else if (parms.debug_level > 1) {
+		} else if (parms.debug_level > 0) {
 			System.out.println("Loaded " + points + "/" + length + " points, " + paths + " paths from file " + filename);
 		}
 	}
@@ -320,7 +322,7 @@ public class Mesh {
 			}
 			newPoints[i++] = new MeshPoint(x_sum/numPoints, y_sum/numPoints);
 			
-			if (parms.debug_level > 2)
+			if (parms.debug_level  >= MESH_DEBUG)
 				System.out.println("initial point <" + v.position + "> -> <" + newPoints[i-1] + ">");
 		}
 		return(newPoints);
@@ -405,7 +407,7 @@ public class Mesh {
 		 * ... which ends at the edges anyway.
 		 */
 
-		if (parms.debug_level > 1)
+		if (parms.debug_level  >= MESH_DEBUG)
 			System.out.println(points.length + " points-> " + vertices.length + "/" + g.num_vertices() + 
 					" mesh vertices, " + numPaths/2 + "/" + g.num_edges() + " mesh paths");
 	}

@@ -27,6 +27,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	
 	private static final long serialVersionUID = 1L;
 	
+	private static final int RAIN_DEBUG = 3;
+	
 	public RainDialog(Map map)  {
 		// pick up references
 		this.map = map;
@@ -192,7 +194,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		
 		// tell the map about the update
 		map.setRainMap(rainmap);
-		if (parms.debug_level > 2)
+		if (parms.debug_level >= RAIN_DEBUG)
 			parms.rainParms((int)incoming);
 	}
 

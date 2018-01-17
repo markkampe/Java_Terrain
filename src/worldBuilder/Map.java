@@ -96,6 +96,7 @@ public class Map extends JPanel {
 
 	private Parameters parms;
 	
+	private static final int MAP_DEBUG = 2;
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -792,7 +793,7 @@ public class Map extends JPanel {
 		map = new Cartesian(mesh, x_min, y_min, x_max, y_max, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
 		repaint();
 		
-		if (parms.debug_level > 1)
+		if (parms.debug_level >= MAP_DEBUG)
 			System.out.println("Display window <" + x_min + ", " + y_min + "> to <" + x_max + ", " + y_max + ">");
 	}
 

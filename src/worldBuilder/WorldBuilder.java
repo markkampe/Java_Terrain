@@ -15,9 +15,9 @@ public class WorldBuilder  extends JFrame
 	// identification information
 	private static final String version = "WorldBuilder 0.1";
 	private static final String author = "Author: Mark Kampe (mark.kampe@gmail.com)";
-	private static final String credit = "Based on Martin O'Leary's Uncharted Atlas terrain generator (mewo2.com)";
+	private static final String credit = "Inspired by Martin O'Leary's Uncharted Atlas terrain generator (mewo2.com)";
 	private static final String license = "";	// TBD
-	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [ -t tilecfg] [mesh file]";
+	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [mesh file]";
 	
 	// active mouse-hogging dialog (for serialization)
 	public static boolean activeDialog;
@@ -66,7 +66,6 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem viewDebug;
 	private JMenuItem helpInfo;
 	private JMenuItem ruleDebug;
-	private JMenuItem helpDebug;
 	private JMenuItem debug0;
 	private JMenuItem debug1;
 	private JMenuItem debug2;

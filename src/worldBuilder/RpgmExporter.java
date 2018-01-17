@@ -33,6 +33,8 @@ public class RpgmExporter implements Exporter {
 	private double[][] erode;	// per point erosion (meters)
 	private double[][] hydration; // per point water depth (meters)
 	private double[][] soil;	// per point soil type
+	
+	private static final int EXPORT_DEBUG = 3;
 
 	
 	/**
@@ -143,7 +145,7 @@ public class RpgmExporter implements Exporter {
 				double lapse = alt * parms.lapse_rate;
 				bidder.reset();
 				int bids = 0;
-				if (parms.debug_level >2)
+				if (parms.debug_level >= EXPORT_DEBUG)
 					System.out.println("l" + level + "[" + i + "," + j + "]: " +
 						" alt=" + alt + ", hyd=" + 
 						String.format("%.2f", hydration[i][j]) + 
@@ -166,7 +168,7 @@ public class RpgmExporter implements Exporter {
 				if (bids != 0) {
 					int winner = bidder.winner(random.nextFloat());
 					grid[i][j] = winner;
-					if (parms.debug_level > 2)
+					if (parms.debug_level >= EXPORT_DEBUG)
 						System.out.println("    winner = " + winner);
 				}
 			}
@@ -183,7 +185,7 @@ public class RpgmExporter implements Exporter {
 				grid[i][j] = 0;
 				int alt = (int) parms.altitude(heights[i][j] - erode[i][j]);
 				double lapse = alt * parms.lapse_rate;
-				if (parms.debug_level > 2)
+				if (parms.debug_level >= EXPORT_DEBUG)
 					System.out.println("l" + level + "[" + i + "," + j + "]: " +
 						" alt=" + alt + ", hyd=" + 
 						String.format("%.2f", hydration[i][j]) + 
@@ -209,7 +211,7 @@ public class RpgmExporter implements Exporter {
 				if (bids != 0) {
 					int winner = bidder.winner(random.nextFloat());
 					grid[i][j] = winner;
-					if (parms.debug_level > 2)
+					if (parms.debug_level >= EXPORT_DEBUG)
 						System.out.println("    winner = " + winner);
 				}
 			}

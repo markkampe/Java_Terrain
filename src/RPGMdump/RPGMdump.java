@@ -46,13 +46,9 @@ public class RPGMdump extends JFrame {
 			System.exit(-1);
 		
 		int level = 0;
-		int width = 4;
+		int width = 5;
 		boolean suppress = false;
 		for( int i = 0; i < args.length; i++ ) {
-			// eclipse does not honor argv[0] == command
-			if (i == 0 && !args[i].startsWith(SWITCH_CHAR))
-				continue;
-			
 			if (args[i].startsWith(SWITCH_CHAR)) {	
 				if (args[i].startsWith("-l")) {
 					if (args[i].length() > 2)
@@ -78,7 +74,7 @@ public class RPGMdump extends JFrame {
 		output.println("map file: " + filename);
 		int rows = r.height();
 		int cols = r.width();
-		output.println("map size: " + rows + "x" + cols);
+		output.println("map size: " + cols + "x" + rows);
 		output.println("tile set: " + r.tileSet());
 		
 		// level dumps

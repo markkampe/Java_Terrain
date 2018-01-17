@@ -549,9 +549,6 @@ public class WorldBuilder  extends JFrame
 		String outputfilename = null;
 		int debug = 0;
 		for( int i = 0; i < args.length; i++ ) {
-			// eclipse does not honor argv[0] == command
-			if (i == 0 && !args[i].startsWith(SWITCH_CHAR))
-				continue;
 			if (args[i].startsWith(SWITCH_CHAR)) {	
 				if (args[i].startsWith("-d")) {
 					if (args[i].length() > 2)

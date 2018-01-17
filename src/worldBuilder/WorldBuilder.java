@@ -65,6 +65,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem viewZoom;
 	private JMenuItem viewDebug;
 	private JMenuItem helpInfo;
+	private JMenuItem ruleDebug;
 	private JMenuItem helpDebug;
 	private JMenuItem debug0;
 	private JMenuItem debug1;
@@ -231,6 +232,8 @@ public class WorldBuilder  extends JFrame
 		dbgMenu.add(debug1);
 		dbgMenu.add(debug2);
 		dbgMenu.add(debug3);
+		ruleDebug = new JMenuItem("Rule Trace");
+		ruleDebug.addActionListener(this);
 		
 		debug0.addActionListener(this);
 		debug1.addActionListener(this);
@@ -239,6 +242,7 @@ public class WorldBuilder  extends JFrame
 		helpInfo.addActionListener(this);
 		JMenu helpMenu = new JMenu("Help");
 		helpMenu.add(helpInfo);
+		helpMenu.add(ruleDebug);
 		helpMenu.add(dbgMenu);
 		
 		// assemble the menu bar
@@ -437,6 +441,8 @@ public class WorldBuilder  extends JFrame
 			JOptionPane.showMessageDialog(new JFrame(), 
 					version +"\n" + author + "\n" + credit + "\n" + license, 
 					"Information", JOptionPane.INFORMATION_MESSAGE);
+		} else if (o == ruleDebug) {
+			placeDialog(new RuleDebug(), false);
 		} else if (o == debug0) {
 			parms.debug_level = 0;
 			System.out.println("   verbosity:  " + parms.debug_level);

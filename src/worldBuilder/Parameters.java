@@ -120,6 +120,7 @@ public class Parameters {
 
 	// diagnostic options
 	public int debug_level; 	// level of verbosity
+	public String rule_debug;	// export rule to trace
 
 	// default display
 	public int display_options;

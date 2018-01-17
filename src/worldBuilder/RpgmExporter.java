@@ -143,7 +143,6 @@ public class RpgmExporter implements Exporter {
 				double lapse = alt * parms.lapse_rate;
 				bidder.reset();
 				int bids = 0;
-				int possibles = 0;
 				if (parms.debug_level >2)
 					System.out.println("l" + level + "[" + i + "," + j + "]: " +
 						" alt=" + alt + ", hyd=" + 
@@ -158,32 +157,23 @@ public class RpgmExporter implements Exporter {
 					// ask each applicable rule for its bid
 					int bid = r.bid(alt, hydration[i][j], Twinter - (int) lapse, Tsummer - (int) lapse, 
 							soil[i][j], slope(i,j), direction(i,j));
-					if (parms.debug_level > 2)
-						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + ") bids " + bid);
+					if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
+						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + ") bids " + bid + " (" + r.justification + ")");
 					if (bid > 0) {
 						bidder.bid(r.baseTile, bid);
-						bids++;
 					}
-					possibles++;
 				}
 				if (bids != 0) {
 					int winner = bidder.winner(random.nextFloat());
 					grid[i][j] = winner;
 					if (parms.debug_level > 2)
 						System.out.println("    winner = " + winner);
-				} else if (level == 1) {	// this shouldn't happen
-					System.err.println("ERROR: l1[" + i + "," + j + "] bids = 0/" + possibles);
-					if (parms.debug_level <= 2)
-						System.err.println("    alt=" + alt + ", hyd=" + 
-								String.format("%.2f", hydration[i][j]) + 
-								String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
-								", soil=" + soil[i][j]);
 				}
 			}
 	}
 	
 	/*
-	 * L4 is stamps and L3 fills in between them
+	 * L3 and L4 can use stamps (multi-cell sprites)
 	 */
 	void stamps(int[][] grid, int level) {	
 		Bidder bidder = new Bidder(MAXRULES);
@@ -193,9 +183,14 @@ public class RpgmExporter implements Exporter {
 				grid[i][j] = 0;
 				int alt = (int) parms.altitude(heights[i][j] - erode[i][j]);
 				double lapse = alt * parms.lapse_rate;
-				bidder.reset();
+				if (parms.debug_level > 2)
+					System.out.println("l" + level + "[" + i + "," + j + "]: " +
+						" alt=" + alt + ", hyd=" + 
+						String.format("%.2f", hydration[i][j]) + 
+						String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
+						", soil=" + soil[i][j] + ", slope=" + slope(i,j));
 				int bids = 0;
-				int possibles = 0;
+				bidder.reset();
 				for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
 					// find rules applicable to this level
 					TileRule r = it.next();
@@ -204,13 +199,18 @@ public class RpgmExporter implements Exporter {
 					// ask each applicable rule for its bid
 					int bid = r.bid(alt, hydration[i][j], Twinter - (int) lapse, Tsummer - (int) lapse, 
 							soil[i][j], slope(i,j), direction(i,j));
-					if (parms.debug_level > 2)
-						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + ") bids " + bid);
+					if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
+						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + ") bids " + bid + " (" + r.justification + ")");
 					if (bid > 0) {
 						bidder.bid(r.baseTile, bid);
 						bids++;
 					}
-					possibles++;
+				}
+				if (bids != 0) {
+					int winner = bidder.winner(random.nextFloat());
+					grid[i][j] = winner;
+					if (parms.debug_level > 2)
+						System.out.println("    winner = " + winner);
 				}
 			}
 	}

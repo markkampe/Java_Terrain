@@ -7,8 +7,6 @@ public class TileRule {
 	
 	public static LinkedList<TileRule> rules;
 	
-	private static final int RULE_DEBUG = 2;
-	
 	public String ruleName;
 	public int level;		// map level
 	public int tileSet;		// tile set ID
@@ -33,6 +31,8 @@ public class TileRule {
 	public double minFace;
 	
 	public int vigor;
+	
+	public String justification;	// reason for the last bid
 	
 	private static Parameters parms = Parameters.getInstance();
 	
@@ -115,76 +115,63 @@ public class TileRule {
 			double slope, double direction) {
 		// see if any parameters preclude this tile-bid
 		if (alt < minAltitude || alt > maxAltitude) {	
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": alt out of range");
+			justification = "alt out of range";
 			return 0;
 		}
 		if (winter < minTemp || summer > maxTemp) {	
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": temp out of range");
+			justification = "temp out of range";
 			return 0;
 		}
 		if (hydro > 0 && (hydro < minHydro || hydro > maxHydro)) {	
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": hydro out of range");
+			justification = "hydro out of range";
 			return 0;
 		}
 		
 		if (hydro > 0 && minDepth > 0) {	
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": needed u/w");
+			justification = "not u/w";
 			return 0;
 		}
 		if (hydro < 0 && ((-hydro < minDepth || -hydro > maxDepth))) {	
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": hydro " + hydro + " vs " + minDepth + "-" + maxDepth);
+			justification = "depth out of range";
 			return(0);
 		}
 		if (soil < minSoil || soil > maxSoil) {	
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": soil out of range");
+				justification = "soil out of range";
 			return 0;
 		}
 		if (slope < minSlope || slope > maxSlope) {	
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": slope out of range");
+			justification = "slope out of range";
 			return 0;
 		}
 		if (direction < minFace || direction > maxFace) {	
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": face out of range");
+			justification = "face out of range";
 			return 0;
 		}
 		
 		// see if any parameters take us outside of the sweet-zone
 		double score = vigor;
+		justification = "";
 		if (alt < (maxAltitude + 3 * minAltitude) / 4) {
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": low altitude reduction");
+			justification += "low altitude reduction ";
 			score /= 2;
 		} else if (alt > (minAltitude + 3 * maxAltitude) / 4) {
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": high altitude reduction");
+			justification += "high altitude reduction ";
 			score /= 2;
 		}
 		if (hydro >= 0) {
 			if (hydro < (maxHydro + 3 * minHydro) / 4) {
-				if (parms.debug_level > RULE_DEBUG)
-					System.out.println("rule " + ruleName + ": low hydration reduction");
+				justification += "low hydration reduction ";
 				score /= 2;
 			} else if (hydro > (minHydro + 3 * maxHydro) / 4) {
-				if (parms.debug_level > RULE_DEBUG)
-					System.out.println("rule " + ruleName + ": hgh hydration reduction");
+				justification += "high hydration reduction ";
 				score /= 2;
 			}
 		}
 		if (winter < (maxTemp + 3 * minTemp) / 4) {
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": low temp reduction");
+			justification += "low temp reduction ";
 			score /= 2;
 		} else if (summer > (minTemp + 3 * maxTemp) / 4) {
-			if (parms.debug_level > RULE_DEBUG)
-				System.out.println("rule " + ruleName + ": high temp reduction");
+			justification += "high temp reduction ";
 			score /= 2;
 		}
 

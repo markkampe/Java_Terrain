@@ -73,13 +73,12 @@
 
 	{ "name": "peak", "level": 4, "base": 18, "stamp":"2x2", "surround": 34,
 	  "alt": { "min": 2000 },
-	  "slope": { "min": 0.2 },
+	  "hydro": { "max": 0.1 },
 	  "temp": { "min": 10.0 },
 	  "soil": { "min": 1.5, "max": 3.0 }
 	},
 	{ "name": "stonepeak", "level": 4, "base": 299, "stamp":"2x2", "surround": 315,
 	  "alt": { "min": 2000 },
-	  "slope": { "min": 0.2 },
 	  "hydro": { "max": 0.1 },
 	  "temp": { "min": 10.0 },
 	  "soil": { "min": 0.0, "max": 1.5 }
@@ -87,12 +86,11 @@
 	{ "name": "snowpeak", "level": 4, "base": 22, "stamp":"2x2", "surround": 38,
 	  "alt": { "min": 2000 },
 	  "temp": { "max": 10.0 },
-	  "slope": { "min": 0.2 }
+	  "hydro": { "min": 0.1 }
 	},
 	{ "name": "greenpeak", "level": 4, "base": 301, "stamp":"2x2", "surround": 317,
 	  "alt": { "min": 2000 },
-	  "slope": { "min": 0.2 },
-	  "temp": { "max": 10 },
+	  "temp": { "min": 10 },
 	  "hydro": { "min": 0.1 }
 	},
 

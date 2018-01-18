@@ -92,7 +92,6 @@ public class RpgmExporter implements Exporter {
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
 					output.write(String.format("%d,", l[i][j]));
-			// TODO adjacent stamp enhancements
 			
 			// level 5 - shadows ... come later (w/walls)
 			//	UL = 1, UR = 2, BL = 4, BR = 8. 
@@ -318,6 +317,7 @@ public class RpgmExporter implements Exporter {
 						continue;
 					
 					// figure out where to put which of the alternate tile sprites
+					// FIX alternate sprite placement
 					corrections[i][j] = r.altTile;
 					corrections[i][j+1] = r.altTile + 1;
 					corrections[i+1][j] = r.altTile + SPRITES_PER_ROW;

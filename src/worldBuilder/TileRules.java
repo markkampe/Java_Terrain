@@ -80,6 +80,8 @@ public class TileRules {
 				
 				// are these min/max attributes
 				if (thisObject == "") {	// end of a new rule?
+					if (level > 6)
+						break;
 					thisRule = new TileRule(name, tileset, level, base);
 					if (aMin != NO_VALUE)
 						thisRule.minAltitude = aMin;
@@ -157,10 +159,9 @@ public class TileRules {
 					break;
 				case "stamp":
 					thisValue = parser.getString();
-					if (thisValue.equals("2x2")) {	// FIX generalize stamp size
-						height = 2;
-						width = 2;
-					}
+					int x = thisValue.indexOf('x');
+					width = Integer.parseInt(thisValue.substring(0,x));
+					height = Integer.parseInt(thisValue.substring(x+1));
 					break;
 				}
 				thisKey = "";
@@ -251,8 +252,8 @@ public class TileRules {
 		
 		level = Parameters.getInstance().debug_level;
 		if (level > 0)
-			System.out.println("Tiles \"" + ruleset + "\": id=" + tileset +
-					", " + rules.size() + " rules read from " + filename);
+			System.out.println("Tile rules " + ruleset + "(tilesetId=" + tileset +
+					"): read " + rules.size() + " rules from " + filename);
 		if (level > 2) {
 			for (ListIterator<TileRule> it = rules.listIterator(); it.hasNext(); ) {
 				thisRule = it.next();

@@ -11,6 +11,8 @@ import java.util.Random;
 public class RpgmExporter implements Exporter {
 
 	private static final int MAXRULES = 20;
+	private static final int SPRITES_PER_ROW = 8;
+	private static final int EXPORT_DEBUG = 3;
 	
 	private String filename;	// output file name
 	private Parameters parms;	// general parameters
@@ -34,9 +36,6 @@ public class RpgmExporter implements Exporter {
 	private double[][] hydration; // per point water depth (meters)
 	private double[][] soil;	// per point soil type
 	
-	private static final int EXPORT_DEBUG = 3;
-
-	
 	/**
 	 * create a new output writer
 	 * 
@@ -44,11 +43,11 @@ public class RpgmExporter implements Exporter {
 	 */
 	public RpgmExporter(String filename, String tileset, int width, int height) {
 		this.parms = Parameters.getInstance();
-		
 		this.filename = filename;
 		this.x_points = width;
 		this.y_points = height;
 		
+		// read in the rules for this tileset
 		this.rules = new TileRules(tileset);
 	}
 
@@ -93,6 +92,7 @@ public class RpgmExporter implements Exporter {
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
 					output.write(String.format("%d,", l[i][j]));
+			// TODO adjacent stamp enhancements
 			
 			// level 5 - shadows ... come later (w/walls)
 			//	UL = 1, UR = 2, BL = 4, BR = 8. 
@@ -136,73 +136,44 @@ public class RpgmExporter implements Exporter {
 	 * L1 is the color/texture of the ground, L2 is on the ground
 	 */
 	void tiles(int[][] grid, int level) {	
-		Bidder bidder = new Bidder(MAXRULES);
+		
+		TileRule bidders[] = new TileRule[MAXRULES];
+		int numRules = 0;
+		for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
+			TileRule r = it.next();
+			if (r.level == level)
+				bidders[numRules++] = r;
+		}
+		Bidder bidder = new Bidder(numRules);
 		
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
 				grid[i][j] = 0;
+				
+				// collect all the attributes of this square
 				int alt = (int) parms.altitude(heights[i][j] - erode[i][j]);
 				double lapse = alt * parms.lapse_rate;
-				bidder.reset();
-				int bids = 0;
+				double hydro = hydration[i][j];
+				double slope = slope(i,j);
+				double face = direction(i, j);
+				double soilType = soil[i][j];
 				if (parms.debug_level >= EXPORT_DEBUG)
 					System.out.println("l" + level + "[" + i + "," + j + "]: " +
-						" alt=" + alt + ", hyd=" + 
-						String.format("%.2f", hydration[i][j]) + 
+						" alt=" + alt +
+						String.format(", hydro=%.2f", hydro) + 
 						String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
-						", soil=" + soil[i][j] + ", slope=" + slope(i,j));
-				for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
-					// find rules applicable to this level
-					TileRule r = it.next();
-					if (r.level != level)
-						continue;
-					// ask each applicable rule for its bid
-					int bid = r.bid(alt, hydration[i][j], Twinter - (int) lapse, Tsummer - (int) lapse, 
-							soil[i][j], slope(i,j), direction(i,j));
-					if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
-						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + ") bids " + bid + " (" + r.justification + ")");
-					if (bid > 0) {
-						bidder.bid(r.baseTile, bid);
-					}
-				}
-				if (bids != 0) {
-					int winner = bidder.winner(random.nextFloat());
-					grid[i][j] = winner;
-					if (parms.debug_level >= EXPORT_DEBUG)
-						System.out.println("    winner = " + winner);
-				}
-			}
-	}
-	
-	/*
-	 * L3 and L4 can use stamps (multi-cell sprites)
-	 */
-	void stamps(int[][] grid, int level) {	
-		Bidder bidder = new Bidder(MAXRULES);
-		
-		for (int i = 0; i < y_points; i++)
-			for (int j = 0; j < x_points; j++) {
-				grid[i][j] = 0;
-				int alt = (int) parms.altitude(heights[i][j] - erode[i][j]);
-				double lapse = alt * parms.lapse_rate;
-				if (parms.debug_level >= EXPORT_DEBUG)
-					System.out.println("l" + level + "[" + i + "," + j + "]: " +
-						" alt=" + alt + ", hyd=" + 
-						String.format("%.2f", hydration[i][j]) + 
-						String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
-						", soil=" + soil[i][j] + ", slope=" + slope(i,j));
-				int bids = 0;
+						String.format(", soil=%.1f",  soilType) + 
+						String.format(", slope=%03.0f", face));
+				// collect the bids from each rule
 				bidder.reset();
-				for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
-					// find rules applicable to this level
-					TileRule r = it.next();
-					if (r.level != level)
-						continue;
-					// ask each applicable rule for its bid
-					int bid = r.bid(alt, hydration[i][j], Twinter - (int) lapse, Tsummer - (int) lapse, 
-							soil[i][j], slope(i,j), direction(i,j));
+				int bids = 0;
+				for(int b = 0; b < numRules; b++) {
+					TileRule r = bidders[b];
+					int bid = r.bid(alt, hydro, Twinter - (int) lapse, Tsummer - (int) lapse, 
+							soilType, slope, face);
 					if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
-						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + ") bids " + bid + " (" + r.justification + ")");
+						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
+								") bids " + bid + " (" + r.justification + ")");
 					if (bid > 0) {
 						bidder.bid(r.baseTile, bid);
 						bids++;
@@ -215,6 +186,149 @@ public class RpgmExporter implements Exporter {
 						System.out.println("    winner = " + winner);
 				}
 			}
+	}
+	
+	/*
+	 * L3 and L4 can use (multi-cell) stamps
+	 */
+	void stamps(int[][] grid, int level) {	
+		
+		// start with all zeroes	
+		for (int i = 0; i < y_points; i++)
+			for (int j = 0; j < x_points; j++)
+				grid[i][j] = 0;
+		
+		// enumerate the applicable rules
+		TileRule bidders[] = new TileRule[MAXRULES];
+		int numRules = 0;
+		boolean groupCorrections = false;
+		for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
+			TileRule r = it.next();
+			if (r.level != level)
+				continue;
+			if (r.width <= SPRITES_PER_ROW) {
+				bidders[numRules++] = r;
+				if (r.altTile > 0)
+					groupCorrections = true;
+			} else
+				System.err.println("WARNING: rule " + r.ruleName + ", width=" + r.width + " > " + SPRITES_PER_ROW);
+		}
+		Bidder bidder = new Bidder(numRules);
+		
+		// now try to populate it with tiles
+		for (int i = 0; i < y_points; i++)
+			for (int j = 0; j < x_points; j++) {
+				// make sure top-left hasn't already been filled
+				if (grid[i][j] != 0)
+					continue;
+				
+				// collect the bids for each applicable rule
+				bidder.reset();
+				int bids = 0;
+				for( int b = 0; b < numRules; b++ ) {
+					int bid = 0;
+					TileRule r = bidders[b];
+					boolean noBid = false;
+					for(int dy = 0; dy < r.height && !noBid; dy++)
+						for(int dx = 0; dx < r.width && !noBid; dx++) {
+							// make sure this square is empty and legal
+							if (i + dy >= y_points || j + dx >= x_points || grid[i + dy][j + dx] != 0) {
+								noBid = true;
+								continue;
+							}
+							// collect all the attributes of this square
+							int alt = (int) parms.altitude(heights[i+dy][j+dx] - erode[i+dy][j+dx]);
+							double lapse = alt * parms.lapse_rate;
+							double hydro = hydration[i+dy][j+dx];
+							double slope = slope(i+dy,j+dx);
+							double face = direction(i+dy, j+dx);
+							double soilType = soil[i+dy][j+dx];
+							if (parms.debug_level >= EXPORT_DEBUG && b == 0)
+								System.out.println("l" + level + "[" + (i+dy) + "," + (j+dx) + "]: " +
+									" alt=" + alt + ", hyd=" + 
+									String.format("%.2f", hydro) + 
+									String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
+									String.format(", soil=%.1f",  soilType) + 
+									String.format(", slope=%03.0f", face));
+							
+							int thisBid = r.bid(alt, hydro , Twinter - lapse, Tsummer - lapse, soilType, slope, face);
+							if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
+								System.out.println(r.ruleName + "[" + (i+dy) + "," + (j+dx) + "] (" + 
+										r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");
+							if (thisBid == 0)
+								noBid = true;
+							else
+								bid += thisBid;
+						}
+					
+					// place the bid for this rule
+					if (!noBid) {
+						bidder.bid(b, bid);
+						bids++;
+					}
+				}
+			
+				// find and install the winner
+				if (bids > 0) {
+						int winner = bidder.winner(random.nextFloat());
+						TileRule r = bidders[winner];
+						for(int dy = 0; dy < r.height; dy++)
+							for(int dx = 0; dx < r.width; dx++)
+								grid[i+dy][j+dx] = r.baseTile + (dy * SPRITES_PER_ROW) + dx;
+				}	
+			}
+		
+			// see if we have to apply any group corrections to this stamp
+			if (!groupCorrections)
+				return;
+			int[][] corrections = new int[y_points][x_points];
+			for (int i = 0; i < y_points; i++)
+				for (int j = 0; j < x_points; j++) {
+					if (grid[i][j] == 0)
+						continue;
+					
+					// find the rule that generated this tile
+					TileRule r = null;
+					for(int b = 0; b < numRules; b++) 
+						if (bidders[b].baseTile == grid[i][j]) {
+							r = bidders[b];
+							break;
+						}
+					
+					// is this a 2x2 stamp with an alternate tile?
+					if (r == null || r.altTile == 0 || r.height != 2 || r.width != 2)
+						continue;
+					
+					// see if it is surrounded by itself for all eight neighbors
+					if (i < r.height || grid[i-r.height][j] != r.baseTile)
+						continue;
+					if (i >= y_points - r.height || grid[i+r.height][j] != r.baseTile)
+						continue;
+					if (j < r.width || grid[i][j - r.width] != r.baseTile)
+						continue;
+					if (j >= x_points - r.width || grid[i][j + r.width] != r.baseTile)
+						continue;
+					if (grid[i-r.height][j-r.width] != r.baseTile)
+						continue;
+					if (grid[i-r.height][j+r.width] != r.baseTile)
+						continue;
+					if (grid[i+r.height][j-r.width] != r.baseTile)
+						continue;
+					if (grid[i+r.height][j+r.width] != r.baseTile)
+						continue;
+					
+					// figure out where to put which of the alternate tile sprites
+					corrections[i][j] = r.altTile;
+					corrections[i][j+1] = r.altTile + 1;
+					corrections[i+1][j] = r.altTile + SPRITES_PER_ROW;
+					corrections[i+1][j+1] = r.altTile + SPRITES_PER_ROW + 1;
+				}
+			
+			// copy the corrections into the grid
+			for (int i = 0; i < y_points; i++)
+				for (int j = 0; j < x_points; j++)
+					if (corrections[i][j] != 0)
+						grid[i][j] = corrections[i][j];
 	}
 	
 	

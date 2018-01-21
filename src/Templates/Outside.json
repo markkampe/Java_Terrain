@@ -1,52 +1,62 @@
 { "tileset": 2,
   "Outside": [
+
 	{ "name": "water", "level": 1, "base": 2048,
-	  "depth": { "min": 0.000001, "max": 10000 }
+	  "depth": { "min": 0.00001, "max": 10000 }
 	},
 
 	{ "name": "deep", "level": 2, "base": 2096,
 	  "depth": { "min": 10, "max": 10000 }
 	},
 
-	{ "name": "sand", "level": 1, "base": 3584,
-	  "soil": { "min": 2.5, "max": 3.0 }
-	},
-	{ "name": "dirt", "level": 1, "base": 3584,
-	  "soil": { "max": 0.5 }
+	{ "name": "sand", "level": 1, "base": 3200,
+	  "temp": { "min": -5.0 },
+	  "soil": { "max": 0.5 },
+	  "vigor": 32
 	},
 	{ "name": "rocks", "level": 1, "base": 3296,
-	  "soil": { "min": 0.5, "max": 2.5 }
+	  "temp": { "min": -5.0 },
+	  "soil": { "min": 0.5, "max": 2.5 },
+	  "vigor": 32
 	},
-	{ "name": "grass", "level": 1, "base": 2816,
-	  "temp": { "min": 5 },
+	{ "name": "dirt", "level": 1, "base": 3200,
+	  "temp": { "min": -5.0 },
+	  "soil": { "min": 2.5 },
+	  "vigor": 32
+	},
+	{ "name": "grass", "level": 1, "base": 3248,
+	  "temp": { "min": 10 },
 	  "hydro": { "min": 0.1 },
-	  "vigor": 96
+	  "vigor": 128
 	},
 	{ "name": "snow", "level": 1, "base": 3968,
-	  "temp": { "max": 10 },
-	  "vigor": 96
+	  "temp": { "max": 7.5 },
+	  "vigor": 32
 	},
 
-
-	{ "name": "tree", "level": 2, "base": 3006,
-	  "alt": { "max": 1500 },
-	  "temp": { "min": -5 },
-	  "hydro": { "min": 0.3 }
+	{ "name": "tree", "level": 4, "base": 112, "stamp": "2x2", "surround": 114,
+	  "alt": { "min": 0, "max": 1500 },
+	  "temp": { "min": 0 },
+	  "hydro": { "min": 0.3 },
+	  "vigor": 32
 	},
-	{ "name": "pine", "level": 2, "base": 3056,
-	  "alt": { "min": 1500, "max": 2000 },
+	{ "name": "pine", "level": 4, "base": 93, "stamp": "1x2",
+	  "alt": { "min": 1000, "max": 2500 },
 	  "temp": { "min": -5 },
-	  "hydro": { "min": 0.3 }
+	  "hydro": { "min": 0.15 },
+	  "vigor": 32
 	},
-	{ "name": "palm", "level": 2, "base": 3776,
-	  "alt": { "max": 100 },
+	{ "name": "palm", "level": 4, "base": 172, "stamp": "1x2",
+	  "alt": { "max": 30 },
 	  "temp": { "min": 10 },
-	  "hydro": { "min": 0.3 }
+	  "hydro": { "min": 0.15 },
+	  "vigor": 32
 	},
-	{ "name": "snowtree", "level": 2, "base": 4160,
-	  "alt": { "max": 2000 },
-	  "temp": { "max": 10 },
-	  "hydro": { "min": 0.3 }
+	{ "name": "snowtree", "level": 4, "base": 128, "stamp": "2x2", "surround": 130,
+	  "alt": { "max": 2500 },
+	  "temp": { "max": 7.5 },
+	  "hydro": { "min": 0.15 },
+	  "vigor": 32
 	},
 
 
@@ -56,7 +66,8 @@
 	  "hydro": { "min": 0.0, "max": 0.0 },
 	  "depth": { "min": 0.0, "max": 0.0 },
 	  "slope": { "min": 0.0, "max": 0.0 },
-	  "soil": { "min": 0.0, "max": 0.0 }
+	  "soil": { "min": 0.0, "max": 0.0 },
+	  "face": { "min": 0.0, "max": 360.0 }
 	}
     ]
 }

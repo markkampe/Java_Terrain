@@ -313,8 +313,8 @@ public class RpgmExporter implements Exporter {
 							break;
 						}
 					
-					// we only care about 2x2 stamps w/alternate tiles
-					if (r == null || r.altTile == 0 || r.height != 2 || r.width != 2)
+					// we only care about 1x2 and 2x2 stamps w/alternate tiles
+					if (r == null || r.altTile == 0 || r.height != 2 || r.width > 2)
 						continue;
 					
 					// note the Cartesian neighbors
@@ -323,18 +323,21 @@ public class RpgmExporter implements Exporter {
 					boolean left = (j >= r.width) && (grid[i][j-r.width] == r.baseTile);
 					boolean right = (j < x_points - r.width) && (grid[i][j+r.width] == r.baseTile);
 					
-					// TODO support NxM (vs 2x2) alternate stamps
 					if (top) {
-						if (left && grid[i-r.height][j-r.width] == r.baseTile)
+						if (r.width == 2 && left && grid[i-r.height][j-r.width] == r.baseTile)
 							corrections[i][j] = r.altTile + SPRITES_PER_ROW;
-						if (right && grid[i-r.height][j+r.width] == r.baseTile)
+						if (r.width == 2 && right && grid[i-r.height][j+r.width] == r.baseTile)
 							corrections[i][j+1] = r.altTile + SPRITES_PER_ROW + 1;
+						if (r.width == 1)
+							corrections[i][j] = r.altTile;
 					}
 					if (bot) {
-						if (left && grid[i+r.height][j-r.width] == r.baseTile)
+						if (r.width == 2 && left && grid[i+r.height][j-r.width] == r.baseTile)
 							corrections[i+1][j] = r.altTile;
-						if (right && grid[i+r.height][j+r.width] == r.baseTile)
+						if (r.width == 2 && right && grid[i+r.height][j+r.width] == r.baseTile)
 							corrections[i+1][j+1] = r.altTile + 1;
+						if (r.width == 1)
+							corrections[i+1][j] = r.altTile + SPRITES_PER_ROW;
 					}
 				}
 			

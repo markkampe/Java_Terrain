@@ -8,7 +8,7 @@
 	  "depth": { "min": 10, "max": 10000 }
 	},
 
-	{ "name": "dirt", "level": 1, "base": 3296,
+	{ "name": "dirt", "level": 1, "base": 3584,
 	  "temp": { "min": -5.0 },
 	  "vigor": 32
 	},
@@ -52,15 +52,6 @@
 	  "alt": { "min": 100, "max": 500 },
 	  "hydro": { "max": 0.10 },
 	  "temp": { "min": -5.0 },
-	  "soil": { "max": 0.5 },
-	  "slope": { "min": 0.03 },
-	  "vigor": 64
-	},
-	{ "name": "rockhill", "level": 2, "base": 3958,
-	  "alt": { "min": 100, "max": 500 },
-	  "hydro": { "max": 0.10 },
-	  "temp": { "min": -5.0 },
-	  "soil": { "min": 0.5, "max": 2.5 },
 	  "slope": { "min": 0.03 },
 	  "vigor": 64
 	},

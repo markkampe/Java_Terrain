@@ -47,6 +47,10 @@
 	  "hydro": { "min": 0.15 },
 	  "vigor": 32
 	},
+	{ "name": "EMPTYFIELD", "level": 2, "base": 0,
+	  "hydro": { "min": 0.15 },
+	  "vigor": 16
+	},
 
 	{ "name": "dirthill", "level": 2, "base": 3488,
 	  "alt": { "min": 100, "max": 500 },

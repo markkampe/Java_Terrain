@@ -19,22 +19,19 @@ public class TileRules {
 	public int tileset;					// associated tile set ID
 	
 	public LinkedList<TileRule> rules;	// the rules
-	private Parameters parms;
-
 	
-	public TileRules(String exportType) {
-		parms = Parameters.getInstance();
+	public TileRules(String exportRules) {
 		rules = new LinkedList<TileRule>();
 	
 		BufferedReader r;
 		JsonParser parser;
 		String filename;
-		if (parms.config_directory == "") {
-			filename = DEFAULT_CONFIG + "/" + exportType + ".json";
+		if (exportRules.charAt(0) != '/') {
+			filename = DEFAULT_CONFIG + "/" + exportRules;
 			InputStream s = getClass().getResourceAsStream(filename);
 			r = new BufferedReader(new InputStreamReader(s));
 		} else {
-			filename = parms.config_directory + "/" + exportType + ".json";
+			filename = exportRules;
 			try {
 				r = new BufferedReader(new FileReader(filename));
 			} catch (FileNotFoundException e) {

@@ -58,6 +58,10 @@
 	  "hydro": { "min": 0.15 },
 	  "vigor": 32
 	},
+	{ "name": "EMPTYFIELD", "level": 4, "base": 0,
+	  "hydro": { "min": 0.15 },
+	  "vigor": 32
+	},
 
 
 	{ "name": "template", "level": 666, "base": 666,

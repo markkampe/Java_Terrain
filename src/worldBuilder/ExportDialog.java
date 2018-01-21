@@ -2,7 +2,10 @@ package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Hashtable;
+import java.util.ListIterator;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -59,10 +62,17 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		JLabel nameLabel = new JLabel("Name of this region", JLabel.CENTER);
 		nameLabel.setFont(fontLarge);
 		
+		// assemble a list of known export rules
 		format = new JComboBox<String>();
 		format.addItem(RAW_JSON);
-		format.addItem("Overworld");
-		format.addItem("Outside");
+		for( ListIterator<String> it = parms.exportRules.listIterator(); it.hasNext();) {
+			Path rulefile = Paths.get(it.next());
+			String name = rulefile.getFileName().toString();
+			int p = name.lastIndexOf('.');
+			if (p >= 0)
+				name = name.substring(0, p);
+			format.addItem(name);
+		}
 		format.setSelectedIndex(1);
 		
 		accept = new JButton("EXPORT");
@@ -196,12 +206,19 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 	 */
 	public void export(String filename) {
 		// create an appropriate exporter
-		Exporter export;
+		Exporter export = null;
 		String f = (String) format.getSelectedItem();
 		if (f.equals(RAW_JSON))
 			export = new JsonExporter(filename, x_points, y_points);
-		else
-			export = new RpgmExporter(filename, f, x_points, y_points);
+		else {	// find full path name to selected export rules
+			for( ListIterator<String> it = parms.exportRules.listIterator(); it.hasNext();) {
+				String name = it.next();
+				if (name.contains(f)) {
+					export = new RpgmExporter(filename, name, x_points, y_points);
+					break;
+				}
+			}
+		}
 		int meters = tile_sizes[resolution.getValue()];
 		export.tileSize(meters);
 		export.temps(parms.meanTemp(), parms.meanSummer(), parms.meanWinter());
@@ -239,7 +256,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 			if (parms.debug_level > 0) {
 				System.out.println("Exported(" + f + ") " +
 						x_points + "x" + y_points + 
-						" " + meters + " meter tiles, centered at <" + 
+						" " + meters + "M tiles from <" + 
 						String.format("%9.6f", lat) + "," + 
 						String.format("%9.6f", lon) + 
 						"> to file " + filename);

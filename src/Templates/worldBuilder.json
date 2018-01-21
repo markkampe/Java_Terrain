@@ -59,6 +59,7 @@
 		"soil": false
     },
     "export": {
-    	"output": "Map001"
+    	"output": "Map001",
+    	"rules": [ "Overworld.json", "Outside.json" ]
     }
 }

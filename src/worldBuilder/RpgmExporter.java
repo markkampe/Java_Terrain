@@ -39,16 +39,19 @@ public class RpgmExporter implements Exporter {
 	/**
 	 * create a new output writer
 	 * 
-	 * @param filename
+	 * @param filename ... name of output file
+	 * @param tileRules ... name of rules file
+	 * @param map width (cells)
+	 * @param map height (cells)
 	 */
-	public RpgmExporter(String filename, String tileset, int width, int height) {
+	public RpgmExporter(String filename, String tileRules, int width, int height) {
 		this.parms = Parameters.getInstance();
 		this.filename = filename;
 		this.x_points = width;
 		this.y_points = height;
 		
 		// read in the rules for this tileset
-		this.rules = new TileRules(tileset);
+		this.rules = new TileRules(tileRules);
 	}
 
 	/**

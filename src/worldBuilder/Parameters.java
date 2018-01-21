@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;
-//import java.io.InputStreamReader;
 import java.io.InputStreamReader;
+
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -17,9 +19,16 @@ import javax.json.stream.JsonParser;
  */
 
 public class Parameters {
-	// default configuration file
+	// version identification info
+	private static final String PROGRAM_NAME = "WorldBuilder";
+	private static final String PROGRAM_VERSION = "0.1";
+	private static final String VERSION_NAME = "(WIP)";
+	public String title = PROGRAM_NAME + " " + PROGRAM_VERSION + " " + VERSION_NAME;
+
+	// default configuration information
 	private static final String DEFAULT_CONFIG = "/Templates/worldBuilder.json";
 	public String output_filename = "Happyville";
+	public LinkedList<String> exportRules;
 	public String config_directory = "";
 
 	// operating units ... hard-wired into the code
@@ -67,8 +76,7 @@ public class Parameters {
 	public int border; 				// screen border width
 	public int dialogBorder; 		// dialog box border
 
-	public String title = "WorldBuilder 0.1 WIP";
-
+	
 	// map rendering thresholds
 	public double stream_flux = 0.1;	// stream threshold (m3/s)
 	public double river_flux = 1.0;		// river threshold (m3/s)
@@ -162,6 +170,8 @@ public class Parameters {
 	public Parameters(String filename, int debug) {
 		debug_level = debug;
 		singleton = this;
+		exportRules = new LinkedList<String>();
+		
 		BufferedReader r;
 		JsonParser parser;
 		if (filename == null) {
@@ -179,6 +189,7 @@ public class Parameters {
 		parser = Json.createParser(r);
 
 		String thisKey = "";
+		boolean inRules = false;
 		while (parser.hasNext()) {
 			JsonParser.Event e = parser.next();
 			switch (e) {
@@ -217,6 +228,9 @@ public class Parameters {
 				case "output":
 					output_filename = parser.getString();
 					break;
+				}
+				if (inRules) {
+					exportRules.add(parser.getString());
 				}
 				break;
 
@@ -354,6 +368,16 @@ public class Parameters {
 				default:
 					break;
 				}
+				
+			case START_ARRAY:
+				if (thisKey.equals("rules"))
+					inRules = true;
+				break;
+				
+			case END_ARRAY:
+				inRules = false;
+				break;
+				
 			default:
 				break;
 			}
@@ -382,6 +406,9 @@ public class Parameters {
 					"               rainfall=" + rain_max + unit_r + " (bottoms at " + alt_maxrain + unit_z + ")");
 			System.out.println("               watershed=" + tribute_max + " " + unit_f);
 			System.out.println("   export:     name=" + output_filename);
+			for (ListIterator<String> it = exportRules.listIterator(); it.hasNext();) {
+				System.out.println("               rule file: " + it.next());
+			}
 			System.out.println("   warnings:   tiles=" + tiles_max);
 			System.out.println("   verbosity:  " + debug_level);
 		}

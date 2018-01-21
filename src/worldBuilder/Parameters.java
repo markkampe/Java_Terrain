@@ -443,7 +443,7 @@ public class Parameters {
 	}
 
 	/**
-	 * mean temperatore (for this latitude)
+	 * mean temperature (for this latitude)
 	 * 
 	 * @return mean temperature (degC)
 	 */

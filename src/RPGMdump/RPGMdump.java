@@ -41,7 +41,7 @@ public class RPGMdump extends JFrame {
 	 * main: process arguments and produce output
 	 */
 	public static void main(String[] args) throws FileNotFoundException {
-		String filename = (args.length > 1) ? args[1] : new RPGMdump().filename;
+		String filename = (args.length > 0) ? args[0] : new RPGMdump().filename;
 		if (filename == null)
 			System.exit(-1);
 		

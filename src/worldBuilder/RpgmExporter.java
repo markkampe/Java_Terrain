@@ -60,6 +60,7 @@ public class RpgmExporter implements Exporter {
 			FileWriter output = new FileWriter(filename);
 			output.write("{\n");
 			boilerPlate(output);
+			output.write("\n");
 			
 			// produce the actual map of tiles
 			startList(output, "data", "[");
@@ -162,7 +163,7 @@ public class RpgmExporter implements Exporter {
 						String.format(", hydro=%.2f", hydro) + 
 						String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
 						String.format(", soil=%.1f",  soilType) + 
-						String.format(", slope=%03.0f", face));
+						String.format(", slope=%.3f", slope));
 				// collect the bids from each rule
 				bidder.reset();
 				int bids = 0;
@@ -183,6 +184,14 @@ public class RpgmExporter implements Exporter {
 					grid[i][j] = winner;
 					if (parms.debug_level >= EXPORT_DEBUG)
 						System.out.println("    winner = " + winner);
+				} else if (level == 1) {
+					// there seems to be a hole in the rules
+					System.err.println("NOBID l" + level + "[" + i + "," + j + "]: " +
+							" alt=" + alt +
+							String.format(", hydro=%.2f", hydro) + 
+							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
+							String.format(", soil=%.1f",  soilType) + 
+							String.format(", slope=%.3f", slope));
 				}
 			}
 	}
@@ -200,21 +209,19 @@ public class RpgmExporter implements Exporter {
 		// enumerate the applicable rules
 		TileRule bidders[] = new TileRule[MAXRULES];
 		int numRules = 0;
-		boolean groupCorrections = false;
 		for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
 			TileRule r = it.next();
 			if (r.level != level)
 				continue;
 			if (r.width <= SPRITES_PER_ROW) {
 				bidders[numRules++] = r;
-				if (r.altTile > 0)
-					groupCorrections = true;
 			} else
 				System.err.println("WARNING: rule " + r.ruleName + ", width=" + r.width + " > " + SPRITES_PER_ROW);
 		}
 		Bidder bidder = new Bidder(numRules);
 		
 		// now try to populate it with tiles
+		boolean groupCorrections = false;
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
 				// make sure top-left hasn't already been filled
@@ -227,6 +234,12 @@ public class RpgmExporter implements Exporter {
 				for( int b = 0; b < numRules; b++ ) {
 					int bid = 0;
 					TileRule r = bidders[b];
+					
+					// corrections require all stamps to be height/width aligned
+					if ((i % r.height) != 0 || (j % r.width) != 0)
+							continue;
+					
+					// give this stamp a chance to bid on every square in this area
 					boolean noBid = false;
 					for(int dy = 0; dy < r.height && !noBid; dy++)
 						for(int dx = 0; dx < r.width && !noBid; dx++) {
@@ -274,10 +287,16 @@ public class RpgmExporter implements Exporter {
 						for(int dy = 0; dy < r.height; dy++)
 							for(int dx = 0; dx < r.width; dx++)
 								grid[i+dy][j+dx] = r.baseTile + (dy * SPRITES_PER_ROW) + dx;
+						if (r.altTile > 0)
+							groupCorrections = true;
 				}	
 			}
 		
-			// see if we have to apply any group corrections to this stamp
+			/*
+			 * Analogous to the auto-tiling adjustments in L1/L2 tiles, some
+			 * L3/L4 stamps have alternate groups that can be used to fill in
+			 * between identical tiles ... but we have to do that for ourselves.
+			 */
 			if (!groupCorrections)
 				return;
 			int[][] corrections = new int[y_points][x_points];
@@ -294,34 +313,29 @@ public class RpgmExporter implements Exporter {
 							break;
 						}
 					
-					// is this a 2x2 stamp with an alternate tile?
+					// we only care about 2x2 stamps w/alternate tiles
 					if (r == null || r.altTile == 0 || r.height != 2 || r.width != 2)
 						continue;
 					
-					// see if it is surrounded by itself for all eight neighbors
-					if (i < r.height || grid[i-r.height][j] != r.baseTile)
-						continue;
-					if (i >= y_points - r.height || grid[i+r.height][j] != r.baseTile)
-						continue;
-					if (j < r.width || grid[i][j - r.width] != r.baseTile)
-						continue;
-					if (j >= x_points - r.width || grid[i][j + r.width] != r.baseTile)
-						continue;
-					if (grid[i-r.height][j-r.width] != r.baseTile)
-						continue;
-					if (grid[i-r.height][j+r.width] != r.baseTile)
-						continue;
-					if (grid[i+r.height][j-r.width] != r.baseTile)
-						continue;
-					if (grid[i+r.height][j+r.width] != r.baseTile)
-						continue;
+					// note the Cartesian neighbors
+					boolean top = (i >= r.height) && (grid[i-r.height][j] == r.baseTile);
+					boolean bot = (i < y_points - r.height) && (grid[i+r.height][j] == r.baseTile);
+					boolean left = (j >= r.width) && (grid[i][j-r.width] == r.baseTile);
+					boolean right = (j < x_points - r.width) && (grid[i][j+r.width] == r.baseTile);
 					
-					// figure out where to put which of the alternate tile sprites
-					// FIX alternate sprite placement
-					corrections[i][j] = r.altTile;
-					corrections[i][j+1] = r.altTile + 1;
-					corrections[i+1][j] = r.altTile + SPRITES_PER_ROW;
-					corrections[i+1][j+1] = r.altTile + SPRITES_PER_ROW + 1;
+					// TODO support NxM (vs 2x2) alternate stamps
+					if (top) {
+						if (left && grid[i-r.height][j-r.width] == r.baseTile)
+							corrections[i][j] = r.altTile + SPRITES_PER_ROW;
+						if (right && grid[i-r.height][j+r.width] == r.baseTile)
+							corrections[i][j+1] = r.altTile + SPRITES_PER_ROW + 1;
+					}
+					if (bot) {
+						if (left && grid[i+r.height][j-r.width] == r.baseTile)
+							corrections[i+1][j] = r.altTile;
+						if (right && grid[i+r.height][j+r.width] == r.baseTile)
+							corrections[i+1][j+1] = r.altTile + 1;
+					}
 				}
 			
 			// copy the corrections into the grid

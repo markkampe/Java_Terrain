@@ -584,5 +584,9 @@ public class WorldBuilder  extends JFrame
 		// initialize the display type and options menus
 		w.map.setDisplay(parms.display_options, true);
 		w.updateDisplayMenus(parms.display_options);
+		
+// exerciser for map index
+//		MapIndex i = new MapIndex("/tmp");
+//		i.flush();
 	}
 }

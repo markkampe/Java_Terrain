@@ -26,10 +26,15 @@ public class MapIndex {
 		return(numMaps + 1);
 	}
 	
+	static public MapIndex getInstance() {
+		return instance;
+	}
+	
 	public MapIndex(String directory) {
 		path = directory;
 		maps = new LinkedList<RpgmMap>();
 		parms = Parameters.getInstance();
+		instance = this;
 		
 		BufferedReader r;
 		JsonParser parser;
@@ -44,6 +49,7 @@ public class MapIndex {
 		
 		// parsing state variables
 		int read = 0;
+		numMaps = 0;
 		String thisKey = "";
 		int r_id = NO_VALUE;
 		String r_name = null;

@@ -46,6 +46,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem fileSave;
 	private JMenuItem fileSaveAs;
 	private JMenuItem fileClose;
+	private JMenuItem fileProject;
 	private JMenuItem fileExport;
 	private JMenuItem fileExit;
 	private JMenuItem editWorld;
@@ -144,6 +145,8 @@ public class WorldBuilder  extends JFrame
 		fileSaveAs.addActionListener(this);
 		fileClose = new JMenuItem("Close file");
 		fileClose.addActionListener(this);
+		fileProject = new JMenuItem("Project dir");
+		fileProject.addActionListener(this);
 		fileExport = new JMenuItem("Export");
 		fileExport.addActionListener(this);
 		fileExit = new JMenuItem("Exit");
@@ -155,6 +158,7 @@ public class WorldBuilder  extends JFrame
 		fileMenu.add(fileSave);
 		fileMenu.add(fileSaveAs);
 		fileMenu.add(fileClose);
+		fileMenu.add(fileProject);
 		fileMenu.add(fileExport);
 		fileMenu.add( new JSeparator() );
 		fileMenu.add(fileExit);
@@ -368,6 +372,15 @@ public class WorldBuilder  extends JFrame
 				checkSave();
 			map.setMesh(null);
 			modified = false;
+		} else if (o == fileProject) {
+			JFileChooser d = new JFileChooser();
+			d.setDialogTitle("Choose project directory");
+			d.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			d.setAcceptAllFileFilterUsed(false);
+			if (d.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				parms.project_dir = d.getSelectedFile().getPath();
+				new MapIndex(parms.project_dir);
+			}
 		} else if (o == fileExport) {
 			if (activeDialog)
 				twoDialogError();
@@ -578,8 +591,10 @@ public class WorldBuilder  extends JFrame
 		}
 		// instantiate the parameters singletons
 		parms = new Parameters(configname, debug);
-		if (project_dir != null)
+		if (project_dir != null) {
 			parms.project_dir = project_dir;
+			new MapIndex(parms.project_dir);
+		}
 		
 		// and create the map
 		WorldBuilder w = new WorldBuilder(filename);

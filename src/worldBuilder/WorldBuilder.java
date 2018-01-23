@@ -17,7 +17,7 @@ public class WorldBuilder  extends JFrame
 	private static final String author = "Author: Mark Kampe (mark.kampe@gmail.com)";
 	private static final String credit = "Inspired by Martin O'Leary's Uncharted Atlas terrain generator (mewo2.com)";
 	private static final String license = "";	// TBD
-	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [mesh file]";
+	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [-p projectdir] [mesh file]";
 	
 	// active mouse-hogging dialog (for serialization)
 	public static boolean activeDialog;
@@ -293,7 +293,9 @@ public class WorldBuilder  extends JFrame
 	private void doSave(String filename) {
 		String title = (filename == null) ? "Save As" : "Save";
 		FileDialog d = new FileDialog(this, title, FileDialog.SAVE);
-		d.setFile(filename == null ? "world.json" : filename);
+		if (filename == null)
+			filename = parms.map_name + ".json";
+		d.setFile(filename);
 		d.setVisible(true);
 		filename = d.getFile();
 		if (filename != null) {
@@ -546,7 +548,7 @@ public class WorldBuilder  extends JFrame
 		// process the arguments
 		String filename = null;
 		String configname = null;
-		String outputfilename = null;
+		String project_dir = null;
 		int debug = 0;
 		for( int i = 0; i < args.length; i++ ) {
 			if (args[i].startsWith(SWITCH_CHAR)) {	
@@ -560,11 +562,11 @@ public class WorldBuilder  extends JFrame
 						configname = args[i].substring(2);
 					else
 						configname = args[++i];
-				} else if (args[i].startsWith("-o")) {
+				} else if (args[i].startsWith("-p")) {
 					if (args[i].length() > 2)
-						outputfilename = args[i].substring(2);
+						project_dir = args[i].substring(2);
 					else
-						outputfilename = args[++i];
+						project_dir = args[++i];
 				}else if (args[i].startsWith("-v")) {
 					debug = 1;
 				} else
@@ -575,8 +577,8 @@ public class WorldBuilder  extends JFrame
 		}
 		// instantiate the parameters singletons
 		parms = new Parameters(configname, debug);
-		if (outputfilename != null)
-			parms.output_filename = outputfilename;
+		if (project_dir != null)
+			parms.project_dir = project_dir;
 		
 		// and create the map
 		WorldBuilder w = new WorldBuilder(filename);
@@ -584,9 +586,5 @@ public class WorldBuilder  extends JFrame
 		// initialize the display type and options menus
 		w.map.setDisplay(parms.display_options, true);
 		w.updateDisplayMenus(parms.display_options);
-		
-// exerciser for map index
-//		MapIndex i = new MapIndex("/tmp");
-//		i.flush();
 	}
 }

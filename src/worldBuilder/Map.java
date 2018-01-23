@@ -243,8 +243,7 @@ public class Map extends JPanel {
 				}
 				break;
 				
-			case VALUE_FALSE:
-			case VALUE_TRUE:
+
 			case VALUE_STRING:
 			case VALUE_NUMBER:
 				switch(thisKey) {
@@ -283,11 +282,6 @@ public class Map extends JPanel {
 						break;
 						
 					// world attributes
-					case "subregion":
-						s = parser.getString();
-						isSubRegion = s.equals("true");
-						break;
-						
 					case "sealevel":
 						s = parser.getString();
 						u = s.indexOf(Parameters.unit_z);
@@ -355,8 +349,25 @@ public class Map extends JPanel {
 					case "longitude":
 						parms.longitude = new Double(parser.getString());
 						break;
+						
+					case "map_name":
+						parms.map_name = parser.getString();
+						break;
+						
+					case "parent_name":
+						parms.parent_name = parser.getString();
+						break;
 				}
 				break;
+				
+			case VALUE_FALSE:
+				if (thisKey.equals("subregion"))
+					isSubRegion = false;
+				break;
+
+			case VALUE_TRUE:
+				if (thisKey.equals("subregion"))
+					isSubRegion = true;
 				
 			case END_OBJECT:
 				if (inPoints) {
@@ -409,21 +420,26 @@ public class Map extends JPanel {
 	public boolean write(String filename) {
 		try {
 			FileWriter output = new FileWriter(filename);
-			final String T_FORMAT = "    \"subregion\": \"true\",\n";
+			final String T_FORMAT = "    \"subregion\": true,\n";
 			final String S_FORMAT = "    \"sealevel\": \"%d%s\",\n";
 			final String R_FORMAT = "    \"rainfall\": { \"amount\": \"%d%s\", \"direction\": %d, \"cloudbase\": \"%d%s\" },\n";
 			final String E_FORMAT = "    \"erosion\": %d,\n";
 			final String L_FORMAT = "    \"center\": { \"latitude\": \"%.6f\", \"longitude\": \"%.6f\" },\n";
 			final String W_FORMAT = "    \"world\": { \"radius\": \"%d%s\", \"tilt\": \"%.1f\" },\n";
 			final String Z_FORMAT = "    \"scale\": { \"xy_range\": \"%d%s\", \"z_range\": \"%d%s\" },\n";
+			final String M_format = "    \"map_name\": \"%s\",\n";
+			final String P_format = "    \"parent_name\": \"%s\",\n";
 			
 			output.write( "{   \"length\": " + mesh.vertices.length + ",\n");
+			output.write( String.format(M_format, parms.map_name));
+			if (isSubRegion)
+				output.write(T_FORMAT);
+			if (parms.parent_name != null)
+				output.write(String.format(P_format, parms.parent_name));
 			
 			// write out the world parameters:
 			//	planetary radius and tilt, lat/lon, map span
 			//	sea-level, incoming rainfall, erosion coefficient
-			if (isSubRegion)
-				output.write(T_FORMAT);
 			output.write(String.format(W_FORMAT, parms.radius, Parameters.unit_xy, parms.tilt));
 			output.write(String.format(L_FORMAT, parms.latitude, parms.longitude));
 			output.write(String.format(Z_FORMAT, parms.xy_range, Parameters.unit_xy,

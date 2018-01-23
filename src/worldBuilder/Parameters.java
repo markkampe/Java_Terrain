@@ -27,7 +27,9 @@ public class Parameters {
 
 	// default configuration information
 	private static final String DEFAULT_CONFIG = "/Templates/worldBuilder.json";
-	public String output_filename = "Happyville";
+	public String map_name = "Map001";
+	public String parent_name = null;
+	public String project_dir = null;
 	public LinkedList<String> exportRules;
 	public String config_directory = "";
 
@@ -225,8 +227,8 @@ public class Parameters {
 				case "title":
 					title = parser.getString();
 					break;
-				case "output":
-					output_filename = parser.getString();
+				case "map_name":
+					map_name = parser.getString();
 					break;
 				}
 				if (inRules) {
@@ -405,7 +407,7 @@ public class Parameters {
 			System.out.println(
 					"               rainfall=" + rain_max + unit_r + " (bottoms at " + alt_maxrain + unit_z + ")");
 			System.out.println("               watershed=" + tribute_max + " " + unit_f);
-			System.out.println("   export:     name=" + output_filename);
+			System.out.println("   export:     name=" + map_name);
 			for (ListIterator<String> it = exportRules.listIterator(); it.hasNext();) {
 				System.out.println("               rule file: " + it.next());
 			}

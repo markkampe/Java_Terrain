@@ -58,7 +58,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		sel_name = new JTextField();
-		sel_name.setText(parms.output_filename);
+		sel_name.setText(parms.map_name);
 		JLabel nameLabel = new JLabel("Name of this region", JLabel.CENTER);
 		nameLabel.setFont(fontLarge);
 		
@@ -486,7 +486,7 @@ public class ExportDialog extends JFrame implements ActionListener, ChangeListen
 				export(export_file);
 				
 				// make this the new default output file name
-				parms.output_filename = sel_name.getText();
+				parms.map_name = sel_name.getText();
 				return;
 			}
 		}

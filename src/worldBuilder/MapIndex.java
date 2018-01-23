@@ -20,11 +20,21 @@ public class MapIndex {
 	private int numMaps;
 	private String path;
 	private Parameters parms;
+	static private MapIndex instance;
+	
+	static public MapIndex getInstance() {
+		return instance;
+	}
+	
+	public int nextID() {
+		return(numMaps + 1);
+	}
 	
 	public MapIndex(String directory) {
 		path = directory;
 		maps = new LinkedList<RpgmMap>();
 		parms = Parameters.getInstance();
+		instance = this;
 		
 		BufferedReader r;
 		JsonParser parser;

@@ -14,6 +14,7 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 	
 	private JLabel sel_center;
 	private JLabel sel_km;
+	private JTextField sel_name;
 	private JButton accept;
 	private JButton cancel;
 	private JComboBox<Integer> pointsChooser;
@@ -46,6 +47,7 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		// create the basic widgets
 		// Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
+		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 	
 		pointsChooser = new JComboBox<Integer>();
 		JLabel pointsLabel = new JLabel("Points", JLabel.CENTER);
@@ -66,7 +68,7 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		cancel = new JButton("CANCEL");
 		
 		sel_km = new JLabel();
-		sel_center = new JLabel("Select the area to be exported");
+		sel_center = new JLabel("Select the area for the new region");
 
 		/*
 		 * Pack them into:
@@ -84,6 +86,16 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		descPanel.add(new JLabel("Region Size"));
 		descPanel.add(sel_km);
 		
+		sel_name = new JTextField();
+		sel_name.setText(String.format("MAP%03d", MapIndex.getInstance().nextID()));
+		JLabel nameLabel = new JLabel("Name of new sub-region", JLabel.CENTER);
+		nameLabel.setFont(fontLarge);
+		JPanel namePanel = new JPanel(new GridLayout(2,1));
+		namePanel.add(nameLabel);
+		namePanel.add(sel_name);
+		namePanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+		
+		// create the basic widgets
 		JPanel p_panel = new JPanel();
 		p_panel.setLayout(new BoxLayout(p_panel, BoxLayout.PAGE_AXIS));
 		p_panel.add(pointsLabel);
@@ -110,6 +122,7 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		controls.add(buttons);
 
 		mainPane.add(descPanel, BorderLayout.NORTH);
+		mainPane.add(namePanel, BorderLayout.CENTER);
 		mainPane.add(controls, BorderLayout.SOUTH);
 		
 		pack();
@@ -225,6 +238,8 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 			parms.xy_range = (int) ((x_km >= y_km) ? x_km : y_km);
 			parms.latitude = lat;
 			parms.longitude = lon;
+			parms.parent_name = parms.map_name;
+			parms.map_name = sel_name.getText();
 			
 			// create a new map for the chosen subset
 			int points = (int) pointsChooser.getSelectedItem();

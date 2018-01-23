@@ -340,6 +340,7 @@ public class WorldBuilder  extends JFrame
 			if (modified)
 				checkSave();
 			placeDialog(new RegionDialog(map), false);
+			filename = null;
 			menuEnable(true);
 		} else if (o == fileOpen) {
 			if (modified)
@@ -579,6 +580,8 @@ public class WorldBuilder  extends JFrame
 		parms = new Parameters(configname, debug);
 		if (project_dir != null)
 			parms.project_dir = project_dir;
+		else
+			parms.project_dir = "/tmp";	// FIX BOGUS project directory initialization
 		
 		// and create the map
 		WorldBuilder w = new WorldBuilder(filename);
@@ -586,5 +589,7 @@ public class WorldBuilder  extends JFrame
 		// initialize the display type and options menus
 		w.map.setDisplay(parms.display_options, true);
 		w.updateDisplayMenus(parms.display_options);
+		
+		new MapIndex(parms.project_dir);	// FIX bogus MapIndex instantiation
 	}
 }

@@ -17,16 +17,12 @@ public class MapIndex {
 	private static final int NO_VALUE = 666666;
 	
 	public LinkedList<RpgmMap> maps;
-	private int numMaps;
+	private static int numMaps;
 	private String path;
 	private Parameters parms;
 	static private MapIndex instance;
 	
-	static public MapIndex getInstance() {
-		return instance;
-	}
-	
-	public int nextID() {
+	public static int nextID() {
 		return(numMaps + 1);
 	}
 	
@@ -34,7 +30,6 @@ public class MapIndex {
 		path = directory;
 		maps = new LinkedList<RpgmMap>();
 		parms = Parameters.getInstance();
-		instance = this;
 		
 		BufferedReader r;
 		JsonParser parser;

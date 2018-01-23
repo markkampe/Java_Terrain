@@ -87,7 +87,7 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		descPanel.add(sel_km);
 		
 		sel_name = new JTextField();
-		sel_name.setText(String.format("MAP%03d", MapIndex.getInstance().nextID()));
+		sel_name.setText(String.format("MAP%03d", MapIndex.nextID()));
 		JLabel nameLabel = new JLabel("Name of new sub-region", JLabel.CENTER);
 		nameLabel.setFont(fontLarge);
 		JPanel namePanel = new JPanel(new GridLayout(2,1));

@@ -403,21 +403,21 @@ public class WorldBuilder  extends JFrame
 			if (activeDialog)
 				twoDialogError();
 			else {
-				placeDialog(new ExportDialog(map), false);
+				placeDialog(new RawExport(map), false);
 				activeDialog = true;
 			} 
 		} else if (o == exportRpgmOverworld) {
 			if (activeDialog)
 				twoDialogError();
 			else {
-				placeDialog(new ExportDialog(map), false);
+				placeDialog(new OverworldExport(map), false);
 				activeDialog = true;
 			} 
 		} else if (o == exportRpgmOutside) {
 			if (activeDialog)
 				twoDialogError();
 			else {
-				placeDialog(new ExportDialog(map), false);
+				placeDialog(new OutsideExport(map), false);
 				activeDialog = true;
 			} 
 		} else if (o == fileExit) {

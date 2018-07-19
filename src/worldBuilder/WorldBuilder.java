@@ -40,14 +40,16 @@ public class WorldBuilder  extends JFrame
 	private static final int MAX_DIALOGS = 4;
 	
 	// menu bar items
-	private JMenuItem fileNew;
-	private JMenuItem fileRegion;
+	private JMenuItem newMesh;
+	private JMenuItem newRegion;
 	private JMenuItem fileOpen;
 	private JMenuItem fileSave;
 	private JMenuItem fileSaveAs;
 	private JMenuItem fileClose;
 	private JMenuItem fileProject;
-	private JMenuItem fileExport;
+	private JMenuItem exportRaw;
+	private JMenuItem exportRpgmOverworld;
+	private JMenuItem exportRpgmOutside;
 	private JMenuItem fileExit;
 	private JMenuItem editWorld;
 	private JMenuItem editMountain;
@@ -133,10 +135,14 @@ public class WorldBuilder  extends JFrame
 	private void createMenus() {
 		
 		// create File menu
-		fileNew = new JMenuItem("New Mesh");
-		fileNew.addActionListener(this);
-		fileRegion = new JMenuItem("New sub-region");
-		fileRegion.addActionListener(this);
+		newMesh = new JMenuItem("World");
+		newMesh.addActionListener(this);
+		newRegion = new JMenuItem("sub-region");
+		newRegion.addActionListener(this);
+		JMenu fileNew = new JMenu("new");
+		fileNew.add(newMesh);
+		fileNew.add(newRegion);
+
 		fileOpen = new JMenuItem("Open");
 		fileOpen.addActionListener(this);
 		fileSave = new JMenuItem("Save");
@@ -147,13 +153,25 @@ public class WorldBuilder  extends JFrame
 		fileClose.addActionListener(this);
 		fileProject = new JMenuItem("Project dir");
 		fileProject.addActionListener(this);
-		fileExport = new JMenuItem("Export");
-		fileExport.addActionListener(this);
+
+		exportRaw = new JMenuItem("Raw JSON");
+		exportRaw.addActionListener(this);
+		exportRpgmOverworld = new JMenuItem("Overworld");
+		exportRpgmOverworld.addActionListener(this);
+		exportRpgmOutside = new JMenuItem("Outside");
+		exportRpgmOutside.addActionListener(this);	
+		JMenu fileExport = new JMenu("Export");
+		fileExport.add(exportRaw);
+		JMenu exportRPGM = new JMenu("RPGMaker");
+		exportRPGM.add(exportRpgmOverworld);
+		exportRPGM.add(exportRpgmOutside);
+		fileExport.add(exportRPGM);
+		
 		fileExit = new JMenuItem("Exit");
 		fileExit.addActionListener(this);
+		
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.add(fileNew);
-		fileMenu.add(fileRegion);
 		fileMenu.add(fileOpen);
 		fileMenu.add(fileSave);
 		fileMenu.add(fileSaveAs);
@@ -333,14 +351,14 @@ public class WorldBuilder  extends JFrame
 	public void actionPerformed( ActionEvent e ) {
 		Object o = e.getSource();
 		// file menu opens, closes, saves, and exports files
-		if (o == fileNew) {
+		if (o == newMesh) {
 			if (modified)
 				checkSave();
 			filename = null;
 			placeDialog(new MeshDialog(map), true);
 			menuEnable(false);
 			modified = true;
-		} else if (o == fileRegion) {
+		} else if (o == newRegion) {
 			if (modified)
 				checkSave();
 			placeDialog(new RegionDialog(map), false);
@@ -381,13 +399,27 @@ public class WorldBuilder  extends JFrame
 				parms.project_dir = d.getSelectedFile().getPath();
 				new MapIndex(parms.project_dir);
 			}
-		} else if (o == fileExport) {
+		} else if (o == exportRaw) {
 			if (activeDialog)
 				twoDialogError();
 			else {
 				placeDialog(new ExportDialog(map), false);
 				activeDialog = true;
-			}
+			} 
+		} else if (o == exportRpgmOverworld) {
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new ExportDialog(map), false);
+				activeDialog = true;
+			} 
+		} else if (o == exportRpgmOutside) {
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new ExportDialog(map), false);
+				activeDialog = true;
+			} 
 		} else if (o == fileExit) {
 			if (modified)
 				checkSave();

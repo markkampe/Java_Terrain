@@ -161,11 +161,11 @@ public class WorldBuilder  extends JFrame
 		exportRpgmOutside = new JMenuItem("Outside");
 		exportRpgmOutside.addActionListener(this);	
 		JMenu fileExport = new JMenu("Export");
-		fileExport.add(exportRaw);
 		JMenu exportRPGM = new JMenu("RPGMaker");
 		exportRPGM.add(exportRpgmOverworld);
 		exportRPGM.add(exportRpgmOutside);
 		fileExport.add(exportRPGM);
+		fileExport.add(exportRaw);
 		
 		fileExit = new JMenuItem("Exit");
 		fileExit.addActionListener(this);

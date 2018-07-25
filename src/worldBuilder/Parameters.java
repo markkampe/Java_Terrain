@@ -108,6 +108,7 @@ public class Parameters {
 	public int dRainHeight; 	// mean height of incoming rain
 	public int dErosion; 		// erosion cycles
 	public int dTribute; 		// incoming river
+	public int dTileSize;		// default tile size
 
 	// tunable physical process parameters
 	// others (less likely to change) are in Hydrology.java
@@ -165,7 +166,10 @@ public class Parameters {
 		dErosion = erosion_max / 2;
 
 		// default watershed
-		dTribute = tribute_max / 10; // pretty studly
+		dTribute = tribute_max / 10; // pretty studley
+		
+		// default export tile size
+		dTileSize = 1000;			// 1km
 	}
 
 	// public constructor to read from configuration file

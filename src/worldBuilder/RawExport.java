@@ -3,7 +3,7 @@ package worldBuilder;
 import java.awt.FileDialog;
 import java.awt.event.*;
 
-public class RawExport extends ExportBase implements ActionListener, WindowListener {
+public class RawExport extends ExportBase implements ActionListener {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -58,23 +58,4 @@ public class RawExport extends ExportBase implements ActionListener, WindowListe
 			windowClosing((WindowEvent) null);
 		}
 	}
-
-	/**
-	 * Window Close event handler ... implicit CANCEL
-	 */
-	public void windowClosing(WindowEvent e) {
-		map.selectNone();
-		this.dispose();
-		map.removeMouseListener(this);
-		map.removeMouseMotionListener(this);
-		WorldBuilder.activeDialog = false;
-	}
-	
-	// perfunctory handlers for events we don't care about
-	public void windowActivated(WindowEvent arg0) {}
-	public void windowClosed(WindowEvent arg0) {}
-	public void windowDeactivated(WindowEvent arg0) {}
-	public void windowDeiconified(WindowEvent arg0) {}
-	public void windowIconified(WindowEvent arg0) {}
-	public void windowOpened(WindowEvent arg0) {}
 }

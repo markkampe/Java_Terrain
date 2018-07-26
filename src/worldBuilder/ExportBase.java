@@ -16,7 +16,7 @@ import javax.swing.event.*;
  * pushes and window events, as well as perhaps adding additional
  * control widgets to the CENTER controls JPanel.
  */
-public class ExportBase extends JFrame implements ChangeListener, MouseListener, MouseMotionListener {	
+public class ExportBase extends JFrame implements WindowListener, MouseListener, MouseMotionListener {	
 	protected Map map;				// map from which we export
 	protected Parameters parms;
 	private String format;			// selected output format
@@ -42,7 +42,7 @@ public class ExportBase extends JFrame implements ChangeListener, MouseListener,
 	private int x_start, x_end, y_start, y_end;		// selection screen coordinates
 	private double x_km, y_km;		// selection width/height (in km)
 	
-	private static final int MIN_TILE_SIZE = 1;
+	// parameters for the tile size selection slider
 	private static final int MAX_TILE_SIZE = 10000;
 	private static final int TICS_PER_DECADE = 9;
 	
@@ -77,7 +77,7 @@ public class ExportBase extends JFrame implements ChangeListener, MouseListener,
 		resolution = new JSlider(JSlider.HORIZONTAL, 0, meters_to_slider(MAX_TILE_SIZE), 
 				meters_to_slider(parms.dTileSize));
 		resolution.setMajorTickSpacing(TICS_PER_DECADE);
-		// resolution.setMinorTickSpacing(TICS_PER_DECADE/2);
+		// resolution.setMinorTickSpacing(TICS_Paxis/inclination ER_DECADE/2);
 		resolution.setFont(fontSmall);
 		resolution.setPaintTicks(true);
 		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
@@ -146,14 +146,21 @@ public class ExportBase extends JFrame implements ChangeListener, MouseListener,
 		mainPane.add(controls, BorderLayout.CENTER);
 		
 		// add the super-class action listeners
-		resolution.addChangeListener(this);
+		// (in-place to prevent shadowing by sub-class listeners)
 		map.addMouseListener(this);
 		map.addMouseMotionListener(this);
 		sel_t_size.addActionListener(new ActionListener() {
-			// done here to prevent preemption by subclass
 			public void actionPerformed(ActionEvent e) {
 				int meters = Integer.parseInt(sel_t_size.getText());
 				resolution.setValue(meters_to_slider(meters));
+				sel_t_size.setText(Integer.toString(meters));
+				if (selected)
+					select(x_start, y_start, x_end, y_end, meters);
+			}
+		});
+		resolution.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int meters = slider_to_meters(resolution.getValue());
 				sel_t_size.setText(Integer.toString(meters));
 				if (selected)
 					select(x_start, y_start, x_end, y_end, meters);
@@ -433,18 +440,6 @@ public class ExportBase extends JFrame implements ChangeListener, MouseListener,
 	}
 	
 	/**
-	 * updates to the axis/inclination sliders
-	 */
-	public void stateChanged(ChangeEvent e) {
-		if (e.getSource() == resolution) {
-			int meters = slider_to_meters(resolution.getValue());
-			sel_t_size.setText(Integer.toString(meters));
-			if (selected)
-				select(x_start, y_start, x_end, y_end, meters);
-		} 
-	}
-	
-	/**
 	 * @return the number of meters associated with a slider value
 	 * @param slider
 	 */
@@ -465,13 +460,30 @@ public class ExportBase extends JFrame implements ChangeListener, MouseListener,
 	 */
 	private int meters_to_slider(int meters) {
 		int slider = 0;
-		// FIX estimate the power of 10?
 		while(slider_to_meters(slider+1) <= meters)
 			slider++;
 		return(slider);
 	}
 
+	/**
+	 * Window Close event handler ... implicit CANCEL
+	 */
+	public void windowClosing(WindowEvent e) {
+		map.selectNone();
+		this.dispose();
+		map.removeMouseListener(this);
+		map.removeMouseMotionListener(this);
+		WorldBuilder.activeDialog = false;
+	}
+	
 	// perfunctory handlers for events we don't care about
+	public void windowActivated(WindowEvent arg0) {}
+	public void windowClosed(WindowEvent arg0) {}
+	public void windowDeactivated(WindowEvent arg0) {}
+	public void windowDeiconified(WindowEvent arg0) {}
+	public void windowIconified(WindowEvent arg0) {}
+	public void windowOpened(WindowEvent arg0) {}
+	
 	public void mouseClicked(MouseEvent arg0) {}
 	public void mouseMoved(MouseEvent arg0) {}
 	public void mouseEntered(MouseEvent arg0) {}

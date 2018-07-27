@@ -65,6 +65,8 @@ public class Parameters {
 	public int tiles_max = 10000; // export warning limit
 	public int tribute_max = 1000; // max incoming river flow
 	public double slope_init = 0.00001; // initial slope for new mesh
+	public int levels_min = 5;	// minimum number of height altitude levels
+	public int levels_max = 20;	// maximum number of height levels
 
 	// world size slider units
 	public int diameter_scale = 100; // slider labeling unit (km)
@@ -109,10 +111,14 @@ public class Parameters {
 	public int dErosion; 		// erosion cycles
 	public int dTribute; 		// incoming river
 	public int dTileSize;		// default tile size
+	
 	public int dWaterMin;		// marsh threshold
 	public int dWaterMax;		// deep water threshold
-	public int dHillMin;		// hill threshold
-	public int dHillMax;		// mountain threshold
+	public int dHillMin;		// Overworld: hill threshold
+	public int dHillMax;		// Overworld: mountain threshold
+	public int dGroundMin;		// Outside: pit threshold
+	public int dGroundMax;		// Outside: hill threshold
+	public int dAltLevels;		// Outside: altitude levels
 
 	// tunable physical process parameters
 	// others (less likely to change) are in Hydrology.java
@@ -175,11 +181,14 @@ public class Parameters {
 		// default export tile size
 		dTileSize = 1000;			// 1km
 		
-		// default altitude/depth threxholds
+		// default altitude/depth thresholds
 		dWaterMin = 1;
 		dWaterMax = 10;
 		dHillMin = 10;
 		dHillMax = 30;
+		dGroundMin = 10;
+		dGroundMax = 20;
+		dAltLevels = 6;
 	}
 
 	// public constructor to read from configuration file

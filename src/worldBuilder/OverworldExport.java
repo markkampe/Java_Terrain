@@ -12,6 +12,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 public class OverworldExport extends ExportBase implements ActionListener {
@@ -36,6 +37,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		
 		// create palette selector
+		// FIX use saved palette
 		palette = new JTextField("Overworld.json");
 		JLabel pTitle = new JLabel("Tile Palette", JLabel.CENTER);
 		choosePalette = new JButton("Choose");
@@ -60,7 +62,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		altitudes.setFont(fontSmall);
 		altitudes.setPaintTicks(true);
 		altitudes.setPaintLabels(true);
-		JLabel aTitle = new JLabel("Land Forms (ground, hill, mountain)", JLabel.CENTER);
+		JLabel aTitle = new JLabel("Hills (vs ground, mountain)", JLabel.CENTER);
 		aTitle.setFont(fontLarge);
 
 		// create depth RangeSlider
@@ -72,7 +74,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		depths.setFont(fontSmall);
 		depths.setPaintTicks(true);
 		depths.setPaintLabels(true);
-		JLabel dTitle = new JLabel("Water Bodies (marsh, shallow, deep)", JLabel.CENTER);
+		JLabel dTitle = new JLabel("Shallow (vs marsh, deep)", JLabel.CENTER);
 		dTitle.setFont(fontLarge);
 		
 		// add sliders to the controls
@@ -123,6 +125,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 				parms.dHillMax = altitudes.getUpperValue();
 				parms.dWaterMin = depths.getValue();
 				parms.dWaterMax = depths.getUpperValue();
+				// FIX save palette
 				
 				// discard the window
 				windowClosing((WindowEvent) null);

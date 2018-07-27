@@ -58,10 +58,10 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		JLabel aT1 = new JLabel("Ground");
 		aT1.setFont(fontLarge);
 		aTitle.add(aT1);
-		JLabel aT2 = new JLabel("Hills");
+		JLabel aT2 = new JLabel("Hills", JLabel.CENTER);
 		aT2.setFont(fontLarge);
 		aTitle.add(aT2);
-		JLabel aT3 = new JLabel("Mountains");
+		JLabel aT3 = new JLabel("Mountains", JLabel.RIGHT);
 		aT3.setFont(fontLarge);
 		aTitle.add(aT3);
 		
@@ -79,10 +79,10 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		JLabel dT1 = new JLabel("Marsh");
 		dT1.setFont(fontLarge);
 		dTitle.add(dT1);
-		JLabel dT2 = new JLabel("Shallow");
+		JLabel dT2 = new JLabel("Shallow", JLabel.CENTER);
 		dT2.setFont(fontLarge);
 		dTitle.add(dT2);
-		JLabel dT3 = new JLabel("Deep");
+		JLabel dT3 = new JLabel("Deep", JLabel.RIGHT);
 		dT3.setFont(fontLarge);
 		dTitle.add(dT3);
 		

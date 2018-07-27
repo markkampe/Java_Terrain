@@ -112,15 +112,13 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 		mainPane.add(descPanel, BorderLayout.NORTH);
 
 		// SOUTH: 3 buttons
-		JPanel buttons = new JPanel();
-		buttons.setLayout(new BoxLayout(buttons, BoxLayout.LINE_AXIS));
-		buttons.add(Box.createRigidArea(new Dimension(40,0)));
+		JPanel buttons = new JPanel(new GridLayout(1,5));
 		buttons.add(cancel);
-		buttons.add(Box.createRigidArea(new Dimension(40,0)));
+		buttons.add(new JLabel(" "));
 		buttons.add(preview);
-		buttons.add(Box.createRigidArea(new Dimension(40,0)));
+		buttons.add(new JLabel("  "));
 		buttons.add(accept);
-		buttons.setBorder(BorderFactory.createEmptyBorder(20, 100, 20, 10));
+		buttons.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));
 		mainPane.add(buttons, BorderLayout.SOUTH);
 		
 		// CENTER: rows, start w/tile size slider, map name

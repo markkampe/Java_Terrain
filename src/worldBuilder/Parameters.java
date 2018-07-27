@@ -112,6 +112,7 @@ public class Parameters {
 	public int dTribute; 		// incoming river
 	public int dTileSize;		// default tile size
 	
+	// export parameters
 	public int dWaterMin;		// marsh threshold
 	public int dWaterMax;		// deep water threshold
 	public int dHillMin;		// Overworld: hill threshold
@@ -119,6 +120,8 @@ public class Parameters {
 	public int dGroundMin;		// Outside: pit threshold
 	public int dGroundMax;		// Outside: hill threshold
 	public int dAltLevels;		// Outside: altitude levels
+	public String OW_palette;	// Overworld: palette file
+	public String Out_palette;	// Outside: palette file
 
 	// tunable physical process parameters
 	// others (less likely to change) are in Hydrology.java

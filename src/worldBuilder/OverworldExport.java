@@ -12,11 +12,11 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 public class OverworldExport extends ExportBase implements ActionListener {
 	
+	private static final String format = "Overworld";
 	private RangeSlider altitudes;	// ground, hill, mountain
 	private RangeSlider depths;		// marsh, shallow, deep
 	private JTextField palette;		// tile set description file
@@ -31,16 +31,16 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	 * @param map ... Map to be exported
 	 */
 	public OverworldExport(Map map) {
-		super("RPGMaker Overworld", map);
+		super("RPGMaker " + format, map);
 		
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		
-		// create palette selector
-		// FIX use saved palette
-		palette = new JTextField("Overworld.json");
+		// create palette selector		
+		palette = new JTextField(
+				parms.OW_palette == null ? format + ".json" : parms.OW_palette);
 		JLabel pTitle = new JLabel("Tile Palette", JLabel.CENTER);
-		choosePalette = new JButton("Choose");
+		choosePalette = new JButton("Browse");
 		pTitle.setFont(fontLarge);
 		JPanel p_panel = new JPanel(new GridLayout(2,1));
 		p_panel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
@@ -54,6 +54,17 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		controls.add(p_panel);
 		
 		// create altitude RangeSlider
+		JPanel aTitle = new JPanel(new GridLayout(1,3));
+		JLabel aT1 = new JLabel("Ground");
+		aT1.setFont(fontLarge);
+		aTitle.add(aT1);
+		JLabel aT2 = new JLabel("Hills");
+		aT2.setFont(fontLarge);
+		aTitle.add(aT2);
+		JLabel aT3 = new JLabel("Mountains");
+		aT3.setFont(fontLarge);
+		aTitle.add(aT3);
+		
 		altitudes = new RangeSlider(0, 100);
 		altitudes.setValue(parms.dHillMin);
 		altitudes.setUpperValue(parms.dHillMax);
@@ -62,10 +73,19 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		altitudes.setFont(fontSmall);
 		altitudes.setPaintTicks(true);
 		altitudes.setPaintLabels(true);
-		JLabel aTitle = new JLabel("Hills (vs ground, mountain)", JLabel.CENTER);
-		aTitle.setFont(fontLarge);
 
 		// create depth RangeSlider
+		JPanel dTitle = new JPanel(new GridLayout(1,3));
+		JLabel dT1 = new JLabel("Marsh");
+		dT1.setFont(fontLarge);
+		dTitle.add(dT1);
+		JLabel dT2 = new JLabel("Shallow");
+		dT2.setFont(fontLarge);
+		dTitle.add(dT2);
+		JLabel dT3 = new JLabel("Deep");
+		dT3.setFont(fontLarge);
+		dTitle.add(dT3);
+		
 		depths = new RangeSlider(0, 100);
 		depths.setValue(parms.dWaterMin);
 		depths.setUpperValue(parms.dWaterMax);
@@ -74,8 +94,6 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		depths.setFont(fontSmall);
 		depths.setPaintTicks(true);
 		depths.setPaintLabels(true);
-		JLabel dTitle = new JLabel("Shallow (vs marsh, deep)", JLabel.CENTER);
-		dTitle.setFont(fontLarge);
 		
 		// add sliders to the controls
 		JPanel locals = new JPanel();
@@ -125,7 +143,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 				parms.dHillMax = altitudes.getUpperValue();
 				parms.dWaterMin = depths.getValue();
 				parms.dWaterMax = depths.getUpperValue();
-				// FIX save palette
+				parms.OW_palette = palette.getText();
 				
 				// discard the window
 				windowClosing((WindowEvent) null);

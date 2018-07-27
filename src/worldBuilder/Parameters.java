@@ -109,6 +109,10 @@ public class Parameters {
 	public int dErosion; 		// erosion cycles
 	public int dTribute; 		// incoming river
 	public int dTileSize;		// default tile size
+	public int dWaterMin;		// marsh threshold
+	public int dWaterMax;		// deep water threshold
+	public int dHillMin;		// hill threshold
+	public int dHillMax;		// mountain threshold
 
 	// tunable physical process parameters
 	// others (less likely to change) are in Hydrology.java
@@ -170,6 +174,12 @@ public class Parameters {
 		
 		// default export tile size
 		dTileSize = 1000;			// 1km
+		
+		// default altitude/depth threxholds
+		dWaterMin = 1;
+		dWaterMax = 10;
+		dHillMin = 10;
+		dHillMax = 30;
 	}
 
 	// public constructor to read from configuration file

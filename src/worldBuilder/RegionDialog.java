@@ -47,7 +47,7 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		// create the basic widgets
 		// Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
-		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
+		// Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 	
 		pointsChooser = new JComboBox<Integer>();
 		JLabel pointsLabel = new JLabel("Points", JLabel.CENTER);

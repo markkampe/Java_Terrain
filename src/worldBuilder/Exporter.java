@@ -1,8 +1,10 @@
 package worldBuilder;
 
+import java.awt.Color;
+
 /**
  * An exporter is a class that can persist a world map
- * in a form that some other softwrae caqn import.
+ * in a form that some other software caqn import.
  *
  */
 public interface Exporter {
@@ -51,7 +53,15 @@ public interface Exporter {
 	void waterMap(double[][] hydration);
 	
 	/**
-	 * force out the file
+	 * write the output
+	 * 
+	 * @param name out of output file
 	 */
-	boolean flush();
+	boolean writeFile(String outputFile);
+	
+	/**
+	 * create an output preview
+	 */
+	public enum WhichMap { HEIGHTMAP };
+	void preview(WhichMap chosen, Color colorMap[]);
 }

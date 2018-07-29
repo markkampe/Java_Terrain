@@ -1,5 +1,6 @@
 package worldBuilder;
 
+import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -9,13 +10,9 @@ import java.io.IOException;
 public class JsonExporter implements Exporter {	
 
 	private Parameters parms;
-	
 	private static final String soilTypes[] = {
 			"sedimentary", "metamorphic", "igneous", "alluvial"
 	};
-	
-	private String filename;		// output file name
-	private String mapname;			// name of this map
 	
 	private int x_points;			// width of map (in points)
 	private int y_points;			// height of map (in points)
@@ -34,22 +31,24 @@ public class JsonExporter implements Exporter {
 	private double[][] hydration;	// per point water depth (meters)
 	private double[][] soil;		// per point soil type
 	
+	private double maxHeight;		// highest discovered altitude
+	private double minHeight;		// lowest discovered altitude
+	private double maxDepth;		// deepest discovered water
+	
+	// brightness constants for preview colors
+	private static final int DIM = 32;
+	private static final int BRIGHT = 256 - DIM;
+	private static final int NORMAL = 128;
+	
 	/**
-	 * create a new output file
-	 * @param filename
+	 * create a new Raw JSON exporter
+	 * 
+	 * @param width, height (in tiles)
 	 */
-	public JsonExporter(String filename, int width, int height) {
-		this.filename = filename;
+	public JsonExporter(int width, int height) {
 		this.x_points = width;
 		this.y_points = height;
 		parms = Parameters.getInstance();
-		
-		// strip off suffix and leading directories to get base name
-		int dot = filename.lastIndexOf('.');
-		this.mapname = (dot == -1) ? filename : filename.substring(0, dot);
-		int slash = this.mapname.lastIndexOf('/');
-		if (slash == -1) slash = this.mapname.lastIndexOf('\\');
-		if (slash != -1) this.mapname = this.mapname.substring(slash+1);
 	}
 
 	public void tileSize(int meters) {
@@ -69,6 +68,17 @@ public class JsonExporter implements Exporter {
 
 	public void heightMap(double[][] heights) {
 		this.heights = heights;
+		
+		// note the max and min heights
+		maxHeight = 0;
+		minHeight = 666;
+		for(int i = 0; i < heights.length; i++)
+			for(int j = 0; j < heights[0].length; j++) {
+				if (heights[i][j] > maxHeight)
+					maxHeight = heights[i][j];
+				if (heights[i][j] < minHeight)
+					minHeight = heights[i][j];
+			}
 	}
 
 	public void erodeMap(double[][] erode) {
@@ -85,13 +95,30 @@ public class JsonExporter implements Exporter {
 
 	public void waterMap(double[][] hydration) {
 		this.hydration = hydration;
+		
+		// note the max and min heights
+		maxDepth = 0;
+		for (int i = 0; i < hydration.length; i++)
+			for (int j = 0; j < hydration[0].length; j++) {
+				if (hydration[i][j] < maxDepth)
+					maxDepth = hydration[i][j];
+			}
 	}
 
 	/**
 	 * export a map as high resolution tiles
 	 */
-	public boolean flush() {
-	
+	public boolean writeFile( String filename ) {
+		// strip off suffix and leading directories to get base name
+		int dot = filename.lastIndexOf('.');
+		String mapname = (dot == -1) ? filename : filename.substring(0, dot);
+		int slash = mapname.lastIndexOf('/');
+		if (slash == -1)
+			slash = mapname.lastIndexOf('\\');
+		if (slash != -1)
+			mapname = mapname.substring(slash + 1);
+			
+		// generate the output
 		try {
 			FileWriter output = new FileWriter(filename);
 			final String FORMAT_S = " \"%s\": \"%s\"";
@@ -139,7 +166,7 @@ public class JsonExporter implements Exporter {
 			output.write(NEWLINE);
 			
 			output.write(String.format(FORMAT_A, "points"));
-
+			
 			boolean first = true;
 			for(int r = 0; r < y_points; r++) {
 				for(int c = 0; c < x_points; c++) {
@@ -167,9 +194,47 @@ public class JsonExporter implements Exporter {
 			output.write("]\n");	// end of points
 			output.write( "}\n");	// end of grid
 			output.close();
+			
+			if (parms.debug_level > 0) {
+				System.out.println("Exported(Raw Json) "  + x_points + "x" + y_points + " " + tile_size
+						+ "M tiles from <" + String.format("%9.6f", lat) + "," + String.format("%9.6f", lon)
+						+ "> to file " + filename);
+			}
 			return true;
 		} catch (IOException e) {
+			System.err.println("Unable to export map to file " + filename);
 			return false;
+		}
+	}
+	
+	/**
+	 * create a preview of the pending export
+	 * 
+	 * @param ... which map to preview
+	 * @param ... mapping of values to colors (unused in this class)
+	 */
+	public void preview(WhichMap chosen, Color colorMap[]) {
+	
+		if (chosen == WhichMap.HEIGHTMAP) {
+			// figure out the altitude to color mapping
+			double aMean = (maxHeight + minHeight)/2;
+			double aScale = BRIGHT - DIM;
+			if (maxHeight > minHeight)
+				aScale /= maxHeight - minHeight;
+			
+			// fill in the preview map
+			Color map[][] = new Color[y_points][x_points];
+			for(int i = 0; i < y_points; i++)
+				for(int j = 0; j < x_points; j++)
+					if (hydration[i][j] >= 0) {	// land
+						double h = NORMAL + ((heights[i][j] - aMean) * aScale);
+						map[i][j] = new Color((int)h, (int)h, (int)h);
+					} else	{							// water
+						double depth = hydration[i][j]/maxDepth;
+						double h = (1 - depth) * (BRIGHT - DIM);
+						map[i][j] = new Color(0, (int) h, BRIGHT);
+					}
+			new PreviewMap("Export Preview (terrain)", map);
 		}
 	}
 }

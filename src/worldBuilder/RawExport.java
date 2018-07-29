@@ -20,7 +20,7 @@ public class RawExport extends ExportBase implements ActionListener {
 		// controls.add(whatever);
 		
 		// we handle window and button events
-		preview.setEnabled(false);
+		preview.addActionListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		addWindowListener(this);
@@ -35,6 +35,10 @@ public class RawExport extends ExportBase implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
+			Exporter exporter = new JsonExporter(x_points, y_points);
+			export(exporter);
+			
+			// flush the it out to a file
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText()+".json");
 			d.setVisible(true);
@@ -43,10 +47,8 @@ public class RawExport extends ExportBase implements ActionListener {
 				String dir = d.getDirectory();
 				if (dir != null)
 					export_file = dir + export_file;
-				Exporter exporter = new JsonExporter(export_file, x_points, y_points);
 				
-				// RAW JSON requires no special processing
-				export(exporter, export_file);
+				exporter.writeFile(export_file);
 				
 				// make this the new default output file name
 				parms.map_name = sel_name.getText();
@@ -56,6 +58,10 @@ public class RawExport extends ExportBase implements ActionListener {
 			}
 		} else if (e.getSource() == cancel) {
 			windowClosing((WindowEvent) null);
+		} else if (e.getSource() == preview && selected) {
+			Exporter exporter = new JsonExporter(x_points, y_points);
+			export(exporter);
+			exporter.preview(Exporter.WhichMap.HEIGHTMAP, null);
 		}
 	}
 }

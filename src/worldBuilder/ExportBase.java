@@ -202,7 +202,7 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 	/**
 	 * export a map as high resolution tiles
 	 */
-	protected void export(Exporter export, String filename) {
+	protected void export(Exporter export) {
 		// set (and remember) the tile size
 		int meters = Integer.parseInt(sel_t_size.getText());
 		export.tileSize(meters);
@@ -238,20 +238,6 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 		double hydration[][] = cart.interpolate(map.getHydrationMap());
 		add_rivers(hydration, meters);	// add rivers to hydration map
 		export.waterMap(hydration);
-
-		// and force it all out
-		if (export.flush()) {
-			if (parms.debug_level > 0) {
-				System.out.println("Exported(" + format + ") " +
-						x_points + "x" + y_points + 
-						" " + meters + "M tiles from <" + 
-						String.format("%9.6f", lat) + "," + 
-						String.format("%9.6f", lon) + 
-						"> to file " + filename);
-			}
-		} else {
-			System.err.println("Unable to export map to file " + filename);
-		}
 	}
 	
 	/**

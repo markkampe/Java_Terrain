@@ -139,6 +139,11 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
+			Exporter exporter = new RpgmExporter(palette.getText(), x_points, y_points);
+			// FIX ... we need special processing
+			export(exporter);
+			
+			// get the output file name
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText()+".json");
 			d.setVisible(true);
@@ -147,11 +152,10 @@ public class OutsideExport extends ExportBase implements ActionListener {
 				String dir = d.getDirectory();
 				if (dir != null)
 					export_file = dir + export_file;
-				Exporter exporter = new RpgmExporter(export_file, palette.getText(), x_points, y_points);
 				
-				// FIX ... we need special processing
-				export(exporter, export_file);
-				
+				// write out the file
+				exporter.writeFile(export_file);
+
 				// make the selected values defaults
 				parms.map_name = sel_name.getText();
 				parms.dGroundMin = altitudes.getValue();
@@ -166,8 +170,10 @@ public class OutsideExport extends ExportBase implements ActionListener {
 			}
 		} else if (e.getSource() == cancel) {
 			windowClosing((WindowEvent) null);
-		} else if (e.getSource() == preview) {
-			System.out.println("PREVIEW NOT IMPLEMENTED"); // FIX
+		} else if (e.getSource() == preview && selected) {
+			Exporter exporter = new RpgmExporter(palette.getText(), x_points, y_points);
+			export(exporter);
+			exporter.preview(Exporter.WhichMap.HEIGHTMAP, null);	// FIX color map
 		} else if (e.getSource() == choosePalette) {
 			FileDialog d = new FileDialog(this, "Tile Palette", FileDialog.LOAD);
 			d.setFile(palette.getText());

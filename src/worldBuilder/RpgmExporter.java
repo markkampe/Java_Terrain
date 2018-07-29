@@ -1,5 +1,6 @@
 package worldBuilder;
 
+import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ListIterator;
@@ -14,14 +15,13 @@ public class RpgmExporter implements Exporter {
 	private static final int SPRITES_PER_ROW = 8;
 	private static final int EXPORT_DEBUG = 3;
 	
-	private String filename;	// output file name
 	private Parameters parms;	// general parameters
 	private TileRules rules;	// tile selection rules
 	private Random random;		// random # generator
 	
 	// physical map parameters
 	private int x_points; 		// width of map (in points)
-	private int y_points; 		// height of map (in points)
+	private int y_points; 		// height of map (in points)flushflush
 	private int tile_size; 		// tile size (in meters)
 	private double lat;			// latitude
 	private double lon;			// longitude
@@ -44,9 +44,8 @@ public class RpgmExporter implements Exporter {
 	 * @param map width (cells)
 	 * @param map height (cells)
 	 */
-	public RpgmExporter(String filename, String tileRules, int width, int height) {
+	public RpgmExporter(String tileRules, int width, int height) {
 		this.parms = Parameters.getInstance();
-		this.filename = filename;
 		this.x_points = width;
 		this.y_points = height;
 		
@@ -57,14 +56,14 @@ public class RpgmExporter implements Exporter {
 	/**
 	 * write out an RPGMaker map
 	 */
-	public boolean flush() {
+	public boolean writeFile(String filename) {
 		random = new Random((int) (lat * lon * 1000));
 		try {
 			FileWriter output = new FileWriter(filename);
 			output.write("{\n");
 			boilerPlate(output);
 			output.write("\n");
-			
+		
 			// produce the actual map of tiles
 			startList(output, "data", "[");
 			
@@ -133,6 +132,10 @@ public class RpgmExporter implements Exporter {
 		//	look for an entry for the current map
 		//	update it (w/location), adding it as necessary
 		//	rewrite
+	}
+	
+	public void preview(WhichMap chosen, Color colormap[]) {
+		System.out.println("RPGM Preview not yet implemented");
 	}
 	
 	/*
@@ -505,7 +508,7 @@ public class RpgmExporter implements Exporter {
 	public void heightMap(double[][] heights) {
 		this.heights = heights;
 	}
-
+	
 	public void erodeMap(double[][] erode) {
 		this.erode = erode;
 	}
@@ -547,7 +550,7 @@ public class RpgmExporter implements Exporter {
 		out.write(",");
 	}
 
-	// This is a kluge to produce a bunch of boiler-plate
+	// This is a kluge to produce flusha bunch of boiler-plate
 	// Someday we will want to produce this stuff intelligently
 	// rumor has it that the order matters
 	private static String parms1[][] = { 

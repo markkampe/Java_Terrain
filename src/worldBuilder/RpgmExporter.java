@@ -35,6 +35,11 @@ public class RpgmExporter implements Exporter {
 	private double[][] erode;	// per point erosion (meters)
 	private double[][] hydration; // per point water depth (meters)
 	private double[][] soil;	// per point soil type
+	private int[][] levels;		// per point terrain level
+	private double minHeight;	// lowest altitude in export
+	private double maxHeight;	// highest altitude in export
+	private double minDepth;	// shallowest water in export
+	private double maxDepth;	// deepest water in export
 	
 	/**
 	 * create a new output writer
@@ -134,8 +139,18 @@ public class RpgmExporter implements Exporter {
 		//	rewrite
 	}
 	
+	/**
+	 * generate an export preview, mapping levels to colors
+	 */
 	public void preview(WhichMap chosen, Color colormap[]) {
-		System.out.println("RPGM Preview not yet implemented");
+		if (chosen == WhichMap.HEIGHTMAP) {
+			Color pMap[][] = new Color[y_points][x_points];
+			for(int i = 0; i < y_points; i++)
+				for(int j = 0; j < x_points; j++) {
+					pMap[i][j] = colormap[levels[i][j]];
+				}
+			new PreviewMap("Export Preview (terrain)", pMap);
+		}
 	}
 	
 	/*
@@ -429,7 +444,7 @@ public class RpgmExporter implements Exporter {
 				24,	26,	36,	36,	24,	26,	36,	36,	// .*x/...	
 				32,	32,	42,	42,	32,	32,	42,	42,	// x*x/...	
 				8,	9,	22,	22,	10,	11,	22,	22,	// .*./x..	
-				16,	16,	34,	34,	17,	17,	34,	34,	// x*./x..	
+				16,	16,	34,	34,	17,	17,	34,	34,	// x*./x..					double h = hydration[i][j];
 				25,	27,	37,	37,	25,	27,	37,	37,	// .*x/x..	
 				32,	32,	42,	42,	32,	32,	42,	42,	// x*x/x..
 				28,	29,	33,	33,	30,	31,	33,	33,	// .*./.x.	
@@ -509,6 +524,29 @@ public class RpgmExporter implements Exporter {
 		this.heights = heights;
 	}
 	
+	/**
+	 * initialize the bucketized level map
+	 * @param percentages
+	 */
+	public void levelMap(int [] landMap, int[] waterMap) {
+		double aRange = (maxHeight > minHeight) ? maxHeight - minHeight : 0.000001;
+		double dRange = (maxDepth > minDepth) ? maxDepth - minDepth : 1;
+		
+		levels = new int[y_points][x_points];
+		for(int i = 0; i < y_points; i++)
+			for(int j = 0; j < x_points; j++) {
+				if (hydration[i][j] < 0) {
+					double h = -hydration[i][j];
+					double pctile = 99 * (h - minDepth) / dRange;
+					levels[i][j] = waterMap[(int) pctile];
+				} else {
+					double a = heights[i][j];
+					double pctile = 99 * (a - minHeight) / aRange;
+					levels[i][j] = landMap[(int) pctile];
+				}
+			}
+	}
+	
 	public void erodeMap(double[][] erode) {
 		this.erode = erode;
 	}
@@ -523,6 +561,27 @@ public class RpgmExporter implements Exporter {
 
 	public void waterMap(double[][] hydration) {
 		this.hydration = hydration;
+		
+		// figure out minimum and maximum heights/depths in the region
+		minDepth = 666666;
+		minHeight = 666;
+		maxDepth = 0;
+		maxHeight = 0;
+		for (int i = 0; i < hydration.length; i++)
+			for (int j = 0; j < hydration[0].length; j++) {
+				double h = hydration[i][j];
+				if (h < 0) {
+					if (-h < minDepth)
+						minDepth = -h;
+					else if (-h > maxDepth)
+						maxDepth = -h;
+				} else {
+					if (heights[i][j] < minHeight)
+						minHeight = heights[i][j];
+					if (heights[i][j] > maxHeight)
+						maxHeight = heights[i][j];
+				}
+			}
 	}
 
 	/**

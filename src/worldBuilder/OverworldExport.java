@@ -1,5 +1,6 @@
 package worldBuilder;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Font;
@@ -22,10 +23,28 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	private JTextField palette;		// tile set description file
 	private JButton choosePalette;	// select palette file
 	
+	// (hard coded) overland levels
+	private static final int DEEP = 0;
+	private static final int SHALLOW = 1;
+	private static final int MARSH = 2;
+	private static final int LOWLANDS = 3;
+	private static final int HILLS = 4;
+	private static final int MOUNTAINS = 5;
+	
+	// level to color mapping for export previews
+	Color previewColors[] = {
+			new Color(0,0,128),		// 0: deep water
+			Color.BLUE,				// 1: shallow water
+			Color.CYAN,				// 2: marsh/creek
+			Color.GREEN,			// 3: low lands
+			Color.GRAY,				// 4: hills
+			Color.LIGHT_GRAY		// 5: MOUNTAINS
+	};
+	
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Set up the dialog (base class is fine) and
+	 * Set up the dialog (base class is fine) andSystem.out.println("RPGM Preview not yet implemented");
 	 * register the action listeners.
 	 * 
 	 * @param map ... Map to be exported
@@ -53,7 +72,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		p_panel.add(p1_panel);
 		controls.add(p_panel);
 		
-		// create altitude RangeSlider
+		// create altitude RangeSliderSystem.out.println("RPGM Preview not yet implemented");
 		JPanel aTitle = new JPanel(new GridLayout(1,3));
 		JLabel aT1 = new JLabel("Ground");
 		aT1.setFont(fontLarge);
@@ -91,7 +110,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		depths.setUpperValue(parms.dWaterMax);
 		depths.setMajorTickSpacing(10);
 		depths.setMinorTickSpacing(5);
-		depths.setFont(fontSmall);
+		depths.setFont(fontSmall);System.out.println("RPGM Preview not yet implemented");
 		depths.setPaintTicks(true);
 		depths.setPaintLabels(true);
 		
@@ -125,8 +144,8 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
 			Exporter exporter = new RpgmExporter(palette.getText(), x_points, y_points);
-			// FIX ... we need special processing
 			export(exporter);
+			levelMap((RpgmExporter) exporter);
 			
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText()+".json");
@@ -154,7 +173,9 @@ public class OverworldExport extends ExportBase implements ActionListener {
 			windowClosing((WindowEvent) null);
 		} else if (e.getSource() == preview && selected) {
 			Exporter exporter = new RpgmExporter(palette.getText(), x_points, y_points);
-			exporter.preview(Exporter.WhichMap.HEIGHTMAP, null);
+			export(exporter);
+			levelMap((RpgmExporter) exporter);
+			exporter.preview(Exporter.WhichMap.HEIGHTMAP, previewColors);
 		} else if (e.getSource() == choosePalette) {
 			FileDialog d = new FileDialog(this, "Tile Palette", FileDialog.LOAD);
 			d.setFile(palette.getText());
@@ -167,5 +188,36 @@ public class OverworldExport extends ExportBase implements ActionListener {
 				palette.setText(palette_file);
 			}
 		}
+	}
+	
+	/**
+	 * generate the percentile maps for land and water
+	 * 
+	 * @param exporter
+	 */
+	void levelMap(RpgmExporter exporter) {
+		int landLevels[] = new int[100];
+		int low = altitudes.getValue();
+		int high = altitudes.getUpperValue();
+		for(int i = 0; i < 100; i++)
+			if (i < low)
+				landLevels[i] = LOWLANDS;
+			else if (i >= high)
+				landLevels[i] = MOUNTAINS;
+			else
+				landLevels[i] = HILLS;
+		
+		int waterLevels[] = new int[100];
+		low = depths.getValue();
+		high = depths.getUpperValue();
+		for(int i = 0; i < 100; i++)
+			if (i < low)
+				waterLevels[i] = MARSH;
+			else if (i >= high)
+				waterLevels[i] = DEEP;
+			else
+				waterLevels[i] = SHALLOW;
+		
+		exporter.levelMap(landLevels, waterLevels);
 	}
 }

@@ -88,7 +88,7 @@ public class OutsideExport extends ExportBase implements ActionListener {
 
 		// create depth RangeSlider
 		JPanel dTitle = new JPanel(new GridLayout(1,3));
-		JLabel dT1 = new JLabel("Marsh");
+		JLabel dT1 = new JLabel("Passable");
 		dT1.setFont(fontLarge);
 		dTitle.add(dT1);
 		JLabel dT2 = new JLabel("Shallow", JLabel.CENTER);

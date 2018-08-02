@@ -19,7 +19,7 @@ import javax.swing.event.*;
 public class ExportBase extends JFrame implements WindowListener, MouseListener, MouseMotionListener {	
 	protected Map map;				// map from which we export
 	protected Parameters parms;
-	private String format;			// selected output format
+	// private String format;			// selected output format
 
 	// standard (to all subclasses) widgets
 	protected JTextField sel_name;	// name of region
@@ -48,10 +48,16 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 	
 	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * common subset of exports
+	 * 
+	 * @param format ... perhaps not needed
+	 * @param map ... the map from which we are exporting
+	 */
 	public ExportBase(String format, Map map)  {
 		// pick up references
 		this.map = map;
-		this.format = format;
+		// this.format = format;
 		this.parms = Parameters.getInstance();;
 		
 		// create the dialog box
@@ -231,6 +237,10 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 		// get Cartesian interpolations of tile characteristics
 		Cartesian cart = new Cartesian(map.getMesh(), box_x, box_y, box_x+box_width, box_y+box_height, x_points, y_points);
 		
+		// TODO lose gratuitous interpolates
+		//		only need to redo these if the region changes
+		//		this might save a lot of time, and might enable
+		//		continuous previews
 		export.heightMap(cart.interpolate(map.getHeightMap()));
 		export.erodeMap(cart.interpolate(map.getErodeMap()));
 		export.rainMap(cart.interpolate(map.getRainMap()));

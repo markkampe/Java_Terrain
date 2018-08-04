@@ -15,6 +15,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import worldBuilder.TerrainType.TerrainClass;
+
 public class OverworldExport extends ExportBase implements ActionListener {
 	
 	private static final String format = "Overworld";
@@ -31,7 +33,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	private static final int HILLS = 4;
 	private static final int MOUNTAINS = 5;
 	
-	// level to color mapping for export previews
+	// level to color mapping for previews
 	Color previewColors[] = {
 			new Color(0,0,128),		// 0: DEEP water
 			Color.BLUE,				// 1: SHALLOW water
@@ -39,6 +41,16 @@ public class OverworldExport extends ExportBase implements ActionListener {
 			Color.GREEN,			// 3: LOWLANDS
 			Color.GRAY,				// 4: HILLS
 			Color.LIGHT_GRAY		// 5: MOUNTAINS
+	};
+	
+	// level to terrain type mapping for export
+	TerrainClass typeMap[] = {
+			TerrainClass.DEEP_WATER,
+			TerrainClass.SHALLOW_WATER,
+			TerrainClass.PASSABLE_WATER,
+			TerrainClass.GROUND,
+			TerrainClass.HILL,
+			TerrainClass.MOUNTAIN	
 	};
 	
 	private static final long serialVersionUID = 1L;
@@ -218,6 +230,6 @@ public class OverworldExport extends ExportBase implements ActionListener {
 			else
 				waterLevels[i] = SHALLOW;
 		
-		exporter.levelMap(landLevels, waterLevels);
+		exporter.levelMap(landLevels, waterLevels, typeMap);
 	}
 }

@@ -16,6 +16,8 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
+import worldBuilder.TerrainType.TerrainClass;
+
 public class OutsideExport extends ExportBase implements ActionListener {
 	
 	private static final String format = "Outside";
@@ -26,6 +28,7 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	private JButton choosePalette;	// select palette file
 	
 	private Color colorMap[];		// level to preview color map
+	private TerrainClass[] levelMap;
 	
 	// (hard coded) Outside levels
 	private static final int DEEP = 0;
@@ -216,6 +219,7 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	 */
 	void levelMap(RpgmExporter exporter) {
 
+		int totLevels = levels.getValue();
 		// note the water classifications (by percentile)
 		int waterLevels[] = new int[100];
 		int low = depths.getValue();
@@ -228,40 +232,52 @@ public class OutsideExport extends ExportBase implements ActionListener {
 			else
 				waterLevels[i] = SHALLOW;
 		
-		colorMap = new Color[3 + levels.getValue()];
+		// note the water classifications (by level)
+		colorMap = new Color[3 + totLevels];
 		colorMap[DEEP] = DEEP_color;
 		colorMap[SHALLOW] = SHALLOW_color;
 		colorMap[PASSABLE] = PASSABLE_color;
 		
-		// note the land classifications (by percentile)
+		levelMap = new TerrainClass[3 + totLevels];
+		levelMap[DEEP] = TerrainClass.DEEP_WATER;
+		levelMap[SHALLOW] = TerrainClass.SHALLOW_WATER;
+		levelMap[PASSABLE] = TerrainClass.PASSABLE_WATER;
+		
+		// note the land classifications (by level)
 		low = altitudes.getValue();
 		high = altitudes.getUpperValue();
-		int lowLevels =  (int) (((double) low) * (levels.getValue() - 1) / 100.0);
+		int lowLevels =  (int) (((double) low) * (totLevels - 1) / 100.0);
 		if (lowLevels == 0)
 			lowLevels = 1;
-		int highLevels = levels.getValue() - (1 + lowLevels);
-		if (highLevels == 0)
-			highLevels = 1;
+		int highLevels = totLevels - (1 + lowLevels);
 		int groundLevel = PIT + lowLevels;
+		
+		int shade = MAX_PIT_shade;
+		for(int i = PIT; i < groundLevel; i++) {
+			levelMap[i] = TerrainClass.PIT;
+			colorMap[i] = new Color(shade, shade, shade);
+			shade += SHADE_RANGE / lowLevels;
+		}
+		
+		colorMap[groundLevel] = GROUND_color;
+		levelMap[groundLevel] = TerrainClass.GROUND;
+		
+		shade = MIN_MOUND_shade;
+		for(int i = groundLevel + 1; i < totLevels; i++) {
+			levelMap[i] = TerrainClass.MOUNTAIN;
+			colorMap[i] = new Color(shade, shade, shade);
+			shade += SHADE_RANGE / highLevels;
+		}
 		
 		// figure out class and level for each altitude percentile
 		int landLevels[] = new int[100];
 		for(int i = 0; i < 100; i++)
-			if (i < low) {
-				int pitLevel = PIT + (i * lowLevels)/low;
-				landLevels[i] = pitLevel;
-				int shade = MAX_PIT_shade + ((SHADE_RANGE * (pitLevel - PIT))/lowLevels);
-				colorMap[pitLevel] = new Color(shade, shade, shade);
-			} else if (i >= high) {
-				int moundLevel = groundLevel + 1 + (((i - high) * highLevels)/(100 - high));
-				landLevels[i] = moundLevel;
-				int shade = MIN_MOUND_shade + ((SHADE_RANGE * (moundLevel - (groundLevel + 1))/highLevels));
-				colorMap[moundLevel] = new Color(shade, shade, shade);
-			} else {
+			if (i < low)
+				landLevels[i] = PIT + (i * lowLevels)/low;
+			else if (i >= high)
+				landLevels[i] = groundLevel + 1 + (((i - high) * highLevels)/(100 - high));
+			else
 				landLevels[i] = groundLevel;
-				// colorMap[groundLevel] = new Color(GROUND_shade, GROUND_shade, GROUND_shade);
-				colorMap[groundLevel] = GROUND_color;
-			}
-		exporter.levelMap(landLevels, waterLevels);
+		exporter.levelMap(landLevels, waterLevels, levelMap);
 	}
 }

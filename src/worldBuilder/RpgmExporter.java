@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ListIterator;
 import java.util.Random;
 
+import worldBuilder.TerrainType.TerrainClass;
+
 /**
  * exporter that creates an RPGMaker map
  */
@@ -526,9 +528,11 @@ public class RpgmExporter implements Exporter {
 	
 	/**
 	 * initialize the bucketized level map
-	 * @param percentages
+	 * @param land percentile to level map
+	 * @param water percentile to level map
+	 * @param level to TerrainType map
 	 */
-	public void levelMap(int [] landMap, int[] waterMap) {
+	public void levelMap(int [] landMap, int[] waterMap, TerrainClass[] classMap) {
 		double aRange = (maxHeight > minHeight) ? maxHeight - minHeight : 0.000001;
 		double dRange = (maxDepth > minDepth) ? maxDepth - minDepth : 1;
 		

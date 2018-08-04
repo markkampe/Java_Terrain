@@ -1,5 +1,6 @@
 package worldBuilder;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Font;
@@ -23,6 +24,25 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	private RangeSlider depths;		// marsh, shallow, deep
 	private JTextField palette;		// tile set description file
 	private JButton choosePalette;	// select palette file
+	
+	private Color colorMap[];		// level to preview color map
+	
+	// (hard coded) Outside levels
+	private static final int DEEP = 0;
+	private static final int SHALLOW = 1;
+	private static final int PASSABLE = 2;
+	private static final int PIT = 3;
+	
+	// hard coded preview colors
+	private Color DEEP_color = new Color(0,0,128);
+	private Color SHALLOW_color = Color.BLUE;
+	private Color PASSABLE_color = Color.CYAN;
+	private static final Color GROUND_color = new Color(205,133,63);
+	
+	// ranges for land preview colors
+	private static final int MAX_PIT_shade = 32;;
+	private static final int MIN_MOUND_shade = 160;
+	private static final int SHADE_RANGE = 64;
 	
 	private static final long serialVersionUID = 1L;
 
@@ -140,8 +160,8 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
 			Exporter exporter = new RpgmExporter(palette.getText(), x_points, y_points);
-			// FIX ... we need special processing
 			export(exporter);
+			levelMap((RpgmExporter) exporter);
 			
 			// get the output file name
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
@@ -173,7 +193,8 @@ public class OutsideExport extends ExportBase implements ActionListener {
 		} else if (e.getSource() == preview && selected) {
 			Exporter exporter = new RpgmExporter(palette.getText(), x_points, y_points);
 			export(exporter);
-			exporter.preview(Exporter.WhichMap.HEIGHTMAP, null);	// FIX color map
+			levelMap((RpgmExporter) exporter);
+			exporter.preview(Exporter.WhichMap.HEIGHTMAP, colorMap);
 		} else if (e.getSource() == choosePalette) {
 			FileDialog d = new FileDialog(this, "Tile Palette", FileDialog.LOAD);
 			d.setFile(palette.getText());
@@ -186,5 +207,61 @@ public class OutsideExport extends ExportBase implements ActionListener {
 				palette.setText(palette_file);
 			}
 		}
+	}
+	
+	/**
+	 * generate the percentile maps for land and water
+	 * 
+	 * @param exporter
+	 */
+	void levelMap(RpgmExporter exporter) {
+
+		// note the water classifications (by percentile)
+		int waterLevels[] = new int[100];
+		int low = depths.getValue();
+		int high = depths.getUpperValue();
+		for(int i = 0; i < 100; i++)
+			if (i < low)
+				waterLevels[i] = PASSABLE;
+			else if (i >= high)
+				waterLevels[i] = DEEP;
+			else
+				waterLevels[i] = SHALLOW;
+		
+		colorMap = new Color[3 + levels.getValue()];
+		colorMap[DEEP] = DEEP_color;
+		colorMap[SHALLOW] = SHALLOW_color;
+		colorMap[PASSABLE] = PASSABLE_color;
+		
+		// note the land classifications (by percentile)
+		low = altitudes.getValue();
+		high = altitudes.getUpperValue();
+		int lowLevels =  (int) (((double) low) * (levels.getValue() - 1) / 100.0);
+		if (lowLevels == 0)
+			lowLevels = 1;
+		int highLevels = levels.getValue() - (1 + lowLevels);
+		if (highLevels == 0)
+			highLevels = 1;
+		int groundLevel = PIT + lowLevels;
+		
+		// figure out class and level for each altitude percentile
+		int landLevels[] = new int[100];
+		for(int i = 0; i < 100; i++)
+			if (i < low) {
+				int pitLevel = PIT + (i * lowLevels)/low;
+				landLevels[i] = pitLevel;
+				int shade = MAX_PIT_shade + ((SHADE_RANGE * (pitLevel - PIT))/lowLevels);
+				colorMap[pitLevel] = new Color(shade, shade, shade);
+			} else if (i >= high) {
+				int moundLevel = groundLevel + 1 + (((i - high) * highLevels)/(100 - high));
+				landLevels[i] = moundLevel;
+				int shade = MIN_MOUND_shade + ((SHADE_RANGE * (moundLevel - (groundLevel + 1))/highLevels));
+				colorMap[moundLevel] = new Color(shade, shade, shade);
+			} else {
+				landLevels[i] = groundLevel;
+				// colorMap[groundLevel] = new Color(GROUND_shade, GROUND_shade, GROUND_shade);
+				colorMap[groundLevel] = GROUND_color;
+			}
+		exporter.levelMap(landLevels, waterLevels);
 	}
 }

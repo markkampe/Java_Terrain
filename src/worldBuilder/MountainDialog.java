@@ -591,7 +591,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	public void keyTyped(KeyEvent e) {
 		int key = e.getKeyChar();
-		if (key == KeyEvent.VK_ENTER)
+		if (key == KeyEvent.VK_ENTER && selected)
 			acceptMountain();
 		else if (key == KeyEvent.VK_ESCAPE)
 			cancelDialog();	
@@ -603,7 +603,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			cancelDialog();
-		} else if (e.getSource() == accept) {
+		} else if (e.getSource() == accept && selected) {
 			acceptMountain();
 		} else if (e.getSource() == form) {
 			int x = form.getSelectedIndex();

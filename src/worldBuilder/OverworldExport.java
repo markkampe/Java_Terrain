@@ -26,18 +26,18 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	// (hard coded) overland levels
 	private static final int DEEP = 0;
 	private static final int SHALLOW = 1;
-	private static final int MARSH = 2;
+	private static final int PASSABLE = 2;
 	private static final int LOWLANDS = 3;
 	private static final int HILLS = 4;
 	private static final int MOUNTAINS = 5;
 	
 	// level to color mapping for export previews
 	Color previewColors[] = {
-			new Color(0,0,128),		// 0: deep water
-			Color.BLUE,				// 1: shallow water
-			Color.CYAN,				// 2: marsh/creek
-			Color.GREEN,			// 3: low lands
-			Color.GRAY,				// 4: hills
+			new Color(0,0,128),		// 0: DEEP water
+			Color.BLUE,				// 1: SHALLOW water
+			Color.CYAN,				// 2: PASSABLE wetland/creek
+			Color.GREEN,			// 3: LOWLANDS
+			Color.GRAY,				// 4: HILLS
 			Color.LIGHT_GRAY		// 5: MOUNTAINS
 	};
 	
@@ -212,7 +212,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		high = depths.getUpperValue();
 		for(int i = 0; i < 100; i++)
 			if (i < low)
-				waterLevels[i] = MARSH;
+				waterLevels[i] = PASSABLE;
 			else if (i >= high)
 				waterLevels[i] = DEEP;
 			else

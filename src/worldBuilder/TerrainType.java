@@ -15,4 +15,38 @@ public class TerrainType {
 	public TerrainType(TerrainClass tClass) {
 		type = tClass;
 	}
+	
+	public boolean isWater() {
+		switch(type) {
+		case DEEP_WATER:
+		case SHALLOW_WATER:
+		case PASSABLE_WATER:
+			return true;
+			
+		default:
+			return false;
+		}
+	}
+	
+	public boolean isLowLand() {
+		switch(type) {
+		case GROUND:
+		case PIT:
+			return true;
+			
+		default:
+			return false;
+		}
+	}
+	
+	public boolean isHighLand() {
+		switch(type) {
+		case HILL:
+		case MOUNTAIN:
+			return true;
+			
+		default:
+			return false;
+		}
+	}
 }

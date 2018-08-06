@@ -37,12 +37,12 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	private static final int PIT = 3;
 	
 	// hard coded preview colors
-	private Color DEEP_color = new Color(0,0,128);
-	private Color SHALLOW_color = Color.BLUE;
-	private Color PASSABLE_color = Color.CYAN;
+	private static final Color DEEP_color = new Color(0,0,128);
+	private static final Color SHALLOW_color = Color.BLUE;
+	private static final Color PASSABLE_color = Color.CYAN;
 	private static final Color GROUND_color = new Color(205,133,63);
 	
-	// ranges for land preview colors
+	// ranges for land preview luminance
 	private static final int MAX_PIT_shade = 32;;
 	private static final int MIN_MOUND_shade = 160;
 	private static final int SHADE_RANGE = 64;

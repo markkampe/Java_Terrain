@@ -118,7 +118,7 @@ public class RpgmExporter implements Exporter {
 				}
 			output.write("],\n");
 			
-			// Events list ... to be created later
+			// TODO create transfer events at sub-map boundaries
 			startList(output, "events", "[\n");
 			output.write("null,\n");
 			output.write("null\n");
@@ -613,25 +613,25 @@ public class RpgmExporter implements Exporter {
 		out.write(",");
 	}
 
-	// This is a kluge to produce flusha bunch of boiler-plate
+	// This is a kluge to produce a bunch of boiler-plate
 	// Someday we will want to produce this stuff intelligently
 	// rumor has it that the order matters
-	private static String parms1[][] = { 
+	private static String parms1[][] = {	// background sounds/music
 			{ "autoplayBgm", "boolean", "false" }, 
 			{ "autoplayBgs", "boolean", "false" },
 			{ "battleback1Name", "string", "" }, 
 			{ "battleback2Name", "string", "" }, };
-	private static String bgmParms[][] = { 
+	private static String bgmParms[][] = {	// music pitch/volume
 			{ "name", "string", "" }, 
 			{ "pan", "int", "0" }, 
 			{ "pitch", "int", "100" },
 			{ "volume", "int", "90" } };
-	private static String bgsParms[][] = { 
+	private static String bgsParms[][] = {	// sound pitch/volume
 			{ "name", "string", "" }, 
 			{ "pan", "int", "0" }, 
 			{ "pitch", "int", "100" },
 			{ "volume", "int", "90" } };
-	private static String parms2[][] = { 
+	private static String parms2[][] = {	// processing options
 			{ "disableDashing", "boolean", "false" }, 
 			{ "displayName", "string", "" },
 			{ "encounterList", "array", "" }, 

@@ -21,7 +21,8 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	
 	private static final String format = "Overworld";
 	private RangeSlider altitudes;	// ground, hill, mountain
-	private RangeSlider depths;		// marsh, shallow, deep
+	private RangeSlider slopes;		// ground, hill, mountain
+	private RangeSlider depths;		// passable, shallow, deep
 	private JTextField palette;		// tile set description file
 	private JButton choosePalette;	// select palette file
 	
@@ -56,7 +57,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Set up the dialog (base class is fine) andSystem.out.println("RPGM Preview not yet implemented");
+	 * Set up the dialog (base class is fine) and
 	 * register the action listeners.
 	 * 
 	 * @param map ... Map to be exported
@@ -84,7 +85,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		p_panel.add(p1_panel);
 		controls.add(p_panel);
 		
-		// create altitude RangeSliderSystem.out.println("RPGM Preview not yet implemented");
+		// create altitude RangeSlider
 		JPanel aTitle = new JPanel(new GridLayout(1,3));
 		JLabel aT1 = new JLabel("Ground");
 		aT1.setFont(fontLarge);
@@ -104,7 +105,28 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		altitudes.setFont(fontSmall);
 		altitudes.setPaintTicks(true);
 		altitudes.setPaintLabels(true);
-
+		
+		// create slope RangeSlider
+		JPanel sTitle = new JPanel(new GridLayout(1,3));
+		JLabel sT1 = new JLabel("Ground");
+		sT1.setFont(fontLarge);
+		sTitle.add(sT1);
+		JLabel sT2 = new JLabel("Hills", JLabel.CENTER);
+		sT2.setFont(fontLarge);
+		sTitle.add(sT2);
+		JLabel sT3 = new JLabel("Mountains", JLabel.RIGHT);
+		sT3.setFont(fontLarge);
+		sTitle.add(sT3);
+		
+		slopes = new RangeSlider(0, 100);
+		slopes.setValue(parms.dSlopeMin);
+		slopes.setUpperValue(parms.dSlopeMax);
+		slopes.setMajorTickSpacing(10);
+		slopes.setMinorTickSpacing(5);
+		slopes.setFont(fontSmall);
+		slopes.setPaintTicks(true);
+		slopes.setPaintLabels(true);
+				
 		// create depth RangeSlider
 		JPanel dTitle = new JPanel(new GridLayout(1,3));
 		JLabel dT1 = new JLabel("Passable");
@@ -122,7 +144,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		depths.setUpperValue(parms.dWaterMax);
 		depths.setMajorTickSpacing(10);
 		depths.setMinorTickSpacing(5);
-		depths.setFont(fontSmall);System.out.println("RPGM Preview not yet implemented");
+		depths.setFont(fontSmall);
 		depths.setPaintTicks(true);
 		depths.setPaintLabels(true);
 		
@@ -133,9 +155,21 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		locals.add(new JLabel("    "));
 		locals.add(aTitle);
 		locals.add(altitudes);
+		JLabel l = new JLabel("Terrain Altitude (percentile)", JLabel.CENTER);
+		l.setFont(fontSmall);
+		locals.add(l);
+		locals.add(new JLabel("    "));
+		locals.add(sTitle);
+		locals.add(slopes);
+		l = new JLabel("Terrain Slope (percentile)", JLabel.CENTER);
+		l.setFont(fontSmall);
+		locals.add(l);
 		locals.add(new JLabel("    "));
 		locals.add(dTitle);
 		locals.add(depths);
+		l = new JLabel("Water Depth (percentile)", JLabel.CENTER);
+		l.setFont(fontSmall);
+		locals.add(l);
 		controls.add(locals);
 		
 		// we handle window and button events
@@ -155,7 +189,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			Exporter exporter = new RpgmExporter(palette.getText(), x_points, y_points);
+			Exporter exporter = new OverworldTiler(palette.getText(), x_points, y_points);
 			export(exporter);
 			levelMap((RpgmExporter) exporter);
 			
@@ -174,6 +208,8 @@ public class OverworldExport extends ExportBase implements ActionListener {
 				parms.map_name = sel_name.getText();
 				parms.dHillMin = altitudes.getValue();
 				parms.dHillMax = altitudes.getUpperValue();
+				parms.dSlopeMin = slopes.getValue();
+				parms.dSlopeMax = slopes.getUpperValue();
 				parms.dWaterMin = depths.getValue();
 				parms.dWaterMax = depths.getUpperValue();
 				parms.OW_palette = palette.getText();

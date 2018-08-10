@@ -117,6 +117,8 @@ public class Parameters {
 	public int dWaterMax;		// deep water threshold
 	public int dHillMin;		// Overworld: hill threshold
 	public int dHillMax;		// Overworld: mountain threshold
+	public int dSlopeMin;		// Overworld: hill threshold
+	public int dSlopeMax;		// Overworld: mountain threshold
 	public int dGroundMin;		// Outside: pit threshold
 	public int dGroundMax;		// Outside: hill threshold
 	public int dAltLevels;		// Outside: altitude levels
@@ -184,11 +186,13 @@ public class Parameters {
 		// default export tile size
 		dTileSize = 1000;			// 1km
 		
-		// default altitude/depth thresholds
+		// default altitude/slope/depth thresholds
 		dWaterMin = 1;
 		dWaterMax = 10;
 		dHillMin = 10;
 		dHillMax = 30;
+		dSlopeMin = 10;
+		dSlopeMax = 30;
 		dGroundMin = 10;
 		dGroundMax = 20;
 		dAltLevels = 6;

@@ -15,6 +15,7 @@ public class TileRule {
 	public int height;		// stamp height
 	public int width;		// stamp width
 	
+	public TerrainType.TerrainClass terrain;
 	public int minAltitude;
 	public int maxAltitude;
 	public double minDepth;
@@ -45,8 +46,8 @@ public class TileRule {
 		this.width = 1;
 		this.altTile = 0;
 		
-		
 		// default values will meet any terrestrial conditions
+		terrain = TerrainType.TerrainClass.NONE;
 		minAltitude = -parms.alt_max;
 		maxAltitude = parms.alt_max;
 		minDepth = 0;
@@ -75,14 +76,15 @@ public class TileRule {
 		if (height > 1 || width > 1)
 			System.out.print(", stamp=" + width + "x" + height);
 		System.out.println("");
-		System.out.println(prefix + "      " + "alt:   " + minAltitude + "-" + maxAltitude);
-		System.out.println(prefix + "      " + "depth: " + (int) minDepth + "-" + (int) maxDepth);
-		System.out.println(prefix + "      " + "hydro: " + String.format("%.1f", minHydro) + "-" + String.format("%.1f", maxHydro));
-		System.out.println(prefix + "      " + "temp:  " + minTemp + "-" + maxTemp);
-		System.out.println(prefix + "      " + "soil:  " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
-		System.out.println(prefix + "      " + "slope: " + String.format("%.1f", minSlope) + "-" + String.format("%.1f", maxSlope));
-		System.out.println(prefix + "      " + "face:  " + (int) minFace + "-" + (int) maxFace);
-		System.out.println(prefix + "      " + "vigor: " + vigor);
+		System.out.println(prefix + "      " + "terrain:" + TerrainType.terrainType(terrain));
+		System.out.println(prefix + "      " + "alt:    " + minAltitude + "-" + maxAltitude);
+		System.out.println(prefix + "      " + "depth:  " + (int) minDepth + "-" + (int) maxDepth);
+		System.out.println(prefix + "      " + "hydro:  " + String.format("%.1f", minHydro) + "-" + String.format("%.1f", maxHydro));
+		System.out.println(prefix + "      " + "temp:   " + minTemp + "-" + maxTemp);
+		System.out.println(prefix + "      " + "soil:   " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
+		System.out.println(prefix + "      " + "slope:  " + String.format("%.1f", minSlope) + "-" + String.format("%.1f", maxSlope));
+		System.out.println(prefix + "      " + "face:   " + (int) minFace + "-" + (int) maxFace);
+		System.out.println(prefix + "      " + "vigor:  " + vigor);
 	}
 	
 	/**

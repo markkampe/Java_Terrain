@@ -1,23 +1,28 @@
 { "tileset": 1,
   "Overworld": [
 	{ "name": "water", "level": 1, "base": 2048,
+	  "terrain": "water",
 	  "depth": { "min": 0.00001, "max": 10000 }
 	},
 
 	{ "name": "deep", "level": 2, "base": 2096,
+	  "terrain": "deep",
 	  "depth": { "min": 10, "max": 10000 }
 	},
 
 	{ "name": "dirt", "level": 1, "base": 3584,
+	  "terrain": "ground",
 	  "temp": { "min": -5.0 },
 	  "vigor": 32
 	},
 	{ "name": "grass", "level": 1, "base": 2816,
+	  "terrain": "ground",
 	  "temp": { "min": 10 },
 	  "hydro": { "min": 0.1 },
 	  "vigor": 128
 	},
 	{ "name": "snow", "level": 1, "base": 3968,
+	  "terrain": "ground",
 	  "temp": { "max": 7.5 },
 	  "vigor": 32
 	},
@@ -48,11 +53,13 @@
 	  "vigor": 32
 	},
 	{ "name": "EMPTYFIELD", "level": 2, "base": 0,
+	  "terrain": "ground",
 	  "hydro": { "min": 0.15 },
 	  "vigor": 16
 	},
 
 	{ "name": "dirthill", "level": 2, "base": 3488,
+	  "terrain": "hill",
 	  "alt": { "min": 100, "max": 500 },
 	  "hydro": { "max": 0.10 },
 	  "temp": { "min": -5.0 },
@@ -60,6 +67,7 @@
 	  "vigor": 64
 	},
 	{ "name": "grasshill", "level": 2, "base": 3104,
+	  "terrain": "hill",
 	  "alt": { "min": 100, "max": 500 },
 	  "temp": { "min": 10 },
 	  "hydro": { "min": 0.1 },
@@ -67,6 +75,7 @@
 	  "vigor": 64
 	},
 	{ "name": "snowhill", "level": 2, "base": 4016,
+	  "terrain": "hill",
 	  "alt": { "min": 100, "max": 500 },
 	  "temp": { "max": 7.5 },
 	  "slope": { "min": 0.03 },
@@ -74,6 +83,7 @@
 	},
 
 	{ "name": "mountain", "level": 2, "base": 3152,
+	  "terrain": "mountain",
 	  "alt": { "min": 500 },
 	  "soil": { "max": 0.5 },
 	  "temp": { "min": -5.0 },
@@ -81,6 +91,7 @@
 	  "vigor": 64
 	},
 	{ "name": "rockmountain", "level": 2, "base": 3580,
+	  "terrain": "mountain",
 	  "alt": { "min": 500 },
 	  "temp": { "min": -5.0 },
 	  "soil": { "min": 0.5, "max": 2.5 },
@@ -88,6 +99,7 @@
 	  "vigor": 64
 	},
 	{ "name": "snowmountain", "level": 2, "base": 4348,
+	  "terrain": "mountain",
 	  "alt": { "min": 500 },
 	  "temp": { "max": 7.5 },
 	  "slope": { "min": 0.03 },
@@ -95,6 +107,7 @@
 	},
 
 	{ "name": "peak", "level": 4, "base": 26, "stamp":"2x2", "surround": 42,
+	  "terrain": "mountain",
 	  "alt": { "min": 1000 },
 	  "hydro": { "max": 0.10 },
 	  "temp": { "min": -5.0 },
@@ -102,6 +115,7 @@
 	  "vigor": 32
 	},
 	{ "name": "stonepeak", "level": 4, "base": 283, "stamp":"2x2", "surround": 299,
+	  "terrain": "mountain",
 	  "alt": { "min": 1000 },
 	  "hydro": { "max": 0.10 },
 	  "temp": { "min": -5.0 },
@@ -109,12 +123,14 @@
 	  "vigor": 32
 	},
 	{ "name": "greenpeak", "level": 4, "base": 285, "stamp":"2x2", "surround": 301,
+	  "terrain": "mountain",
 	  "alt": { "min": 1000 },
 	  "hydro": { "min": 0.10 },
 	  "temp": { "min": 10.0 },
 	  "vigor": 64
 	},
 	{ "name": "snowpeak", "level": 4, "base": 30, "stamp":"2x2", "surround": 46,
+	  "terrain": "mountain",
 	  "alt": { "min": 1000 },
 	  "temp": { "max": 7.5 },
 	  "vigor": 96
@@ -122,6 +138,7 @@
 
 
 	{ "name": "template", "level": 666, "base": 666,
+	  "terrain": "none",
 	  "alt": { "min": 0, "max": 0 },
 	  "temp": { "min": 0.0, "max": 0.0 },
 	  "hydro": { "min": 0.0, "max": 0.0 },

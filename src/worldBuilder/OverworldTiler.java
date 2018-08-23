@@ -530,9 +530,10 @@ public class OverworldTiler implements Exporter {
 	 * initialize the bucketized level map
 	 * @param land percentile to level map
 	 * @param water percentile to level map
+	 * @param slope percentile to level map
 	 * @param level to TerrainType map
 	 */
-	public void levelMap(int [] landMap, int[] waterMap, TerrainClass[] classMap) {
+	public void levelMap(int [] landMap, int[] waterMap, int[] slopeMap, TerrainClass[] classMap) {
 		double aRange = (maxHeight > minHeight) ? maxHeight - minHeight : 0.000001;
 		double dRange = (maxDepth > minDepth) ? maxDepth - minDepth : 1;
 		

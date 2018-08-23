@@ -189,9 +189,9 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			Exporter exporter = new OverworldTiler(palette.getText(), x_points, y_points);
+			OverworldTiler exporter = new OverworldTiler(palette.getText(), x_points, y_points);
 			export(exporter);
-			levelMap((RpgmExporter) exporter);
+			levelMap(exporter);
 			
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText()+".json");
@@ -220,9 +220,9 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		} else if (e.getSource() == cancel) {
 			windowClosing((WindowEvent) null);
 		} else if (e.getSource() == preview && selected) {
-			Exporter exporter = new RpgmExporter(palette.getText(), x_points, y_points);
+			OverworldTiler exporter = new OverworldTiler(palette.getText(), x_points, y_points);
 			export(exporter);
-			levelMap((RpgmExporter) exporter);
+			levelMap(exporter);
 			exporter.preview(Exporter.WhichMap.HEIGHTMAP, previewColors);
 		} else if (e.getSource() == choosePalette) {
 			FileDialog d = new FileDialog(this, "Tile Palette", FileDialog.LOAD);
@@ -243,7 +243,8 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	 * 
 	 * @param exporter
 	 */
-	void levelMap(RpgmExporter exporter) {
+	void levelMap(OverworldTiler exporter) {
+		// initialize altitude percentile to terrain class map
 		int landLevels[] = new int[100];
 		int low = altitudes.getValue();
 		int high = altitudes.getUpperValue();
@@ -255,6 +256,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 			else
 				landLevels[i] = HILLS;
 		
+		// initialize depth percentile to terrain class map
 		int waterLevels[] = new int[100];
 		low = depths.getValue();
 		high = depths.getUpperValue();
@@ -266,6 +268,19 @@ public class OverworldExport extends ExportBase implements ActionListener {
 			else
 				waterLevels[i] = SHALLOW;
 		
-		exporter.levelMap(landLevels, waterLevels, typeMap);
+		// initialize slope percentile to terrain class map
+		int slopeLevels[] = new int[100];
+		low = slopes.getValue();
+		high = slopes.getUpperValue();
+		for(int i = 0; i < 100; i++)
+			if (i < low)
+				slopeLevels[i] = LOWLANDS;
+			else if (i >= high)
+				slopeLevels[i] = MOUNTAINS;
+			else
+				slopeLevels[i] = HILLS;
+		
+		// the level to terrain class map is hard-coded
+		exporter.levelMap(landLevels, waterLevels, slopeLevels, typeMap);
 	}
 }

@@ -76,15 +76,15 @@ public class TileRule {
 		if (height > 1 || width > 1)
 			System.out.print(", stamp=" + width + "x" + height);
 		System.out.println("");
-		System.out.println(prefix + "      " + "terrain:" + TerrainType.terrainType(terrain));
-		System.out.println(prefix + "      " + "alt:    " + minAltitude + "-" + maxAltitude);
-		System.out.println(prefix + "      " + "depth:  " + (int) minDepth + "-" + (int) maxDepth);
-		System.out.println(prefix + "      " + "hydro:  " + String.format("%.1f", minHydro) + "-" + String.format("%.1f", maxHydro));
-		System.out.println(prefix + "      " + "temp:   " + minTemp + "-" + maxTemp);
-		System.out.println(prefix + "      " + "soil:   " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
-		System.out.println(prefix + "      " + "slope:  " + String.format("%.1f", minSlope) + "-" + String.format("%.1f", maxSlope));
-		System.out.println(prefix + "      " + "face:   " + (int) minFace + "-" + (int) maxFace);
-		System.out.println(prefix + "      " + "vigor:  " + vigor);
+		System.out.println(prefix + "      " + "terrain: " + TerrainType.terrainType(terrain));
+		System.out.println(prefix + "      " + "alt:     " + minAltitude + "-" + maxAltitude);
+		System.out.println(prefix + "      " + "depth:   " + (int) minDepth + "-" + (int) maxDepth);
+		System.out.println(prefix + "      " + "hydro:   " + String.format("%.1f", minHydro) + "-" + String.format("%.1f", maxHydro));
+		System.out.println(prefix + "      " + "temp:    " + minTemp + "-" + maxTemp);
+		System.out.println(prefix + "      " + "soil:    " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
+		System.out.println(prefix + "      " + "slope:   " + String.format("%.1f", minSlope) + "-" + String.format("%.1f", maxSlope));
+		System.out.println(prefix + "      " + "face:    " + (int) minFace + "-" + (int) maxFace);
+		System.out.println(prefix + "      " + "vigor:   " + vigor);
 	}
 	
 	/**

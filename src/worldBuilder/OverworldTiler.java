@@ -411,7 +411,7 @@ public class OverworldTiler implements Exporter {
 	 * compass orientation of face
 	 * @return
 	 */
-	/**
+	/**Notes
 	 * compass orientation of face
 	 */
 	public double direction(int row, int col) {
@@ -534,20 +534,46 @@ public class OverworldTiler implements Exporter {
 	 * @param level to TerrainType map
 	 */
 	public void levelMap(int [] landMap, int[] waterMap, int[] slopeMap, TerrainClass[] classMap) {
+
+		// ascertain the slope at every point
+		double slopes[][] = new double[y_points][x_points];
+		double minSlope = 666;
+		double maxSlope = 0;
+		for(int i = 0; i < y_points; i++)
+			for(int j = 0; j < x_points; j++) {
+				slopes[i][j] = slope(i,j);
+				double m = (slopes[i][j] >= 0) ? slopes[i][j] : -slopes[i][j];
+				if (m < minSlope)
+					minSlope = m;
+				if (m > maxSlope)
+					maxSlope = m;
+			}
+		
+		// ascertain the range of altitudes, depths, and slopes
 		double aRange = (maxHeight > minHeight) ? maxHeight - minHeight : 0.000001;
 		double dRange = (maxDepth > minDepth) ? maxDepth - minDepth : 1;
+		double mRange = (maxSlope > minSlope) ? maxSlope - minSlope : 1;
 		
+		// use the supplied maps to characterize each tile in the grid
 		levels = new int[y_points][x_points];
 		for(int i = 0; i < y_points; i++)
 			for(int j = 0; j < x_points; j++) {
-				if (hydration[i][j] < 0) {
+				if (hydration[i][j] < 0) {	// under water
 					double h = -hydration[i][j];
 					double pctile = 99 * (h - minDepth) / dRange;
 					levels[i][j] = waterMap[(int) pctile];
-				} else {
+					continue;
+				} else {	// land form (based on height and slope)
 					double a = heights[i][j];
 					double pctile = 99 * (a - minHeight) / aRange;
-					levels[i][j] = landMap[(int) pctile];
+					int aType = landMap[(int) pctile];
+					
+					double m = slopes[i][j];
+					pctile = 99 * (m - minSlope) / mRange;
+					int mType = slopeMap[(int) pctile];
+					
+					// choose the least mountainous of the two land forms
+					levels[i][j] = (mType < aType) ? mType : aType;
 				}
 			}
 	}

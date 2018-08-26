@@ -5,42 +5,45 @@ public class TerrainType {
 	/**
 	 * types of terrain known to the tile exporting engines
 	 */
-	public enum TerrainClass {
-		NONE, DEEP_WATER, SHALLOW_WATER, PASSABLE_WATER,
-		GROUND, PIT, HILL, MOUNTAIN
+	public static final int NONE = 0;
+	public static final int DEEP_WATER = 1;
+	public static final int SHALLOW_WATER = 2;
+	public static final int PASSABLE_WATER = 3;
+	public static final int PIT = 4;
+	public static final int GROUND = 5;
+	public static final int HILL = 6;
+	public static final int MOUNTAIN = 7;
+	public static final int LAND = 8;
+	public static final int LOW = 9;
+	public static final int HIGH = 10;
+	
+	private static final String typeNames[] = {
+			"NONE", 
+			"deep", "water", "fordable", 
+			"pit", "ground", "hill", "mountain", 
+			"land", "lowlands", "highlands"
 	};
-	
-	public TerrainClass type;
-	
-	public TerrainType(TerrainClass tClass) {
-		type = tClass;
-	}
 	
 	/**
 	 * @return string describing this Terrain
 	 */
-	public static String terrainType(TerrainClass type) {
-		switch(type) {
-		case DEEP_WATER:
-			return "deep";
-		case SHALLOW_WATER:
-			return "water";
-		case PASSABLE_WATER:
-			return "fordable";
-		case GROUND:
-			return "ground";
-		case PIT:
-			return "pit";
-		case HILL:
-			return "hill";
-		case MOUNTAIN:
-			return "mountain";
-		default:
-			return "NONE";
-		}
+	public static String terrainType(int type) {
+		if (type > 0 && type < typeNames.length)
+			return typeNames[type];
+		return "NONE";
 	}
 	
-	public boolean isWater() {
+	/**
+	 * @return terrainType associated with namejk
+	 */
+	public static int terrainType(String name) {
+		for(int i = 0; i < typeNames.length; i++)
+			if (name.equals(typeNames[i]))
+					return(i);
+		return NONE;
+	}
+	
+	public static boolean isWater(int type) {
 		switch(type) {
 		case DEEP_WATER:
 		case SHALLOW_WATER:
@@ -52,7 +55,7 @@ public class TerrainType {
 		}
 	}
 	
-	public boolean isLowLand() {
+	public static boolean isLowLand(int type) {
 		switch(type) {
 		case GROUND:
 		case PIT:
@@ -63,7 +66,7 @@ public class TerrainType {
 		}
 	}
 	
-	public boolean isHighLand() {
+	public static boolean isHighLand(int type) {
 		switch(type) {
 		case HILL:
 		case MOUNTAIN:

@@ -16,8 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
-import worldBuilder.TerrainType.TerrainClass;
-
 public class OutsideExport extends ExportBase implements ActionListener {
 	
 	private static final String format = "Outside";
@@ -28,7 +26,7 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	private JButton choosePalette;	// select palette file
 	
 	private Color colorMap[];		// level to preview color map
-	private TerrainClass[] levelMap;
+	private int[] levelMap;
 	
 	// (hard coded) Outside levels
 	private static final int DEEP = 0;
@@ -238,10 +236,10 @@ public class OutsideExport extends ExportBase implements ActionListener {
 		colorMap[SHALLOW] = SHALLOW_color;
 		colorMap[PASSABLE] = PASSABLE_color;
 		
-		levelMap = new TerrainClass[3 + totLevels];
-		levelMap[DEEP] = TerrainClass.DEEP_WATER;
-		levelMap[SHALLOW] = TerrainClass.SHALLOW_WATER;
-		levelMap[PASSABLE] = TerrainClass.PASSABLE_WATER;
+		levelMap = new int[3 + totLevels];
+		levelMap[DEEP] = TerrainType.DEEP_WATER;
+		levelMap[SHALLOW] = TerrainType.SHALLOW_WATER;
+		levelMap[PASSABLE] = TerrainType.PASSABLE_WATER;
 		
 		// note the land classifications (by level)
 		low = altitudes.getValue();
@@ -254,17 +252,17 @@ public class OutsideExport extends ExportBase implements ActionListener {
 		
 		int shade = MAX_PIT_shade;
 		for(int i = PIT; i < groundLevel; i++) {
-			levelMap[i] = TerrainClass.PIT;
+			levelMap[i] = TerrainType.PIT;
 			colorMap[i] = new Color(shade, shade, shade);
 			shade += SHADE_RANGE / lowLevels;
 		}
 		
 		colorMap[groundLevel] = GROUND_color;
-		levelMap[groundLevel] = TerrainClass.GROUND;
+		levelMap[groundLevel] = TerrainType.GROUND;
 		
 		shade = MIN_MOUND_shade;
 		for(int i = groundLevel + 1; i < totLevels; i++) {
-			levelMap[i] = TerrainClass.MOUNTAIN;
+			levelMap[i] = TerrainType.MOUNTAIN;
 			colorMap[i] = new Color(shade, shade, shade);
 			shade += SHADE_RANGE / highLevels;
 		}

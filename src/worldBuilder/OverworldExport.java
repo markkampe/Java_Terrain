@@ -15,8 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import worldBuilder.TerrainType.TerrainClass;
-
 public class OverworldExport extends ExportBase implements ActionListener {
 	
 	private static final String format = "Overworld";
@@ -26,32 +24,24 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	private JTextField palette;		// tile set description file
 	private JButton choosePalette;	// select palette file
 	
-	// (hard coded) overland levels
-	private static final int DEEP = 0;
-	private static final int SHALLOW = 1;
-	private static final int PASSABLE = 2;
-	private static final int LOWLANDS = 3;
-	private static final int HILLS = 4;
-	private static final int MOUNTAINS = 5;
-	
-	// level to color mapping for previews
+	// level to color mapping for land form previews
 	Color previewColors[] = {
-			new Color(0,0,128),		// 0: DEEP water
-			Color.BLUE,				// 1: SHALLOW water
-			Color.CYAN,				// 2: PASSABLE wetland/creek
-			Color.GREEN,			// 3: LOWLANDS
-			Color.GRAY,				// 4: HILLS
-			Color.LIGHT_GRAY		// 5: MOUNTAINS
+			Color.BLACK,			// NONE
+			new Color(0,0,128),		// DEEP water
+			Color.BLUE,				// SHALLOW water
+			Color.CYAN,				// PASSABLE wetland/creek
+			Color.DARK_GRAY,		// PIT
+			Color.GREEN,			// LOWLANDS
+			Color.GRAY,				// HILLS
+			Color.LIGHT_GRAY		// MOUNTAINS
 	};
 	
-	// level to terrain type mapping for export
-	TerrainClass typeMap[] = {
-			TerrainClass.DEEP_WATER,
-			TerrainClass.SHALLOW_WATER,
-			TerrainClass.PASSABLE_WATER,
-			TerrainClass.GROUND,
-			TerrainClass.HILL,
-			TerrainClass.MOUNTAIN	
+	// level to terrain type map for Overworld is static
+	private int levelToTerrain[] = {
+			TerrainType.NONE,
+			TerrainType.DEEP_WATER, TerrainType.SHALLOW_WATER, TerrainType.PASSABLE_WATER,
+			TerrainType.PIT,
+			TerrainType.GROUND, TerrainType.HILL, TerrainType.MOUNTAIN			
 	};
 	
 	private static final long serialVersionUID = 1L;
@@ -250,11 +240,11 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		int high = altitudes.getUpperValue();
 		for(int i = 0; i < 100; i++)
 			if (i < low)
-				landLevels[i] = LOWLANDS;
+				landLevels[i] = TerrainType.GROUND;
 			else if (i >= high)
-				landLevels[i] = MOUNTAINS;
+				landLevels[i] = TerrainType.MOUNTAIN;
 			else
-				landLevels[i] = HILLS;
+				landLevels[i] = TerrainType.HILL;
 		
 		// initialize depth percentile to terrain class map
 		int waterLevels[] = new int[100];
@@ -262,11 +252,11 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		high = depths.getUpperValue();
 		for(int i = 0; i < 100; i++)
 			if (i < low)
-				waterLevels[i] = PASSABLE;
+				waterLevels[i] = TerrainType.PASSABLE_WATER;
 			else if (i >= high)
-				waterLevels[i] = DEEP;
+				waterLevels[i] = TerrainType.DEEP_WATER;
 			else
-				waterLevels[i] = SHALLOW;
+				waterLevels[i] = TerrainType.SHALLOW_WATER;
 		
 		// initialize slope percentile to terrain class map
 		int slopeLevels[] = new int[100];
@@ -274,13 +264,13 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		high = slopes.getUpperValue();
 		for(int i = 0; i < 100; i++)
 			if (i < low)
-				slopeLevels[i] = LOWLANDS;
+				slopeLevels[i] = TerrainType.GROUND;
 			else if (i >= high)
-				slopeLevels[i] = MOUNTAINS;
+				slopeLevels[i] = TerrainType.MOUNTAIN;
 			else
-				slopeLevels[i] = HILLS;
+				slopeLevels[i] = TerrainType.HILL;
 		
 		// the level to terrain class map is hard-coded
-		exporter.levelMap(landLevels, waterLevels, slopeLevels, typeMap);
+		exporter.levelMap(landLevels, waterLevels, slopeLevels, levelToTerrain);
 	}
 }

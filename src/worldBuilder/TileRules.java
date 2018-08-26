@@ -54,7 +54,7 @@ public class TileRules {
 		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
 		double fMin = NO_VALUE, fMax = NO_VALUE;	// facing direction
 		
-		TerrainType.TerrainClass terrain = TerrainType.TerrainClass.NONE;
+		int terrain = TerrainType.NONE;
 		int surround = NO_VALUE;					// surrounding tile
 		int vigor = NO_VALUE;
 		int height = 1, width = 1;					// stamp size
@@ -131,7 +131,7 @@ public class TileRules {
 					fMin = NO_VALUE; fMax = NO_VALUE;
 					sMin = NO_VALUE; sMax = NO_VALUE;
 					vigor = NO_VALUE;
-					terrain = TerrainType.TerrainClass.NONE;
+					terrain = TerrainType.NONE;
 					name = "";
 					
 				} else
@@ -165,40 +165,7 @@ public class TileRules {
 					height = Integer.parseInt(thisValue.substring(x+1));
 					break;
 				case "terrain":
-					switch (parser.getString()) {
-					case "deep":
-						terrain = TerrainType.TerrainClass.DEEP_WATER;
-						thisKey = "";
-						break;
-					case "water":
-						terrain = TerrainType.TerrainClass.SHALLOW_WATER;
-						thisKey = "";
-						break;
-					case "fordable":
-						terrain = TerrainType.TerrainClass.PASSABLE_WATER;
-						thisKey = "";
-						break;
-					case "pit":
-						terrain = TerrainType.TerrainClass.PIT;
-						thisKey = "";
-						break;
-					case "ground":
-						terrain = TerrainType.TerrainClass.GROUND;
-						thisKey = "";
-						break;
-					case "hill":
-						terrain = TerrainType.TerrainClass.HILL;
-						thisKey = "";
-						break;
-					case "mountain":
-						terrain = TerrainType.TerrainClass.MOUNTAIN;
-						thisKey = "";
-						break;
-					case "none":
-						terrain = TerrainType.TerrainClass.NONE;
-						thisKey = "";
-						break;
-					}
+					terrain = TerrainType.terrainType(parser.getString());
 					break;
 				}
 				thisKey = "";

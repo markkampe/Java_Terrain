@@ -15,7 +15,7 @@ public class TileRule {
 	public int height;		// stamp height
 	public int width;		// stamp width
 	
-	public TerrainType.TerrainClass terrain;
+	public int terrain;
 	public int minAltitude;
 	public int maxAltitude;
 	public double minDepth;
@@ -47,7 +47,7 @@ public class TileRule {
 		this.altTile = 0;
 		
 		// default values will meet any terrestrial conditions
-		terrain = TerrainType.TerrainClass.NONE;
+		terrain = TerrainType.NONE;
 		minAltitude = -parms.alt_max;
 		maxAltitude = parms.alt_max;
 		minDepth = 0;
@@ -103,6 +103,7 @@ public class TileRule {
 	 * 		8: four characteristics out of sweet zone -> 0
 	 * 		16 is probably a good neutral vigor
 	 * 
+	 * @param terrain	TerrainClass
 	 * @param alt		altitude(M)
 	 * @param hydro		hydration(%)
 	 * @param winter	low temp(degC)
@@ -113,8 +114,50 @@ public class TileRule {
 	 * 
 	 * @return			integer bid
 	 */
-	int bid(double alt, double hydro, double winter, double summer, double soil,
-			double slope, double direction) {
+	int bid(int terrain, double alt, double hydro, double winter, double summer, 
+			double soil, double slope, double direction) {
+	
+		// see if the terrain type precludes this tile-bit
+		switch(this.terrain) {
+			case TerrainType.LAND:
+				if (TerrainType.isWater(terrain)) {
+					justification = "land terrain mismatch";
+					return 0;
+				}
+				break;
+				
+			case TerrainType.LOW:
+				if (!TerrainType.isLowLand(terrain)) {
+					justification = "low terrain mismatch";
+					return 0;
+				}
+				break;
+					
+			case TerrainType.HIGH:
+				if (!TerrainType.isHighLand(terrain)) {
+					justification = "high terrain mismatch";
+					return 0;
+				}
+				break;
+				
+			// specific terrain types must match
+			case TerrainType.DEEP_WATER:
+			case TerrainType.SHALLOW_WATER:
+			case TerrainType.PASSABLE_WATER:				
+			case TerrainType.PIT:
+			case TerrainType.GROUND:
+			case TerrainType.HILL:
+			case TerrainType.MOUNTAIN:
+				if (this.terrain != terrain) {
+					justification = "terrain mismatch";
+					return 0;
+				}
+				break;
+				
+			default:
+				break;
+		}
+		
 		// see if any parameters preclude this tile-bid
 		if (alt < minAltitude || alt > maxAltitude) {	
 			justification = "alt out of range";
@@ -128,7 +171,7 @@ public class TileRule {
 			justification = "hydro out of range";
 			return 0;
 		}
-		
+	/*	
 		if (hydro > 0 && minDepth > 0) {	
 			justification = "not u/w";
 			return 0;
@@ -137,6 +180,7 @@ public class TileRule {
 			justification = "depth out of range";
 			return(0);
 		}
+		*/
 		if (soil < minSoil || soil > maxSoil) {	
 				justification = "soil out of range";
 			return 0;

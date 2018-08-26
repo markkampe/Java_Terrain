@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.ListIterator;
 import java.util.Random;
 
-import worldBuilder.TerrainType.TerrainClass;
-
 /**
  * exporter that creates an RPGMaker map
  */
@@ -73,49 +71,67 @@ public class OverworldTiler implements Exporter {
 		
 			// produce the actual map of tiles
 			startList(output, "data", "[");
+			output.write("\n");
 			
 			// level 1 objects on the ground
 			int l[][] = new int[y_points][x_points];
 			tiles(l, 1);
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++) {
 					int adjustment = auto_tile_offset(l, i, j);
-					output.write(String.format("%d,", l[i][j] + adjustment));
+					output.write(String.format("%4d,", l[i][j] + adjustment));
 				}
+				output.write("\n");
+			}
+			output.write("\n");
 			
 			// level 2 objects on the ground drawn over level 1
 			tiles(l, 2);
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++) {
 					int adjustment = l[i][j] > 0 ? auto_tile_offset(l, i, j) : 0;
-					output.write(String.format("%d,", l[i][j] + adjustment));	
+					output.write(String.format("%4d,", l[i][j] + adjustment));	
 				}
+				output.write("\n");
+			}
+			output.write("\n");
 			
 			// level 3 - foreground mountains/trees/structures (B/C object sets)
 			stamps(l, 3);
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++)
-					output.write(String.format("%d,", l[i][j]));
+					output.write(String.format("%4d,", l[i][j]));
+				output.write("\n");
+			}
+			output.write("\n");
 			
 			// level 4 - background mountains/trees/structures (B/C object sets)
 			stamps(l, 4);
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++)
-					output.write(String.format("%d,", l[i][j]));
+					output.write(String.format("%4d,", l[i][j]));
+				output.write("\n");
+			}
+			output.write("\n");
 			
 			// level 5 - shadows ... come later (w/walls)
 			//	UL = 1, UR = 2, BL = 4, BR = 8. 
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++)
-					output.write("0,");
+					output.write(String.format("%4d,",0));
+				output.write("\n");
+			}
+			output.write("\n");
 			
 			// level 6 - encounters ... to be created later
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++) {
-					output.write("0");
+					output.write("   0");
 					if (i < y_points - 1 || j < x_points - 1)
 						output.write(",");
 				}
+				output.write("\n");
+			}
 			output.write("],\n");
 			
 			// TODO create transfer events at sub-map boundaries
@@ -127,18 +143,25 @@ public class OverworldTiler implements Exporter {
 			// terminate the file
 			output.write("}\n");
 			output.close();
-			return true;
 		} catch (IOException e) {
 			System.err.println("ERROR - unable to write output file: " + filename);
 			return false;
 		}
 		
+		if (parms.debug_level > 0) {
+			System.out.println("Exported(RPGMaker Overworld) "  + x_points + "x" + y_points + " " + tile_size
+					+ "M tiles from <" + String.format("%9.6f", lat) + "," + String.format("%9.6f", lon)
+					+ ">");
+			System.out.println("                             to file " + filename);
+		}
+
 		// TODO update MapInfo.json
 		//	find it in the same directory as the map
 		//	read it in
 		//	look for an entry for the current map
 		//	update it (w/location), adding it as necessary
 		//	rewrite
+		return true;
 	}
 	
 	/**
@@ -180,6 +203,7 @@ public class OverworldTiler implements Exporter {
 				double slope = slope(i,j);
 				double face = direction(i, j);
 				double soilType = soil[i][j];
+				int terrain = levels[i][j];
 				if (parms.debug_level >= EXPORT_DEBUG)
 					System.out.println("l" + level + "[" + i + "," + j + "]: " +
 						" alt=" + alt +
@@ -192,7 +216,7 @@ public class OverworldTiler implements Exporter {
 				int bids = 0;
 				for(int b = 0; b < numRules; b++) {
 					TileRule r = bidders[b];
-					int bid = r.bid(alt, hydro, Twinter - (int) lapse, Tsummer - (int) lapse, 
+					int bid = r.bid(terrain, alt, hydro, Twinter - (int) lapse, Tsummer - (int) lapse, 
 							soilType, slope, face);
 					if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
@@ -210,7 +234,8 @@ public class OverworldTiler implements Exporter {
 				} else if (level == 1) {
 					// there seems to be a hole in the rules
 					System.err.println("NOBID l" + level + "[" + i + "," + j + "]: " +
-							" alt=" + alt +
+							" ter=" + TerrainType.terrainType(terrain) +
+							", alt=" + alt +
 							String.format(", hydro=%.2f", hydro) + 
 							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
 							String.format(", soil=%.1f",  soilType) + 
@@ -278,6 +303,7 @@ public class OverworldTiler implements Exporter {
 							double slope = slope(i+dy,j+dx);
 							double face = direction(i+dy, j+dx);
 							double soilType = soil[i+dy][j+dx];
+							int terrain = levels[i][j];
 							if (parms.debug_level >= EXPORT_DEBUG && b == 0)
 								System.out.println("l" + level + "[" + (i+dy) + "," + (j+dx) + "]: " +
 									" alt=" + alt + ", hyd=" + 
@@ -286,7 +312,7 @@ public class OverworldTiler implements Exporter {
 									String.format(", soil=%.1f",  soilType) + 
 									String.format(", slope=%03.0f", face));
 							
-							int thisBid = r.bid(alt, hydro , Twinter - lapse, Tsummer - lapse, soilType, slope, face);
+							int thisBid = r.bid(terrain, alt, hydro , Twinter - lapse, Tsummer - lapse, soilType, slope, face);
 							if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
 								System.out.println(r.ruleName + "[" + (i+dy) + "," + (j+dx) + "] (" + 
 										r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");
@@ -533,7 +559,7 @@ public class OverworldTiler implements Exporter {
 	 * @param slope percentile to level map
 	 * @param level to TerrainType map
 	 */
-	public void levelMap(int [] landMap, int[] waterMap, int[] slopeMap, TerrainClass[] classMap) {
+	public void levelMap(int [] landMap, int[] waterMap, int[] slopeMap, int[] terrainMap) {
 
 		// ascertain the slope at every point
 		double slopes[][] = new double[y_points][x_points];
@@ -561,16 +587,18 @@ public class OverworldTiler implements Exporter {
 				if (hydration[i][j] < 0) {	// under water
 					double h = -hydration[i][j];
 					double pctile = 99 * (h - minDepth) / dRange;
-					levels[i][j] = waterMap[(int) pctile];
+					if ((int) pctile > 99)	// FIX debug code
+						System.out.println("h=" + h + " - mindepth=" + minDepth + " / dRange=" + dRange);
+					levels[i][j] = terrainMap[waterMap[(int) pctile]];
 					continue;
 				} else {	// land form (based on height and slope)
 					double a = heights[i][j];
 					double pctile = 99 * (a - minHeight) / aRange;
-					int aType = landMap[(int) pctile];
+					int aType = terrainMap[landMap[(int) pctile]];
 					
 					double m = slopes[i][j];
 					pctile = 99 * (m - minSlope) / mRange;
-					int mType = slopeMap[(int) pctile];
+					int mType = terrainMap[slopeMap[(int) pctile]];
 					
 					// choose the least mountainous of the two land forms
 					levels[i][j] = (mType < aType) ? mType : aType;
@@ -619,11 +647,6 @@ public class OverworldTiler implements Exporter {
 	 * standard map prolog/epilog
 	 * 
 	 * @param outpackage worldBuilder;
-
-public class OverworldTiler {
-
-}
-
 	 * @throws IOException
 	 */
 	private void boilerPlate(FileWriter out) throws IOException {

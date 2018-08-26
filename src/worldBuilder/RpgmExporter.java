@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.ListIterator;
 import java.util.Random;
 
-import worldBuilder.TerrainType.TerrainClass;
-
 /**
  * exporter that creates an RPGMaker map
  */
@@ -73,49 +71,67 @@ public class RpgmExporter implements Exporter {
 		
 			// produce the actual map of tiles
 			startList(output, "data", "[");
+			output.write("\n");
 			
 			// level 1 objects on the ground
 			int l[][] = new int[y_points][x_points];
 			tiles(l, 1);
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++) {
 					int adjustment = auto_tile_offset(l, i, j);
-					output.write(String.format("%d,", l[i][j] + adjustment));
+					output.write(String.format("%4d,", l[i][j] + adjustment));
 				}
+				output.write("\n");
+			}
+			output.write("\n");
 			
 			// level 2 objects on the ground drawn over level 1
 			tiles(l, 2);
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++) {
 					int adjustment = l[i][j] > 0 ? auto_tile_offset(l, i, j) : 0;
-					output.write(String.format("%d,", l[i][j] + adjustment));	
+					output.write(String.format("%4d,", l[i][j] + adjustment));	
 				}
+				output.write("\n");
+			}
+			output.write("\n");
 			
 			// level 3 - foreground mountains/trees/structures (B/C object sets)
 			stamps(l, 3);
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++)
-					output.write(String.format("%d,", l[i][j]));
+					output.write(String.format("%4d,", l[i][j]));
+				output.write("\n");
+			}
+			output.write("\n");
 			
 			// level 4 - background mountains/trees/structures (B/C object sets)
 			stamps(l, 4);
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++)
-					output.write(String.format("%d,", l[i][j]));
+					output.write(String.format("%4d,", l[i][j]));
+				output.write("\n");
+			}
+			output.write("\n");
 			
 			// level 5 - shadows ... come later (w/walls)
 			//	UL = 1, UR = 2, BL = 4, BR = 8. 
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++)
-					output.write("0,");
+					output.write(String.format("%4d,",0));
+				output.write("\n");
+			}
+			output.write("\n");
 			
 			// level 6 - encounters ... to be created later
-			for(int i = 0; i < y_points; i++)
+			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++) {
-					output.write("0");
+					output.write("   0");
 					if (i < y_points - 1 || j < x_points - 1)
 						output.write(",");
 				}
+				output.write("\n");
+			}
 			output.write("],\n");
 			
 			// TODO create transfer events at sub-map boundaries
@@ -127,18 +143,26 @@ public class RpgmExporter implements Exporter {
 			// terminate the file
 			output.write("}\n");
 			output.close();
-			return true;
 		} catch (IOException e) {
 			System.err.println("ERROR - unable to write output file: " + filename);
 			return false;
 		}
 		
+		if (parms.debug_level > 0) {
+			System.out.println("Exported(RPGMaker Outside) "  + x_points + "x" + y_points + " " + tile_size
+					+ "M tiles from <" + String.format("%9.6f", lat) + "," + String.format("%9.6f", lon)
+					+ ">");
+			System.out.println("                             levels 1-4 only");
+			System.out.println("                             to file " + filename);
+		}
+
 		// TODO update MapInfo.json
 		//	find it in the same directory as the map
 		//	read it in
 		//	look for an entry for the current map
 		//	update it (w/location), adding it as necessary
 		//	rewrite
+		return true;
 	}
 	
 	/**
@@ -168,6 +192,7 @@ public class RpgmExporter implements Exporter {
 				bidders[numRules++] = r;
 		}
 		Bidder bidder = new Bidder(numRules);
+		int FIX_ME = TerrainType.NONE;
 		
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
@@ -192,7 +217,7 @@ public class RpgmExporter implements Exporter {
 				int bids = 0;
 				for(int b = 0; b < numRules; b++) {
 					TileRule r = bidders[b];
-					int bid = r.bid(alt, hydro, Twinter - (int) lapse, Tsummer - (int) lapse, 
+					int bid = r.bid(FIX_ME, alt, hydro, Twinter - (int) lapse, Tsummer - (int) lapse, 
 							soilType, slope, face);
 					if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
@@ -244,6 +269,7 @@ public class RpgmExporter implements Exporter {
 		Bidder bidder = new Bidder(numRules);
 		
 		// now try to populate it with tiles
+		int FIX_ME = TerrainType.NONE;
 		boolean groupCorrections = false;
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
@@ -286,7 +312,7 @@ public class RpgmExporter implements Exporter {
 									String.format(", soil=%.1f",  soilType) + 
 									String.format(", slope=%03.0f", face));
 							
-							int thisBid = r.bid(alt, hydro , Twinter - lapse, Tsummer - lapse, soilType, slope, face);
+							int thisBid = r.bid(FIX_ME, alt, hydro , Twinter - lapse, Tsummer - lapse, soilType, slope, face);
 							if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
 								System.out.println(r.ruleName + "[" + (i+dy) + "," + (j+dx) + "] (" + 
 										r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");
@@ -532,7 +558,7 @@ public class RpgmExporter implements Exporter {
 	 * @param water percentile to level map
 	 * @param level to TerrainType map
 	 */
-	public void levelMap(int [] landMap, int[] waterMap, TerrainClass[] classMap) {
+	public void levelMap(int [] landMap, int[] waterMap, int[] classMap) {
 		double aRange = (maxHeight > minHeight) ? maxHeight - minHeight : 0.000001;
 		double dRange = (maxDepth > minDepth) ? maxDepth - minDepth : 1;
 		

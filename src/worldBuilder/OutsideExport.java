@@ -211,7 +211,7 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	}
 	
 	/**
-	 * The RPGmaker tilers do not deal with altitudes, but
+	 * RPGmaker tilers do not deal with altitudes, but
 	 * merely with levels.  This function creates the maps
 	 * from altitude/depth percentiles to levels.
 	 * 	1. map depth and height percentiles into levels

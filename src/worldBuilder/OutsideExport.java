@@ -160,9 +160,9 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			Exporter exporter = new RpgmExporter(palette.getText(), x_points, y_points);
+			Exporter exporter = new OutsideTiler(palette.getText(), x_points, y_points);
 			export(exporter);
-			levelMap((RpgmExporter) exporter);
+			levelMap((OutsideTiler) exporter);
 			
 			// get the output file name
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
@@ -192,9 +192,9 @@ public class OutsideExport extends ExportBase implements ActionListener {
 		} else if (e.getSource() == cancel) {
 			windowClosing((WindowEvent) null);
 		} else if (e.getSource() == preview && selected) {
-			Exporter exporter = new RpgmExporter(palette.getText(), x_points, y_points);
+			Exporter exporter = new OutsideTiler(palette.getText(), x_points, y_points);
 			export(exporter);
-			levelMap((RpgmExporter) exporter);
+			levelMap((OutsideTiler) exporter);
 			exporter.preview(Exporter.WhichMap.HEIGHTMAP, colorMap);
 		} else if (e.getSource() == choosePalette) {
 			FileDialog d = new FileDialog(this, "Tile Palette", FileDialog.LOAD);
@@ -211,14 +211,23 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	}
 	
 	/**
-	 * generate the percentile maps for land and water
+	 * The RPGmaker tilers do not deal with altitudes, but
+	 * merely with levels.  This function creates the maps
+	 * from altitude/depth percentiles to levels.
+	 * 	1. map depth and height percentiles into levels
+	 * 	2. create levelMap (from level to TerrainType)
+	 * 	3. create colorMap (from level to preview color)
 	 * 
-	 * @param exporter
+	 * @param exporter ... tiler to whom we will pass these maps
 	 */
-	void levelMap(RpgmExporter exporter) {
+	void levelMap(OutsideTiler exporter) {
 
+		// always 3 water levels, but land levels are settable
 		int totLevels = levels.getValue();
-		// note the water classifications (by percentile)
+		levelMap = new int[3 + totLevels];		// terrain types
+		colorMap = new Color[3 + totLevels];	// preview colors
+		
+		// create map from depth percentile to water level
 		int waterLevels[] = new int[100];
 		int low = depths.getValue();
 		int high = depths.getUpperValue();
@@ -230,26 +239,23 @@ public class OutsideExport extends ExportBase implements ActionListener {
 			else
 				waterLevels[i] = SHALLOW;
 		
-		// note the water classifications (by level)
-		colorMap = new Color[3 + totLevels];
+		// create map from level to terrain type and preview color
+		levelMap[DEEP] = TerrainType.DEEP_WATER;
 		colorMap[DEEP] = DEEP_color;
+		levelMap[SHALLOW] = TerrainType.SHALLOW_WATER;
 		colorMap[SHALLOW] = SHALLOW_color;
+		levelMap[PASSABLE] = TerrainType.PASSABLE_WATER;
 		colorMap[PASSABLE] = PASSABLE_color;
 		
-		levelMap = new int[3 + totLevels];
-		levelMap[DEEP] = TerrainType.DEEP_WATER;
-		levelMap[SHALLOW] = TerrainType.SHALLOW_WATER;
-		levelMap[PASSABLE] = TerrainType.PASSABLE_WATER;
-		
-		// note the land classifications (by level)
+		// figure out how many pit and hill levels there are
 		low = altitudes.getValue();
 		high = altitudes.getUpperValue();
-		int lowLevels =  (int) (((double) low) * (totLevels - 1) / 100.0);
-		if (lowLevels == 0)
-			lowLevels = 1;
-		int highLevels = totLevels - (1 + lowLevels);
+		//		TODO implement Outside PIT level tiling
+		int lowLevels = 0;	// (int) (((double) low) * (totLevels - 1) / 100.0);
 		int groundLevel = PIT + lowLevels;
+		int highLevels = totLevels - (1 + lowLevels);
 		
+		// mapping from PIT levels to TerrainType and color
 		int shade = MAX_PIT_shade;
 		for(int i = PIT; i < groundLevel; i++) {
 			levelMap[i] = TerrainType.PIT;
@@ -257,9 +263,11 @@ public class OutsideExport extends ExportBase implements ActionListener {
 			shade += SHADE_RANGE / lowLevels;
 		}
 		
-		colorMap[groundLevel] = GROUND_color;
+		// mapping from ground level to TerrainType and color
 		levelMap[groundLevel] = TerrainType.GROUND;
+		colorMap[groundLevel] = GROUND_color;
 		
+		// mapping from higher altitudes to TerrainType and color
 		shade = MIN_MOUND_shade;
 		for(int i = groundLevel + 1; i < totLevels; i++) {
 			levelMap[i] = TerrainType.MOUNTAIN;
@@ -267,7 +275,7 @@ public class OutsideExport extends ExportBase implements ActionListener {
 			shade += SHADE_RANGE / highLevels;
 		}
 		
-		// figure out class and level for each altitude percentile
+		// mapping from altitude percentiles to levels
 		int landLevels[] = new int[100];
 		for(int i = 0; i < 100; i++)
 			if (i < low)
@@ -276,6 +284,8 @@ public class OutsideExport extends ExportBase implements ActionListener {
 				landLevels[i] = groundLevel + 1 + (((i - high) * highLevels)/(100 - high));
 			else
 				landLevels[i] = groundLevel;
+		
+		// pass these maps to the tiler
 		exporter.levelMap(landLevels, waterLevels, levelMap);
 	}
 }

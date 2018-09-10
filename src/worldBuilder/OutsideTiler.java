@@ -9,7 +9,7 @@ import java.util.Random;
 /**
  * exporter that creates an RPGMaker map
  */
-public class RpgmExporter implements Exporter {
+public class OutsideTiler implements Exporter {
 
 	private static final int MAXRULES = 20;
 	private static final int SPRITES_PER_ROW = 8;
@@ -49,7 +49,7 @@ public class RpgmExporter implements Exporter {
 	 * @param map width (cells)
 	 * @param map height (cells)
 	 */
-	public RpgmExporter(String tileRules, int width, int height) {
+	public OutsideTiler(String tileRules, int width, int height) {
 		this.parms = Parameters.getInstance();
 		this.x_points = width;
 		this.y_points = height;

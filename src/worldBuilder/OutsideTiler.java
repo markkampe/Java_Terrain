@@ -116,7 +116,7 @@ public class OutsideTiler implements Exporter {
 			
 			// level 5 - shadows ... come later (w/walls)
 			//	UL = 1, UR = 2, BL = 4, BR = 8. 
-			// FIX add shadows
+			// FIX add shadows to east UL+BL sides of walls
 			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++)
 					output.write(String.format("%4d,",0));

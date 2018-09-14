@@ -36,6 +36,7 @@ public class OutsideTiler implements Exporter {
 	private double[][] hydration; // per point water depth (meters)
 	private double[][] soil;	// per point soil type
 	private int[][] levels;		// per point terrain level
+	private int[] typeMap;		// map terrain level to type
 	private double minHeight;	// lowest altitude in export
 	private double maxHeight;	// highest altitude in export
 	private double minDepth;	// shallowest water in export
@@ -114,12 +115,20 @@ public class OutsideTiler implements Exporter {
 			}
 			output.write("\n");
 			
-			// level 5 - shadows ... come later (w/walls)
-			//	UL = 1, UR = 2, BL = 4, BR = 8. 
-			// FIX add shadows to east UL+BL sides of walls
+			// level 5 - shadows
+			final int LEFT_SHADOW = 1 + 4;	// UL=1, UR=2, BL=4, BR=8
+			final int NO_SHADOW = 0;
 			for(int i = 0; i < y_points; i++) {
-				for(int j = 0; j < x_points; j++)
-					output.write(String.format("%4d,",0));
+				for(int j = 0; j < x_points; j++) {
+					// walls cast shadows, down to the right, not on water or other walls
+					int shadow = NO_SHADOW;
+					if (j > 0 && !TerrainType.isWater(typeMap[levels[i][j]]))
+						if (levels[i][j-1] > levels[i][j])
+							if (i == 0 || levels[i-1][j] <= levels[i][j])
+								shadow = LEFT_SHADOW;
+					
+					output.write(String.format("%4d,", shadow));
+				}
 				output.write("\n");
 			}
 			output.write("\n");
@@ -153,7 +162,7 @@ public class OutsideTiler implements Exporter {
 			System.out.println("Exported(RPGMaker Outside) "  + x_points + "x" + y_points + " " + tile_size
 					+ "M tiles from <" + String.format("%9.6f", lat) + "," + String.format("%9.6f", lon)
 					+ ">");
-			System.out.println("                             levels 1-4 only");
+			System.out.println("                             levels 1-5 only");
 			System.out.println("                             to file " + filename);
 		}
 
@@ -193,7 +202,6 @@ public class OutsideTiler implements Exporter {
 				bidders[numRules++] = r;
 		}
 		Bidder bidder = new Bidder(numRules);
-		int FIX_ME = TerrainType.NONE;
 		
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
@@ -206,19 +214,27 @@ public class OutsideTiler implements Exporter {
 				double slope = slope(i,j);
 				double face = direction(i, j);
 				double soilType = soil[i][j];
+				
+				// Outside: south slopes are a different terrain type
+				int terrain = typeMap[levels[i][j]];
+				if (i > 0 && !TerrainType.isWater(terrain) && levels[i-1][j] > levels[i][j])
+					terrain = TerrainType.SLOPE;
+				
 				if (parms.debug_level >= EXPORT_DEBUG)
 					System.out.println("l" + level + "[" + i + "," + j + "]: " +
-						" alt=" + alt +
+						" terrain=" + TerrainType.terrainType(terrain) +
+						", alt=" + alt +
 						String.format(", hydro=%.2f", hydro) + 
 						String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
 						String.format(", soil=%.1f",  soilType) + 
 						String.format(", slope=%.3f", slope));
+				
 				// collect the bids from each rule
 				bidder.reset();
 				int bids = 0;
 				for(int b = 0; b < numRules; b++) {
 					TileRule r = bidders[b];
-					int bid = r.bid(FIX_ME, alt, hydro, Twinter - (int) lapse, Tsummer - (int) lapse, 
+					int bid = r.bid(terrain, alt, hydro, Twinter - (int) lapse, Tsummer - (int) lapse, 
 							soilType, slope, face);
 					if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
@@ -236,7 +252,8 @@ public class OutsideTiler implements Exporter {
 				} else if (level == 1) {
 					// there seems to be a hole in the rules
 					System.err.println("NOBID l" + level + "[" + i + "," + j + "]: " +
-							" alt=" + alt +
+							" terrain=" + TerrainType.terrainType(terrain) +
+							", alt=" + alt +
 							String.format(", hydro=%.2f", hydro) + 
 							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
 							String.format(", soil=%.1f",  soilType) + 
@@ -270,7 +287,6 @@ public class OutsideTiler implements Exporter {
 		Bidder bidder = new Bidder(numRules);
 		
 		// now try to populate it with tiles
-		int FIX_ME = TerrainType.NONE;
 		boolean groupCorrections = false;
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
@@ -305,15 +321,22 @@ public class OutsideTiler implements Exporter {
 							double slope = slope(i+dy,j+dx);
 							double face = direction(i+dy, j+dx);
 							double soilType = soil[i+dy][j+dx];
+							
+							// Outside: south slopes are a different terrain type
+							int terrain = typeMap[levels[i][j]];
+							if (i > 0 && !TerrainType.isWater(terrain) && levels[i-1][j] > levels[i][j])
+								terrain = TerrainType.SLOPE;
+							
 							if (parms.debug_level >= EXPORT_DEBUG && b == 0)
 								System.out.println("l" + level + "[" + (i+dy) + "," + (j+dx) + "]: " +
-									" alt=" + alt + ", hyd=" + 
+									" terrain=" + TerrainType.terrainType(terrain) +
+									", alt=" + alt + ", hyd=" + 
 									String.format("%.2f", hydro) + 
 									String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
 									String.format(", soil=%.1f",  soilType) + 
 									String.format(", slope=%03.0f", face));
 							
-							int thisBid = r.bid(FIX_ME, alt, hydro , Twinter - lapse, Tsummer - lapse, soilType, slope, face);
+							int thisBid = r.bid(terrain, alt, hydro , Twinter - lapse, Tsummer - lapse, soilType, slope, face);
 							if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
 								System.out.println(r.ruleName + "[" + (i+dy) + "," + (j+dx) + "] (" + 
 										r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");
@@ -576,6 +599,8 @@ public class OutsideTiler implements Exporter {
 					levels[i][j] = landMap[(int) pctile];
 				}
 			}
+		
+		typeMap = classMap;
 	}
 	
 	public void erodeMap(double[][] erode) {

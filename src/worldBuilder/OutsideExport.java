@@ -269,7 +269,7 @@ public class OutsideExport extends ExportBase implements ActionListener {
 		
 		// mapping from higher altitudes to TerrainType and color
 		shade = MIN_MOUND_shade;
-		for(int i = groundLevel + 1; i < totLevels; i++) {
+		for(int i = groundLevel + 1; i < levelMap.length; i++) {
 			levelMap[i] = TerrainType.MOUNTAIN;
 			colorMap[i] = new Color(shade, shade, shade);
 			shade += SHADE_RANGE / highLevels;

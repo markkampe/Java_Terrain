@@ -120,7 +120,7 @@ public class TileRule {
 		// see if the terrain type precludes this tile-bit
 		switch(this.terrain) {
 			case TerrainType.LAND:
-				if (TerrainType.isWater(terrain)) {
+				if (!TerrainType.isLand(terrain)) {
 					justification = "land terrain mismatch";
 					return 0;
 				}
@@ -148,6 +148,7 @@ public class TileRule {
 			case TerrainType.GROUND:
 			case TerrainType.HILL:
 			case TerrainType.MOUNTAIN:
+			case TerrainType.SLOPE:
 				if (this.terrain != terrain) {
 					justification = "terrain mismatch";
 					return 0;

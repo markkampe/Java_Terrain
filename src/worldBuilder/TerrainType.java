@@ -16,12 +16,13 @@ public class TerrainType {
 	public static final int LAND = 8;
 	public static final int LOW = 9;
 	public static final int HIGH = 10;
+	public static final int SLOPE = 11;
 	
 	private static final String typeNames[] = {
 			"NONE", 
 			"deep", "water", "fordable", 
 			"pit", "ground", "hill", "mountain", 
-			"land", "lowlands", "highlands"
+			"land", "lowlands", "highlands", "slope"
 	};
 	
 	/**
@@ -30,7 +31,7 @@ public class TerrainType {
 	public static String terrainType(int type) {
 		if (type > 0 && type < typeNames.length)
 			return typeNames[type];
-		return "NONE";
+		return "NONE(" + type + ")";
 	}
 	
 	/**
@@ -51,6 +52,19 @@ public class TerrainType {
 			return true;
 			
 		default:
+			return false;
+		}
+	}
+	
+	public static boolean isLand(int type) {
+		switch(type) {
+		case HILL:
+		case MOUNTAIN:
+		case GROUND:
+		case PIT:
+			return true;
+			
+		default:	// slopes are not land
 			return false;
 		}
 	}

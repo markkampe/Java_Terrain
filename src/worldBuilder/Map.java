@@ -534,7 +534,7 @@ public class Map extends JPanel {
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
-			this.erosion = 1; // FIX s.b parms.dErosion;
+			this.erosion = 1; // TODO s.b parms.dErosion;
 			hydro.reCalculate(true);
 		} else {
 			this.map = null;

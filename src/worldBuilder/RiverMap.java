@@ -61,7 +61,7 @@ public class RiverMap {
 				double blue = WATER_DIM + delta;
 				double green = Math.max(0, WATER_DIM - delta);
 				g.setColor(new Color(0, (int) green, (int) blue));
-				// XXX use stroke-width for rivers
+				// SOMEDAY use stroke-width for rivers
 				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 				if (flux[i] < min_river)
 					continue;

@@ -134,7 +134,7 @@ public class OverworldTiler implements Exporter {
 			}
 			output.write("],\n");
 			
-			// TODO create transfer events at sub-map boundaries
+			// SOMEDAY create transfer events at sub-map boundaries
 			startList(output, "events", "[\n");
 			output.write("null,\n");
 			output.write("null\n");
@@ -155,7 +155,7 @@ public class OverworldTiler implements Exporter {
 			System.out.println("                             to file " + filename);
 		}
 
-		// TODO update MapInfo.json
+		// SOMEDAY update MapInfo.json
 		//	find it in the same directory as the map
 		//	read it in
 		//	look for an entry for the current map

@@ -116,6 +116,7 @@ public class OutsideTiler implements Exporter {
 			
 			// level 5 - shadows ... come later (w/walls)
 			//	UL = 1, UR = 2, BL = 4, BR = 8. 
+			// FIX add shadows
 			for(int i = 0; i < y_points; i++) {
 				for(int j = 0; j < x_points; j++)
 					output.write(String.format("%4d,",0));
@@ -134,7 +135,7 @@ public class OutsideTiler implements Exporter {
 			}
 			output.write("],\n");
 			
-			// TODO create transfer events at sub-map boundaries
+			// SOMEDAY create transfer events at sub-map boundaries
 			startList(output, "events", "[\n");
 			output.write("null,\n");
 			output.write("null\n");
@@ -156,7 +157,7 @@ public class OutsideTiler implements Exporter {
 			System.out.println("                             to file " + filename);
 		}
 
-		// TODO update MapInfo.json
+		// SOMEDAY update MapInfo.json
 		//	find it in the same directory as the map
 		//	read it in
 		//	look for an entry for the current map
@@ -472,7 +473,7 @@ public class OutsideTiler implements Exporter {
 				24,	26,	36,	36,	24,	26,	36,	36,	// .*x/...	
 				32,	32,	42,	42,	32,	32,	42,	42,	// x*x/...	
 				8,	9,	22,	22,	10,	11,	22,	22,	// .*./x..	
-				16,	16,	34,	34,	17,	17,	34,	34,	// x*./x..					double h = hydration[i][j];
+				16,	16,	34,	34,	17,	17,	34,	34,	// x*./x..
 				25,	27,	37,	37,	25,	27,	37,	37,	// .*x/x..	
 				32,	32,	42,	42,	32,	32,	42,	42,	// x*x/x..
 				28,	29,	33,	33,	30,	31,	33,	33,	// .*./.x.	

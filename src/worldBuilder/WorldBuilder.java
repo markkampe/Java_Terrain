@@ -196,10 +196,10 @@ public class WorldBuilder  extends JFrame
 		editErode.addActionListener(this);
 		editCity = new JMenuItem("add city");
 		editCity.addActionListener(this);
-		editCity.setEnabled(false);	// TODO implement city creation
+		editCity.setEnabled(false);	// SOMEDAY implement city creation
 		editRoads = new JMenuItem("draw roads");
 		editRoads.addActionListener(this);
-		editRoads.setEnabled(false);	// TODO implement city creation
+		editRoads.setEnabled(false);	// SOMEDAY implement city creation
 		JMenu editMenu = new JMenu("Edit");
 		editMenu.add(editWorld);
 		editMenu.add(editSlope);

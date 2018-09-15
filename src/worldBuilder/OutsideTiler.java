@@ -568,7 +568,6 @@ public class OutsideTiler implements Exporter {
 				bits |= (map[row+1][col+1] != sameTile) ? 128 : 0;
 		}
 		
-		// FIX strange auto-tiling w/slope walls ... different offsets function?
 		// look at the eight neighbors for downwards level changes
 		int sameLevel = levels[row][col];
 		if (bits == 0 && !TerrainType.isWater(typeMap[sameLevel])) {

@@ -214,7 +214,11 @@ public class OutsideTiler implements Exporter {
 				
 				// Outside: south slopes are a different terrain type
 				int terrain = typeMap[levels[i][j]];
-				if (!TerrainType.isWater(terrain) && i < y_points - 1 && levels[i][j] > levels[i+1][j])
+				if (!TerrainType.isWater(terrain) && 		// cannot be water
+						i < y_points - 1 && 				// must have a south neighbor
+						levels[i][j] > levels[i+1][j] &&	// on a lower level
+						!TerrainType.isWater(typeMap[levels[i+1][j]])	// that is not water
+						)
 					terrain = TerrainType.SLOPE;
 				
 				if (parms.debug_level >= EXPORT_DEBUG)
@@ -247,6 +251,7 @@ public class OutsideTiler implements Exporter {
 					if (parms.debug_level >= EXPORT_DEBUG)
 						System.out.println("    winner = " + winner);
 				} else if (level == 5) {	// shadows are in this level
+					// FIX ... should these be Outside only?
 					if (TerrainType.isWater(terrain))
 						continue;			// no shadows on water
 					if (terrain == TerrainType.SLOPE)
@@ -531,7 +536,7 @@ public class OutsideTiler implements Exporter {
 				44,	44,	46,	46,	44,	44,	46,	46,	// x*x/xxx
 		};
 		
-		// look at the eight neighbors for tile boundaries
+		// look at the eight neighbors for tile changes
 		int bits = 0;
 		int sameTile = map[row][col];
 		if (row > 0) {
@@ -553,26 +558,27 @@ public class OutsideTiler implements Exporter {
 				bits |= (map[row+1][col+1] != sameTile) ? 128 : 0;
 		}
 		
-		// look at the eight neighbors for level boundaries
+		// FIX strange auto-tiling w/slope walls ... different offsets function?
+		// look at the eight neighbors for downwards level changes
 		int sameLevel = levels[row][col];
-		if (!TerrainType.isWater(typeMap[sameLevel])) {
+		if (bits == 0 && !TerrainType.isWater(typeMap[sameLevel])) {
 			if (row > 0) {
 				if (col > 0)
-					bits |= (levels[row-1][col-1] < sameLevel) ? 1 : 0;
-				bits |= (levels[row-1][col] < sameLevel) ? 2 : 0;
+					bits |= lowerLevel(row-1, col-1, sameLevel) ? 1 : 0;
+				bits |= lowerLevel(row-1, col, sameLevel) ? 2 : 0;
 				if (col < levels[row].length -1)
-					bits |= (levels[row-1][col+1] < sameLevel) ? 4 : 0;
+					bits |= lowerLevel(row-1, col+1, sameLevel) ? 4 : 0;
 			}
 			if (col > 0)
-				bits |= (levels[row][col-1] < sameLevel) ? 8 : 0;
+				bits |= lowerLevel(row, col-1, sameLevel) ? 8 : 0;
 			if (col < levels[row].length - 1)
-				bits |= (levels[row][col+1] < sameLevel) ? 16 : 0;
+				bits |= lowerLevel(row, col+1, sameLevel) ? 16 : 0;
 			if (row < levels.length - 1) {
 				if (col > 0)
-					bits |= (levels[row+1][col-1] < sameLevel) ? 32 : 0;
-				bits |= (levels[row+1][col] < sameLevel) ? 64 : 0;
+					bits |= lowerLevel(row+1, col-1, sameLevel) ? 32 : 0;
+				bits |= lowerLevel(row+1, col, sameLevel) ? 64 : 0;
 				if (col < levels[row].length - 1)
-					bits |= (levels[row+1][col+1] < sameLevel) ? 128 : 0;
+					bits |= lowerLevel(row+1, col+1, sameLevel) ? 128 : 0;
 			}
 		}
 		
@@ -580,6 +586,17 @@ public class OutsideTiler implements Exporter {
 		return offset[bits];
 	}
 
+	// is this a downwards level change
+	private boolean lowerLevel(int row, int col, int ref) {
+		int level = levels[row][col];
+		
+		// dropping down to water doesn't count as a level change
+		if (TerrainType.isWater(typeMap[level]))
+			return false;
+		else
+			return level < ref;
+	}
+	
 	public void tileSize(int meters) {
 		this.tile_size = meters;
 	}

@@ -42,6 +42,13 @@ public class OutsideTiler implements Exporter {
 	private double minDepth;	// shallowest water in export
 	private double maxDepth;	// deepest water in export
 	
+	// level 5 shadow masks
+	private static final int SHADOW_TL = 1;
+	private static final int SHADOW_TR = 2;
+	private static final int SHADOW_BL = 4;
+	private static final int SHADOW_BR = 8;
+	
+	
 	/**
 	 * create a new output writer
 	 * 
@@ -116,19 +123,10 @@ public class OutsideTiler implements Exporter {
 			output.write("\n");
 			
 			// level 5 - shadows
-			final int LEFT_SHADOW = 1 + 4;	// UL=1, UR=2, BL=4, BR=8
-			final int NO_SHADOW = 0;
+			tiles(l, 5);
 			for(int i = 0; i < y_points; i++) {
-				for(int j = 0; j < x_points; j++) {
-					// walls cast shadows, down to the right, not on water or other walls
-					int shadow = NO_SHADOW;
-					if (j > 0 && !TerrainType.isWater(typeMap[levels[i][j]]))
-						if (levels[i][j-1] > levels[i][j])
-							if (i == 0 || levels[i-1][j] <= levels[i][j])
-								shadow = LEFT_SHADOW;
-					
-					output.write(String.format("%4d,", shadow));
-				}
+				for(int j = 0; j < x_points; j++)
+					output.write(String.format("%4d,", l[i][j]));
 				output.write("\n");
 			}
 			output.write("\n");
@@ -162,7 +160,6 @@ public class OutsideTiler implements Exporter {
 			System.out.println("Exported(RPGMaker Outside) "  + x_points + "x" + y_points + " " + tile_size
 					+ "M tiles from <" + String.format("%9.6f", lat) + "," + String.format("%9.6f", lon)
 					+ ">");
-			System.out.println("                             levels 1-5 only");
 			System.out.println("                             to file " + filename);
 		}
 
@@ -217,7 +214,7 @@ public class OutsideTiler implements Exporter {
 				
 				// Outside: south slopes are a different terrain type
 				int terrain = typeMap[levels[i][j]];
-				if (i > 0 && !TerrainType.isWater(terrain) && levels[i-1][j] > levels[i][j])
+				if (!TerrainType.isWater(terrain) && i < y_points - 1 && levels[i][j] > levels[i+1][j])
 					terrain = TerrainType.SLOPE;
 				
 				if (parms.debug_level >= EXPORT_DEBUG)
@@ -249,6 +246,14 @@ public class OutsideTiler implements Exporter {
 					grid[i][j] = winner;
 					if (parms.debug_level >= EXPORT_DEBUG)
 						System.out.println("    winner = " + winner);
+				} else if (level == 5) {	// shadows are in this level
+					if (TerrainType.isWater(terrain))
+						continue;			// no shadows on water
+					if (terrain == TerrainType.SLOPE)
+						continue;			// no shadows on walls
+					if (j == 0 || levels[i][j-1] <= levels[i][j])
+						continue;			// shadows on right of slopes
+					grid[i][j] = SHADOW_TL + SHADOW_BL;
 				} else if (level == 1) {
 					// there seems to be a hole in the rules
 					System.err.println("NOBID l" + level + "[" + i + "," + j + "]: " +
@@ -526,31 +531,49 @@ public class OutsideTiler implements Exporter {
 				44,	44,	46,	46,	44,	44,	46,	46,	// x*x/xxx
 		};
 		
-		// look at neighbors to identify boundaries
+		// look at the eight neighbors for tile boundaries
 		int bits = 0;
-		int lastrow = map.length - 1;
-		int lastcol = map[row].length - 1;
-		int same = map[row][col];
-		// top row ... left to right
+		int sameTile = map[row][col];
 		if (row > 0) {
 			if (col > 0)
-				bits |= (map[row-1][col-1] != same) ? 1 : 0;
-			bits |= (map[row-1][col] != same) ? 2 : 0;
-			if (col < lastcol)
-				bits |= (map[row-1][col+1] != same) ? 4 : 0;
+				bits |= (map[row-1][col-1] != sameTile) ? 1 : 0;
+			bits |= (map[row-1][col] != sameTile) ? 2 : 0;
+			if (col < map[row].length -1)
+				bits |= (map[row-1][col+1] != sameTile) ? 4 : 0;
 		}
-		// middle row ... left to right
 		if (col > 0)
-			bits |= (map[row][col-1] != same) ? 8 : 0;
-		if (col < lastcol)
-			bits |= (map[row][col+1] != same) ? 16 : 0;
-		// bottom row ... left to right
-		if (row < lastrow) {
+			bits |= (map[row][col-1] != sameTile) ? 8 : 0;
+		if (col < map[row].length - 1)
+			bits |= (map[row][col+1] != sameTile) ? 16 : 0;
+		if (row < map.length - 1) {
 			if (col > 0)
-				bits |= (map[row+1][col-1] != same) ? 32 : 0;
-			bits |= (map[row+1][col] != same) ? 64 : 0;
-			if (col < lastcol)
-				bits |= (map[row+1][col+1] != same) ? 128 : 0;
+				bits |= (map[row+1][col-1] != sameTile) ? 32 : 0;
+			bits |= (map[row+1][col] != sameTile) ? 64 : 0;
+			if (col < map[row].length - 1)
+				bits |= (map[row+1][col+1] != sameTile) ? 128 : 0;
+		}
+		
+		// look at the eight neighbors for level boundaries
+		int sameLevel = levels[row][col];
+		if (!TerrainType.isWater(typeMap[sameLevel])) {
+			if (row > 0) {
+				if (col > 0)
+					bits |= (levels[row-1][col-1] < sameLevel) ? 1 : 0;
+				bits |= (levels[row-1][col] < sameLevel) ? 2 : 0;
+				if (col < levels[row].length -1)
+					bits |= (levels[row-1][col+1] < sameLevel) ? 4 : 0;
+			}
+			if (col > 0)
+				bits |= (levels[row][col-1] < sameLevel) ? 8 : 0;
+			if (col < levels[row].length - 1)
+				bits |= (levels[row][col+1] < sameLevel) ? 16 : 0;
+			if (row < levels.length - 1) {
+				if (col > 0)
+					bits |= (levels[row+1][col-1] < sameLevel) ? 32 : 0;
+				bits |= (levels[row+1][col] < sameLevel) ? 64 : 0;
+				if (col < levels[row].length - 1)
+					bits |= (levels[row+1][col+1] < sameLevel) ? 128 : 0;
+			}
 		}
 		
 		// index into offset array to choose which image to use

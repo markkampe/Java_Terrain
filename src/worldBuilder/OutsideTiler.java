@@ -214,10 +214,10 @@ public class OutsideTiler implements Exporter {
 				
 				// Outside: south slopes are a different terrain type
 				int terrain = typeMap[levels[i][j]];
-				if (!TerrainType.isWater(terrain) && 		// cannot be water
-						i < y_points - 1 && 				// must have a south neighbor
-						levels[i][j] > levels[i+1][j] &&	// on a lower level
-						!TerrainType.isWater(typeMap[levels[i+1][j]])	// that is not water
+				if (!TerrainType.isWater(terrain) && // cannot be water
+						i < y_points - 1 && // must have a south neighbor
+						levels[i][j] > levels[i + 1][j] && // on a lower level
+						!TerrainType.isWater(typeMap[levels[i + 1][j]]) // that is not water
 						)
 					terrain = TerrainType.SLOPE;
 				
@@ -536,9 +536,19 @@ public class OutsideTiler implements Exporter {
 				44,	44,	46,	46,	44,	44,	46,	46,	// x*x/xxx
 		};
 		
-		// look at the eight neighbors for tile changes
 		int bits = 0;
 		int sameTile = map[row][col];
+		
+		// special case for 4-only auto-tiling
+		if (squareNeighbors(sameTile)) {
+			bits |= (row > 0 && map[row-1][col] != sameTile) ? 1 : 0;
+			bits |= (row < map.length - 1 && map[row+1][col] != sameTile) ? 4 : 0;
+			bits |= (col > 0 && map[row][col-1] != sameTile) ? 1 : 2;
+			bits |= (col < map[row].length - 1 && map[row][col+1] != sameTile) ? 1 : 8;
+			return bits;
+		}
+		
+		// look at the eight neighbors for different tiles
 		if (row > 0) {
 			if (col > 0)
 				bits |= (map[row-1][col-1] != sameTile) ? 1 : 0;
@@ -595,6 +605,12 @@ public class OutsideTiler implements Exporter {
 			return false;
 		else
 			return level < ref;
+	}
+	
+	// is this tile limited to square neighbors
+	private boolean squareNeighbors(int tile) {
+		// TODO generalize square neighbors (w/new rule attribute?)
+		return(tile >= 7808 && tile <= 7952);
 	}
 	
 	public void tileSize(int meters) {

@@ -540,11 +540,11 @@ public class OutsideTiler implements Exporter {
 		int sameTile = map[row][col];
 		
 		// special case for 4-only auto-tiling
-		if (squareNeighbors(sameTile)) {
-			bits |= (row > 0 && map[row-1][col] != sameTile) ? 1 : 0;
-			bits |= (row < map.length - 1 && map[row+1][col] != sameTile) ? 4 : 0;
-			bits |= (col > 0 && map[row][col-1] != sameTile) ? 1 : 2;
-			bits |= (col < map[row].length - 1 && map[row][col+1] != sameTile) ? 1 : 8;
+		if (rules.neighbors(sameTile) == 4) {
+			bits |= (col > 0 && map[row][col-1] != sameTile) ? 1 : 0;		// left
+			bits |= (row > 0 && map[row-1][col] != sameTile) ? 2 : 0;		// up
+			bits |= (col < map[row].length - 1 && map[row][col+1] != sameTile) ? 4 : 0;	// right
+			bits |= (row < map.length - 1 && map[row+1][col] != sameTile) ? 8 : 0;		// down
 			return bits;
 		}
 		
@@ -604,12 +604,6 @@ public class OutsideTiler implements Exporter {
 			return false;
 		else
 			return level < ref;
-	}
-	
-	// is this tile limited to square neighbors
-	private boolean squareNeighbors(int tile) {
-		// TODO generalize square neighbors (w/new rule attribute?)
-		return(tile >= 7808 && tile <= 7952);
 	}
 	
 	public void tileSize(int meters) {

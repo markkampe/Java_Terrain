@@ -58,6 +58,7 @@ public class TileRules {
 		int surround = NO_VALUE;					// surrounding tile
 		int vigor = NO_VALUE;
 		int height = 1, width = 1;					// stamp size
+		int neighbors = 8;							// auto-tile neighbors
 		
 		parser = Json.createParser(r);
 		while (parser.hasNext()) {
@@ -117,6 +118,7 @@ public class TileRules {
 					thisRule.terrain = terrain;
 					thisRule.height = height;
 					thisRule.width = width;
+					thisRule.neighbors = neighbors;
 					
 					rules.add(thisRule);
 					level = NO_VALUE;
@@ -192,6 +194,9 @@ public class TileRules {
 					vigor = parser.getInt();
 					thisKey = "";
 					break;
+				case "neighbors":
+					neighbors = parser.getInt();
+					break;
 				case "min":
 					thisValue = parser.getString();
 					switch(thisObject) {
@@ -264,5 +269,19 @@ public class TileRules {
 				thisRule.dump("    ");
 			}
 		}
+	}
+	
+	/**
+	 * @param   base tile
+	 * @return  number of (auto-tile) neighors
+	 */
+	public int neighbors(int base) {
+		for( ListIterator<TileRule> it = rules.listIterator(); it.hasNext();) {
+			TileRule r = it.next();
+			if (r.baseTile != base)
+				continue;
+			return r.neighbors;
+		}
+		return -1;
 	}
 }

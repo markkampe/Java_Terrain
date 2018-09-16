@@ -14,6 +14,7 @@ public class TileRule {
 	public int altTile;		// base tile for surrounded version
 	public int height;		// stamp height
 	public int width;		// stamp width
+	public int neighbors;	// # autotile neighbors
 	
 	public int terrain;
 	public int minAltitude;

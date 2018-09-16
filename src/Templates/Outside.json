@@ -13,39 +13,39 @@
 	  "terrain": "deep"
 	},
 
-	{ "name": "low-dirt", "level": 1, "base": 2816,
-	  "terrain": "lowlands",
+	{ "name": "dirt", "level": 1, "base": 2816,
+	  "terrain": "land",
 	  "temp": { "min": -5.0 },
 	  "hydro": { "max": 0.10 },
 	  "vigor": 2
 	},
-	{ "name": "low-grass", "level": 1, "base": 2864,
-	  "terrain": "lowlands",
+	{ "name": "grass", "level": 1, "base": 2864,
+	  "terrain": "land",
 	  "temp": { "min": -5 },
 	  "hydro": { "min": 0.075 },
 	  "vigor": 128
 	},
-	{ "name": "low-snow", "level": 1, "base": 3968,
-	  "terrain": "lowlands",
+	{ "name": "snow", "level": 1, "base": 3968,
+	  "terrain": "land",
 	  "temp": { "max": 7.5 },
 	  "vigor": 32
 	},
 	{ "name": "high-dirt", "level": 1, "base": 2816,
-	  "terrain": "highlands",
+	  "terrain": "none",
 	  "temp": { "min": -5.0 },
 	  "hydro": { "max": 0.10 },
-	  "vigor": 2
+	  "vigor": 0
 	},
 	{ "name": "high-grass", "level": 1, "base": 2864,
-	  "terrain": "highlands",
+	  "terrain": "none",
 	  "temp": { "min": -5 },
 	  "hydro": { "min": 0.075 },
-	  "vigor": 128
+	  "vigor": 0
 	},
 	{ "name": "high-snow", "level": 1, "base": 3968,
-	  "terrain": "highlands",
+	  "terrain": "none",
 	  "temp": { "max": 7.5 },
-	  "vigor": 32
+	  "vigor": 0
 	},
 
 	{ "name": "rocks", "level": 1, "base": 3296,
@@ -56,18 +56,18 @@
 	  "vigor": 0
 	},
 
-	{ "name": "dirt-slope", "level": 1, "base": 7856,
+	{ "name": "dirt-slope", "level": 1, "base": 7856, "neighbors": 4,
 	  "terrain": "slope",
 	  "temp": { "min": -5.0 },
 	  "vigor": 2
 	},
-	{ "name": "grass-slope", "level": 1, "base": 7808,
+	{ "name": "grass-slope", "level": 1, "base": 7808, "neighbors": 4,
 	  "terrain": "slope",
 	  "temp": { "min": -5 },
 	  "hydro": { "min": 0.075 },
 	  "vigor": 128
 	},
-	{ "name": "snow-slope", "level": 1, "base": 7952,
+	{ "name": "snow-slope", "level": 1, "base": 7952, "neighbors": 4,
 	  "terrain": "slope",
 	  "temp": { "max": 7.5 },
 	  "vigor": 32

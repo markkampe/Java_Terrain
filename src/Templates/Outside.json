@@ -30,24 +30,6 @@
 	  "temp": { "max": 7.5 },
 	  "vigor": 32
 	},
-	{ "name": "high-dirt", "level": 1, "base": 2816,
-	  "terrain": "none",
-	  "temp": { "min": -5.0 },
-	  "hydro": { "max": 0.10 },
-	  "vigor": 0
-	},
-	{ "name": "high-grass", "level": 1, "base": 2864,
-	  "terrain": "none",
-	  "temp": { "min": -5 },
-	  "hydro": { "min": 0.075 },
-	  "vigor": 0
-	},
-	{ "name": "high-snow", "level": 1, "base": 3968,
-	  "terrain": "none",
-	  "temp": { "max": 7.5 },
-	  "vigor": 0
-	},
-
 	{ "name": "rocks", "level": 1, "base": 3296,
 	  "terrain": "land",
 	  "temp": { "min": -5.0 },

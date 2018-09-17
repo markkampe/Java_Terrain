@@ -179,7 +179,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			OverworldTiler exporter = new OverworldTiler(palette.getText(), x_points, y_points);
+			RPGMTiler exporter = new RPGMTiler(palette.getText(), x_points, y_points);
 			export(exporter);
 			levelMap(exporter);
 			
@@ -210,7 +210,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 		} else if (e.getSource() == cancel) {
 			windowClosing((WindowEvent) null);
 		} else if (e.getSource() == preview && selected) {
-			OverworldTiler exporter = new OverworldTiler(palette.getText(), x_points, y_points);
+			RPGMTiler exporter = new RPGMTiler(palette.getText(), x_points, y_points);
 			export(exporter);
 			levelMap(exporter);
 			exporter.preview(Exporter.WhichMap.HEIGHTMAP, previewColors);
@@ -233,7 +233,7 @@ public class OverworldExport extends ExportBase implements ActionListener {
 	 * 
 	 * @param exporter
 	 */
-	void levelMap(OverworldTiler exporter) {
+	void levelMap(RPGMTiler exporter) {
 		// initialize altitude percentile to terrain class map
 		int landLevels[] = new int[100];
 		int low = altitudes.getValue();

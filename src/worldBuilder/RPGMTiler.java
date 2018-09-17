@@ -9,7 +9,7 @@ import java.util.Random;
 /**
  * exporter that creates an RPGMaker map
  */
-public class OverworldTiler implements Exporter {
+public class RPGMTiler implements Exporter {
 
 	private static final int MAXRULES = 20;
 	private static final int SPRITES_PER_ROW = 8;
@@ -18,6 +18,8 @@ public class OverworldTiler implements Exporter {
 	private Parameters parms;	// general parameters
 	private TileRules rules;	// tile selection rules
 	private Random random;		// random # generator
+	
+	private boolean useSLOPE;	// enables special level processing
 	
 	// physical map parameters
 	private int x_points; 		// width of map (in points)
@@ -36,6 +38,7 @@ public class OverworldTiler implements Exporter {
 	private double[][] hydration; // per point water depth (meters)
 	private double[][] soil;	// per point soil type
 	private int[][] levels;		// per point terrain level
+	private int[] typeMap;		// map terrain level to type
 	private double minHeight;	// lowest altitude in export
 	private double maxHeight;	// highest altitude in export
 	private double minDepth;	// shallowest water in export
@@ -49,13 +52,21 @@ public class OverworldTiler implements Exporter {
 	 * @param map width (cells)
 	 * @param map height (cells)
 	 */
-	public OverworldTiler(String tileRules, int width, int height) {
+	public RPGMTiler(String tileRules, int width, int height) {
 		this.parms = Parameters.getInstance();
 		this.x_points = width;
 		this.y_points = height;
 		
 		// read in the rules for this tileset
 		this.rules = new TileRules(tileRules);
+		
+		// determine whether or not we are rendering levels
+		useSLOPE = false;
+		for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
+			TileRule r = it.next();
+			if (r.terrain == TerrainType.SLOPE)
+				useSLOPE = true;
+		}
 	}
 
 	/**
@@ -65,35 +76,39 @@ public class OverworldTiler implements Exporter {
 		random = new Random((int) (lat * lon * 1000));
 		try {
 			FileWriter output = new FileWriter(filename);
-			RPGMwriter w = new RPGMwriter(output);
+			RPGMwriter w = new RPGMwriter(output, rules);
+			w.typeMap(typeMap);
 			w.prologue(y_points,  x_points,  rules.tileset);
 		
 			// produce the actual map of tiles
 			w.startList("data", "[");
 			
 			// level 1 objects on the ground
-			int l[][] = new int[y_points][x_points];
-			tiles(l, 1);
-			w.writeAdjustedTable(l);
+			int baseTiles[][] = new int[y_points][x_points];
+			tiles(baseTiles, 1);
+			w.writeAdjustedTable(baseTiles, useSLOPE ? levels : null);
 			
 			// level 2 objects on the ground drawn over level 1
-			tiles(l, 2);
-			w.writeAdjustedTable(l);
+			tiles(baseTiles, 2);
+			w.writeAdjustedTable(baseTiles, useSLOPE ? levels : null);
 			
 			// level 3 - foreground mountains/trees/structures (B/C object sets)
-			stamps(l, 3);
-			w.writeTable(l, false);
+			stamps(baseTiles, 3);
+			w.writeTable(baseTiles, false);
 			
 			// level 4 - background mountains/trees/structures (B/C object sets)
-			stamps(l, 4);
-			w.writeTable(l, false);
+			stamps(baseTiles, 4);
+			w.writeTable(baseTiles, false);
 			
-			// level 5 - shadows ... come later (w/walls)
-			int zeroes[][] = new int[y_points][x_points];
-			w.writeTable(zeroes, false);
+			// level 5 - shadows (only cast by walls)
+			if (useSLOPE) {
+				tiles(baseTiles, 5);
+				w.writeTable(baseTiles,  false);
+			} else
+				w.writeTable(null, false);
 			
 			// level 6 - encounters ... to be created later
-			w.writeTable(zeroes, true);
+			w.writeTable(null, true);
 			
 			w.endList("],");	// end of DATA
 			
@@ -112,7 +127,7 @@ public class OverworldTiler implements Exporter {
 		}
 		
 		if (parms.debug_level > 0) {
-			System.out.println("Exported(RPGMaker Overworld) "  + x_points + "x" + y_points + " " + tile_size
+			System.out.println("Exported(RPGMaker " + rules.ruleset + ") "  + x_points + "x" + y_points + " " + tile_size
 					+ "M tiles from <" + String.format("%9.6f", lat) + "," + String.format("%9.6f", lon)
 					+ ">");
 			System.out.println("                             to file " + filename);
@@ -141,11 +156,20 @@ public class OverworldTiler implements Exporter {
 		}
 	}
 	
-	/*
-	 * L1 is the color/texture of the ground, L2 is on the ground
+	/**
+	 * fill in the array of base tiles for the entire grid
+	 * 
+	 * @param grid ... array to be filled in
+	 * @param level .. what level are we filling
 	 */
-	void tiles(int[][] grid, int level) {	
+	void tiles(int[][] grid, int level) {
+		// level 5 shadow masks
+		final int SHADOW_TL = 1;
+		final int SHADOW_TR = 2;
+		final int SHADOW_BL = 4;
+		final int SHADOW_BR = 8;
 		
+		// assemble a list of bidders for this level
 		TileRule bidders[] = new TileRule[MAXRULES];
 		int numRules = 0;
 		for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
@@ -166,10 +190,21 @@ public class OverworldTiler implements Exporter {
 				double slope = slope(i,j);
 				double face = direction(i, j);
 				double soilType = soil[i][j];
-				int terrain = levels[i][j];
+				int terrain = typeMap[levels[i][j]];
+				
+				// south slopes may be a special terrain type
+				if (useSLOPE &&								// SLOPE rules enabled
+						!TerrainType.isWater(terrain) && 	// is not water
+						i < y_points - 1 && 				// must have a south neighbor
+						levels[i][j] > levels[i + 1][j] && 	// on a lower level
+						!TerrainType.isWater(typeMap[levels[i + 1][j]]) // that is not water
+						)
+					terrain = TerrainType.SLOPE;
+				
 				if (parms.debug_level >= EXPORT_DEBUG)
 					System.out.println("l" + level + "[" + i + "," + j + "]: " +
-						" alt=" + alt +
+						" terrain=" + TerrainType.terrainType(terrain) +
+						", alt=" + alt +
 						String.format(", hydro=%.2f", hydro) + 
 						String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
 						String.format(", soil=%.1f",  soilType) + 
@@ -194,10 +229,19 @@ public class OverworldTiler implements Exporter {
 					grid[i][j] = winner;
 					if (parms.debug_level >= EXPORT_DEBUG)
 						System.out.println("    winner = " + winner);
+				} else if (level == 5) {	// shadows are in this level
+					// FIX ... should these be Outside only?
+					if (TerrainType.isWater(terrain))
+						continue;			// no shadows on water
+					if (terrain == TerrainType.SLOPE)
+						continue;			// no shadows on walls
+					if (j == 0 || levels[i][j-1] <= levels[i][j])
+						continue;			// shadows on right of slopes
+					grid[i][j] = SHADOW_TL + SHADOW_BL;
 				} else if (level == 1) {
 					// there seems to be a hole in the rules
 					System.err.println("NOBID l" + level + "[" + i + "," + j + "]: " +
-							" ter=" + TerrainType.terrainType(terrain) +
+							" terrain=" + TerrainType.terrainType(terrain) +
 							", alt=" + alt +
 							String.format(", hydro=%.2f", hydro) + 
 							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
@@ -207,8 +251,11 @@ public class OverworldTiler implements Exporter {
 			}
 	}
 	
-	/*
-	 * L3 and L4 can use (multi-cell) stamps
+	/**
+	 * fill in the array of base tiles with multi-tile stamps
+	 * 
+	 * @param grid ... the array to be filled in
+	 * @param level .. the level being filled in
 	 */
 	void stamps(int[][] grid, int level) {	
 		
@@ -266,10 +313,15 @@ public class OverworldTiler implements Exporter {
 							double slope = slope(i+dy,j+dx);
 							double face = direction(i+dy, j+dx);
 							double soilType = soil[i+dy][j+dx];
-							int terrain = levels[i][j];
+							int terrain = typeMap[levels[i][j]];
+							// South slopes may be a different terrain type
+							if (useSLOPE && i > 0 && !TerrainType.isWater(terrain) && levels[i-1][j] > levels[i][j])
+								terrain = TerrainType.SLOPE;
+							
 							if (parms.debug_level >= EXPORT_DEBUG && b == 0)
 								System.out.println("l" + level + "[" + (i+dy) + "," + (j+dx) + "]: " +
-									" alt=" + alt + ", hyd=" + 
+									" terrain=" + TerrainType.terrainType(terrain) +
+									", alt=" + alt + ", hyd=" + 
 									String.format("%.2f", hydro) + 
 									String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
 									String.format(", soil=%.1f",  soilType) + 
@@ -398,10 +450,6 @@ public class OverworldTiler implements Exporter {
 	
 	/**
 	 * compass orientation of face
-	 * @return
-	 */
-	/**Notes
-	 * compass orientation of face
 	 */
 	public double direction(int row, int col) {
 		double dzdy = dZdY(row, col);
@@ -442,23 +490,26 @@ public class OverworldTiler implements Exporter {
 	 * @param slope percentile to level map
 	 * @param level to TerrainType map
 	 */
-	public void levelMap(int [] landMap, int[] waterMap, int[] slopeMap, int[] terrainMap) {
+	public void levelMap(int [] landMap, int[] waterMap, int[] slopeMap, int[] classMap) {
 
 		// ascertain the slope at every point
-		double slopes[][] = new double[y_points][x_points];
 		double minSlope = 666;
 		double maxSlope = 0;
-		for(int i = 0; i < y_points; i++)
-			for(int j = 0; j < x_points; j++) {
-				slopes[i][j] = slope(i,j);
-				double m = (slopes[i][j] >= 0) ? slopes[i][j] : -slopes[i][j];
-				if (m < minSlope)
-					minSlope = m;
-				if (m > maxSlope)
-					maxSlope = m;
-			}
-		
-		// ascertain the range of altitudes, depths, and slopes
+		double slopes[][] = null;
+		if (slopeMap != null) {
+			slopes = new double[y_points][x_points];
+			for(int i = 0; i < y_points; i++)
+				for(int j = 0; j < x_points; j++) {
+					slopes[i][j] = slope(i,j);
+					double m = (slopes[i][j] >= 0) ? slopes[i][j] : -slopes[i][j];
+					if (m < minSlope)
+						minSlope = m;
+					if (m > maxSlope)
+						maxSlope = m;
+				}
+		}
+			
+		// ascertain the range of altitudes, depths
 		double aRange = (maxHeight > minHeight) ? maxHeight - minHeight : 0.000001;
 		double dRange = (maxDepth > minDepth) ? maxDepth - minDepth : 1;
 		double mRange = (maxSlope > minSlope) ? maxSlope - minSlope : 1;
@@ -470,23 +521,24 @@ public class OverworldTiler implements Exporter {
 				if (hydration[i][j] < 0) {	// under water
 					double h = -hydration[i][j];
 					double pctile = 99 * (h - minDepth) / dRange;
-					if ((int) pctile > 99)	// FIX debug code
-						System.out.println("h=" + h + " - mindepth=" + minDepth + " / dRange=" + dRange);
-					levels[i][j] = terrainMap[waterMap[(int) pctile]];
-					continue;
+					levels[i][j] = waterMap[(int) pctile];
 				} else {	// land form (based on height and slope)
 					double a = heights[i][j];
 					double pctile = 99 * (a - minHeight) / aRange;
-					int aType = terrainMap[landMap[(int) pctile]];
+					levels[i][j] = landMap[(int) pctile];
 					
-					double m = slopes[i][j];
-					pctile = 99 * (m - minSlope) / mRange;
-					int mType = terrainMap[slopeMap[(int) pctile]];
-					
-					// choose the least mountainous of the two land forms
-					levels[i][j] = (mType < aType) ? mType : aType;
+					// see if slope would reduce the terrain type
+					if (slopeMap != null) {
+						double m = slopes[i][j];
+						pctile = 99 * (m - minSlope) / mRange;
+						int mLevel = slopeMap[(int) pctile];
+						if (mLevel < levels[i][j])
+							levels[i][j] = mLevel;
+					}
 				}
 			}
+		
+		typeMap = classMap;
 	}
 	
 	public void erodeMap(double[][] erode) {

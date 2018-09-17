@@ -160,9 +160,9 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			Exporter exporter = new OutsideTiler(palette.getText(), x_points, y_points);
+			Exporter exporter = new RPGMTiler(palette.getText(), x_points, y_points);
 			export(exporter);
-			levelMap((OutsideTiler) exporter);
+			levelMap((RPGMTiler) exporter);
 			
 			// get the output file name
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
@@ -192,9 +192,9 @@ public class OutsideExport extends ExportBase implements ActionListener {
 		} else if (e.getSource() == cancel) {
 			windowClosing((WindowEvent) null);
 		} else if (e.getSource() == preview && selected) {
-			Exporter exporter = new OutsideTiler(palette.getText(), x_points, y_points);
+			Exporter exporter = new RPGMTiler(palette.getText(), x_points, y_points);
 			export(exporter);
-			levelMap((OutsideTiler) exporter);
+			levelMap((RPGMTiler) exporter);
 			exporter.preview(Exporter.WhichMap.HEIGHTMAP, colorMap);
 		} else if (e.getSource() == choosePalette) {
 			FileDialog d = new FileDialog(this, "Tile Palette", FileDialog.LOAD);
@@ -220,7 +220,7 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	 * 
 	 * @param exporter ... tiler to whom we will pass these maps
 	 */
-	void levelMap(OutsideTiler exporter) {
+	void levelMap(RPGMTiler exporter) {
 
 		// always 3 water levels, but land levels are settable
 		int totLevels = levels.getValue();
@@ -286,6 +286,6 @@ public class OutsideExport extends ExportBase implements ActionListener {
 				landLevels[i] = groundLevel;
 		
 		// pass these maps to the tiler
-		exporter.levelMap(landLevels, waterLevels, levelMap);
+		exporter.levelMap(landLevels, waterLevels, null, levelMap);
 	}
 }

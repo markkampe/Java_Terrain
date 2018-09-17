@@ -6,11 +6,19 @@ import java.io.IOException;
 public class RPGMwriter {
 
 	private FileWriter out;	
+	private TileRules rules;
 	private int numRows;
 	private int numCols;
+	private int[] typeMap;
 	
-	public RPGMwriter(FileWriter outfile) {
+	public RPGMwriter(FileWriter outfile, TileRules rules) {
 		out = outfile;
+		this.rules = rules;
+		typeMap = null;
+	}
+	
+	public void typeMap(int[] map) {
+		this.typeMap = map;
 	}
 	
 	public void prologue( int height, int width, int tileset ) throws IOException {
@@ -42,16 +50,16 @@ public class RPGMwriter {
 	/**
 	 * write out one table (numRows x numCols)
 	 * 
-	 * @param l   ... the array to be written out
-	 * @param last .. is this the last table to be written
+	 * @param tiles ... the array to be written out
+	 * @param last .... is this the last table to be written
 	 */
-	public void writeTable(int[][] l, boolean last) throws IOException {
+	public void writeTable(int[][] tiles, boolean last) throws IOException {
 		for(int i = 0; i < numRows; i++) {
-			for(int j = 0; j < numCols; j++)
-				if (last && i == numRows - 1 && j == numCols - 1)
-					out.write(String.format("%4d", l[i][j]));
-				else
-					out.write(String.format("%4d,", l[i][j]));
+			for(int j = 0; j < numCols; j++) {
+				out.write(String.format("%4d", (tiles == null) ? 0 : tiles[i][j]));
+				if (!last || i < numRows - 1 || j < numCols - 1)
+					out.write(",");
+			}
 			out.write("\n");
 		}
 		if (!last)
@@ -61,15 +69,17 @@ public class RPGMwriter {
 	/**
 	 * write out one table (numRows x numCols) w/autotile adjustments
 	 * 
-	 * @param l   ... the array to be written out
-	 * @param last .. is this the last table to be written
+	 * @param baseTiles ... the array to be written out
+	 * @param levels   ... array of types for each tile
+	 *
+	 * Note: there is no auto-tiling for the last level (6)
 	 */
-	public void writeAdjustedTable(int[][] l) throws IOException {
+	public void writeAdjustedTable(int[][] baseTiles, int[][] levels) throws IOException {
 		for(int i = 0; i < numRows; i++) {
 			for(int j = 0; j < numCols; j++) {
-				int v = l[i][j];
+				int v = (baseTiles == null) ? 0 : baseTiles[i][j];
 				if (v != 0)
-					v += auto_tile_offset(l, i, j);
+					v += auto_tile_offset(baseTiles, levels, i, j);
 				out.write(String.format("%4d,", v));
 			}
 			out.write("\n");
@@ -77,14 +87,26 @@ public class RPGMwriter {
 		out.write("\n");
 	}
 	
+	
+	
 	/*
 	 * examine the neighbors, identify boundaries, and figure out
 	 * the appropriate tile offsets.
 	 * 
-	 * RPGMaker defines 48 different ways to slice up a reference
+	 * @param baseTiles ... base tile # for each grid square
+	 * @param levels ...... level # for each grid square (may be null)
+	 * @param row
+	 * @param col
+	 * 
+	 * RPGMaker defines up to 48 different ways to slice up a reference
 	 * 	tile in order to create borders between them
+	 * 
+	 * For level changes, 
+	 * 	we put walls on south high ground
+	 *  we put auto-tile borders on the north and west high ground
+	 *  we put shadows on the east low ground
 	 */
-	private int auto_tile_offset(int map[][], int row, int col) {
+	private int auto_tile_offset(int baseTiles[][], int levels[][], int row, int col) {
 		/*
 		 * this matrix decides which part of a reference tile
 		 * to use for different configurations of unlike tiles
@@ -128,37 +150,80 @@ public class RPGMwriter {
 				44,	44,	46,	46,	44,	44,	46,	46,	// x*x/xxx
 		};
 		
-		// look at neighbors to identify boundaries
 		int bits = 0;
-		int lastrow = map.length - 1;
-		int lastcol = map[row].length - 1;
-		int same = map[row][col];
-		// top row ... left to right
+		int lastrow = baseTiles.length - 1;
+		int lastcol = baseTiles[row].length - 1;
+		int sameTile = baseTiles[row][col];
+		
+		// special case for 4-only auto-tiling
+		if (rules.neighbors(sameTile) == 4) {
+			bits |= (col > 0 && baseTiles[row][col-1] != sameTile) ? 1 : 0;		// left
+			bits |= (row > 0 && baseTiles[row-1][col] != sameTile) ? 2 : 0;		// up
+			bits |= (col < lastcol && baseTiles[row][col+1] != sameTile) ? 4 : 0;	// right
+			bits |= (row < lastrow && baseTiles[row+1][col] != sameTile) ? 8 : 0;		// down
+			return bits;
+		}
+		
+		// look at the eight neighbors for different tiles
 		if (row > 0) {
 			if (col > 0)
-				bits |= (map[row-1][col-1] != same) ? 1 : 0;
-			bits |= (map[row-1][col] != same) ? 2 : 0;
+				bits |= (baseTiles[row-1][col-1] != sameTile) ? 1 : 0;
+			bits |= (baseTiles[row-1][col] != sameTile) ? 2 : 0;
 			if (col < lastcol)
-				bits |= (map[row-1][col+1] != same) ? 4 : 0;
+				bits |= (baseTiles[row-1][col+1] != sameTile) ? 4 : 0;
 		}
-		// middle row ... left to right
 		if (col > 0)
-			bits |= (map[row][col-1] != same) ? 8 : 0;
-		if (col < lastcol)
-			bits |= (map[row][col+1] != same) ? 16 : 0;
-		// bottom row ... left to right
+			bits |= (baseTiles[row][col-1] != sameTile) ? 8 : 0;
+		if (col < baseTiles[row].length - 1)
+			bits |= (baseTiles[row][col+1] != sameTile) ? 16 : 0;
 		if (row < lastrow) {
 			if (col > 0)
-				bits |= (map[row+1][col-1] != same) ? 32 : 0;
-			bits |= (map[row+1][col] != same) ? 64 : 0;
+				bits |= (baseTiles[row+1][col-1] != sameTile) ? 32 : 0;
+			bits |= (baseTiles[row+1][col] != sameTile) ? 64 : 0;
 			if (col < lastcol)
-				bits |= (map[row+1][col+1] != same) ? 128 : 0;
+				bits |= (baseTiles[row+1][col+1] != sameTile) ? 128 : 0;
+		}
+		
+		// look at the eight neighbors for downwards level changes
+		if (levels != null) {
+			int sameLevel = levels[row][col];
+			if (bits == 0 && !TerrainType.isWater(typeMap[sameLevel])) {
+				if (row > 0) {
+					if (col > 0)
+						bits |= lowerLevel(levels, row-1, col-1, sameLevel) ? 1 : 0;
+					bits |= lowerLevel(levels,  row-1, col, sameLevel) ? 2 : 0;
+					if (col < lastcol)
+						bits |= lowerLevel(levels, row-1, col+1, sameLevel) ? 4 : 0;
+				}
+				if (col > 0)
+					bits |= lowerLevel(levels, row, col-1, sameLevel) ? 8 : 0;
+				if (col < lastcol)
+					bits |= lowerLevel(levels, row, col+1, sameLevel) ? 16 : 0;
+				if (row < lastrow) {
+					if (col > 0)
+						bits |= lowerLevel(levels,  row+1, col-1, sameLevel) ? 32 : 0;
+					bits |= lowerLevel(levels, row+1, col, sameLevel) ? 64 : 0;
+					if (col < lastcol)
+						bits |= lowerLevel(levels,  row+1, col+1, sameLevel) ? 128 : 0;
+				}
+			}
 		}
 		
 		// index into offset array to choose which image to use
 		return offset[bits];
 	}
 	
+	// is this a downwards level change
+	private boolean lowerLevel(int[][] levels, int row, int col, int ref) {
+		int level = levels[row][col];
+		
+		// dropping down to water doesn't count as a level change
+		if (TerrainType.isWater(typeMap[level]))
+			return false;
+		else
+			return level < ref;
+	}
+
 	public void epilogue() throws IOException {
 		out.write("}\n");
 	}

@@ -333,6 +333,7 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 				if (Math.abs(dR) > Math.abs(dC)) { // vertical flow
 					int start = c - (stroke/2);
 					if (r >= 0 && r < y_points && start >= 0 && start + stroke <= x_points) {
+						// FIX don't extend rivers into deep water
 						for(int j = 0; j < stroke; j++)
 							hydration[r][start + j] = -depth;
 					}
@@ -342,6 +343,7 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 				} else {	// horizontal flow or last stroke
 					int start = r - (stroke/2);
 					if (c >= 0 && c < x_points && start >= 0 && start + stroke <= y_points) {
+						// FIX don't extend rivers into deep water
 						for(int j = 0; j < stroke; j++)
 							hydration[start + j][c] = -depth;
 					}

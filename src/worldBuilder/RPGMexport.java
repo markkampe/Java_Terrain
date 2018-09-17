@@ -16,19 +16,19 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
-public class OutsideExport extends ExportBase implements ActionListener {
+public class RPGMexport extends ExportBase implements ActionListener {
 	
-	private static final String format = "Outside";
+	private String format;			// export type/ rules file
 	private JSlider levels;			// number of height levels
 	private RangeSlider altitudes;	// ground, hill, mountain
 	private RangeSlider depths;		// marsh, shallow, deep
 	private JTextField palette;		// tile set description file
 	private JButton choosePalette;	// select palette file
 	
-	private Color colorMap[];		// level to preview color map
+	private Color[] colorMap;		// level to preview color map
 	private int[] levelMap;
 	
-	// (hard coded) Outside levels
+	// FIX (hard coded) Outside levels
 	private static final int DEEP = 0;
 	private static final int SHALLOW = 1;
 	private static final int PASSABLE = 2;
@@ -53,15 +53,16 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	 * 
 	 * @param map ... Map to be exported
 	 */
-	public OutsideExport(Map map) {
+	public RPGMexport(String format, Map map) {
 		super("RPGMaker " + format, map);
+		this.format = format;
 		
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		
 		// create palette selector
 		palette = new JTextField(
-				parms.Out_palette == null ? format + ".json" : parms.Out_palette);
+				parms.Out_palette == null ? this.format + ".json" : parms.Out_palette);
 		JLabel pTitle = new JLabel("Tile Palette", JLabel.CENTER);
 		choosePalette = new JButton("Browse");
 		pTitle.setFont(fontLarge);
@@ -160,9 +161,9 @@ public class OutsideExport extends ExportBase implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			Exporter exporter = new RPGMTiler(palette.getText(), x_points, y_points);
+			RPGMTiler exporter = new RPGMTiler(palette.getText(), x_points, y_points);
 			export(exporter);
-			levelMap((RPGMTiler) exporter);
+			levelMap(exporter);
 			
 			// get the output file name
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
@@ -285,7 +286,10 @@ public class OutsideExport extends ExportBase implements ActionListener {
 			else
 				landLevels[i] = groundLevel;
 		
+		// mapping from slope percentiles to levels
+		int slopeLevels[] = null;
+		
 		// pass these maps to the tiler
-		exporter.levelMap(landLevels, waterLevels, null, levelMap);
+		exporter.levelMap(landLevels, waterLevels, slopeLevels, levelMap);
 	}
 }

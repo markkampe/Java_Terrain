@@ -417,7 +417,7 @@ public class WorldBuilder  extends JFrame
 			if (activeDialog)
 				twoDialogError();
 			else {
-				placeDialog(new OutsideExport(map), false);
+				placeDialog(new RPGMexport("Outside", map), false);
 				activeDialog = true;
 			} 
 		} else if (o == fileExit) {

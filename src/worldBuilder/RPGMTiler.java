@@ -165,9 +165,9 @@ public class RPGMTiler implements Exporter {
 	void tiles(int[][] grid, int level) {
 		// level 5 shadow masks
 		final int SHADOW_TL = 1;
-		final int SHADOW_TR = 2;
+		// final int SHADOW_TR = 2;
 		final int SHADOW_BL = 4;
-		final int SHADOW_BR = 8;
+		// final int SHADOW_BR = 8;
 		
 		// assemble a list of bidders for this level
 		TileRule bidders[] = new TileRule[MAXRULES];

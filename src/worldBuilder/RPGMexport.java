@@ -88,7 +88,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 
 		if (need_palette) { // create palette selector in main panel
-			palette = new JTextField(parms.Out_palette == null ? this.format + ".json" : parms.Out_palette);
+			palette = new JTextField(this.format + ".json");
 			JLabel pTitle = new JLabel("Tile Palette", JLabel.CENTER);
 			choosePalette = new JButton("Browse");
 			pTitle.setFont(fontLarge);

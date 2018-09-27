@@ -410,7 +410,7 @@ public class WorldBuilder  extends JFrame
 			if (activeDialog)
 				twoDialogError();
 			else {
-				placeDialog(new OverworldExport(map), false);
+				placeDialog(new RPGMexport("Overworld", map), false);
 				activeDialog = true;
 			} 
 		} else if (o == exportRpgmOutside) {

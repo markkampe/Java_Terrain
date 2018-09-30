@@ -187,7 +187,7 @@ public class RPGMwriter {
 		// look at the eight neighbors for downwards level changes
 		if (levels != null) {
 			int sameLevel = levels[row][col];
-			if (bits == 0 && !TerrainType.isWater(typeMap[sameLevel])) {
+			if (!TerrainType.isWater(typeMap[sameLevel])) {
 				if (row > 0) {
 					if (col > 0)
 						bits |= lowerLevel(levels, row-1, col-1, sameLevel) ? 1 : 0;

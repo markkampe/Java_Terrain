@@ -14,28 +14,46 @@
 	},
 
 	{ "name": "dirt", "level": 1, "base": 2816,
-	  "terrain": "land",
+	  "terrain": "ground",
 	  "temp": { "min": -5.0 },
 	  "hydro": { "max": 0.10 },
 	  "vigor": 2
 	},
 	{ "name": "grass", "level": 1, "base": 2864,
-	  "terrain": "land",
+	  "terrain": "ground",
 	  "temp": { "min": -5 },
 	  "hydro": { "min": 0.075 },
 	  "vigor": 128
 	},
 	{ "name": "snow", "level": 1, "base": 3968,
-	  "terrain": "land",
+	  "terrain": "ground",
 	  "temp": { "max": 7.5 },
 	  "vigor": 32
 	},
 	{ "name": "rocks", "level": 1, "base": 3296,
-	  "terrain": "land",
+	  "terrain": "ground",
 	  "temp": { "min": -5.0 },
 	  "hydro": { "max": 0.08 },
 	  "soil": { "min": 0.5, "max": 2.5 },
 	  "vigor": 0
+	},
+
+	{ "name": "hi-dirt", "level": 1, "base": 7472,
+	  "terrain": "highlands",
+	  "temp": { "min": -5.0 },
+	  "hydro": { "max": 0.10 },
+	  "vigor": 2
+	},
+	{ "name": "hi-grass", "level": 1, "base": 7424,
+	  "terrain": "highlands",
+	  "temp": { "min": -5 },
+	  "hydro": { "min": 0.075 },
+	  "vigor": 128
+	},
+	{ "name": "hi-snow", "level": 1, "base": 7568,
+	  "terrain": "highlands",
+	  "temp": { "max": 7.5 },
+	  "vigor": 32
 	},
 
 	{ "name": "dirt-slope", "level": 1, "base": 7856, "neighbors": 4,

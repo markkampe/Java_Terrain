@@ -22,27 +22,27 @@ public class RPGMTiler implements Exporter {
 	private boolean useSLOPE;	// enables special level processing
 	
 	// physical map parameters
-	private int x_points; 		// width of map (in points)
-	private int y_points; 		// height of map (in points)flushflush
+	public int x_points; 		// width of map (in points)
+	public int y_points; 		// height of map (in points)flushflush
 	private int tile_size; 		// tile size (in meters)
 	private double lat;			// latitude
 	private double lon;			// longitude
 
 	// tile selection parameters
-	//private double Tmean; 		// mean temperature (degC)
+	//private double Tmean; 	// mean temperature (degC)
 	private double Tsummer; 	// mean summer temperature (degC)
 	private double Twinter; 	// mean winter temperature (degC)
 	//private double[][] rain;	// per point rainfall (meters)
-	private double[][] heights;	// per point height (meters)
-	private double[][] erode;	// per point erosion (meters)
-	private double[][] hydration; // per point water depth (meters)
-	private double[][] soil;	// per point soil type
+	public double[][] heights;	// per point height (meters)
+	public double[][] erode;	// per point erosion (meters)
+	public double[][] hydration; // per point water depth (meters)
+	public double[][] soil;	// per point soil type
 	private int[][] levels;		// per point terrain level
 	private int[] typeMap;		// map terrain level to type
-	private double minHeight;	// lowest altitude in export
-	private double maxHeight;	// highest altitude in export
-	private double minDepth;	// shallowest water in export
-	private double maxDepth;	// deepest water in export
+	//private double minHeight;	// lowest altitude in export
+	//private double maxHeight;	// highest altitude in export
+	//private double minDepth;	// shallowest water in export
+	//private double maxDepth;	// deepest water in export
 	
 	/**
 	 * create a new output writer
@@ -72,7 +72,7 @@ public class RPGMTiler implements Exporter {
 	/**
 	 * write out an RPGMaker map
 	 */
-	public boolean writeFile(String filename) {
+	public boolean writeFile(String filename) {		
 		random = new Random((int) (lat * lon * 1000));
 		try {
 			FileWriter output = new FileWriter(filename);
@@ -416,7 +416,7 @@ public class RPGMTiler implements Exporter {
 	/*
 	 * return the slope at a point
 	 */
-	private double slope(int row, int col) {
+	public double slope(int row, int col) {
 		double z0 = heights[row][col] - erode[row][col];
 		double zx1 = (col > 0) ? heights[row][col-1] - erode[row][col-1] :
 								 heights[row][col+1] - erode[row][col+1];
@@ -485,60 +485,12 @@ public class RPGMTiler implements Exporter {
 	
 	/**
 	 * initialize the bucketized level map
-	 * @param land percentile to level map
-	 * @param water percentile to level map
-	 * @param slope percentile to level map
-	 * @param level to TerrainType map
+	 * @param levels ... level for every map point
+	 * @param typemap ... terrain type of each level
 	 */
-	public void levelMap(int [] landMap, int[] waterMap, int[] slopeMap, int[] classMap) {
-
-		// ascertain the slope at every point
-		double minSlope = 666;
-		double maxSlope = 0;
-		double slopes[][] = null;
-		if (slopeMap != null) {
-			slopes = new double[y_points][x_points];
-			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++) {
-					slopes[i][j] = slope(i,j);
-					double m = (slopes[i][j] >= 0) ? slopes[i][j] : -slopes[i][j];
-					if (m < minSlope)
-						minSlope = m;
-					if (m > maxSlope)
-						maxSlope = m;
-				}
-		}
-			
-		// ascertain the range of altitudes, depths
-		double aRange = (maxHeight > minHeight) ? maxHeight - minHeight : 0.000001;
-		double dRange = (maxDepth > minDepth) ? maxDepth - minDepth : 1;
-		double mRange = (maxSlope > minSlope) ? maxSlope - minSlope : 1;
-		
-		// use the supplied maps to characterize each tile in the grid
-		levels = new int[y_points][x_points];
-		for(int i = 0; i < y_points; i++)
-			for(int j = 0; j < x_points; j++) {
-				if (hydration[i][j] < 0) {	// under water
-					double h = -hydration[i][j];
-					double pctile = 99 * (h - minDepth) / dRange;
-					levels[i][j] = waterMap[(int) pctile];
-				} else {	// land form (based on height and slope)
-					double a = heights[i][j];
-					double pctile = 99 * (a - minHeight) / aRange;
-					levels[i][j] = landMap[(int) pctile];
-					
-					// see if slope would reduce the terrain type
-					if (slopeMap != null) {
-						double m = slopes[i][j];
-						pctile = 99 * (m - minSlope) / mRange;
-						int mLevel = slopeMap[(int) pctile];
-						if (mLevel < levels[i][j])
-							levels[i][j] = mLevel;
-					}
-				}
-			}
-		
-		typeMap = classMap;
+	public void levelMap(int[][] levels, int[] typeMap ) {
+		this.levels = levels;
+		this.typeMap = typeMap;
 	}
 	
 	public void erodeMap(double[][] erode) {
@@ -555,26 +507,5 @@ public class RPGMTiler implements Exporter {
 
 	public void waterMap(double[][] hydration) {
 		this.hydration = hydration;
-		
-		// figure out minimum and maximum heights/depths in the region
-		minDepth = 666666;
-		minHeight = 666;
-		maxDepth = 0;
-		maxHeight = 0;
-		for (int i = 0; i < hydration.length; i++)
-			for (int j = 0; j < hydration[0].length; j++) {
-				double h = hydration[i][j];
-				if (h < 0) {
-					if (-h < minDepth)
-						minDepth = -h;
-					else if (-h > maxDepth)
-						maxDepth = -h;
-				} else {
-					if (heights[i][j] < minHeight)
-						minHeight = heights[i][j];
-					if (heights[i][j] > maxHeight)
-						maxHeight = heights[i][j];
-				}
-			}
 	}
 }

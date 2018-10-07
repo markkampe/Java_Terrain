@@ -454,7 +454,9 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			level++;
 		}
 
-		// pass them all to the exporter
-		exporter.levelMap(altMap, depthMap, slopeMap, typeMap);
+		// compute a level for every square
+		RPGMLeveler leveler = new RPGMLeveler();
+		int[][] levelMap = leveler.getLevels(exporter, altMap, depthMap, slopeMap);
+		exporter.levelMap(levelMap, typeMap);
 	}
 }

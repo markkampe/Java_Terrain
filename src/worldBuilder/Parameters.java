@@ -122,6 +122,9 @@ public class Parameters {
 	public int dGroundMin;		// Outside: pit threshold
 	public int dGroundMax;		// Outside: hill threshold
 	public int dAltLevels;		// Outside: altitude levels
+	public int dFloraPct;		// percentage of plant cover
+	public int dFloraMin;		// percentage of tall grasses
+	public int dFloraMax;		// percentage of brush
 	public String OW_palette;	// Overworld: palette file
 	public String Out_palette;	// Outside: palette file
 
@@ -196,6 +199,10 @@ public class Parameters {
 		dGroundMin = 10;
 		dGroundMax = 20;
 		dAltLevels = 6;
+		// default plant distribution thresholds
+		dFloraPct = 50;
+		dFloraMin = 40;
+		dFloraMax = 70;
 	}
 
 	// public constructor to read from configuration file

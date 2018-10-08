@@ -21,21 +21,27 @@ public class RPGMexport extends ExportBase implements ActionListener {
 	private String format; // export type/ rules file
 
 	// dialog control options
-	private boolean need_palette; // tile palette selection
-	private boolean need_levels; // slider for # levels
-	private boolean need_alt_3; // slider for ground/hill/mountain
-	private boolean need_alt_n; // slider for pit/ground/mound levels
-	private boolean need_slopes; // slider for ground/hill/mountain
-	private boolean need_depths; // slider for passable/shallow/deep
+	private boolean need_palette; 	// tile palette selection
+	private boolean need_levels; 	// slider for # levels
+	private boolean need_alt_3; 	// slider for ground/hill/mountain
+	private boolean need_alt_n; 	// slider for pit/ground/mound levels
+	private boolean need_slopes; 	// slider for ground/hill/mountain
+	private boolean need_depths; 	// slider for passable/shallow/deep
+	private boolean need_flora_pct;	// slider for percentage plant cover
+	private boolean need_flora_3;	// slider for tall grass/brush/trees
+	private boolean need_flora_p;	// flora palette selection
 
 	// control widgets
-	private JSlider levels; // number of height levels
-	private RangeSlider altitudes; // ground, hill, mountain OR pit, ground,
-									// mound
+	private JSlider levels; 	// number of height levels
+	private RangeSlider altitudes; // ground, hill, mountain OR pit, ground, mound
 	private RangeSlider slopes; // ground, hill, mountain
 	private RangeSlider depths; // marsh, shallow, deep
+	private JSlider flora_pct;	// percent plant cover
+	private RangeSlider flora_3;	// types of plant cover
 	private JTextField palette; // tile set description file
 	private JButton choosePalette; // select palette file
+	private JTextField flora_palette;	// flora description file
+	private JButton chooseFlora;	// select flora file
 
 	private Color[] colorMap; // level to preview color map
 
@@ -74,6 +80,9 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			need_depths = true;
 		}
 		need_palette = true;
+		need_flora_p = true;
+		need_flora_pct = true;
+		need_flora_3 = true;
 
 		// add our controls to those in the base class
 		create_GUI();
@@ -212,12 +221,80 @@ public class RPGMexport extends ExportBase implements ActionListener {
 
 			JLabel l = new JLabel("Water Depth (percentile)");
 			l.setFont(fontSmall);
-			;
 
 			// add this to the local panel
 			locals.add(new JLabel("    "));
 			locals.add(dTitle);
 			locals.add(depths);
+			locals.add(l);
+		}
+		
+		if (need_flora_pct || need_flora_3)
+			locals.add(new JLabel("     "));
+		
+		if (need_flora_p) {	// create flora palette selector
+			flora_palette = new JTextField(this.format + "_flora" + ".json");
+			JLabel fTitle = new JLabel("Flora Palette", JLabel.CENTER);
+			chooseFlora = new JButton("Browse");
+			fTitle.setFont(fontLarge);
+			JPanel f_panel = new JPanel(new GridLayout(2, 1));
+			f_panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+			f_panel.add(fTitle);
+			JPanel f1_panel = new JPanel();
+			f1_panel.setLayout(new BoxLayout(f1_panel, BoxLayout.LINE_AXIS));
+			f1_panel.add(flora_palette);
+			f1_panel.add(Box.createRigidArea(new Dimension(40, 0)));
+			f1_panel.add(chooseFlora);
+			f_panel.add(f1_panel);
+			locals.add(f_panel);
+
+			chooseFlora.addActionListener(this);
+		}
+		
+		if (need_flora_pct) {	// create a plant percentage slider
+			flora_pct = new JSlider(JSlider.HORIZONTAL, 0, 100, parms.dFloraPct);
+			flora_pct.setMajorTickSpacing(10);
+			flora_pct.setMinorTickSpacing(5);
+			flora_pct.setFont(fontSmall);
+			flora_pct.setPaintTicks(true);
+			flora_pct.setPaintLabels(true);
+			JLabel fTitle = new JLabel("Plant Cover (percentage)");
+			fTitle.setFont(fontSmall);
+
+			// add this to the local panel
+			locals.add(new JLabel("    "));
+			locals.add(flora_pct);
+			locals.add(fTitle);
+		}
+		
+		if (need_flora_3) { // create flora RangeSlider
+			JPanel fTitle = new JPanel(new GridLayout(1, 3));
+			JLabel fT1 = new JLabel("Tall Grass");
+			fT1.setFont(fontLarge);
+			fTitle.add(fT1);
+			JLabel fT2 = new JLabel("Brush", JLabel.CENTER);
+			fT2.setFont(fontLarge);
+			fTitle.add(fT2);
+			JLabel fT3 = new JLabel("Trees", JLabel.RIGHT);
+			fT3.setFont(fontLarge);
+			fTitle.add(fT3);
+
+			flora_3 = new RangeSlider(0, 100);
+			flora_3.setValue(parms.dFloraMin);
+			flora_3.setUpperValue(parms.dFloraMax);
+			flora_3.setMajorTickSpacing(10);
+			flora_3.setMinorTickSpacing(5);
+			flora_3.setFont(fontSmall);
+			flora_3.setPaintTicks(true);
+			flora_3.setPaintLabels(true);
+
+			JLabel l = new JLabel("Flora Distribution (percentile)");
+			l.setFont(fontSmall);
+
+			// add this to the local panel
+			locals.add(new JLabel("    "));
+			locals.add(fTitle);
+			locals.add(flora_3);
 			locals.add(l);
 		}
 
@@ -273,6 +350,14 @@ public class RPGMexport extends ExportBase implements ActionListener {
 					parms.dAltLevels = levels.getValue();
 				if (palette != null)
 					parms.Out_palette = palette.getText();
+				
+				if (flora_pct != null) {
+					parms.dFloraPct = flora_pct.getValue();
+				}
+				if (flora_3 != null) {
+					parms.dFloraMin = flora_3.getValue();
+					parms.dFloraMax = flora_3.getUpperValue();
+				}
 
 				// discard the window
 				windowClosing((WindowEvent) null);
@@ -294,6 +379,17 @@ public class RPGMexport extends ExportBase implements ActionListener {
 				if (dir != null)
 					palette_file = dir + palette_file;
 				palette.setText(palette_file);
+			}
+		} else if (e.getSource() == chooseFlora) {
+			FileDialog d = new FileDialog(this, "Flora Palette", FileDialog.LOAD);
+			d.setFile(flora_palette.getText());
+			d.setVisible(true);
+			String palette_file = d.getFile();
+			if (palette_file != null) {
+				String dir = d.getDirectory();
+				if (dir != null)
+					palette_file = dir + palette_file;
+				flora_palette.setText(palette_file);
 			}
 		}
 	}

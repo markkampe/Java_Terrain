@@ -1,0 +1,64 @@
+{ 
+  "Overworld Plants": [
+	{ "name": "Broadleaf", 
+	  "class": "Tree",
+	  "terrain": "land",
+	  "alt": { "min": 0, "max": 1500 },
+	  "temp": { "min": 0 },
+	  "hydro": { "min": 0.3 },
+	  "vigor": 32
+	},
+	{ "name": "Connifer", 
+	  "class": "Tree",
+	  "terrain": "highlands",
+	  "alt": { "min": 1000, "max": 2500 },
+	  "temp": { "min": -5 },
+	  "hydro": { "min": 0.15 },
+	  "vigor": 32
+	},
+	{ "name": "Palm",
+	  "class": "Tree",
+	  "terrain": "lowlands",
+	  "alt": { "max": 30 },
+	  "temp": { "min": 10 },
+	  "hydro": { "min": 0.15 },
+	  "vigor": 32
+	},
+	{ "name": "Snowtree", 
+	  "class": "Tree",
+	  "terrain": "land",
+	  "alt": { "max": 2500 },
+	  "temp": { "max": 7.5 },
+	  "hydro": { "min": 0.15 },
+	  "vigor": 32
+	},
+
+	{ "name": "Brush", 
+	  "class": "Brush",
+	  "terrain": "land",
+	  "temp": { "min": -5 },
+	  "hydro": { "min": 0.1 },
+	  "vigor": 32
+	},
+
+	{ "name": "Grass", 
+	  "class": "Grass",
+	  "terrain": "land",
+	  "temp": { "min": -5 },
+	  "hydro": { "min": 0.1 },
+	  "vigor": 32
+	},
+
+	{ "name": "template", "level": 666, "base": 666,
+	  "class": "none",
+	  "terrain": "none",
+	  "alt": { "min": 0, "max": 0 },
+	  "temp": { "min": 0.0, "max": 0.0 },
+	  "hydro": { "min": 0.0, "max": 0.0 },
+	  "depth": { "min": 0.0, "max": 0.0 },
+	  "slope": { "min": 0.0, "max": 0.0 },
+	  "soil": { "min": 0.0, "max": 0.0 },
+	  "face": { "min": 0.0, "max": 360.0 }
+	}
+    ]
+}

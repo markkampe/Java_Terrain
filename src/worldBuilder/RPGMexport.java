@@ -317,6 +317,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			RPGMTiler exporter = new RPGMTiler(palette.getText(), x_points, y_points);
 			export(exporter); // set the characteristics of each tile
 			levelMap(exporter); // set the altitude/depth->level->terrain type
+			floraMap(exporter);	// figure out what plants to put on each square
 
 			// get the output file name
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
@@ -368,6 +369,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			Exporter exporter = new RPGMTiler(palette.getText(), x_points, y_points);
 			export(exporter);
 			levelMap((RPGMTiler) exporter);
+			floraMap((RPGMTiler) exporter);
 			exporter.preview(Exporter.WhichMap.HEIGHTMAP, colorMap);
 		} else if (e.getSource() == choosePalette) {
 			FileDialog d = new FileDialog(this, "Tile Palette", FileDialog.LOAD);
@@ -550,9 +552,28 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			level++;
 		}
 
-		// compute a level for every square
+		// compute a terrain level for every square
 		RPGMLeveler leveler = new RPGMLeveler();
 		int[][] levelMap = leveler.getLevels(exporter, altMap, depthMap, slopeMap);
 		exporter.levelMap(levelMap, typeMap);
+	}
+	
+	/**
+	 * determine the owning plant type for every square
+	 * 
+	 * @param exporter
+	 */
+	public void floraMap(RPGMTiler exporter) {
+		
+		RPGMFlora flora = new RPGMFlora(exporter, flora_palette.getText());
+		
+		String[] floraClasses = {"Tree", "Brush", "Grass" };
+		int quotas[] = new int[3];
+		int total = (exporter.y_points * exporter.x_points * flora_pct.getValue()) / 100;
+		quotas[0] = (total * (100 - flora_3.getUpperValue())) / 100;	// trees
+		quotas[2] = (total * flora_3.getValue()) / 100;				// grasses
+		quotas[1] = total - (quotas[0] + quotas[2]);
+		
+		flora.getFlora(floraClasses, quotas);
 	}
 }

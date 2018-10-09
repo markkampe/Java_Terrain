@@ -8,6 +8,7 @@ public class TileRule {
 	public static LinkedList<TileRule> rules;
 	
 	public String ruleName;
+	public String className;/// what class of rules is this part of
 	public int level;		// map level
 	public int tileSet;		// tile set ID
 	public int baseTile;	// base tile for this rule
@@ -48,6 +49,7 @@ public class TileRule {
 		this.altTile = 0;
 		
 		// default values will meet any terrestrial conditions
+		className = null;
 		terrain = TerrainType.NONE;
 		minAltitude = -parms.alt_max;
 		maxAltitude = parms.alt_max;
@@ -77,6 +79,8 @@ public class TileRule {
 		if (height > 1 || width > 1)
 			System.out.print(", stamp=" + width + "x" + height);
 		System.out.println("");
+		if (className != null)
+			System.out.println(prefix + "      " + "class:   " + className);
 		System.out.println(prefix + "      " + "terrain: " + TerrainType.terrainType(terrain));
 		System.out.println(prefix + "      " + "alt:     " + minAltitude + "-" + maxAltitude);
 		System.out.println(prefix + "      " + "depth:   " + (int) minDepth + "-" + (int) maxDepth);

@@ -60,6 +60,8 @@ public class TileRules {
 		int height = 1, width = 1;					// stamp size
 		int neighbors = 8;							// auto-tile neighbors
 		
+		String className = null;					// floral class
+		
 		parser = Json.createParser(r);
 		while (parser.hasNext()) {
 			JsonParser.Event e = parser.next();
@@ -80,9 +82,12 @@ public class TileRules {
 				
 				// are these min/max attributes
 				if (thisObject == "") {	// end of a new rule?
-					if (level > 6)
+					if (level != NO_VALUE && level > 6)
 						break;
 					thisRule = new TileRule(name, tileset, level, base);
+
+					if (className != null)
+						thisRule.className = className;
 					if (aMin != NO_VALUE)
 						thisRule.minAltitude = aMin;
 					if (hMin != NO_VALUE)
@@ -124,6 +129,7 @@ public class TileRules {
 					level = NO_VALUE;
 					base = NO_VALUE;
 					surround = NO_VALUE;
+					className = null;
 					height = 1; width = 1;
 					aMin = NO_VALUE; aMax = NO_VALUE;
 					dMin = NO_VALUE; dMax = NO_VALUE;
@@ -135,10 +141,8 @@ public class TileRules {
 					vigor = NO_VALUE;
 					terrain = TerrainType.NONE;
 					name = "";
-					
 				} else
 					thisObject = "";
-				
 				thisKey = "";
 				break;
 				
@@ -159,6 +163,9 @@ public class TileRules {
 				switch (thisKey) {
 				case "name":
 					name = parser.getString();
+					break;
+				case "class":
+					className = parser.getString();
 					break;
 				case "stamp":
 					thisValue = parser.getString();

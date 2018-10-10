@@ -1,5 +1,6 @@
 package worldBuilder;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -44,6 +45,7 @@ public class TileRules {
 		TileRule thisRule = null;
 		String name = "", thisKey = "", thisObject = "", thisValue = "";
 		boolean inRules = false;
+		
 		int level = NO_VALUE, base = NO_VALUE;
 		
 		int    aMin = NO_VALUE, aMax = NO_VALUE;	// altitude
@@ -53,6 +55,7 @@ public class TileRules {
 		double mMin = NO_VALUE, mMax = NO_VALUE;	// slope
 		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
 		double fMin = NO_VALUE, fMax = NO_VALUE;	// facing direction
+		int red = NO_VALUE, blue = NO_VALUE, green = NO_VALUE;
 		
 		int terrain = TerrainType.NONE;
 		int surround = NO_VALUE;					// surrounding tile
@@ -61,6 +64,8 @@ public class TileRules {
 		int neighbors = 8;							// auto-tile neighbors
 		
 		String className = null;					// floral class
+		
+		int inColor = 0;
 		
 		parser = Json.createParser(r);
 		while (parser.hasNext()) {
@@ -120,6 +125,8 @@ public class TileRules {
 						thisRule.vigor = vigor;
 					if (surround != NO_VALUE)
 						thisRule.altTile = surround;
+					if (red != NO_VALUE)
+						thisRule.previewColor = new Color(red, blue, green);
 					thisRule.terrain = terrain;
 					thisRule.height = height;
 					thisRule.width = width;
@@ -139,6 +146,7 @@ public class TileRules {
 					fMin = NO_VALUE; fMax = NO_VALUE;
 					sMin = NO_VALUE; sMax = NO_VALUE;
 					vigor = NO_VALUE;
+					red = NO_VALUE; green = NO_VALUE; blue = NO_VALUE;
 					terrain = TerrainType.NONE;
 					name = "";
 				} else
@@ -147,16 +155,23 @@ public class TileRules {
 				break;
 				
 			case START_ARRAY:
-				if (thisKey != "") {
-					ruleset = thisKey;
-					thisKey = "";
+				if (thisKey.equals("color")) {
+						inColor = 1;
+				} else {
+					if (!thisKey.equals("")) {
+						ruleset = thisKey;
+						thisKey = "";
+					}
+					inRules = true;
 				}
-				inRules = true;
 				break;
 				
 			case END_ARRAY:
 				thisKey = "";
-				inRules = false;
+				if (inColor > 0)
+					inColor = 0;
+				else
+					inRules = false;
 				break;
 
 			case VALUE_STRING:
@@ -181,6 +196,26 @@ public class TileRules {
 				break;
 
 			case VALUE_NUMBER:
+				if (inColor > 0) {
+					switch(inColor) {
+					case 1:
+						red = parser.getInt();
+						inColor++;
+						break;
+					case 2:
+						blue = parser.getInt();
+						inColor++;
+						break;
+					case 3:
+						green = parser.getInt();
+						inColor++;
+						break;
+					default:
+						System.err.println("ERROR: too many fields in color");
+						break;
+					}
+					break;
+				}
 				switch (thisKey) {
 				case "level":
 					level = parser.getInt();

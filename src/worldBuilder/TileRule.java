@@ -1,5 +1,6 @@
 package worldBuilder;
 
+import java.awt.Color;
 import java.util.LinkedList;
 
 
@@ -35,6 +36,8 @@ public class TileRule {
 	
 	public int vigor;
 	
+	public Color previewColor;
+	
 	public String justification;	// reason for the last bid
 	
 	private static Parameters parms = Parameters.getInstance();
@@ -47,6 +50,7 @@ public class TileRule {
 		this.height = 1;
 		this.width = 1;
 		this.altTile = 0;
+		previewColor = null;
 		
 		// default values will meet any terrestrial conditions
 		className = null;
@@ -70,9 +74,9 @@ public class TileRule {
 	
 	/**
 	 * dump out a rule (for debugging)
-	 * @param prefix ... leading blankis
+	 * @param prefix ... leading blanks
 	 */
-	void dump( String prefix ) {
+	public void dump( String prefix ) {
 		System.out.print(prefix + "Rule: " + ruleName + ", level=" + level + ", base=" + baseTile);
 		if (altTile > 0)
 			System.out.print(", surround=" + altTile);
@@ -89,6 +93,11 @@ public class TileRule {
 		System.out.println(prefix + "      " + "soil:    " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
 		System.out.println(prefix + "      " + "slope:   " + String.format("%.1f", minSlope) + "-" + String.format("%.1f", maxSlope));
 		System.out.println(prefix + "      " + "face:    " + (int) minFace + "-" + (int) maxFace);
+		if (previewColor != null)
+			System.out.println(prefix + "      " + "color:   " +
+								previewColor.getRed() + "," +
+								previewColor.getGreen() + "," +
+								previewColor.getBlue());
 		System.out.println(prefix + "      " + "vigor:   " + vigor);
 	}
 	

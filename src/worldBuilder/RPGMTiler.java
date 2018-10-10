@@ -30,15 +30,15 @@ public class RPGMTiler implements Exporter {
 
 	// tile selection parameters
 	//private double Tmean; 	// mean temperature (degC)
-	private double Tsummer; 	// mean summer temperature (degC)
-	private double Twinter; 	// mean winter temperature (degC)
+	public double Tsummer; 	// mean summer temperature (degC)
+	public double Twinter; 	// mean winter temperature (degC)
 	//private double[][] rain;	// per point rainfall (meters)
 	public double[][] heights;	// per point height (meters)
 	public double[][] erode;	// per point erosion (meters)
 	public double[][] hydration; // per point water depth (meters)
 	public double[][] soil;	// per point soil type
-	private int[][] levels;		// per point terrain level
-	private int[] typeMap;		// map terrain level to type
+	public int[][] levels;		// per point terrain level
+	public int[] typeMap;		// map terrain level to type
 	//private double minHeight;	// lowest altitude in export
 	//private double maxHeight;	// highest altitude in export
 	//private double minDepth;	// shallowest water in export

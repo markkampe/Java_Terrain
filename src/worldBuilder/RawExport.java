@@ -20,7 +20,7 @@ public class RawExport extends ExportBase implements ActionListener {
 		// controls.add(whatever);
 		
 		// we handle window and button events
-		preview.addActionListener(this);
+		previewT.addActionListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		addWindowListener(this);
@@ -58,7 +58,7 @@ public class RawExport extends ExportBase implements ActionListener {
 			}
 		} else if (e.getSource() == cancel) {
 			windowClosing((WindowEvent) null);
-		} else if (e.getSource() == preview && selected) {
+		} else if (e.getSource() == previewT && selected) {
 			Exporter exporter = new JsonExporter(x_points, y_points);
 			export(exporter);
 			exporter.preview(Exporter.WhichMap.HEIGHTMAP, null);

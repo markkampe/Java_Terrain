@@ -43,7 +43,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 	private JTextField flora_palette;	// flora description file
 	private JButton chooseFlora;	// select flora file
 
-	private Color[] colorMap; // level to preview color map
+	private Color[] colorTopo; // level to preview color map
+	private Color[] colorFlora;	// flora class to preview color map
 
 	// preview colors
 	private static final Color GROUND_COLOR = new Color(102,51,0);
@@ -303,7 +304,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 		pack();
 
 		// we handle window and button events
-		preview.addActionListener(this);
+		previewT.addActionListener(this);
+		previewF.addActionListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		addWindowListener(this);
@@ -365,12 +367,17 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			}
 		} else if (e.getSource() == cancel) {
 			windowClosing((WindowEvent) null);
-		} else if (e.getSource() == preview && selected) {
+		} else if (e.getSource() == previewT && selected) {
+			Exporter exporter = new RPGMTiler(palette.getText(), x_points, y_points);
+			export(exporter);
+			levelMap((RPGMTiler) exporter);
+			exporter.preview(Exporter.WhichMap.HEIGHTMAP, colorTopo);
+		} else if (e.getSource() == previewF && selected) {
 			Exporter exporter = new RPGMTiler(palette.getText(), x_points, y_points);
 			export(exporter);
 			levelMap((RPGMTiler) exporter);
 			floraMap((RPGMTiler) exporter);
-			exporter.preview(Exporter.WhichMap.HEIGHTMAP, colorMap);
+			exporter.preview(Exporter.WhichMap.FLORAMAP, colorFlora);
 		} else if (e.getSource() == choosePalette) {
 			FileDialog d = new FileDialog(this, "Tile Palette", FileDialog.LOAD);
 			d.setFile(palette.getText());
@@ -497,7 +504,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 
 		// create the terrain level to TerrainType/color maps
 		typeMap = new int[totLevels];
-		colorMap = new Color[totLevels];
+		colorTopo = new Color[totLevels];
 		int level = water_base;
 
 		// water related types and colors
@@ -505,7 +512,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 		int delta = SHADE_RANGE;	// big change per level
 		for (int i = 0; i < waterLevels; i++) {
 			typeMap[level] = TerrainType.DEEP_WATER + i;
-			colorMap[level] = new Color(0, 0, shade);
+			colorTopo[level] = new Color(0, 0, shade);
 			shade += delta;
 			level++;
 		}
@@ -517,10 +524,10 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			for (int i = 0; i < lowLevels; i++) {
 				if (have_pits) {
 					typeMap[level] = TerrainType.PIT;
-					colorMap[level] = new Color(shade, shade, shade);
+					colorTopo[level] = new Color(shade, shade, shade);
 				} else {
 					typeMap[level] = TerrainType.GROUND;
-					colorMap[level] = GROUND_COLOR;
+					colorTopo[level] = GROUND_COLOR;
 				}
 				shade += delta;
 				level++;
@@ -533,10 +540,10 @@ public class RPGMexport extends ExportBase implements ActionListener {
 		for (int i = 0; i < midLevels; i++) {
 			if (have_pits) {
 				typeMap[level] = TerrainType.GROUND;
-				colorMap[level] = GROUND_COLOR;
+				colorTopo[level] = GROUND_COLOR;
 			} else {
 				typeMap[level] = TerrainType.HILL;
-				colorMap[level] = new Color(shade, shade, shade);
+				colorTopo[level] = new Color(shade, shade, shade);
 			}
 			shade += delta;
 			level++;
@@ -547,7 +554,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 		delta = SHADE_RANGE / highLevels;
 		for (int i = 0; i < highLevels; i++) {
 			typeMap[level] = have_pits ? TerrainType.HILL : TerrainType.MOUNTAIN;
-			colorMap[level] = new Color(shade, shade, shade);
+			colorTopo[level] = new Color(shade, shade, shade);
 			shade += delta;
 			level++;
 		}
@@ -574,6 +581,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 		quotas[2] = (total * flora_3.getValue()) / 100;				// grasses
 		quotas[1] = total - (quotas[0] + quotas[2]);
 		
-		flora.getFlora(floraClasses, quotas);
+		exporter.floraMap(flora.getFlora(floraClasses, quotas));
+		colorFlora = flora.getFloraColors();
 	}
 }

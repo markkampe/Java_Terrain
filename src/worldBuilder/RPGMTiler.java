@@ -38,6 +38,7 @@ public class RPGMTiler implements Exporter {
 	public double[][] hydration; // per point water depth (meters)
 	public double[][] soil;	// per point soil type
 	public int[][] levels;		// per point terrain level
+	public int[][] floraTypes;	// per point flora type
 	public int[] typeMap;		// map terrain level to type
 	//private double minHeight;	// lowest altitude in export
 	//private double maxHeight;	// highest altitude in export
@@ -153,6 +154,15 @@ public class RPGMTiler implements Exporter {
 					pMap[i][j] = colormap[levels[i][j]];
 				}
 			new PreviewMap("Export Preview (terrain)", pMap);
+		} else if (chosen == WhichMap.FLORAMAP) {
+			Color pMap[][] = new Color[y_points][x_points];
+			for(int i = 0; i < y_points; i++)
+				for(int j = 0; j < x_points; j++) {
+					int terrain = typeMap[levels[i][j]];
+					pMap[i][j] = (terrain <= TerrainType.PASSABLE_WATER) ? Color.BLUE : 
+									colormap[floraTypes[i][j]];
+				}
+			new PreviewMap("Export Preview (flora)", pMap);
 		}
 	}
 	
@@ -507,5 +517,9 @@ public class RPGMTiler implements Exporter {
 
 	public void waterMap(double[][] hydration) {
 		this.hydration = hydration;
+	}
+	
+	public void floraMap(int[][] flora) {
+		this.floraTypes = flora;
 	}
 }

@@ -62,6 +62,6 @@ public interface Exporter {
 	/**
 	 * create an output preview
 	 */
-	public enum WhichMap { HEIGHTMAP };
+	public enum WhichMap { HEIGHTMAP, FLORAMAP };
 	void preview(WhichMap chosen, Color colorMap[]);
 }

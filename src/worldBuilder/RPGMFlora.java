@@ -32,7 +32,7 @@ public class RPGMFlora {
 		names = new String[rules.rules.size()+1];
 		colors = new Color[rules.rules.size()+1];
 		names[0] = "NONE";
-		colors[0] = Color.BLACK;
+		colors[0] = Color.GRAY;
 		int numRules = 1;
 		for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext(); numRules++) {
 			TileRule r = it.next();
@@ -157,24 +157,37 @@ public class RPGMFlora {
 		}
 	}
 	
+	private FloraBid bids;
+	private FloraBid thisBid;
+	
 	private void record_bid(int id, double bid, int row, int col) {
 		FloraBid b = new FloraBid(id, bid, row, col);
-		// System.out.println("RULE " + names[id] + " bids " + bid + " for (" + row + "," + col + ")");
-		// FIX add this bid to the appropriate list
+		if (bids == null || bid > bids.bid) {
+			// insert at front of list
+			b.next = bids;
+			bids = b;
+		} else {	// insertion sort into the list
+			FloraBid f = bids;
+			while(f.next != null && f.next.bid > bid)
+				f = f.next;
+			b.next = f.next;
+			f.next = b;
+		}
 	}
 	
 	private FloraBid first_bid() {
-		// FIX return highest bid
-		return null;
+		thisBid = bids;
+		return thisBid;
 	}
 	
 	private FloraBid next_bid() {
-		// FIX return next bid
-		return null;
+		if (thisBid != null)
+			thisBid = thisBid.next;
+		return thisBid;
 	}
 	
 	private void reset_bids() {
-		// FIX discard all the bids
-		
+		bids = null;
+		thisBid = null;
 	}
 }

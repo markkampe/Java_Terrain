@@ -25,7 +25,8 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 	protected JTextField sel_name;	// name of region
 	protected JButton accept;
 	protected JButton cancel;
-	protected JButton preview;
+	protected JButton previewT;
+	protected JButton previewF;
 	protected JPanel controls;
 	
 	private JLabel sel_center;		// lat/lon of center
@@ -77,7 +78,8 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 		
 		accept = new JButton("EXPORT");
 		cancel = new JButton("CANCEL");
-		preview = new JButton("PREVIEW");
+		previewT = new JButton("PREVIEW TOPO");
+		previewF = new JButton("PREVIEW FLORA");
 	
 		// the tile size slider is pretty tricky
 		resolution = new JSlider(JSlider.HORIZONTAL, 0, meters_to_slider(MAX_TILE_SIZE), 
@@ -118,10 +120,12 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 		mainPane.add(descPanel, BorderLayout.NORTH);
 
 		// SOUTH: 3 buttons
-		JPanel buttons = new JPanel(new GridLayout(1,5));
+		JPanel buttons = new JPanel(new GridLayout(1,7));
 		buttons.add(cancel);
 		buttons.add(new JLabel(" "));
-		buttons.add(preview);
+		buttons.add(previewT);
+		buttons.add(new JLabel("  "));
+		buttons.add(previewF);
 		buttons.add(new JLabel("  "));
 		buttons.add(accept);
 		buttons.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));

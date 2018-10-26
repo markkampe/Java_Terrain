@@ -224,7 +224,7 @@ public class RPGMTiler implements Exporter {
 				int bids = 0;
 				for(int b = 0; b < numRules; b++) {
 					TileRule r = bidders[b];
-					int bid = r.bid(terrain, alt, hydro, Twinter - (int) lapse, Tsummer - (int) lapse, 
+					double bid = r.bid(terrain, alt, hydro, Twinter - (int) lapse, Tsummer - (int) lapse, 
 							soilType, slope, face);
 					if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
@@ -337,7 +337,7 @@ public class RPGMTiler implements Exporter {
 									String.format(", soil=%.1f",  soilType) + 
 									String.format(", slope=%03.0f", face));
 							
-							int thisBid = r.bid(terrain, alt, hydro , Twinter - lapse, Tsummer - lapse, soilType, slope, face);
+							double thisBid = r.bid(terrain, alt, hydro , Twinter - lapse, Tsummer - lapse, soilType, slope, face);
 							if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
 								System.out.println(r.ruleName + "[" + (i+dy) + "," + (j+dx) + "] (" + 
 										r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");

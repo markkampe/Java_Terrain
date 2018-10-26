@@ -102,20 +102,37 @@ public class TileRule {
 	}
 	
 	/**
+	 * compute how much to bid based on value and my range
+	 * 
+	 * @param value		actual value
+	 * @param min		bottom of acceptable range
+	 * @param max		top of acceptable range
+	 * 
+	 * @return			number between +1 (love it) and -1 (hate it)
+	 */
+	double range_bid(double value, double min, double max) {
+		
+		// figure out the acceptable range and where we are in it
+		double mid = (min + max)/2;
+		double range = mid - min;
+		double delta = Math.abs(value - mid);
+		
+		// if within range, return how close we are to center
+		if (delta <= range)
+			return 1.0 - delta/range;
+		
+		// if close, return how far off we are
+		if (delta < 2*range)
+			return -(delta - range)/range;
+		
+		// just say it is way off
+		return -1.0;
+	}
+	
+	/**
 	 * compute the bid that this tile will make for a grid square
-	 * 
-	 * 	NOTE: a characteristic in the center half of the range
-	 * 		  will get a full bid.  a characteristic in the high
-	 * 		  or low quarter will get a half bid.  The total bid
-	 * 		  is the product of the vigor and the characteristic
-	 * 		  bids.
-	 * 
-	 * comments on vigor:
-	 * 		1: any characteristic out of sweet zone -> 0
-	 * 		2: two characteristics out of sweet zone -> 0
-	 * 		4: three characteristics out of sweet zone -> 0
-	 * 		8: four characteristics out of sweet zone -> 0
-	 * 		16 is probably a good neutral vigor
+	 * 		total bid is the sum of characteristic bids
+	 * 		characteristic bid is based on where it is in range
 	 * 
 	 * @param terrain	TerrainClass
 	 * @param alt		altitude(M)
@@ -126,117 +143,63 @@ public class TileRule {
 	 * @param slope		dz/dxy
 	 * @param direction	0-360
 	 * 
-	 * @return			integer bid
+	 * @return			bid
 	 */
-	int bid(int terrain, double alt, double hydro, double winter, double summer, 
-			double soil, double slope, double direction) {
-	
-		// see if the terrain type precludes this tile-bit
-		switch(this.terrain) {
-			case TerrainType.LAND:
-				if (!TerrainType.isLand(terrain)) {
-					justification = "land terrain mismatch";
-					return 0;
-				}
-				break;
-				
-			case TerrainType.LOW:
-				if (!TerrainType.isLowLand(terrain)) {
-					justification = "low terrain mismatch";
-					return 0;
-				}
-				break;
-					
-			case TerrainType.HIGH:
-				if (!TerrainType.isHighLand(terrain)) {
-					justification = "high terrain mismatch";
-					return 0;
-				}
-				break;
-				
-			// specific terrain types must match
-			case TerrainType.DEEP_WATER:
-			case TerrainType.SHALLOW_WATER:
-			case TerrainType.PASSABLE_WATER:				
-			case TerrainType.PIT:
-			case TerrainType.GROUND:
-			case TerrainType.HILL:
-			case TerrainType.MOUNTAIN:
-			case TerrainType.SLOPE:
-				if (this.terrain != terrain) {
-					justification = "terrain mismatch";
-					return 0;
-				}
-				break;
-				
-			default:
-				break;
-		}
-		
-		// see if any parameters preclude this tile-bid
-		if (alt < minAltitude || alt > maxAltitude) {	
-			justification = "alt out of range";
-			return 0;
-		}
-		if (winter < minTemp || summer > maxTemp) {	
-			justification = "temp out of range";
-			return 0;
-		}
-		if (hydro > 0 && (hydro < minHydro || hydro > maxHydro)) {	
-			justification = "hydro out of range";
-			return 0;
-		}
-	/*	
-		if (hydro > 0 && minDepth > 0) {	
-			justification = "not u/w";
-			return 0;
-		}
-		if (hydro < 0 && ((-hydro < minDepth || -hydro > maxDepth))) {	
-			justification = "depth out of range";
-			return(0);
-		}
-		*/
-		if (soil < minSoil || soil > maxSoil) {	
-				justification = "soil out of range";
-			return 0;
-		}
-		if (slope < minSlope || slope > maxSlope) {	
-			justification = "slope out of range";
-			return 0;
-		}
-		if (direction < minFace || direction > maxFace) {	
-			justification = "face out of range";
-			return 0;
-		}
-		
-		// see if any parameters take us outside of the sweet-zone
-		double score = vigor;
-		justification = "";
-		if (alt < (maxAltitude + 3 * minAltitude) / 4) {
-			justification += "low altitude reduction ";
-			score /= 2;
-		} else if (alt > (minAltitude + 3 * maxAltitude) / 4) {
-			justification += "high altitude reduction ";
-			score /= 2;
-		}
-		if (hydro >= 0) {
-			if (hydro < (maxHydro + 3 * minHydro) / 4) {
-				justification += "low hydration reduction ";
-				score /= 2;
-			} else if (hydro > (minHydro + 3 * maxHydro) / 4) {
-				justification += "high hydration reduction ";
-				score /= 2;
+	double bid(int terrain, double alt, double hydro, double winter, double summer, double soil, double slope,
+			double direction) {
+
+		// see if the terrain type precludes this tile-bid
+		switch (this.terrain) {
+		case TerrainType.LAND:
+			if (!TerrainType.isLand(terrain)) {
+				justification = "land terrain mismatch";
+				return -vigor;
 			}
-		}
-		if (winter < (maxTemp + 3 * minTemp) / 4) {
-			justification += "low temp reduction ";
-			score /= 2;
-		} else if (summer > (minTemp + 3 * maxTemp) / 4) {
-			justification += "high temp reduction ";
-			score /= 2;
+			break;
+
+		case TerrainType.LOW:
+			if (!TerrainType.isLowLand(terrain)) {
+				justification = "low terrain mismatch";
+				return -vigor;
+			}
+			break;
+
+		case TerrainType.HIGH:
+			if (!TerrainType.isHighLand(terrain)) {
+				justification = "high terrain mismatch";
+				return -vigor;
+			}
+			break;
+
+		// specific terrain types must match
+		case TerrainType.DEEP_WATER:
+		case TerrainType.SHALLOW_WATER:
+		case TerrainType.PASSABLE_WATER:
+		case TerrainType.PIT:
+		case TerrainType.GROUND:
+		case TerrainType.HILL:
+		case TerrainType.MOUNTAIN:
+		case TerrainType.SLOPE:
+			if (this.terrain != terrain) {
+				justification = "terrain mismatch";
+				return -vigor;
+			}
+			break;
+
+		default:
+			break;
 		}
 
-		// round it up and return it
-		return (int) (score + 0.5);
+		// range check vs altitude, hydration and temperature
+		double score = 0;
+		score += range_bid(alt, minAltitude, maxAltitude);
+		if (hydro >= 0)
+			score += range_bid(hydro, minHydro, maxHydro);
+		score += range_bid(winter, minTemp, maxTemp);
+		score += range_bid(summer, minTemp, maxTemp);
+		score += range_bid(direction, minFace, maxFace);
+		score += range_bid(slope, minSlope, maxSlope);
+		score += range_bid(soil, minSoil, maxSoil);
+		return vigor * score;
 	}
 }

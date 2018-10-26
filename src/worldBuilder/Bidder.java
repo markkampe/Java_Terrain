@@ -10,8 +10,8 @@ public class Bidder {
 	
 	private int numBidders;	// number of bidders 
 	private int bidders[];	// registered bidders
-	private int bids[];		// corresponding bids
-	private int totBids;	// sum of bids
+	private double bids[];	// corresponding bids
+	private double totBids;	// sum of bids
 	
 	/**
 	 * instantiate a Bidder for a new auction
@@ -19,7 +19,7 @@ public class Bidder {
 	 */
 	public Bidder(int maxBidders) {
 		bidders = new int[maxBidders];
-		bids = new int[maxBidders];
+		bids = new double[maxBidders];
 		numBidders = 0;
 		totBids = 0;
 	}
@@ -31,7 +31,7 @@ public class Bidder {
 	 * @param bid
 	 * @return	success/failure
 	 */
-	public boolean bid(int bidder, int bid) {
+	public boolean bid(int bidder, double bid) {
 		if (bid <= 0)
 			return true;	// zero bids never win
 		if (numBidders >= bidders.length)
@@ -51,8 +51,8 @@ public class Bidder {
 	}
 	
 	/**
-	 * determine the winner of the acution
-	 * @param value ... random valut that chooses the winner
+	 * determine the winner of the auction
+	 * @param value ... random value that chooses the winner
 	 * @return
 	 */
 	public int winner(double value) {

@@ -134,7 +134,6 @@ public class TileRule {
 	 * 		total bid is the sum of characteristic bids
 	 * 		characteristic bid is based on where it is in range
 	 * 
-	 * @param terrain	TerrainClass
 	 * @param alt		altitude(M)
 	 * @param hydro		hydration(%)
 	 * @param winter	low temp(degC)
@@ -145,31 +144,35 @@ public class TileRule {
 	 * 
 	 * @return			bid
 	 */
-	double bid(int terrain, double alt, double hydro, double winter, double summer, double soil, double slope,
+	double bid(double alt, double hydro, double winter, double summer, double soil, double slope,
 			double direction) {
 
+		// range check vs altitude, hydration and temperature
+		double score = 0;
+		score += range_bid(alt, minAltitude, maxAltitude);
+		if (hydro >= 0)
+			score += range_bid(hydro, minHydro, maxHydro);
+		score += range_bid((winter+summer)/2, minTemp, maxTemp);
+		score += range_bid(direction, minFace, maxFace);
+		score += range_bid(slope, minSlope, maxSlope);
+		score += range_bid(soil, minSoil, maxSoil);
+		return vigor * score;
+	}
+	
+	/**
+	 * is this rule inapplicable to a particular terrain
+	 */
+	boolean wrongTerrain(int terrain) {
 		// see if the terrain type precludes this tile-bid
 		switch (this.terrain) {
 		case TerrainType.LAND:
-			if (!TerrainType.isLand(terrain)) {
-				justification = "land terrain mismatch";
-				return -vigor;
-			}
-			break;
+			return !TerrainType.isLand(terrain);
 
 		case TerrainType.LOW:
-			if (!TerrainType.isLowLand(terrain)) {
-				justification = "low terrain mismatch";
-				return -vigor;
-			}
-			break;
+			return !TerrainType.isLowLand(terrain);
 
 		case TerrainType.HIGH:
-			if (!TerrainType.isHighLand(terrain)) {
-				justification = "high terrain mismatch";
-				return -vigor;
-			}
-			break;
+			return !TerrainType.isHighLand(terrain);
 
 		// specific terrain types must match
 		case TerrainType.DEEP_WATER:
@@ -180,26 +183,15 @@ public class TileRule {
 		case TerrainType.HILL:
 		case TerrainType.MOUNTAIN:
 		case TerrainType.SLOPE:
-			if (this.terrain != terrain) {
-				justification = "terrain mismatch";
-				return -vigor;
-			}
-			break;
-
 		default:
-			break;
+			return this.terrain != terrain;
 		}
+	}
 
-		// range check vs altitude, hydration and temperature
-		double score = 0;
-		score += range_bid(alt, minAltitude, maxAltitude);
-		if (hydro >= 0)
-			score += range_bid(hydro, minHydro, maxHydro);
-		score += range_bid(winter, minTemp, maxTemp);
-		score += range_bid(summer, minTemp, maxTemp);
-		score += range_bid(direction, minFace, maxFace);
-		score += range_bid(slope, minSlope, maxSlope);
-		score += range_bid(soil, minSoil, maxSoil);
-		return vigor * score;
+	/**
+	 * is this rule inapplicable to a particular floral class
+	 */
+	boolean wrongFlora(String floraClass) {
+		return (className != null && !className.equals(floraClass));
 	}
 }

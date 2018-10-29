@@ -581,7 +581,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 		quotas[2] = (total * flora_3.getValue()) / 100;				// grasses
 		quotas[1] = total - (quotas[0] + quotas[2]);
 		
-		exporter.floraMap(flora.getFlora(floraClasses, quotas));
+		exporter.floraMap(flora.getFlora(floraClasses, quotas), flora.getFloraNames());
 		colorFlora = flora.getFloraColors();
 	}
 }

@@ -1,5 +1,5 @@
 { 
-  "Overworld Plants": [
+  "Outside Plants": [
 	{ "name": "Broadleaf", 
 	  "class": "Tree",
 	  "terrain": "land",
@@ -46,15 +46,17 @@
 	},
 
 	{ "name": "template", "level": 666, "base": 666,
-	  "class": "none",
-	  "terrain": "none",
+	  "class": "template",
+	  "terrain": "NONE",
 	  "alt": { "min": 0, "max": 0 },
 	  "temp": { "min": 0.0, "max": 0.0 },
 	  "hydro": { "min": 0.0, "max": 0.0 },
 	  "depth": { "min": 0.0, "max": 0.0 },
 	  "slope": { "min": 0.0, "max": 0.0 },
 	  "soil": { "min": 0.0, "max": 0.0 },
-	  "face": { "min": 0.0, "max": 360.0 }
+	  "face": { "min": 0.0, "max": 360.0 },
+	  "color": [0,0,0],
+	  "vigor": 0
 	}
     ]
 }

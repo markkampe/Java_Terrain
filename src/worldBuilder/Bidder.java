@@ -56,6 +56,7 @@ public class Bidder {
 	 * @return
 	 */
 	public int winner(double value) {
+		// FIX - lose random # in bids?
 		if (totBids == 0)
 			return(0);
 		else if (totBids == 1)
@@ -78,7 +79,7 @@ public class Bidder {
 		// scan the bids to see which one was selected
 		for(int i = 0; i < numBidders; i++) {
 			chosen -= bids[i];
-			if (chosen < 0)
+			if (chosen < 1)
 				return bidders[i];
 		}
 		System.err.println("ERROR: bid " + (int) value + "/" + totBids);

@@ -13,97 +13,93 @@
 	  "terrain": "deep"
 	},
 
+
 	{ "name": "dirt", "level": 1, "base": 2816,
 	  "terrain": "ground",
-	  "temp": { "min": -5.0 },
-	  "hydro": { "max": 0.10 },
+	  "temp": { "min": -1 },
 	  "vigor": 2
 	},
-	{ "name": "grass", "level": 1, "base": 2864,
-	  "terrain": "ground",
-	  "temp": { "min": -5 },
-	  "hydro": { "min": 0.075 },
-	  "vigor": 128
-	},
-	{ "name": "snow", "level": 1, "base": 3968,
-	  "terrain": "ground",
-	  "temp": { "max": 7.5 },
-	  "vigor": 32
-	},
 	{ "name": "rocks", "level": 1, "base": 3296,
+	  "class": "NONE",
 	  "terrain": "ground",
-	  "temp": { "min": -5.0 },
-	  "hydro": { "max": 0.08 },
 	  "soil": { "min": 0.5, "max": 2.5 },
 	  "vigor": 0
 	},
+	{ "name": "snow", "level": 1, "base": 3968,
+	  "terrain": "ground",
+	  "temp": { "max": 1 },
+	  "vigor": 32
+	},
+	{ "name": "grass", "level": 1, "base": 2864,
+	  "class": "Grass",
+	  "terrain": "ground",
+	  "temp": { "min": 0 },
+	  "vigor": 128
+	},
+
 
 	{ "name": "hi-dirt", "level": 1, "base": 7472,
 	  "terrain": "highlands",
-	  "temp": { "min": -5.0 },
+	  "temp": { "min": 0 },
 	  "hydro": { "max": 0.10 },
 	  "vigor": 2
 	},
 	{ "name": "hi-grass", "level": 1, "base": 7424,
+	  "class": "Grass",
 	  "terrain": "highlands",
-	  "temp": { "min": -5 },
-	  "hydro": { "min": 0.075 },
+	  "temp": { "min": 0 },
 	  "vigor": 128
 	},
 	{ "name": "hi-snow", "level": 1, "base": 7568,
 	  "terrain": "highlands",
-	  "temp": { "max": 7.5 },
+	  "temp": { "max": 0 },
 	  "vigor": 32
 	},
 
 	{ "name": "dirt-slope", "level": 1, "base": 7856, "neighbors": 4,
 	  "terrain": "slope",
-	  "temp": { "min": -5.0 },
+	  "temp": { "min": 0 },
 	  "vigor": 2
 	},
 	{ "name": "grass-slope", "level": 1, "base": 7808, "neighbors": 4,
 	  "terrain": "slope",
-	  "temp": { "min": -5 },
+	  "class": "Grass",
+	  "temp": { "min": 0 },
 	  "hydro": { "min": 0.075 },
 	  "vigor": 128
 	},
 	{ "name": "snow-slope", "level": 1, "base": 7952, "neighbors": 4,
 	  "terrain": "slope",
-	  "temp": { "max": 7.5 },
+	  "temp": { "max": 0 },
 	  "vigor": 32
 	},
 
 
-	{ "name": "tree", "level": 4, "base": 112, "stamp": "2x2", "surround": 114,
+	{ "name": "brush", "level": 4, "base": 0, 
+	  "class": "Brush",
 	  "terrain": "land",
-	  "alt": { "min": 0, "max": 1500 },
-	  "temp": { "min": 0 },
-	  "hydro": { "min": 0.15 },
+	  "VIGOR": 32
+	},
+	{ "name": "palm", "level": 4, "base": 172, "stamp": "1x2",
+	  "class": "Palm",
+	  "terrain": "land",
+	  "VIGOR": 32
+	},
+	{ "name": "tree", "level": 4, "base": 112, "stamp": "2x2", "surround": 114,
+	  "class": "Broadleaf",
+	  "terrain": "land",
 	  "vigor": 32
 	},
 	{ "name": "pine", "level": 4, "base": 93, "stamp": "1x2",
+	  "class": "Connifer",
 	  "terrain": "land",
-	  "alt": { "min": 1000, "max": 2500 },
-	  "temp": { "min": -5 },
-	  "hydro": { "min": 0.10 },
+	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
-	{ "name": "palm", "level": 4, "base": 172, "stamp": "1x2",
+	{ "name": "snowpine", "level": 4, "base": 128, "stamp": "2x2", "surround": 130,
+	  "class": "Connifer",
 	  "terrain": "land",
-	  "alt": { "max": 30 },
-	  "temp": { "min": 10 },
-	  "hydro": { "min": 0.10 },
-	  "vigor": 32
-	},
-	{ "name": "snowtree", "level": 4, "base": 128, "stamp": "2x2", "surround": 130,
-	  "terrain": "land",
-	  "alt": { "max": 2500 },
-	  "temp": { "max": 7.5 },
-	  "hydro": { "min": 0.10 },
-	  "vigor": 32
-	},
-	{ "name": "EMPTYFIELD", "level": 4, "base": 0,
-	  "terrain": "land",
+	  "temp": { "max": 0 },
 	  "vigor": 32
 	},
 

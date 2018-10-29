@@ -29,7 +29,7 @@ public class RPGMTiler implements Exporter {
 	private double lon;			// longitude
 
 	// tile selection parameters
-	//private double Tmean; 	// mean temperature (degC)
+	private double Tmean; 	// mean temperature (degC)
 	public double Tsummer; 	// mean summer temperature (degC)
 	public double Twinter; 	// mean winter temperature (degC)
 	//private double[][] rain;	// per point rainfall (meters)
@@ -40,6 +40,7 @@ public class RPGMTiler implements Exporter {
 	public int[][] levels;		// per point terrain level
 	public int[][] floraTypes;	// per point flora type
 	public int[] typeMap;		// map terrain level to type
+	public String[] floraNames;	// map flora type to class name
 	//private double minHeight;	// lowest altitude in export
 	//private double maxHeight;	// highest altitude in export
 	//private double minDepth;	// shallowest water in export
@@ -224,7 +225,11 @@ public class RPGMTiler implements Exporter {
 				int bids = 0;
 				for(int b = 0; b < numRules; b++) {
 					TileRule r = bidders[b];
-					double bid = r.bid(terrain, alt, hydro, Twinter - (int) lapse, Tsummer - (int) lapse, 
+					if (r.wrongTerrain(terrain))
+						continue;
+					if (r.wrongFlora(floraNames[floraTypes[i][j]]))
+						continue;
+					double bid = r.bid(alt, hydro, Tmean - lapse, Tmean - lapse, 
 							soilType, slope, face);
 					if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
@@ -316,17 +321,29 @@ public class RPGMTiler implements Exporter {
 								noBid = true;
 								continue;
 							}
-							// collect all the attributes of this square
+							
+							// make sure this square meets the rule terrain type
+							int terrain = typeMap[levels[i+dy][j+dx]];
+							if (useSLOPE && i+dy > 0 && !TerrainType.isWater(terrain) && levels[i+dy-1][j+dx] > levels[i+dy][j+dx])
+								terrain = TerrainType.SLOPE;
+							if (r.wrongTerrain(terrain)) {
+								noBid = true;
+								continue;
+							}
+							
+							// make sure this square matches the rule flora type
+							if (r.wrongFlora(floraNames[floraTypes[i+dy][j+dx]])) {
+								noBid = true;
+								continue;
+							}
+							
+							// collect the attributes of this square
 							int alt = (int) parms.altitude(heights[i+dy][j+dx] - erode[i+dy][j+dx]);
 							double lapse = alt * parms.lapse_rate;
 							double hydro = hydration[i+dy][j+dx];
 							double slope = slope(i+dy,j+dx);
 							double face = direction(i+dy, j+dx);
 							double soilType = soil[i+dy][j+dx];
-							int terrain = typeMap[levels[i][j]];
-							// South slopes may be a different terrain type
-							if (useSLOPE && i > 0 && !TerrainType.isWater(terrain) && levels[i-1][j] > levels[i][j])
-								terrain = TerrainType.SLOPE;
 							
 							if (parms.debug_level >= EXPORT_DEBUG && b == 0)
 								System.out.println("l" + level + "[" + (i+dy) + "," + (j+dx) + "]: " +
@@ -337,11 +354,11 @@ public class RPGMTiler implements Exporter {
 									String.format(", soil=%.1f",  soilType) + 
 									String.format(", slope=%03.0f", face));
 							
-							double thisBid = r.bid(terrain, alt, hydro , Twinter - lapse, Tsummer - lapse, soilType, slope, face);
+							double thisBid = r.bid(alt, hydro , Tmean - lapse, Tmean - lapse, soilType, slope, face);
 							if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
 								System.out.println(r.ruleName + "[" + (i+dy) + "," + (j+dx) + "] (" + 
 										r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");
-							if (thisBid == 0)
+							if (thisBid <= 0)
 								noBid = true;
 							else
 								bid += thisBid;
@@ -484,7 +501,7 @@ public class RPGMTiler implements Exporter {
 	}
 
 	public void temps(double meanTemp, double meanSummer, double meanWinter) {
-		//this.Tmean = meanTemp;
+		this.Tmean = meanTemp;
 		this.Tsummer = meanSummer;
 		this.Twinter = meanWinter;
 	}
@@ -519,7 +536,8 @@ public class RPGMTiler implements Exporter {
 		this.hydration = hydration;
 	}
 	
-	public void floraMap(int[][] flora) {
+	public void floraMap(int[][] flora, String[] names) {
 		this.floraTypes = flora;
+		this.floraNames = names;
 	}
 }

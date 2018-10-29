@@ -82,6 +82,7 @@ public class RPGMFlora {
 				System.out.println("    " + classes[i] + ": " + quotas[i] + " tiles");
 		}
 
+		double Tmean = (tiler.Tsummer + tiler.Twinter)/2;
 		// populate each of the plant classes
 		for(int c = 0; c < classes.length; c++) {
 			for(int i = 0; i < y_points; i++)
@@ -104,13 +105,14 @@ public class RPGMFlora {
 					for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
 						TileRule r = it.next();
 						rulenum++;		// name/claim based on rulenum + 1
-						// make sure this is the right class of plant
-						if (!classes[c].equals(r.className))
+						if (r.wrongFlora(classes[c]))
+							continue;
+						if (r.wrongTerrain(terrain))
 							continue;
 						
 						// collect the bid
-						double b = r.bid(terrain, alt, hydro, 
-										tiler.Twinter - lapse, tiler.Tsummer - lapse, 
+						double b = r.bid(alt, hydro, 
+										Tmean - lapse, Tmean - lapse, 
 										soil, slope, face);
 						if (b>0)
 							record_bid(rulenum, b, i, j);
@@ -140,8 +142,12 @@ public class RPGMFlora {
 		return flora;
 	}
 	
+	/**
+	 * This private class keeps track of every flora type's bids
+	 * on every available tile.
+	 */
 	private class FloraBid {
-		
+		// TODO - rewrite FloraBid w/Iterator?
 		public int floraID;	// index bidding plant
 		public double bid;	// amount of bid
 		public int row;		// row,col for which bid was made
@@ -160,6 +166,14 @@ public class RPGMFlora {
 	private FloraBid bids;
 	private FloraBid thisBid;
 	
+	/**
+	 * record a bid on a tile
+	 * 
+	 * @param id ... floral class index
+	 * @param bid ... bid
+	 * @param row ... tile row
+	 * @param col ... tile column
+	 */
 	private void record_bid(int id, double bid, int row, int col) {
 		FloraBid b = new FloraBid(id, bid, row, col);
 		if (bids == null || bid > bids.bid) {
@@ -174,7 +188,7 @@ public class RPGMFlora {
 			f.next = b;
 		}
 	}
-	
+
 	private FloraBid first_bid() {
 		thisBid = bids;
 		return thisBid;

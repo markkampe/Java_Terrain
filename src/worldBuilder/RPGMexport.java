@@ -361,9 +361,6 @@ public class RPGMexport extends ExportBase implements ActionListener {
 					parms.dFloraMin = flora_3.getValue();
 					parms.dFloraMax = flora_3.getUpperValue();
 				}
-
-				// discard the window
-				windowClosing((WindowEvent) null);
 			}
 		} else if (e.getSource() == cancel) {
 			windowClosing((WindowEvent) null);

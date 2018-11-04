@@ -41,6 +41,7 @@ public class TileRule {
 	public String justification;	// reason for the last bid
 	
 	private static Parameters parms = Parameters.getInstance();
+	private static final double IMPOSSIBLE = -666.0;
 	
 	public TileRule(String name, int tileset, int level, int base) {
 		this.ruleName = name;
@@ -55,20 +56,20 @@ public class TileRule {
 		// default values will meet any terrestrial conditions
 		className = null;
 		terrain = TerrainType.NONE;
-		minAltitude = -parms.alt_max;
-		maxAltitude = parms.alt_max;
+		minAltitude = -2 * parms.alt_max;
+		maxAltitude = 2 * parms.alt_max;
 		minDepth = 0;
 		maxDepth = 0;
 		minHydro = 0.0;
 		maxHydro = 1.0;
-		minTemp = -30;
-		maxTemp = 35;
-		minSlope = 0.0;
-		maxSlope = 100.0;
-		minSoil = 0;
-		maxSoil = Map.soil_names.length - 1;
-		minFace = 0;
-		maxFace = 360;
+		minTemp = -60;
+		maxTemp = 70;
+		minSlope = -100;
+		maxSlope = 200.0;
+		minSoil = -10;
+		maxSoil = 10;
+		minFace = -1024;
+		maxFace = 1024;
 		vigor = 16;
 	}
 	
@@ -108,25 +109,28 @@ public class TileRule {
 	 * @param min		bottom of acceptable range
 	 * @param max		top of acceptable range
 	 * 
-	 * @return			number between +1 (love it) and -1 (hate it)
+	 * @return			1 to 0 if we are in the middle 50%
+	 * 					0 to -1 if we are in the top/bottom 25%
+	 * 					IMPOSSIBLE if we are outside the range
 	 */
 	double range_bid(double value, double min, double max) {
 		
 		// figure out the acceptable range and where we are in it
 		double mid = (min + max)/2;
 		double range = mid - min;
+		double good = range/2;
 		double delta = Math.abs(value - mid);
 		
-		// if within range, return how close we are to center
-		if (delta <= range)
-			return 1.0 - delta/range;
+		// if within good range, return how close we are to center
+		if (delta <= good)
+			return 1.0 - delta/good;
 		
 		// if close, return how far off we are
-		if (delta < 2*range)
-			return -(delta - range)/range;
+		if (delta < range)
+			return -(delta - good)/good;
 		
 		// just say it is way off
-		return -1.0;
+		return IMPOSSIBLE;
 	}
 	
 	/**

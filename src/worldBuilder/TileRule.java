@@ -40,6 +40,7 @@ public class TileRule {
 	
 	public Color previewColor;
 	
+	public boolean debug;			// trace bids from this rule
 	public String justification;	// reason for the last bid
 	
 	private static Parameters parms = Parameters.getInstance();
@@ -53,13 +54,14 @@ public class TileRule {
 		this.height = 1;
 		this.width = 1;
 		this.altTile = 0;
+		this.debug = false;
 		previewColor = null;
 		
 		// default values will meet any terrestrial conditions
 		className = null;
 		terrain = TerrainType.NONE;
-		minAltitude = -2 * parms.alt_max;
-		maxAltitude = 2 * parms.alt_max;
+		minAltitude = -parms.alt_max;
+		maxAltitude = parms.alt_max;
 		minDepth = 0;
 		maxDepth = 0;
 		minHydro = 0.0;
@@ -67,11 +69,11 @@ public class TileRule {
 		minTemp = -60;
 		maxTemp = 70;
 		minSlope = -100;
-		maxSlope = 200.0;
-		minSoil = -10;
-		maxSoil = 10;
-		minFace = -1024;
-		maxFace = 1024;
+		maxSlope = 100;
+		minSoil = 0;
+		maxSoil = 5;
+		minFace = 0;
+		maxFace = 360;
 		flexRange = false;
 		taperedBid = false;
 		vigor = 16;

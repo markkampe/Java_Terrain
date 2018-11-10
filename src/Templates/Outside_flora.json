@@ -1,10 +1,11 @@
 { 
   "Outside Plants": [
+	{ "//": "sub-classes of trees" },
 	{ "name": "Broadleaf", 
 	  "class": "Tree",
 	  "terrain": "land",
 	  "alt": { "min": 0, "max": 1500 },
-	  "temp": { "min": 0 },
+	  "temp": { "min": 0, "max": 20 },
 	  "hydro": { "min": 0.3 },
 	  "vigor": 32,
 	  "range": "flexible",
@@ -25,7 +26,7 @@
 	  "class": "Tree",
 	  "terrain": "lowlands",
 	  "alt": { "max": 30 },
-	  "temp": { "min": 10 },
+	  "temp": { "min": 15 },
 	  "hydro": { "min": 0.15 },
 	  "vigor": 32,
 	  "range": "flexible",
@@ -33,6 +34,7 @@
 	  "color": [102,204,0]
 	},
 
+	{ "//": "for now, only one class of brush" },
 	{ "name": "Brush", 
 	  "class": "Brush",
 	  "terrain": "land",
@@ -44,6 +46,7 @@
 	  "color": [102,102,0]
 	},
 
+	{ "//": "for now, only one class of tall grass" },
 	{ "name": "Grass", 
 	  "class": "Grass",
 	  "terrain": "land",
@@ -55,11 +58,12 @@
 	  "color": [178,255,102]
 	},
 
+	{ "//": "example with all fields" },
 	{ "name": "template", "level": 666, "base": 666,
 	  "class": "template",
 	  "terrain": "NONE",
-	  "range": "strict",
-	  "bid": "flat",
+	  "range": "flexible",
+	  "bid": "tapered",
 	  "alt": { "min": 0, "max": 0 },
 	  "temp": { "min": 0.0, "max": 0.0 },
 	  "hydro": { "min": 0.0, "max": 0.0 },

@@ -1,12 +1,15 @@
 { 
   "Overworld Plants": [
+	{ "//": "sub-classes of trees" },
 	{ "name": "Broadleaf", 
 	  "class": "Tree",
 	  "terrain": "land",
 	  "alt": { "min": 0, "max": 1500 },
-	  "temp": { "min": 0 },
+	  "temp": { "min": 0, "max": 20 },
 	  "hydro": { "min": 0.3 },
 	  "vigor": 32,
+	  "range": "flexible",
+	  "bid": "tapered",
 	  "color": [0,255,0]
 	},
 	{ "name": "Connifer", 
@@ -15,46 +18,61 @@
 	  "alt": { "min": 1000, "max": 2500 },
 	  "hydro": { "min": 0.15 },
 	  "vigor": 32,
+	  "range": "flexible",
+	  "bid": "tapered",
 	  "color": [0,102,51]
 	},
 	{ "name": "Palm",
 	  "class": "Tree",
 	  "terrain": "lowlands",
 	  "alt": { "max": 30 },
-	  "temp": { "min": 10 },
+	  "temp": { "min": 15 },
 	  "hydro": { "min": 0.15 },
 	  "vigor": 32,
+	  "range": "flexible",
+	  "bid": "tapered",
 	  "color": [102,204,0]
 	},
 
+	{ "//": "for now, only one class of brush" },
 	{ "name": "Brush", 
 	  "class": "Brush",
 	  "terrain": "land",
 	  "temp": { "min": 0 },
 	  "hydro": { "min": 0.1 },
 	  "vigor": 32,
+	  "range": "flexible",
+	  "bid": "tapered",
 	  "color": [102,102,0]
 	},
 
+	{ "//": "for now, only one class of tall grass" },
 	{ "name": "Grass", 
 	  "class": "Grass",
 	  "terrain": "land",
 	  "temp": { "min": 0 },
 	  "hydro": { "min": 0.1 },
 	  "vigor": 32,
+	  "range": "flexible",
+	  "bid": "tapered",
 	  "color": [178,255,102]
 	},
 
+	{ "//": "example with all fields" },
 	{ "name": "template", "level": 666, "base": 666,
-	  "class": "none",
-	  "terrain": "none",
+	  "class": "template",
+	  "terrain": "NONE",
+	  "range": "flexible",
+	  "bid": "tapered",
 	  "alt": { "min": 0, "max": 0 },
 	  "temp": { "min": 0.0, "max": 0.0 },
 	  "hydro": { "min": 0.0, "max": 0.0 },
 	  "depth": { "min": 0.0, "max": 0.0 },
 	  "slope": { "min": 0.0, "max": 0.0 },
 	  "soil": { "min": 0.0, "max": 0.0 },
-	  "face": { "min": 0.0, "max": 360.0 }
+	  "face": { "min": 0.0, "max": 360.0 },
+	  "color": [0,0,0],
+	  "vigor": 0
 	}
     ]
 }

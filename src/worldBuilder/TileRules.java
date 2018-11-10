@@ -24,6 +24,7 @@ public class TileRules {
 	public TileRules(String exportRules) {
 		rules = new LinkedList<TileRule>();
 	
+		Parameters parms = Parameters.getInstance();
 		BufferedReader r;
 		JsonParser parser;
 		String filename;
@@ -89,10 +90,14 @@ public class TileRules {
 				
 				// are these min/max attributes
 				if (thisObject == "") {	// end of a new rule?
-					if (level != NO_VALUE && level > 6)
+					// no name or illegal level is not a real rule
+					if (name.equals("") || (level != NO_VALUE && level > 6))
 						break;
+					
+					// create a new rule
 					thisRule = new TileRule(name, tileset, level, base);
-
+					
+					// copy in all of the values we got
 					if (className != null)
 						thisRule.className = className;
 					if (aMin != NO_VALUE)
@@ -136,7 +141,14 @@ public class TileRules {
 					thisRule.flexRange = flexRange;
 					thisRule.taperedBid = taperedBid;
 					
+					// are we tracing this rule
+					thisRule.debug = parms.rule_debug != null && 
+							(parms.rule_debug.equals(name) || parms.rule_debug.equals("*"));
+					if (thisRule.debug)
+						thisRule.dump("DEBUG: ");
 					rules.add(thisRule);
+					
+					// now reset all the parameters for the next rule
 					level = NO_VALUE;
 					base = NO_VALUE;
 					surround = NO_VALUE;
@@ -182,6 +194,9 @@ public class TileRules {
 
 			case VALUE_STRING:
 				switch (thisKey) {
+				case "//":
+					parser.getString();
+					break;
 				case "name":
 					name = parser.getString();
 					break;

@@ -1,5 +1,6 @@
 { "tileset": 2,
   "Outside": [
+	{ "//": "L1/L2 water tiles, based on depth"},
 	{ "name": "shallow", "level": 1, "base": 2048,
 	  "terrain": "fordable"
 	},
@@ -13,7 +14,8 @@
 	  "terrain": "deep"
 	},
 
-	{ "name": "dirt", "level": 1, "base": 2816,
+	{ "//": "L1 ground cover tiles for lowlands w/no flora class"},
+	{ "name": "dirt", "level": 1, "base": 2864,
 	  "terrain": "ground",
 	  "class": "NONE",
 	  "temp": { "min": -1 },
@@ -31,7 +33,7 @@
 	  "temp": { "max": 1 },
 	  "vigor": 32
 	},
-	{ "name": "grass", "level": 1, "base": 2864,
+	{ "name": "grass", "level": 1, "base": 2816,
 	  "class": "NONE",
 	  "terrain": "ground",
 	  "hydro": { "min": 0.1 },
@@ -39,6 +41,7 @@
 	  "vigor": 128
 	},
 
+	{ "//": "L1 ground cover tiles for highlands w/no flora class"},
 	{ "name": "hi-dirt", "level": 1, "base": 7472,
 	  "class": "NONE",
 	  "terrain": "highlands",
@@ -59,6 +62,7 @@
 	  "vigor": 128
 	},
 
+	{ "//": "L1 ground cover tiles for slopes"},
 	{ "name": "dirt-slope", "level": 1, "base": 7856, "neighbors": 4,
 	  "terrain": "slope",
 	  "temp": { "min": 0 },
@@ -76,22 +80,42 @@
 	  "vigor": 32
 	},
 
-	{ "name": "grass-G", "level": 1, "base": 2864,
+	{ "//": "L1 ground cover tiles beneath other flora types"},
+	{ "name": "grass-G", "level": 1, "base": 2816,
 	  "terrain": "land",
 	  "class": "Grass",
 	  "vigor": 32
 	},
-	{ "name": "grass-B", "level": 1, "base": 2864,
+	{ "name": "grass-B", "level": 1, "base": 2816,
 	  "terrain": "land",
 	  "class": "Brush",
 	  "vigor": 32
 	},
-	{ "name": "grass-T", "level": 1, "base": 2864,
+	{ "name": "grass-TB", "level": 1, "base": 2816,
 	  "terrain": "land",
 	  "class": "Broadleaf",
 	  "vigor": 32
 	},
+	{ "name": "grass-TC", "level": 1, "base": 7424,
+	  "terrain": "land",
+	  "class": "Connifer",
+	  "temp": { "min": 0 },
+	  "vigor": 32
+	},
+	{ "name": "snow-TC", "level": 1, "base": 7568,
+	  "terrain": "land",
+	  "class": "Connifer",
+	  "temp": { "max": 0 },
+	  "vigor": 32
+	},
+	{ "name": "dirt-TP", "level": 1, "base": 7472,
+	  "terrain": "land",
+	  "class": "Palm",
+	  "vigor": 32
+	},
 
+
+	{ "//": "L2/4 tiles for flora types"},
 	{ "name": "tallGrass", "level": 2, "base": 3008,
 	  "class": "Grass",
 	  "terrain": "land",
@@ -125,6 +149,7 @@
 	  "vigor": 32
 	},
 
+	{ "//": "example with all fields" },
 	{ "name": "template", "level": 666, "base": 666,
 	  "alt": { "min": 0, "max": 0 },
 	  "temp": { "min": 0.0, "max": 0.0 },
@@ -133,8 +158,8 @@
 	  "slope": { "min": 0.0, "max": 0.0 },
 	  "soil": { "min": 0.0, "max": 0.0 },
 	  "face": { "min": 0.0, "max": 360.0 },
-	  "range": "strict",
-	  "bid": "flat"
+	  "range": "flexible",
+	  "bid": "tapered"
 	}
     ]
 }

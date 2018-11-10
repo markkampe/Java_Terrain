@@ -226,20 +226,18 @@ public class RPGMTiler implements Exporter {
 				int bids = 0;
 				for(int b = 0; b < numRules; b++) {
 					TileRule r = bidders[b];
-					String why = null;
+					r.justification = "OK";
 					double bid = 0;
 					if (r.wrongTerrain(terrain))
-						why = "Terain mismatch";
+						r.justification = "Terain mismatch";
 					else if (r.wrongFlora(floraNames[floraTypes[i][j]]))
-						why = "Class mismatch";
-					else {
-							bid = r.bid(alt, hydro, Tmean - lapse, Tmean - lapse, soilType, slope, face);
-							why = (bid <= 0) ? r.justification : "ok";
-					}
-					if (parms.rule_debug != null && 
-							(parms.rule_debug.equals(r.ruleName) || parms.rule_debug.equals("*")))
+						r.justification = "Class mismatch";
+					else
+						bid = r.bid(alt, hydro, Tmean - lapse, Tmean - lapse, soilType, slope, face);
+
+					if (r.debug)
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
-								") bids " + bid + " (" + why + ")");
+								") bids " + bid + " (" + r.justification + ")");
 					if (bid > 0) {
 						bidder.bid(r.baseTile, bid);
 						bids++;
@@ -328,7 +326,7 @@ public class RPGMTiler implements Exporter {
 								noBid = true;
 								continue;
 							}
-							
+							// FIX reconcile stamp and tile bid/debug
 							// make sure this square meets the rule terrain type
 							int terrain = typeMap[levels[i+dy][j+dx]];
 							if (useSLOPE && i+dy > 0 && !TerrainType.isWater(terrain) && levels[i+dy-1][j+dx] > levels[i+dy][j+dx])
@@ -362,7 +360,7 @@ public class RPGMTiler implements Exporter {
 									String.format(", slope=%03.0f", face));
 							
 							double thisBid = r.bid(alt, hydro , Tmean - lapse, Tmean - lapse, soilType, slope, face);
-							if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
+							if (r.debug)
 								System.out.println(r.ruleName + "[" + (i+dy) + "," + (j+dx) + "] (" + 
 										r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");
 							if (thisBid <= 0)

@@ -62,6 +62,8 @@ public class TileRules {
 		int vigor = NO_VALUE;
 		int height = 1, width = 1;					// stamp size
 		int neighbors = 8;							// auto-tile neighbors
+		boolean flexRange = false;
+		boolean taperedBid = false;
 		
 		String className = null;					// floral class
 		
@@ -131,6 +133,8 @@ public class TileRules {
 					thisRule.height = height;
 					thisRule.width = width;
 					thisRule.neighbors = neighbors;
+					thisRule.flexRange = flexRange;
+					thisRule.taperedBid = taperedBid;
 					
 					rules.add(thisRule);
 					level = NO_VALUE;
@@ -145,6 +149,8 @@ public class TileRules {
 					mMin = NO_VALUE; mMax = NO_VALUE;
 					fMin = NO_VALUE; fMax = NO_VALUE;
 					sMin = NO_VALUE; sMax = NO_VALUE;
+					flexRange = false;
+					taperedBid = false;
 					vigor = NO_VALUE;
 					red = NO_VALUE; green = NO_VALUE; blue = NO_VALUE;
 					terrain = TerrainType.NONE;
@@ -190,6 +196,12 @@ public class TileRules {
 					break;
 				case "terrain":
 					terrain = TerrainType.terrainType(parser.getString());
+					break;
+				case "range":
+					flexRange = parser.getString().equals("flexible");
+					break;
+				case "bid":
+					taperedBid = parser.getString().equals("tapered");
 					break;
 				}
 				thisKey = "";

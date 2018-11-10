@@ -33,6 +33,8 @@ public class TileRule {
 	public double maxSoil;
 	public double maxFace;
 	public double minFace;
+	public boolean flexRange;
+	public boolean taperedBid;
 	
 	public int vigor;
 	
@@ -70,6 +72,8 @@ public class TileRule {
 		maxSoil = 10;
 		minFace = -1024;
 		maxFace = 1024;
+		flexRange = false;
+		taperedBid = false;
 		vigor = 16;
 	}
 	
@@ -94,6 +98,8 @@ public class TileRule {
 		System.out.println(prefix + "      " + "soil:    " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
 		System.out.println(prefix + "      " + "slope:   " + String.format("%.1f", minSlope) + "-" + String.format("%.1f", maxSlope));
 		System.out.println(prefix + "      " + "face:    " + (int) minFace + "-" + (int) maxFace);
+		System.out.println(prefix + "      " + "bid      " + (taperedBid ? "tapered" : "flat"));
+		System.out.println(prefix + "      " + "range:   " + (flexRange ? "flexible" : "strict"));
 		if (previewColor != null)
 			System.out.println(prefix + "      " + "color:   " +
 								previewColor.getRed() + "," +
@@ -109,28 +115,30 @@ public class TileRule {
 	 * @param min		bottom of acceptable range
 	 * @param max		top of acceptable range
 	 * 
-	 * @return			1 to 0 if we are in the middle 50%
-	 * 					0 to -1 if we are in the top/bottom 25%
+	 * @return			0 to 1 for a favorable bid
+	 * 					0 to -1 for an unfavorable bid
 	 * 					IMPOSSIBLE if we are outside the range
+	 * note:
+	 *		taperedBid: bid is proportional to place in range
+	 *		flexRange: negative bids for barely outside range
 	 */
 	double range_bid(double value, double min, double max) {
 		
 		// figure out the acceptable range and where we are in it
 		double mid = (min + max)/2;
 		double range = mid - min;
-		double good = range/2;
 		double delta = Math.abs(value - mid);
 		
-		// if within good range, return how close we are to center
-		if (delta <= good)
-			return 1.0 - delta/good;
+		// if within range, bid based on distance to center
+		if (delta <= range)
+			return taperedBid ? 1.0 - delta/range : 1.0;
 		
-		// if close, return how far off we are
-		if (delta < range)
-			return -(delta - good)/good;
+		// if outside worst acceptable we fail
+		if (!flexRange || delta > 2*range)
+			return IMPOSSIBLE;
 		
-		// just say it is way off
-		return IMPOSSIBLE;
+		// return negative based on how far off we are
+		return taperedBid ? -(delta - range)/range : -1.0;
 	}
 	
 	/**
@@ -153,13 +161,39 @@ public class TileRule {
 
 		// range check vs altitude, hydration and temperature
 		double score = 0;
-		score += range_bid(alt, minAltitude, maxAltitude);
-		if (hydro >= 0)
-			score += range_bid(hydro, minHydro, maxHydro);
-		score += range_bid((winter+summer)/2, minTemp, maxTemp);
-		score += range_bid(direction, minFace, maxFace);
-		score += range_bid(slope, minSlope, maxSlope);
-		score += range_bid(soil, minSoil, maxSoil);
+		double v;
+		justification = "";
+		v = range_bid(alt, minAltitude, maxAltitude);
+		if (v <= 0)
+			justification += "alt";
+		score += v;
+		
+		if (hydro >= 0) {
+			v = range_bid(hydro, minHydro, maxHydro);
+			if (v <= 0)
+				justification += "+hydro";
+		}
+		
+		v = range_bid((winter+summer)/2, minTemp, maxTemp);
+		if (v <= 0)
+			justification += "+temp";
+		score += v;
+		
+		v = range_bid(direction, minFace, maxFace);
+		if (v <= 0)
+			justification += "+dir";
+		score += v;
+		
+		v = range_bid(slope, minSlope, maxSlope);
+		if (v <= 0)
+			justification += "+slope";
+		score += v;
+		
+		v = range_bid(soil, minSoil, maxSoil);
+		if (v <= 0)
+			justification += "+soil";
+		score += v;
+		
 		return vigor * score;
 	}
 	

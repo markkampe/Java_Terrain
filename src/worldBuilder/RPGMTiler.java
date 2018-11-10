@@ -215,6 +215,7 @@ public class RPGMTiler implements Exporter {
 				if (parms.debug_level >= EXPORT_DEBUG)
 					System.out.println("l" + level + "[" + i + "," + j + "]: " +
 						" terrain=" + TerrainType.terrainType(terrain) +
+						", class=" + floraNames[floraTypes[i][j]] + 
 						", alt=" + alt +
 						String.format(", hydro=%.2f", hydro) + 
 						String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
@@ -225,15 +226,20 @@ public class RPGMTiler implements Exporter {
 				int bids = 0;
 				for(int b = 0; b < numRules; b++) {
 					TileRule r = bidders[b];
+					String why = null;
+					double bid = 0;
 					if (r.wrongTerrain(terrain))
-						continue;
-					if (r.wrongFlora(floraNames[floraTypes[i][j]]))
-						continue;
-					double bid = r.bid(alt, hydro, Tmean - lapse, Tmean - lapse, 
-							soilType, slope, face);
-					if (parms.rule_debug != null && parms.rule_debug.equals(r.ruleName))
+						why = "Terain mismatch";
+					else if (r.wrongFlora(floraNames[floraTypes[i][j]]))
+						why = "Class mismatch";
+					else {
+							bid = r.bid(alt, hydro, Tmean - lapse, Tmean - lapse, soilType, slope, face);
+							why = (bid <= 0) ? r.justification : "ok";
+					}
+					if (parms.rule_debug != null && 
+							(parms.rule_debug.equals(r.ruleName) || parms.rule_debug.equals("*")))
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
-								") bids " + bid + " (" + r.justification + ")");
+								") bids " + bid + " (" + why + ")");
 					if (bid > 0) {
 						bidder.bid(r.baseTile, bid);
 						bids++;
@@ -257,6 +263,7 @@ public class RPGMTiler implements Exporter {
 					// there seems to be a hole in the rules
 					System.err.println("NOBID l" + level + "[" + i + "," + j + "]: " +
 							" terrain=" + TerrainType.terrainType(terrain) +
+							", class=" + floraNames[floraTypes[i][j]] + 
 							", alt=" + alt +
 							String.format(", hydro=%.2f", hydro) + 
 							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +

@@ -13,10 +13,11 @@
 	  "terrain": "deep"
 	},
 
-
 	{ "name": "dirt", "level": 1, "base": 2816,
 	  "terrain": "ground",
+	  "class": "NONE",
 	  "temp": { "min": -1 },
+	  "hydro": { "max": 0.1 },
 	  "vigor": 2
 	},
 	{ "name": "rocks", "level": 1, "base": 3296,
@@ -31,29 +32,31 @@
 	  "vigor": 32
 	},
 	{ "name": "grass", "level": 1, "base": 2864,
-	  "class": "Grass",
+	  "class": "NONE",
 	  "terrain": "ground",
+	  "hydro": { "min": 0.1 },
 	  "temp": { "min": 0 },
 	  "vigor": 128
 	},
-
 
 	{ "name": "hi-dirt", "level": 1, "base": 7472,
+	  "class": "NONE",
 	  "terrain": "highlands",
-	  "temp": { "min": 0 },
-	  "hydro": { "max": 0.10 },
+	  "hydro": { "max": 0.1 },
+	  "temp": { "min": -1 },
 	  "vigor": 2
-	},
-	{ "name": "hi-grass", "level": 1, "base": 7424,
-	  "class": "Grass",
-	  "terrain": "highlands",
-	  "temp": { "min": 0 },
-	  "vigor": 128
 	},
 	{ "name": "hi-snow", "level": 1, "base": 7568,
 	  "terrain": "highlands",
 	  "temp": { "max": 0 },
 	  "vigor": 32
+	},
+	{ "name": "hi-grass", "level": 1, "base": 7424,
+	  "class": "NONE",
+	  "terrain": "highlands",
+	  "temp": { "min": 0 },
+	  "hydro": { "min": 0.1 },
+	  "vigor": 128
 	},
 
 	{ "name": "dirt-slope", "level": 1, "base": 7856, "neighbors": 4,
@@ -63,7 +66,6 @@
 	},
 	{ "name": "grass-slope", "level": 1, "base": 7808, "neighbors": 4,
 	  "terrain": "slope",
-	  "class": "Grass",
 	  "temp": { "min": 0 },
 	  "hydro": { "min": 0.075 },
 	  "vigor": 128
@@ -74,8 +76,28 @@
 	  "vigor": 32
 	},
 
+	{ "name": "grass-G", "level": 1, "base": 2864,
+	  "terrain": "land",
+	  "class": "Grass",
+	  "vigor": 32
+	},
+	{ "name": "grass-B", "level": 1, "base": 2864,
+	  "terrain": "land",
+	  "class": "Brush",
+	  "vigor": 32
+	},
+	{ "name": "grass-T", "level": 1, "base": 2864,
+	  "terrain": "land",
+	  "class": "Broadleaf",
+	  "vigor": 32
+	},
 
-	{ "name": "brush", "level": 4, "base": 0, 
+	{ "name": "tallGrass", "level": 2, "base": 3008,
+	  "class": "Grass",
+	  "terrain": "land",
+	  "VIGOR": 32
+	},
+	{ "name": "brush", "level": 4, "base": 91, 
 	  "class": "Brush",
 	  "terrain": "land",
 	  "VIGOR": 32
@@ -103,7 +125,6 @@
 	  "vigor": 32
 	},
 
-
 	{ "name": "template", "level": 666, "base": 666,
 	  "alt": { "min": 0, "max": 0 },
 	  "temp": { "min": 0.0, "max": 0.0 },
@@ -111,7 +132,9 @@
 	  "depth": { "min": 0.0, "max": 0.0 },
 	  "slope": { "min": 0.0, "max": 0.0 },
 	  "soil": { "min": 0.0, "max": 0.0 },
-	  "face": { "min": 0.0, "max": 360.0 }
+	  "face": { "min": 0.0, "max": 360.0 },
+	  "range": "strict",
+	  "bid": "flat"
 	}
     ]
 }

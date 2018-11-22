@@ -65,6 +65,7 @@ public class TileRules {
 		int neighbors = 8;							// auto-tile neighbors
 		boolean flexRange = false;
 		boolean taperedBid = false;
+		boolean barrier = false;
 		
 		String className = null;					// floral class
 		
@@ -140,6 +141,7 @@ public class TileRules {
 					thisRule.neighbors = neighbors;
 					thisRule.flexRange = flexRange;
 					thisRule.taperedBid = taperedBid;
+					thisRule.barrier = barrier;
 					
 					// are we tracing this rule
 					thisRule.debug = parms.rule_debug != null && 
@@ -163,6 +165,7 @@ public class TileRules {
 					sMin = NO_VALUE; sMax = NO_VALUE;
 					flexRange = false;
 					taperedBid = false;
+					barrier = false;
 					vigor = NO_VALUE;
 					red = NO_VALUE; green = NO_VALUE; blue = NO_VALUE;
 					terrain = TerrainType.NONE;
@@ -217,6 +220,9 @@ public class TileRules {
 					break;
 				case "bid":
 					taperedBid = parser.getString().equals("tapered");
+					break;
+				case "barrier":
+					barrier = parser.getString().equals("true");
 					break;
 				}
 				thisKey = "";
@@ -352,5 +358,19 @@ public class TileRules {
 			return r.neighbors;
 		}
 		return -1;
+	}
+	
+	/**
+	 * @param	base tile
+	 * @return	whether or not tile creates barriers
+	 */
+	public boolean landBarrier(int base) {
+		for( ListIterator<TileRule> it = rules.listIterator(); it.hasNext();) {
+			TileRule r = it.next();
+			if (r.baseTile != base)
+				continue;
+			return r.barrier;
+		}
+		return false;
 	}
 }

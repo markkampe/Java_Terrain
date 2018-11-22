@@ -36,6 +36,8 @@ public class TileRule {
 	public boolean flexRange;
 	public boolean taperedBid;
 	
+	public boolean barrier;
+	
 	public int vigor;
 	
 	public Color previewColor;
@@ -55,6 +57,7 @@ public class TileRule {
 		this.width = 1;
 		this.altTile = 0;
 		this.debug = false;
+		this.barrier = false;
 		previewColor = null;
 		
 		// default values will meet any terrestrial conditions
@@ -102,6 +105,8 @@ public class TileRule {
 		System.out.println(prefix + "      " + "face:    " + (int) minFace + "-" + (int) maxFace);
 		System.out.println(prefix + "      " + "bid      " + (taperedBid ? "tapered" : "flat"));
 		System.out.println(prefix + "      " + "range:   " + (flexRange ? "flexible" : "strict"));
+		if (barrier)
+			System.out.println(prefix + "      " + "barrier: " + "true");
 		if (previewColor != null)
 			System.out.println(prefix + "      " + "color:   " +
 								previewColor.getRed() + "," +
@@ -195,7 +200,6 @@ public class TileRule {
 		if (v <= 0)
 			justification += "+soil";
 		score += v;
-		
 		return vigor * score;
 	}
 	

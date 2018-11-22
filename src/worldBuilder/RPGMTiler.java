@@ -11,7 +11,7 @@ import java.util.Random;
  */
 public class RPGMTiler implements Exporter {
 
-	private static final int MAXRULES = 20;
+	private static final int MAXRULES = 40;
 	private static final int SPRITES_PER_ROW = 8;
 	private static final int EXPORT_DEBUG = 3;
 	

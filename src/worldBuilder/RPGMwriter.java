@@ -100,11 +100,14 @@ public class RPGMwriter {
 	 * 
 	 * RPGMaker defines up to 48 different ways to slice up a reference
 	 * 	tile in order to create borders between them
-	 * 
+	 *
 	 * For level changes, 
 	 * 	we put walls on south high ground
 	 *  we put auto-tile borders on the north and west high ground
 	 *  we put shadows on the east low ground
+	 *  
+	 * But, for the highlands (where tile changes create barriers)
+	 * 	we do not auto-tile between L1 tiles
 	 */
 	private int auto_tile_offset(int baseTiles[][], int levels[][], int row, int col) {
 		/*
@@ -162,6 +165,25 @@ public class RPGMwriter {
 			bits |= (col < lastcol && baseTiles[row][col+1] != sameTile) ? 4 : 0;	// right
 			bits |= (row < lastrow && baseTiles[row+1][col] != sameTile) ? 8 : 0;		// down
 			return bits;
+		}
+		
+		// avoid creating gratuitous barriers between ground-covers on the same level
+		if (levels != null && rules.landBarrier(sameTile)) {
+			int sameLevel = levels[row][col];
+			if (TerrainType.isLand(typeMap[sameLevel])) {
+				boolean noBarriers = true;
+				// see if any neighbor is on a different level
+				for(int i = row - 1; i <= row + 1; i++)
+					for(int j = col - 1; j <= col + 1; j++)
+						if (i >= 0 && i < lastcol && 
+						j >= 0 && j < lastrow && 
+						levels[i][j] != sameLevel)
+							noBarriers = false;
+
+				// none of our neighbors seem to justify a barrier
+				if (noBarriers)
+					return( 0 );
+			}
 		}
 		
 		// look at the eight neighbors for different tiles

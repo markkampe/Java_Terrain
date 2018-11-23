@@ -99,7 +99,7 @@ public class RPGMwriter {
 	 * @param col
 	 * 
 	 * RPGMaker defines up to 48 different ways to slice up a reference
-	 * 	tile in order to create borders between them
+	 * 	tile in order to create borders between dissimilar tiles.
 	 *
 	 * For level changes, 
 	 * 	we put walls on south high ground
@@ -112,7 +112,7 @@ public class RPGMwriter {
 	private int auto_tile_offset(int baseTiles[][], int levels[][], int row, int col) {
 		/*
 		 * this matrix decides which part of a reference tile
-		 * to use for different configurations of unlike tiles
+		 * to use for different configurations of unlike neighbors
 		 */
 		int offset[] = {
 			// .=same, x=different, *=tile in question
@@ -158,7 +158,11 @@ public class RPGMwriter {
 		int lastcol = baseTiles[row].length - 1;
 		int sameTile = baseTiles[row][col];
 		
-		// special case for 4-only auto-tiling
+		/*
+		 * most auto-tiling is based on the eight surrounding
+		 * neighbors, but a few tiles distinguish only four
+		 * interesting neighbors.
+		 */
 		if (rules.neighbors(sameTile) == 4) {
 			bits |= (col > 0 && baseTiles[row][col-1] != sameTile) ? 1 : 0;		// left
 			bits |= (row > 0 && baseTiles[row-1][col] != sameTile) ? 2 : 0;		// up
@@ -167,46 +171,46 @@ public class RPGMwriter {
 			return bits;
 		}
 		
-		// avoid creating gratuitous barriers between ground-covers on the same level
-		if (levels != null && rules.landBarrier(sameTile)) {
-			int sameLevel = levels[row][col];
-			if (TerrainType.isLand(typeMap[sameLevel])) {
-				boolean noBarriers = true;
-				// see if any neighbor is on a different level
-				for(int i = row - 1; i <= row + 1; i++)
-					for(int j = col - 1; j <= col + 1; j++)
-						if (i >= 0 && i < lastcol && 
-						j >= 0 && j < lastrow && 
-						levels[i][j] != sameLevel)
-							noBarriers = false;
-
-				// none of our neighbors seem to justify a barrier
-				if (noBarriers)
-					return( 0 );
+		/*
+		 * the primary purpose of auto-tile offsets is to create attractive 
+		 * borders between dissimilar tiles.  Where we want the borders depends 
+		 * on which neighbors are dissimilar.
+		 */
+		if (levels == null || !rules.landBarrier(sameTile)) {
+			if (row > 0) {
+				if (col > 0)
+					bits |= (baseTiles[row-1][col-1] != sameTile) ? 1 : 0;
+				bits |= (baseTiles[row-1][col] != sameTile) ? 2 : 0;
+				if (col < lastcol)
+					bits |= (baseTiles[row-1][col+1] != sameTile) ? 4 : 0;
 			}
+			if (col > 0)
+				bits |= (baseTiles[row][col-1] != sameTile) ? 8 : 0;
+			if (col < baseTiles[row].length - 1)
+				bits |= (baseTiles[row][col+1] != sameTile) ? 16 : 0;
+			if (row < lastrow) {
+				if (col > 0)
+					bits |= (baseTiles[row+1][col-1] != sameTile) ? 32 : 0;
+				bits |= (baseTiles[row+1][col] != sameTile) ? 64 : 0;
+				if (col < lastcol)
+					bits |= (baseTiles[row+1][col+1] != sameTile) ? 128 : 0;
+			}
+		} else {
+			/*
+			 *  Some ground-cover tiles automatically create impassable barriers
+			 *  to other tiles.  If we have multiple levels and this
+			 *  is such a tile, do not create neighbor-based borders.  
+			 *  In the few cases where we do want such barriers 
+			 *  (e.g. land-to-water) we simply omit the barrier attribute 
+			 *  on those tiles, enabling normal auto-tiling.
+			 */
 		}
 		
-		// look at the eight neighbors for different tiles
-		if (row > 0) {
-			if (col > 0)
-				bits |= (baseTiles[row-1][col-1] != sameTile) ? 1 : 0;
-			bits |= (baseTiles[row-1][col] != sameTile) ? 2 : 0;
-			if (col < lastcol)
-				bits |= (baseTiles[row-1][col+1] != sameTile) ? 4 : 0;
-		}
-		if (col > 0)
-			bits |= (baseTiles[row][col-1] != sameTile) ? 8 : 0;
-		if (col < baseTiles[row].length - 1)
-			bits |= (baseTiles[row][col+1] != sameTile) ? 16 : 0;
-		if (row < lastrow) {
-			if (col > 0)
-				bits |= (baseTiles[row+1][col-1] != sameTile) ? 32 : 0;
-			bits |= (baseTiles[row+1][col] != sameTile) ? 64 : 0;
-			if (col < lastcol)
-				bits |= (baseTiles[row+1][col+1] != sameTile) ? 128 : 0;
-		}
-		
-		// look at the eight neighbors for downwards level changes
+		/*
+		 * if neighboring tiles are on a lower level, we still want to 
+		 * create a boundary between us and the downwards slope ...
+		 * even if the same tile is on the lower level.
+		 */
 		if (levels != null) {
 			int sameLevel = levels[row][col];
 			if (!TerrainType.isWater(typeMap[sameLevel])) {
@@ -250,9 +254,11 @@ public class RPGMwriter {
 		out.write("}\n");
 	}
 
-	// This is a kluge to produce a bunch of boiler-plate
-	// Someday we will want to produce this stuff intelligently
-	// rumor has it that the order matters
+	/*
+	 * This is a kluge to produce a bunch of boiler-plate
+	 * Someday we will want to choose some of these values.
+	 * rumor has it that the order matters
+	 */
 	private static String parms1[][] = {	// background sounds/music
 			{ "autoplayBgm", "boolean", "false" }, 
 			{ "autoplayBgs", "boolean", "false" },

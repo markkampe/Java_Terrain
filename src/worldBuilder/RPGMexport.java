@@ -439,7 +439,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 		} else { // Outside
 			waterLevels = 3;
 			int landLevels = levels.getValue();
-			lowLevels = 0; // FIX - tiler can't yet do PITs
+			lowLevels = 0; // TODO - tiler can't yet do PITs
 			midLevels = 1; // all GROUND is at the same level
 			highLevels = landLevels - (lowLevels + midLevels);
 

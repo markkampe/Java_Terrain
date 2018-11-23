@@ -56,7 +56,7 @@ public class Bidder {
 	 * @return
 	 */
 	public int winner(double value) {
-		// FIX - lose random # in bids?
+		// TODO - lose random # in bids?
 		if (totBids == 0)
 			return(0);
 		else if (totBids == 1)

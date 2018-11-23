@@ -249,7 +249,7 @@ public class RPGMTiler implements Exporter {
 					if (parms.debug_level >= EXPORT_DEBUG)
 						System.out.println("    winner = " + winner);
 				} else if (level == 5) {	// shadows are in this level
-					// FIX ... should these be Outside (useSLOPE) only?
+					// TODO ... should these be Outside (useSLOPE) only?
 					if (TerrainType.isWater(terrain))
 						continue;			// no shadows on water
 					if (terrain == TerrainType.SLOPE)

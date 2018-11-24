@@ -9,6 +9,7 @@
 	  "hydro": { "min": 0.3 },
 	  "vigor": 32,
 	  "range": "flexible",
+	  "stamp": "2x2",
 	  "bid": "tapered",
 	  "color": [0,255,0]
 	},
@@ -20,6 +21,7 @@
 	  "vigor": 32,
 	  "range": "flexible",
 	  "bid": "tapered",
+	  "stamp": "1x2",
 	  "color": [0,102,51]
 	},
 	{ "name": "Palm",
@@ -31,6 +33,7 @@
 	  "vigor": 32,
 	  "range": "flexible",
 	  "bid": "tapered",
+	  "stamp": "1x2",
 	  "color": [102,204,0]
 	},
 

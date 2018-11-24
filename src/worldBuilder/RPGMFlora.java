@@ -85,6 +85,7 @@ public class RPGMFlora {
 		double Tmean = (tiler.Tsummer + tiler.Twinter)/2;
 		// populate each of the plant classes
 		for(int c = 0; c < classes.length; c++) {
+			// collect bids for every square
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
 					// don't bother with already claimed tiles
@@ -94,7 +95,8 @@ public class RPGMFlora {
 					// compute the bidding attributes of this square
 					int alt = (int) parms.altitude(tiler.heights[i][j] - tiler.erode[i][j]);
 					double lapse = alt * parms.lapse_rate;
-					int terrain = tiler.typeMap[tiler.levels[i][j]];
+					int level = tiler.levels[i][j];
+					int terrain = tiler.typeMap[level];
 					double hydro = tiler.hydration[i][j];
 					double soil = tiler.soil[i][j];
 					double slope = tiler.slope(i, j);
@@ -105,6 +107,8 @@ public class RPGMFlora {
 					for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
 						TileRule r = it.next();
 						rulenum++;		// name/claim based on rulenum + 1
+						
+						// does this rule apply to this terrain and floral class
 						if (r.wrongFlora(classes[c]))
 							continue;
 						if (r.wrongTerrain(terrain))
@@ -114,29 +118,86 @@ public class RPGMFlora {
 						double b = r.bid(alt, hydro, 
 										Tmean - lapse, Tmean - lapse, 
 										soil, slope, face);
-						if (b>0)
+						if (b <= 0)
+							continue;
+						
+						// avoid putting major flora adjacent to level changes
+						if (i > 0 && tiler.levels[i-1][j] != level)
+							continue;
+						if (i < y_points - r.height && tiler.levels[i+r.height][j] != level)
+							continue;
+						if (j > 0 && tiler.levels[i][j-1] != level)
+							continue;
+						if (j < x_points - r.width && tiler.levels[i][j+r.width] != level)
+							continue;
+						
+						// if it is stamp, we have to check the whole region
+						if (r.width > 1 || r.height > 1) {
+							// region must be height/width aligned, within grid
+							if ((i%r.height != 0) || (j%r.width != 0))
+								b = 0;
+							if (i + r.height > y_points || j + r.width > x_points)
+								b = 0;
+							
+							// see if all squares in region are acceptable
+							for(int dr = 0; dr < r.height; dr++)
+								for(int dc = 0; b > 0 && dc < r.width; dc++) {
+									if (dr == 0 && dc == 0)
+										continue;	// already got this one
+									
+									if (tiler.levels[i+dr][j+dc] != level) {
+										b = 0;
+										continue;	// stamps cannot cross levels
+									}
+									
+									// check the bid for this square too
+									alt = (int) parms.altitude(tiler.heights[i+dr][j+dc] - tiler.erode[i+dr][j+dc]);
+									lapse = alt * parms.lapse_rate;
+									terrain = tiler.typeMap[tiler.levels[i+dr][j+dc]];
+									hydro = tiler.hydration[i+dr][j+dc];
+									soil = tiler.soil[i+dr][j+dc];
+									slope = tiler.slope(i+dr, j+dc);
+									face = tiler.direction(i+dr, j+dc);
+									if (r.bid(alt, hydro, Tmean - lapse, Tmean - lapse, soil, slope, face) <= 0)
+										b = 0;
+									
+									// TODO: compute bid for entire stamp area?
+								}
+						}
+						if (b > 0)
 							record_bid(rulenum, b, i, j);
 					}
 				}
 
-			// fill the class quota from the highest bidders
+			// fill the class quota from the highest bids
 			int needed = quotas[c];
 			for( FloraBid b = first_bid(); needed > 0 && b != null; b = next_bid()) {
 				// skip bids for already claimed tiles
 				if (flora[b.row][b.col] != 0)
 					continue;
-
-				// this one is a winner
-				flora[b.row][b.col] = b.floraID;
-				needed -= 1;
+		
+				// go back to the winning rule
+				TileRule r = null;
+				int rulenum = 1;
+				for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
+					r = it.next();
+					if (rulenum == b.floraID)
+						break;
+					rulenum++;
+				}
+				// assign tile(s) to that rule
+				for(int dr = 0; dr < r.height; dr++)
+					for(int dc = 0; dc < r.width; dc++) {
+						flora[b.row+dr][b.col+dc] = b.floraID;
+						needed--;
+					}
+				
 			}
 			reset_bids();
 			
 			// see if we were unable to place the requested number of plants
-			if (needed > 0 && parms.debug_level > 0)
-				System.out.println("RPGMFlora: only filled " + 
-						(quotas[c] - needed) + "/" + 
-						quotas[c] + " " + classes[c] + "-tiles");
+			if (parms.debug_level > 0)
+				System.out.println("     placed " + (quotas[c] - needed) + "/" + quotas[c] + " " + classes[c] + "-tiles"); 
 		}
 
 		return flora;

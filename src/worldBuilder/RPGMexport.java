@@ -29,6 +29,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 	private boolean need_depths; 	// slider for passable/shallow/deep
 	private boolean need_flora_pct;	// slider for percentage plant cover
 	private boolean need_flora_3;	// slider for tall grass/brush/trees
+	private boolean need_temp;		// slider for temperature up/down
+	private boolean need_hydro;		// slider for hydration up/down
 	private boolean need_flora_p;	// flora palette selection
 
 	// control widgets
@@ -38,6 +40,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 	private RangeSlider depths; // marsh, shallow, deep
 	private JSlider flora_pct;	// percent plant cover
 	private RangeSlider flora_3;	// types of plant cover
+	private JSlider goose_temp;	// temperature up/down
+	private JSlider goose_hydro; // hydration up/down
 	private JTextField palette; // tile set description file
 	private JButton choosePalette; // select palette file
 	private JTextField flora_palette;	// flora description file
@@ -80,6 +84,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			need_slopes = true;
 			need_depths = true;
 		}
+		need_temp = true;
+		need_hydro = true;
 		need_palette = true;
 		need_flora_p = true;
 		need_flora_pct = true;
@@ -298,6 +304,41 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(flora_3);
 			locals.add(l);
 		}
+		
+		if (need_temp || need_hydro)
+			locals.add(new JLabel("    "));
+		
+		if (need_temp) {	// create temperature adjustment slider
+			goose_temp = new JSlider(JSlider.HORIZONTAL, -parms.delta_t_max, parms.delta_t_max, parms.dDeltaT);
+			goose_temp.setMajorTickSpacing(5);
+			goose_temp.setMinorTickSpacing(1);
+			goose_temp.setFont(fontSmall);
+			goose_temp.setPaintTicks(true);
+			goose_temp.setPaintLabels(true);
+			JLabel lTitle = new JLabel("Temperature Adjustment (deg C)");
+			lTitle.setFont(fontSmall);
+
+			// add this to the local panel
+			locals.add(new JLabel("    "));
+			locals.add(goose_temp);
+			locals.add(lTitle);
+		}
+		
+		if (need_hydro) {	// create hydration adjustment slider
+			goose_hydro = new JSlider(JSlider.HORIZONTAL, -parms.delta_h_max, parms.delta_h_max, parms.dDeltaH);
+			goose_hydro.setMajorTickSpacing(10);
+			goose_hydro.setMinorTickSpacing(1);
+			goose_hydro.setFont(fontSmall);
+			goose_hydro.setPaintTicks(true);
+			goose_hydro.setPaintLabels(true);
+			JLabel lTitle = new JLabel("Hydration Adjustment (percentage)");
+			lTitle.setFont(fontSmall);
+
+			// add this to the local panel
+			locals.add(new JLabel("    "));
+			locals.add(goose_hydro);
+			locals.add(lTitle);
+		}
 
 		// add the local panel to the main panel
 		controls.add(locals);
@@ -318,6 +359,15 @@ public class RPGMexport extends ExportBase implements ActionListener {
 		if (e.getSource() == accept && selected) {
 			RPGMTiler exporter = new RPGMTiler(palette.getText(), x_points, y_points);
 			export(exporter); // set the characteristics of each tile
+			
+			// see if we need to adjust the temperature range
+			int deltaT = 0;
+			if (goose_temp != null)
+				deltaT = goose_temp.getValue();
+			if (deltaT != 0)
+				exporter.temps(parms.meanTemp()+deltaT, parms.meanSummer()+deltaT, parms.meanWinter()+deltaT);
+			
+			// export the RPGM-specific info
 			levelMap(exporter); // set the altitude/depth->level->terrain type
 			floraMap(exporter);	// figure out what plants to put on each square
 
@@ -360,6 +410,12 @@ public class RPGMexport extends ExportBase implements ActionListener {
 				if (flora_3 != null) {
 					parms.dFloraMin = flora_3.getValue();
 					parms.dFloraMax = flora_3.getUpperValue();
+				}
+				if (goose_temp != null) {
+					parms.dDeltaT = goose_temp.getValue();
+				}
+				if (goose_hydro != null) {
+					parms.dDeltaH = goose_hydro.getValue();
 				}
 			}
 		} else if (e.getSource() == cancel) {

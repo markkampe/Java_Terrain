@@ -105,6 +105,12 @@
 	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
+	{ "name": "grass-TP", "level": 1, "base": 2816,
+	  "terrain": "ground",
+	  "class": "Palm",
+	  "hydro": { "min": 0.075 },
+	  "vigor": 32
+	},
 	{ "name": "snow-TC", "level": 1, "base": 3968,
 	  "terrain": "ground",
 	  "class": "Connifer",

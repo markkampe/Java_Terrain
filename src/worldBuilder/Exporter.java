@@ -4,7 +4,7 @@ import java.awt.Color;
 
 /**
  * An exporter is a class that can persist a world map
- * in a form that some other software caqn import.
+ * in a form that some other software can import.
  *
  */
 public interface Exporter {

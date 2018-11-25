@@ -30,7 +30,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 	private boolean need_flora_pct;	// slider for percentage plant cover
 	private boolean need_flora_3;	// slider for tall grass/brush/trees
 	private boolean need_temp;		// slider for temperature up/down
-	private boolean need_hydro;		// slider for hydration up/down
+	private boolean need_hydro1;	// slider for hydration addition
+	private boolean need_hydro2;	// slider for hydration multiplication
 	private boolean need_flora_p;	// flora palette selection
 
 	// control widgets
@@ -41,7 +42,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 	private JSlider flora_pct;	// percent plant cover
 	private RangeSlider flora_3;	// types of plant cover
 	private JSlider goose_temp;	// temperature up/down
-	private JSlider goose_hydro; // hydration up/down
+	private JSlider goose_hydro1; // hydration up/down
+	private JSlider goose_hydro2; // hydration multiplier
 	private JTextField palette; // tile set description file
 	private JButton choosePalette; // select palette file
 	private JTextField flora_palette;	// flora description file
@@ -85,7 +87,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			need_depths = true;
 		}
 		need_temp = true;
-		need_hydro = true;
+		need_hydro1 = true;
+		need_hydro2 = true;
 		need_palette = true;
 		need_flora_p = true;
 		need_flora_pct = true;
@@ -305,7 +308,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(l);
 		}
 		
-		if (need_temp || need_hydro)
+		if (need_temp || need_hydro1 || need_hydro2)
 			locals.add(new JLabel("    "));
 		
 		if (need_temp) {	// create temperature adjustment slider
@@ -324,22 +327,37 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(lTitle);
 		}
 		
-		if (need_hydro) {	// create hydration adjustment slider
-			goose_hydro = new JSlider(JSlider.HORIZONTAL, -parms.delta_h_max, parms.delta_h_max, parms.dDeltaH);
-			goose_hydro.setMajorTickSpacing(10);
-			goose_hydro.setMinorTickSpacing(1);
-			goose_hydro.setFont(fontSmall);
-			goose_hydro.setPaintTicks(true);
-			goose_hydro.setPaintLabels(true);
-			JLabel lTitle = new JLabel("Hydration Adjustment (percentage)");
+		if (need_hydro1) {	// create hydration adjustment slider
+			goose_hydro1 = new JSlider(JSlider.HORIZONTAL, -parms.delta_h_max, parms.delta_h_max, parms.dDeltaH);
+			goose_hydro1.setMajorTickSpacing(10);
+			goose_hydro1.setMinorTickSpacing(1);
+			goose_hydro1.setFont(fontSmall);
+			goose_hydro1.setPaintTicks(true);
+			goose_hydro1.setPaintLabels(true);
+			JLabel lTitle = new JLabel("Hydration plus/minus (percentage)");
 			lTitle.setFont(fontSmall);
 
 			// add this to the local panel
 			locals.add(new JLabel("    "));
-			locals.add(goose_hydro);
+			locals.add(goose_hydro1);
 			locals.add(lTitle);
 		}
 
+		if (need_hydro2) {	// create hydration adjustment slider
+			goose_hydro2 = new JSlider(JSlider.HORIZONTAL, 0, 200, parms.dTimesH);
+			goose_hydro2.setMajorTickSpacing(25);
+			goose_hydro2.setMinorTickSpacing(5);
+			goose_hydro2.setFont(fontSmall);
+			goose_hydro2.setPaintTicks(true);
+			goose_hydro2.setPaintLabels(true);
+			JLabel lTitle = new JLabel("Hydration Scaling (x percentage)");
+			lTitle.setFont(fontSmall);
+
+			// add this to the local panel
+			locals.add(new JLabel("    "));
+			locals.add(goose_hydro2);
+			locals.add(lTitle);
+		}
 		// add the local panel to the main panel
 		controls.add(locals);
 		pack();
@@ -414,8 +432,11 @@ public class RPGMexport extends ExportBase implements ActionListener {
 				if (goose_temp != null) {
 					parms.dDeltaT = goose_temp.getValue();
 				}
-				if (goose_hydro != null) {
-					parms.dDeltaH = goose_hydro.getValue();
+				if (goose_hydro1 != null) {
+					parms.dDeltaH = goose_hydro1.getValue();
+				}
+				if (goose_hydro1 != null) {
+					parms.dTimesH = goose_hydro2.getValue();
 				}
 			}
 		} else if (e.getSource() == cancel) {

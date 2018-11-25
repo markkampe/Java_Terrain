@@ -68,7 +68,7 @@ public class Parameters {
 	public int levels_min = 5;	// minimum number of height altitude levels
 	public int levels_max = 20;	// maximum number of height levels
 	public int delta_t_max = 15; // export temperature slider range
-	public int delta_h_max = 50; // export hydration slider range
+	public int delta_h_max = 100; // export hydration slider range
 
 	// world size slider units
 	public int diameter_scale = 100; // slider labeling unit (km)
@@ -129,6 +129,7 @@ public class Parameters {
 	public int dFloraMax;		// percentage of brush
 	public int dDeltaT;			// temperature offset
 	public int dDeltaH;			// hydration offset
+	public int dTimesH;			// hydration scaler
 	public String OW_palette;	// Overworld: palette file
 	public String Out_palette;	// Outside: palette file
 
@@ -210,6 +211,7 @@ public class Parameters {
 		// default temp and hydration offsets
 		dDeltaT = 0;
 		dDeltaH = 0;
+		dTimesH = 100;
 	}
 
 	// public constructor to read from configuration file

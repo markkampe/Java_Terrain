@@ -37,6 +37,7 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 	
 	// variables describing the region selection process
 	protected boolean selected;			// selection completed
+	protected boolean newSelection;		// selected area has changed
 	protected int x_points, y_points;	// selection width/height (in tiles)
 	
 	private boolean selecting;		// selection in progress
@@ -46,6 +47,8 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 	// parameters for the tile size selection slider
 	private static final int MAX_TILE_SIZE = 10000;
 	private static final int TICS_PER_DECADE = 9;
+	
+	private static final int EXPORT_DEBUG = 2;
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -177,6 +180,10 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 		
 		selecting = false;
 		selected = false;
+		newSelection = false;
+		
+		if (parms.debug_level >= EXPORT_DEBUG)
+			System.out.println("new Export Base(" + format + ")");
 	}
 	
 	// export box (in map coordinates)
@@ -213,6 +220,7 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 	 * export a map as high resolution tiles
 	 */
 	protected void export(Exporter export) {
+
 		// set (and remember) the tile size
 		int meters = Integer.parseInt(sel_t_size.getText());
 		export.tileSize(meters);
@@ -398,6 +406,9 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 		sel_km.setText(String.format("%.1fx%.1f", x_km, y_km));
 		sel_points.setText(x_points + "x" + y_points);
 		sel_points.setForeground( tiles > parms.tiles_max ? Color.RED : Color.BLACK);
+		
+		selected = true;
+		newSelection = true;
 	}
 	
 	/**
@@ -428,7 +439,6 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 			}
 
 			selecting = false;
-			selected = true;
 			select(x_start, y_start, x_end, y_end, Integer.parseInt(sel_t_size.getText()));
 		}
 	}

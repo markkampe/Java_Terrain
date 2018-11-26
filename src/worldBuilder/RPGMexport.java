@@ -15,10 +15,19 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-public class RPGMexport extends ExportBase implements ActionListener {
+public class RPGMexport extends ExportBase implements ActionListener, ChangeListener{
 
 	private String format; // export type/ rules file
+	
+	private RPGMTiler tiler = null;
+	private boolean exported = false;
+	private boolean tempChanged;
+	private boolean hydroChanged;
+	private boolean levelsChanged;
+	private boolean floraChanged;
 
 	// dialog control options
 	private boolean need_palette; 	// tile palette selection
@@ -60,6 +69,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 	private static final int MIN_HIGH_SHADE = 160; // light grey
 	private static final int SHADE_RANGE = 64; // total range (per TerrainType)
 
+	private static final int EXPORT_DEBUG = 2;
+	
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -97,6 +108,9 @@ public class RPGMexport extends ExportBase implements ActionListener {
 		// add our controls to those in the base class
 		create_GUI();
 		setVisible(true);
+		
+		if (parms.debug_level >= EXPORT_DEBUG)
+			System.out.println("new RPGMexport(" + format + ")");
 	}
 
 	/**
@@ -144,6 +158,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(new JLabel("    "));
 			locals.add(levels);
 			locals.add(lTitle);
+			
+			levels.addChangeListener(this);
 		}
 
 		if (need_alt_3 || need_alt_n) { // create altitude slider
@@ -175,6 +191,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(aTitle);
 			locals.add(altitudes);
 			locals.add(l);
+			
+			altitudes.addChangeListener(this);
 		}
 
 		if (need_slopes) { // create slope range slider
@@ -206,6 +224,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(sTitle);
 			locals.add(slopes);
 			locals.add(l);
+			
+			slopes.addChangeListener(this);
 		}
 
 		if (need_depths) { // create depth RangeSlider
@@ -237,6 +257,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(dTitle);
 			locals.add(depths);
 			locals.add(l);
+			
+			depths.addChangeListener(this);
 		}
 		
 		if (need_flora_pct || need_flora_3)
@@ -275,6 +297,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(new JLabel("    "));
 			locals.add(flora_pct);
 			locals.add(fTitle);
+			
+			flora_pct.addChangeListener(this);
 		}
 		
 		if (need_flora_3) { // create flora RangeSlider
@@ -306,6 +330,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(fTitle);
 			locals.add(flora_3);
 			locals.add(l);
+			
+			flora_3.addChangeListener(this);
 		}
 		
 		if (need_temp || need_hydro1 || need_hydro2)
@@ -325,6 +351,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(new JLabel("    "));
 			locals.add(goose_temp);
 			locals.add(lTitle);
+			
+			goose_temp.addChangeListener(this);
 		}
 		
 		if (need_hydro1) {	// create hydration adjustment slider
@@ -341,6 +369,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(new JLabel("    "));
 			locals.add(goose_hydro1);
 			locals.add(lTitle);
+			
+			goose_hydro1.addChangeListener(this);
 		}
 
 		if (need_hydro2) {	// create hydration adjustment slider
@@ -357,6 +387,8 @@ public class RPGMexport extends ExportBase implements ActionListener {
 			locals.add(new JLabel("    "));
 			locals.add(goose_hydro2);
 			locals.add(lTitle);
+			
+			goose_hydro2.addChangeListener(this);
 		}
 		// add the local panel to the main panel
 		controls.add(locals);
@@ -371,24 +403,106 @@ public class RPGMexport extends ExportBase implements ActionListener {
 	}
 
 	/**
+	 * changes to sliders may force some re-exporting
+	 */
+	public void stateChanged(ChangeEvent e) {
+		Object source = e.getSource();
+	
+		if (source == levels || source == altitudes || source == slopes || source == depths) {
+			levelsChanged = true;
+			floraChanged = true;
+		} else if (source == flora_pct || source == flora_3)
+			floraChanged = true;
+		else if (source == goose_hydro1 || source == goose_hydro2) {
+			hydroChanged = true;
+			floraChanged = true;
+		} else if (source == goose_temp) {
+			tempChanged = true;
+			floraChanged = true;
+		}
+	}
+	
+	/**
 	 * click events on ACCEPT/PREVIEW/CANCEL/CHOOSE buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
+		
+		if (e.getSource() == cancel) {
+			windowClosing((WindowEvent) null);
+			return;
+		} else if (e.getSource() == choosePalette) {
+			FileDialog d = new FileDialog(this, "Tile Palette", FileDialog.LOAD);
+			d.setFile(palette.getText());
+			d.setVisible(true);
+			String palette_file = d.getFile();
+			if (palette_file != null) {
+				String dir = d.getDirectory();
+				if (dir != null)
+					palette_file = dir + palette_file;
+				palette.setText(palette_file);
+			}
+			return;
+		} else if (e.getSource() == chooseFlora) {
+			FileDialog d = new FileDialog(this, "Flora Palette", FileDialog.LOAD);
+			d.setFile(flora_palette.getText());
+			d.setVisible(true);
+			String palette_file = d.getFile();
+			if (palette_file != null) {
+				String dir = d.getDirectory();
+				if (dir != null)
+					palette_file = dir + palette_file;
+				flora_palette.setText(palette_file);
+			}
+			return;
+		}
+		
+		// make sure we have a ready Tiler
+		if (tiler == null || newSelection) {
+				tiler = new RPGMTiler(palette.getText(), x_points, y_points);
+				exported = false;
+		}
+		if (!exported) {
+			export(tiler);
+			exported = true;
+			newSelection = false;
+			levelsChanged = true;
+			floraChanged = need_flora_pct || need_flora_p || need_flora_3;
+			tempChanged = need_temp;
+			hydroChanged = need_hydro1 || need_hydro2;
+		}
+		
+		// make sure temperatures, levels, hydration, and flora are up to date
+		if (tempChanged) {
+			int deltaT = goose_temp.getValue();
+			tiler.temps(parms.meanTemp()+deltaT, parms.meanSummer()+deltaT, parms.meanWinter()+deltaT);
+			tempChanged = false;
+			floraChanged = need_flora_pct || need_flora_p || need_flora_3;
+		}
+		
+		if (levelsChanged) {
+			levelMap();
+			levelsChanged = false;
+			floraChanged = need_flora_pct || need_flora_p || need_flora_3;
+		}
+		
+		// topo previews do not require hydration and flora updates
+		if (e.getSource() == previewT && selected) {
+			tiler.preview(Exporter.WhichMap.HEIGHTMAP, colorTopo);
+			return;
+		}
+		
+		if (hydroChanged) {
+			// FIX update the hydration
+			hydroChanged = false;
+			floraChanged = need_flora_pct || need_flora_p || need_flora_3;
+		}
+		
+		if (floraChanged) {
+			floraMap();
+			floraChanged = false;
+		}
+		
 		if (e.getSource() == accept && selected) {
-			RPGMTiler exporter = new RPGMTiler(palette.getText(), x_points, y_points);
-			export(exporter); // set the characteristics of each tile
-			
-			// see if we need to adjust the temperature range
-			int deltaT = 0;
-			if (goose_temp != null)
-				deltaT = goose_temp.getValue();
-			if (deltaT != 0)
-				exporter.temps(parms.meanTemp()+deltaT, parms.meanSummer()+deltaT, parms.meanWinter()+deltaT);
-			
-			// export the RPGM-specific info
-			levelMap(exporter); // set the altitude/depth->level->terrain type
-			floraMap(exporter);	// figure out what plants to put on each square
-
 			// get the output file name
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText() + ".json");
@@ -400,7 +514,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 					export_file = dir + export_file;
 
 				// write out the file
-				exporter.writeFile(export_file);
+				tiler.writeFile(export_file);
 
 				// make the selected values defaults
 				parms.map_name = sel_name.getText();
@@ -439,49 +553,13 @@ public class RPGMexport extends ExportBase implements ActionListener {
 					parms.dTimesH = goose_hydro2.getValue();
 				}
 			}
-		} else if (e.getSource() == cancel) {
-			windowClosing((WindowEvent) null);
-		} else if (e.getSource() == previewT && selected) {
-			Exporter exporter = new RPGMTiler(palette.getText(), x_points, y_points);
-			export(exporter);
-			levelMap((RPGMTiler) exporter);
-			exporter.preview(Exporter.WhichMap.HEIGHTMAP, colorTopo);
 		} else if (e.getSource() == previewF && selected) {
-			Exporter exporter = new RPGMTiler(palette.getText(), x_points, y_points);
-			export(exporter);
-			levelMap((RPGMTiler) exporter);
-			floraMap((RPGMTiler) exporter);
-			exporter.preview(Exporter.WhichMap.FLORAMAP, colorFlora);
-		} else if (e.getSource() == choosePalette) {
-			FileDialog d = new FileDialog(this, "Tile Palette", FileDialog.LOAD);
-			d.setFile(palette.getText());
-			d.setVisible(true);
-			String palette_file = d.getFile();
-			if (palette_file != null) {
-				String dir = d.getDirectory();
-				if (dir != null)
-					palette_file = dir + palette_file;
-				palette.setText(palette_file);
-			}
-		} else if (e.getSource() == chooseFlora) {
-			FileDialog d = new FileDialog(this, "Flora Palette", FileDialog.LOAD);
-			d.setFile(flora_palette.getText());
-			d.setVisible(true);
-			String palette_file = d.getFile();
-			if (palette_file != null) {
-				String dir = d.getDirectory();
-				if (dir != null)
-					palette_file = dir + palette_file;
-				flora_palette.setText(palette_file);
-			}
+			tiler.preview(Exporter.WhichMap.FLORAMAP, colorFlora);
 		}
 	}
 
 	/**
 	 * generate the percentile to TerrainType maps for this export
-	 *
-	 * @param exporter
-	 *        (with whom levels will be set)
 	 *
 	 *  slider inputs: levels total # levels (Outside) depths
 	 *                 passable/shallow/deep altitudes ground/hill/mountain
@@ -490,7 +568,7 @@ public class RPGMexport extends ExportBase implements ActionListener {
 	 *
 	 *       TODO: better color ranges for terrain types		
 	 */
-	void levelMap(RPGMTiler exporter) {
+	void levelMap() {
 
 		// maps created by this method
 		int depthMap[]; // depth pctile to terrain level
@@ -635,27 +713,25 @@ public class RPGMexport extends ExportBase implements ActionListener {
 
 		// compute a terrain level for every square
 		RPGMLeveler leveler = new RPGMLeveler();
-		int[][] levelMap = leveler.getLevels(exporter, altMap, depthMap, slopeMap);
-		exporter.levelMap(levelMap, typeMap);
+		int[][] levelMap = leveler.getLevels(tiler, altMap, depthMap, slopeMap);
+		tiler.levelMap(levelMap, typeMap);
 	}
 	
 	/**
 	 * determine the owning plant type for every square
-	 * 
-	 * @param exporter
 	 */
-	public void floraMap(RPGMTiler exporter) {
+	public void floraMap() {
 		
-		RPGMFlora flora = new RPGMFlora(exporter, flora_palette.getText());
+		RPGMFlora flora = new RPGMFlora(tiler, flora_palette.getText());
 		
 		String[] floraClasses = {"Tree", "Brush", "Grass" };
 		int quotas[] = new int[3];
-		int total = (exporter.y_points * exporter.x_points * flora_pct.getValue()) / 100;
+		int total = (tiler.y_points * tiler.x_points * flora_pct.getValue()) / 100;
 		quotas[0] = (total * (100 - flora_3.getUpperValue())) / 100;	// trees
 		quotas[2] = (total * flora_3.getValue()) / 100;				// grasses
 		quotas[1] = total - (quotas[0] + quotas[2]);
 		
-		exporter.floraMap(flora.getFlora(floraClasses, quotas), flora.getFloraNames());
+		tiler.floraMap(flora.getFlora(floraClasses, quotas), flora.getFloraNames());
 		colorFlora = flora.getFloraColors();
 	}
 }

@@ -40,6 +40,8 @@ public class JsonExporter implements Exporter {
 	private static final int BRIGHT = 256 - DIM;
 	private static final int NORMAL = 128;
 	
+	private static final int EXPORT_DEBUG = 2;
+	
 	/**
 	 * create a new Raw JSON exporter
 	 * 
@@ -49,6 +51,9 @@ public class JsonExporter implements Exporter {
 		this.x_points = width;
 		this.y_points = height;
 		parms = Parameters.getInstance();
+		
+		if (parms.debug_level >= EXPORT_DEBUG)
+			System.out.println("new JSON exporter (" + height + "x" + width + ")");
 	}
 
 	public void tileSize(int meters) {
@@ -235,6 +240,8 @@ public class JsonExporter implements Exporter {
 						map[i][j] = new Color(0, (int) h, BRIGHT);
 					}
 			new PreviewMap("Export Preview (terrain)", map);
+		} else if (chosen == WhichMap.FLORAMAP) {
+			System.out.println("Flora previews not supported for JSON export");
 		}
 	}
 }

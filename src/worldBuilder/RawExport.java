@@ -6,6 +6,9 @@ import java.awt.event.*;
 public class RawExport extends ExportBase implements ActionListener {
 	
 	private static final long serialVersionUID = 1L;
+	
+	private JsonExporter exporter = null;
+	private boolean exported = false;
 
 	/**
 	 * Set up the dialog (base class is fine) and
@@ -16,16 +19,14 @@ public class RawExport extends ExportBase implements ActionListener {
 	public RawExport(Map map) {
 		super("Raw JSON", map);
 		
-		// create sub-class-specific controls
-		// controls.add(whatever);
-		
 		// we handle window and button events
 		previewT.addActionListener(this);
+		previewF.setEnabled(false);		// no Flora in raw json
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		addWindowListener(this);
-		
-		// the standard dialog is all we need
+
+		// put up the dialog
 		pack();
 		setVisible(true);
 	}
@@ -34,10 +35,23 @@ public class RawExport extends ExportBase implements ActionListener {
 	 * click events on ACCEPT/CANCEL buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == accept && selected) {
-			Exporter exporter = new JsonExporter(x_points, y_points);
+		if (e.getSource() == cancel) {
+			windowClosing((WindowEvent) null);
+			return;
+		}
+		
+		// make sure we have an exporter ready
+		if (exporter == null || newSelection) {
+			exporter = new JsonExporter(x_points, y_points);
+			exported = false;
+			newSelection = false;
+		}
+		if (!exported) {
 			export(exporter);
-			
+			exported = true;
+		}
+		
+		if (e.getSource() == accept && selected) {
 			// flush the it out to a file
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText()+".json");
@@ -56,12 +70,10 @@ public class RawExport extends ExportBase implements ActionListener {
 				// discard the window
 				windowClosing((WindowEvent) null);
 			}
-		} else if (e.getSource() == cancel) {
-			windowClosing((WindowEvent) null);
 		} else if (e.getSource() == previewT && selected) {
-			Exporter exporter = new JsonExporter(x_points, y_points);
-			export(exporter);
 			exporter.preview(Exporter.WhichMap.HEIGHTMAP, null);
+		} else if (e.getSource() == previewF && selected) {
+			exporter.preview(Exporter.WhichMap.FLORAMAP, null);
 		}
 	}
 }

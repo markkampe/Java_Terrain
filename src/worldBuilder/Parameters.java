@@ -41,6 +41,7 @@ public class Parameters {
 	public static final String unit_f = "m^3/s";
 	public static final String unit_v = "m/s";
 	public static final String unit_t = "C";
+	public static final String unit_d = "deg";
 
 	// map coordinate ranges (probably don't want to change)
 	public static final double x_extent = 1.0; // Xmax - Xmin
@@ -476,7 +477,7 @@ public class Parameters {
 		System.out.println("   maped area: " + xy_range + "x" + xy_range + " " + unit_xy + "^2, max altitude "
 				+ z_range / 2 + unit_z);
 		System.out.println("   planetary:  lat=" + latitude + ", lon=" + longitude + ", radius=" + radius + unit_xy
-				+ ", tilt=" + tilt);
+				+ ", tilt=" + tilt + unit_d);
 		System.out.println("               Tmean=" + String.format("%.1f", meanTemp()) + unit_t + ", Tsummer="
 				+ String.format("%.1f", meanSummer()) + unit_t + ", Twinter=" + String.format("%.1f", meanWinter())
 				+ unit_t);

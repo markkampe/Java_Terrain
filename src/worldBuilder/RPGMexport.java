@@ -60,6 +60,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 
 	private Color[] colorTopo; // level to preview color map
 	private Color[] colorFlora;	// flora class to preview color map
+	private double[][] baseHydro;	// hydration before our adjustments
 
 	// preview colors
 	private static final Color GROUND_COLOR = new Color(102,51,0);
@@ -90,7 +91,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			need_alt_3 = false;
 			need_depths = true;
 			need_slopes = false;
-		} else { // Overworld ... few levels, but more types
+		} else { // Overworld ... few levels, but more types		// start out with from-the-model hydration
 			need_levels = false;
 			need_alt_3 = true;
 			need_alt_n = false;
@@ -142,7 +143,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		// create a local panel for the export-type controls
 		JPanel locals = new JPanel();
 		locals.setLayout(new BoxLayout(locals, BoxLayout.PAGE_AXIS));
-		locals.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
+		locals.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));		// start out with from-the-model hydration
 
 		if (need_levels) { // create height levels slider
 			levels = new JSlider(JSlider.HORIZONTAL, 0, parms.levels_max, parms.dAltLevels);
@@ -463,6 +464,8 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 		if (!exported) {
 			export(tiler);
+			baseHydro = tiler.hydration;	// remember the base
+			
 			exported = true;
 			newSelection = false;
 			levelsChanged = true;
@@ -492,7 +495,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 		
 		if (hydroChanged) {
-			// FIX update the hydration
+			hydroMap();
 			hydroChanged = false;
 			floraChanged = need_flora_pct || need_flora_p || need_flora_3;
 		}
@@ -718,12 +721,40 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	}
 	
 	/**
+	 * adjust the hydration map based on our sliders
+	 */
+	private void hydroMap() {
+		// figure out the adjustments
+		double plus = need_hydro1 ? goose_hydro1.getValue() : 0;
+		double scale = need_hydro2 ? goose_hydro2.getValue() : 100;
+		System.out.println("adjusting hydro map +" + plus + ", *" + scale);
+		
+		// create a new hydration array
+		double[][] updates = new double[tiler.y_points][tiler.x_points];
+		for(int i = 0; i < y_points; i++)
+			for(int j = 0; j < x_points; j++) {
+				double h = baseHydro[i][j];
+				if (h >= 0) {	// only do this for land
+					h *= scale;	h /= 100;	// multiply by scale
+					h += plus/100;			// add plus
+					if (h < 0) h = 0;		// result cannot go negative
+					if (h > 0.99) h = 0.99;	// cannot exceed 99%
+				}
+				updates[i][j] = h;
+			}
+		
+		// set it to be the new per-point hydration
+		tiler.waterMap(updates);
+	}
+	
+	/**
 	 * determine the owning plant type for every square
 	 */
 	public void floraMap() {
 		
 		RPGMFlora flora = new RPGMFlora(tiler, flora_palette.getText());
 		
+		// set-up the quotas and names
 		String[] floraClasses = {"Tree", "Brush", "Grass" };
 		int quotas[] = new int[3];
 		int total = (tiler.y_points * tiler.x_points * flora_pct.getValue()) / 100;
@@ -731,6 +762,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		quotas[2] = (total * flora_3.getValue()) / 100;				// grasses
 		quotas[1] = total - (quotas[0] + quotas[2]);
 		
+		// assign flora type to every tile
 		tiler.floraMap(flora.getFlora(floraClasses, quotas), flora.getFloraNames());
 		colorFlora = flora.getFloraColors();
 	}

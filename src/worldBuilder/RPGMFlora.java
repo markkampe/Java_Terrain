@@ -13,6 +13,7 @@ public class RPGMFlora {
 	private Color colors[];		// preview color of each type of plant
 	private TileRules rules;	// plant generation rules
 	private RPGMTiler tiler;	// tiler (for per square info)
+	
 	private Parameters parms;
 	
 	private static final int RULE_DEBUG = 2;
@@ -40,7 +41,7 @@ public class RPGMFlora {
 			colors[numRules] = r.previewColor;
 		}
 	}
-
+	
 	/**
 	 * @return array to map Flora indices into names
 	 */

@@ -339,15 +339,8 @@ public class WorldBuilder  extends JFrame
 	}
 
 	/**
-	 * enable/disable menus according to sub-region status
+	 * action handler for menu widgets
 	 */
-	private void menuEnable(boolean isSubRegion) {
-		editRain.setEnabled(!isSubRegion);
-		editSlope.setEnabled(!isSubRegion);
-		editRiver.setEnabled(!isSubRegion);
-		seaLevel.setEnabled(!isSubRegion);
-	}
-	
 	public void actionPerformed( ActionEvent e ) {
 		Object o = e.getSource();
 		// file menu opens, closes, saves, and exports files
@@ -356,14 +349,12 @@ public class WorldBuilder  extends JFrame
 				checkSave();
 			filename = null;
 			placeDialog(new MeshDialog(map), true);
-			menuEnable(false);
 			modified = true;
 		} else if (o == newRegion) {
 			if (modified)
 				checkSave();
 			placeDialog(new RegionDialog(map), false);
 			filename = null;
-			menuEnable(true);
 		} else if (o == fileOpen) {
 			if (modified)
 				checkSave();
@@ -378,7 +369,6 @@ public class WorldBuilder  extends JFrame
 	
 				// newly loaded map may have changed the sea-level
 				seaLevel.setValue((int)(parms.sea_level * parms.z_range));
-				menuEnable(map.isSubRegion);
 				modified = false;
 			}
 		} else if (o == fileSave) {

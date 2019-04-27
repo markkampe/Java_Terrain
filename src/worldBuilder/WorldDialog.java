@@ -29,6 +29,9 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		 * put up a world parameters Dialog
 		 * 
 		 * @param readOnly ... sub-region w/fixed world parameters
+		 *			disabling these updates makes it more difficult
+		 *			to make changes to a sub-region map that are 
+		 *			inconsistent with the world-map from which it came.
 		 */
 		public WorldDialog(boolean readOnly)  {
 			// pick up references
@@ -80,7 +83,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			label = "max Altitude (" + Parameters.unit_z + " x " + parms.alt_scale + ")";
 			JLabel altLabel = new JLabel(label, JLabel.CENTER);
 			altLabel.setFont(fontLarge);
-			altitude.setEnabled(!readOnly);
+			altitude.setEnabled(true);
 			
 			for(dflt = 0; dflt < minor_choices.length; dflt++)
 				if (minor_choices[dflt] >= parms.topo_minor)

@@ -405,8 +405,7 @@ public class Map extends JPanel {
 			System.err.println("FATAL: close error on input file " + filename);			
 		}
 		
-		if (!isSubRegion)
-			RainDialog.rainFall(this, parms.dDirection, parms.dAmount);
+		RainDialog.rainFall(this, parms.dDirection, parms.dAmount);
 		
 		if (parms.debug_level > 0) {
 			parms.worldParms();
@@ -448,11 +447,9 @@ public class Map extends JPanel {
 				double l = parms.sea_level * parms.z_range;
 				output.write(String.format(S_FORMAT, (int) l, Parameters.unit_z));
 			}
-			if (!isSubRegion) {
-				output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r, 
-						parms.dDirection, parms.dRainHeight, Parameters.unit_z));
-				output.write(String.format(E_FORMAT, parms.dErosion));
-			}
+			output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r, 
+					parms.dDirection, parms.dRainHeight, Parameters.unit_z));
+			output.write(String.format(E_FORMAT, parms.dErosion));
 			
 			// write out the points and per-point attributes
 			output.write( "    \"points\": [" );
@@ -507,8 +504,7 @@ public class Map extends JPanel {
 		int x = p.index;
 		if (heightMap[x] != 0)
 			output.write(String.format(", \"z\": %.9f", heightMap[x]));
-		if (isSubRegion)
-			output.write(String.format(", \"rain\": \"%.1f%s\"", rainMap[x], Parameters.unit_r));
+		output.write(String.format(", \"rain\": \"%.1f%s\"", rainMap[x], Parameters.unit_r));
 		if (soilMap[x] != 0)
 			output.write(String.format(", \"soil\": \"%s\"", Map.soil_names[(int) Math.round(soilMap[x])]));
 		if (incoming[x] != 0)

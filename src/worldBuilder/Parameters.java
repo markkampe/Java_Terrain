@@ -82,7 +82,8 @@ public class Parameters {
 	public int width = PIXELS; 		// screen width
 	public int border; 				// screen border width
 	public int dialogBorder; 		// dialog box border
-
+	public int descr_width;			// description width
+	public int descr_height;		// description height
 	
 	// map rendering thresholds
 	public double stream_flux = 0.1;	// stream threshold (m3/s)
@@ -98,6 +99,7 @@ public class Parameters {
 	public int mountain_max; 	// widest mountain (km)
 	public double latitude; 	// central point latitude
 	public double longitude; 	// central point longitude
+	public String description;	// description of this world
 
 	// persistent defaults
 	public double sea_level = 0;// sea level (map space)
@@ -213,6 +215,10 @@ public class Parameters {
 		dDeltaT = 0;
 		dDeltaH = 0;
 		dTimesH = 100;
+		
+		description = "";
+		descr_height = 4;
+		descr_width = 80;
 	}
 
 	// public constructor to read from configuration file
@@ -482,6 +488,8 @@ public class Parameters {
 				+ String.format("%.1f", meanSummer()) + unit_t + ", Twinter=" + String.format("%.1f", meanWinter())
 				+ unit_t);
 		System.out.println("   topo maps:  " + topo_minor + unit_z + "/line, " + topo_major + " minors/major");
+		if (description != "")
+			System.out.println("   description:" + getDescription() + "\n");
 	}
 	
 	/**
@@ -622,5 +630,37 @@ public class Parameters {
 	 */
 	public double z(double height) {
 		return z_extent * height / z_range;
+	}
+	
+	/**
+	 * @return description string with \n escapes replaced by newlines
+	 */
+	public String getDescription() {
+		String result = "";
+		int start = 0;
+		for(int next = description.indexOf("\\n",start);
+				next >= 0;
+				next = description.indexOf("\\n", start)) {
+			result += description.substring(start, next);
+			result += "\n";
+			start = next + 2;
+		}
+		return result + description.substring(start);
+	}
+	/**
+	 * set description string, replacing newlines with \n escapes
+	 * @param descr string, possibly containing newlines
+	 */
+	public void setDescription(String descr) {
+		description = "";
+		int start = 0;
+		for(int next = descr.indexOf("\n",start);
+				next >= 0;
+				next = descr.indexOf("\n", start)) {
+			description += descr.substring(start, next);
+			description += "\\n";
+			start = next + 1;
+		}
+		description += descr.substring(start);
 	}
 }

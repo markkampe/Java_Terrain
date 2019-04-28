@@ -357,6 +357,10 @@ public class Map extends JPanel {
 					case "parent_name":
 						parms.parent_name = parser.getString();
 						break;
+						
+					case "description":
+						parms.description = parser.getString();
+						break;
 				}
 				break;
 				
@@ -428,6 +432,7 @@ public class Map extends JPanel {
 			final String Z_FORMAT = "    \"scale\": { \"xy_range\": \"%d%s\", \"z_range\": \"%d%s\" },\n";
 			final String M_format = "    \"map_name\": \"%s\",\n";
 			final String P_format = "    \"parent_name\": \"%s\",\n";
+			final String D_format = "    \"description\": \"%s\",\n";
 			
 			output.write( "{   \"length\": " + mesh.vertices.length + ",\n");
 			output.write( String.format(M_format, parms.map_name));
@@ -450,6 +455,9 @@ public class Map extends JPanel {
 			output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r, 
 					parms.dDirection, parms.dRainHeight, Parameters.unit_z));
 			output.write(String.format(E_FORMAT, parms.dErosion));
+			
+			if (parms.description != "")
+				output.write(String.format(D_format,  parms.description));
 			
 			// write out the points and per-point attributes
 			output.write( "    \"points\": [" );

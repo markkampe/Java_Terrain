@@ -19,6 +19,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		private JSlider topo_major;
 		private JTextField latitude;
 		private JTextField longitude;
+		private JTextArea description;
 		
 		private static final int minor_choices[] = {1, 5, 10, 50, 100, 500, 1000};
 		private static final int major_choices[] = {5, 10, 20};
@@ -59,6 +60,15 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			latitude.setEditable(!readOnly);
 			longitude.setEditable(!readOnly);
 		
+			description = new JTextArea(parms.getDescription());
+			description.setRows(parms.descr_height);
+			JLabel dscLabel = new JLabel("Description");
+			dscLabel.setFont(fontLarge);
+			JPanel dsc_panel = new JPanel();
+			dsc_panel.setLayout(new BoxLayout(dsc_panel, BoxLayout.LINE_AXIS));
+			dsc_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+			dsc_panel.add(description);
+			
 			int max = parms.diameter_max/parms.diameter_scale;
 			int dflt = parms.xy_range/parms.diameter_scale;
 			diameter = new JSlider(JSlider.HORIZONTAL, 0, max, dflt);
@@ -118,8 +128,9 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			 * 		vertical Box layout w/ sliders, input fields, and buttons
 			 * 		sliders are a 2x2 grid layout
 			 * 			each being a vertical Box w/label and slider
-			 * 		text fiels are a 1x2 grid layout
+			 * 		lat/lon fields are a 1x2 grid layout
 			 * 			each being a vertical Box w/label and text field
+			 * 		descr is a single text field w/label
 			 * 		buttons a horizontal Box layout
 			 */
 			JPanel d_panel = new JPanel();
@@ -152,7 +163,6 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			ln_panel.add(lonLabel);
 			ln_panel.add(longitude);
 			
-			
 			JPanel sliders = new JPanel();
 			sliders.setLayout(new GridLayout(2,2));
 			d_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
@@ -171,6 +181,13 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			inputs.add(lt_panel);
 			inputs.add(ln_panel);
 			
+			JPanel middle = new JPanel();
+			middle.setLayout(new BoxLayout(middle, BoxLayout.PAGE_AXIS));
+			middle.add(inputs);
+			middle.add(Box.createRigidArea(new Dimension(0,20)));
+			middle.add(dscLabel);
+			middle.add(dsc_panel);
+			
 			JPanel buttons = new JPanel();
 			buttons.setLayout(new BoxLayout(buttons, BoxLayout.LINE_AXIS));
 			buttons.add(cancel);
@@ -179,7 +196,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			buttons.setBorder(BorderFactory.createEmptyBorder(20,100, 20, 10));
 
 			mainPane.add(sliders, BorderLayout.NORTH);
-			mainPane.add(inputs, BorderLayout.CENTER);
+			mainPane.add(middle, BorderLayout.CENTER);
 			mainPane.add(buttons, BorderLayout.SOUTH);
 			
 			pack();
@@ -225,6 +242,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 				parms.longitude = Double.parseDouble(longitude.getText());
 				parms.topo_minor = minor_choices[topo_minor.getValue()];
 				parms.topo_major = major_choices[topo_major.getValue()];
+				parms.setDescription(description.getText());
 				
 				if (parms.debug_level > 0)
 					parms.worldParms();

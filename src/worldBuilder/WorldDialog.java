@@ -52,10 +52,10 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			cancel = new JButton("CANCEL");
 			
 			latitude = new JTextField(Double.toString(parms.latitude));
-			JLabel latLabel = new JLabel("latitude (center of map, " + parms.unit_d + "N)");
+			JLabel latLabel = new JLabel("latitude (center of map, " + parms.unit_d + "North)");
 			latLabel.setFont(fontLarge);
 			longitude = new JTextField(Double.toString(parms.longitude));
-			JLabel lonLabel = new JLabel("longitude (center of map, " + parms.unit_d + "E)");
+			JLabel lonLabel = new JLabel("longitude (center of map, " + parms.unit_d + "East)");
 			lonLabel.setFont(fontLarge);
 			latitude.setEditable(!readOnly);
 			longitude.setEditable(!readOnly);

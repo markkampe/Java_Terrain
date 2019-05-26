@@ -61,7 +61,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		direction.setFont(fontSmall);
 		direction.setPaintTicks(true);
 		direction.setPaintLabels(true);
-		JLabel dirLabel = new JLabel("Dominant Direction", JLabel.CENTER);
+		JLabel dirLabel = new JLabel("Dominant Direction (North = 0" + parms.unit_d + ")", JLabel.CENTER);
 		dirLabel.setFont(fontLarge);
 
 		amount = new JSlider(JSlider.HORIZONTAL, 0, parms.rain_max, parms.dAmount);

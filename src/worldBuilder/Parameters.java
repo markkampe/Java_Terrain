@@ -35,13 +35,15 @@ public class Parameters {
 
 	// operating units ... hard-wired into the code
 	public static final String unit_xy = "km";
+	public static final String unit_xy2 = "km\u00B2";
 	public static final String unit_z = "m";
 	public static final String unit_r = "cm/y";
 	public static final String unit_s = "cm/km";
-	public static final String unit_f = "m^3/s";
+	public static final String unit_f = "m\u00B3/s";
 	public static final String unit_v = "m/s";
-	public static final String unit_t = "C";
-	public static final String unit_d = "deg";
+	public static final String unit_t = "\u00B0C";
+	public static final String unit_d = "\u00B0";
+
 
 	// map coordinate ranges (probably don't want to change)
 	public static final double x_extent = 1.0; // Xmax - Xmin
@@ -445,7 +447,7 @@ public class Parameters {
 			System.out.println("Configuration Parameters (" + filename + ")");
 			System.out.println("   window:     " + width + "x" + height + ", border=" + border);
 			System.out.println("   waterways:  stream=" + stream_flux + unit_f + ", river=" + river_flux + unit_f
-					+ ", artery=" + artery_flux + unit_f + ", deep=" + deep_threshold);
+					+ ", artery=" + artery_flux + unit_f + ", deep=" + deep_threshold + unit_z);
 			System.out.println("   erosion:    cycles=" + erosion_max + "  Ve=" + String.format("%.2f", Ve) + unit_v
 					+ ", Ce=" + String.format("%.4f", Ce) + ", Vd=" + String.format("%.2f", Vd) + unit_v + ", Cd="
 					+ String.format("%.4f", Cd));
@@ -480,10 +482,10 @@ public class Parameters {
 	 */
 	public void worldParms() {
 		System.out.println("World Configuration");
-		System.out.println("   maped area: " + xy_range + "x" + xy_range + " " + unit_xy + "^2, max altitude "
+		System.out.println("   maped area: " + xy_range + "x" + xy_range + " " + unit_xy2 + ", max altitude "
 				+ z_range / 2 + unit_z);
-		System.out.println("   planetary:  lat=" + latitude + ", lon=" + longitude + ", radius=" + radius + unit_xy
-				+ ", tilt=" + tilt + unit_d);
+		System.out.println("   planetary:  lat=" + latitude + unit_d + ", lon=" + longitude + unit_d 
+				+ ", radius=" + radius + unit_xy + ", tilt=" + tilt + unit_d);
 		System.out.println("               Tmean=" + String.format("%.1f", meanTemp()) + unit_t + ", Tsummer="
 				+ String.format("%.1f", meanSummer()) + unit_t + ", Twinter=" + String.format("%.1f", meanWinter())
 				+ unit_t);
@@ -499,7 +501,7 @@ public class Parameters {
 	 */
 	public void rainParms(int incoming) {
 		System.out.println("Rainfall: " + incoming + unit_r + ", from " + 
-				dDirection + ", cloud bottoms at " + dRainHeight + unit_z);
+				String.format("%03d", dDirection) + unit_d + ", cloud bottoms at " + dRainHeight + unit_z);
 	}
 
 	/**

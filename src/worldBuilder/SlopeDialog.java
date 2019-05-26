@@ -123,7 +123,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	/**
 	 * incline the entire map plane
 	 *
-	 * @param inclination (m/km)
+	 * @param inclination (cm/km)
 	 */
 	public void incline(double inclination) {
 		// convert inclination from word to map units
@@ -233,9 +233,11 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 			oldHeight = null;	// don't need this anymore
 			this.dispose();
 			
-			if (parms.debug_level > 0)
+			if (parms.debug_level > 0) {
+				final int cm_per_km = 100000;
 				System.out.println("Incline continent: axis=" + dir + ", slope=" + slope + Parameters.unit_s +
-						", max slope=" + String.format("%.4f", map.max_slope));
+						", max slope=" + String.format("%.1f", map.max_slope * cm_per_km) + Parameters.unit_s);
+			}
 			
 			// by default, weather comes from off-shore
 			if (dir >= 0)

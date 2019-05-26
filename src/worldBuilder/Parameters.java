@@ -34,29 +34,31 @@ public class Parameters {
 	public String config_directory = "";
 
 	// operating units ... hard-wired into the code
-	public static final String unit_xy = "km";
-	public static final String unit_xy2 = "km\u00B2";
-	public static final String unit_z = "m";
-	public static final String unit_r = "cm/y";
-	public static final String unit_s = "cm/km";
-	public static final String unit_f = "m\u00B3/s";
-	public static final String unit_v = "m/s";
-	public static final String unit_t = "\u00B0C";
-	public static final String unit_d = "\u00B0";
+	public static final String unit_xy = "km";			// distance
+	public static final String unit_xy2 = "km\u00B2";	// land area
+	public static final String unit_z = "m";			// altitude
+	public static final String unit_r = "cm/y";			// rainfall
+	public static final String unit_s = "cm/km";		// slope
+	public static final String unit_f = "m\u00B3/s";	// flow rate
+	public static final String unit_v = "m/s";			// velocity
+	public static final String unit_t = "\u00B0C";		// temperature
+	public static final String unit_d = "\u00B0";		// direction in degrees
+	public static final String unit_p = "px";			// screen resolution
 
-
-	// map coordinate ranges (probably don't want to change)
+	// map coordinate ranges ... no reason to change
 	public static final double x_extent = 1.0; // Xmax - Xmin
 	public static final double y_extent = 1.0; // Ymax - Ymin
 	public static final double z_extent = 1.0; // Zmax - Zmin
-
-	// planetary characteristics
-	public int radius = 6371; // planetary radius (km)
-	public double tilt = 23.5; // (seasonal) axis tilt (deg)
+	
+	// meteorological constants ... not configurable
 	public double lapse_rate = 0.01;	// adiabatic lapse rate (degC/M)
 	public double Tmin = -5; // mean temperature at poles
 	public double Tmax = 30; // mean temperature at equator
 
+	// planetary characteristics (override in config.json)
+	public int radius = 6371; // planetary radius (km)
+	public double tilt = 23.5; // (seasonal) axis tilt (deg)
+	
 	// limits on world parameters (overide in config.json)
 	public int alt_max = 10000; // max altitude (m)
 	public int alt_maxrain = 1000; // max rain altitude (m)
@@ -445,7 +447,7 @@ public class Parameters {
 
 		if (debug_level > 0) {
 			System.out.println("Configuration Parameters (" + filename + ")");
-			System.out.println("   window:     " + width + "x" + height + "px, border=" + border + "px");
+			System.out.println("   window:     " + width + "x" + height + unit_p + ", border=" + border + unit_p);
 			System.out.println("   waterways:  stream=" + stream_flux + unit_f + ", river=" + river_flux + unit_f
 					+ ", artery=" + artery_flux + unit_f + ", deep=" + deep_threshold + unit_z);
 			System.out.println("   erosion:    cycles=" + erosion_max 
@@ -459,7 +461,7 @@ public class Parameters {
 			System.out.println("   max ranges: " + diameter_max + unit_xy + ", altitude +/-" + alt_max + unit_z
 					+ ", msl +/-" + msl_range + unit_z);
 			System.out.println("               mountain diameter=world/" + mountain_divisor);
-			System.out.println("               initial slope=" + String.format("%.6f", slope_init));
+			System.out.println("               initial slope=" + String.format("%.6f", slope_init) + unit_s);
 			System.out.println("               sedimentary layer=" + String.format("%.0f%s", sediment, unit_z));
 			System.out.println(
 					"               rainfall=" + rain_max + unit_r + " (bottoms at " + alt_maxrain + unit_z + ")");

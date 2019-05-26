@@ -445,12 +445,14 @@ public class Parameters {
 
 		if (debug_level > 0) {
 			System.out.println("Configuration Parameters (" + filename + ")");
-			System.out.println("   window:     " + width + "x" + height + ", border=" + border);
+			System.out.println("   window:     " + width + "x" + height + "px, border=" + border + "px");
 			System.out.println("   waterways:  stream=" + stream_flux + unit_f + ", river=" + river_flux + unit_f
 					+ ", artery=" + artery_flux + unit_f + ", deep=" + deep_threshold + unit_z);
-			System.out.println("   erosion:    cycles=" + erosion_max + "  Ve=" + String.format("%.2f", Ve) + unit_v
-					+ ", Ce=" + String.format("%.4f", Ce) + ", Vd=" + String.format("%.2f", Vd) + unit_v + ", Cd="
-					+ String.format("%.4f", Cd));
+			System.out.println("   erosion:    cycles=" + erosion_max 
+					+ "  Ve=" + String.format("%.2f", Ve) + unit_v
+					+ ", Vd=" + String.format("%.2f", Vd) + unit_v 
+					+ ", Ce=" + String.format("%.4f", Ce)
+					+ ", Cd=" + String.format("%.4f", Cd));
 			System.out.println(
 					"   rainfall:   " + dRdX * 100 + "%/" + unit_xy + ", Dp=" + String.format("%.1f", Dp) + unit_z);
 			System.out.println("   mean temps: polar=" + Tmin + unit_t + ", equator=" + Tmax + unit_t);
@@ -482,7 +484,7 @@ public class Parameters {
 	 */
 	public void worldParms() {
 		System.out.println("World Configuration");
-		System.out.println("   maped area: " + xy_range + "x" + xy_range + " " + unit_xy2 + ", max altitude "
+		System.out.println("   maped area: " + xy_range + "x" + xy_range + unit_xy2 + ", max altitude "
 				+ z_range / 2 + unit_z);
 		System.out.println("   planetary:  lat=" + latitude + unit_d + ", lon=" + longitude + unit_d 
 				+ ", radius=" + radius + unit_xy + ", tilt=" + tilt + unit_d);

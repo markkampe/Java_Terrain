@@ -236,6 +236,7 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 			// update the world location and size
 			map.isSubRegion = false;		// leave location editing enabled	
 			parms.xy_range = (int) ((x_km >= y_km) ? x_km : y_km);
+			parms.dDiameter = parms.xy_range/(parms.mountain_divisor * 4);
 			parms.latitude = lat;
 			parms.longitude = lon;
 			parms.parent_name = parms.map_name;

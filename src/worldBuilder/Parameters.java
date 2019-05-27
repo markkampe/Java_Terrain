@@ -520,7 +520,9 @@ public class Parameters {
 	public static int niceTics(int min, int max, boolean major) {
 		int full_scale = max - min;
 		if (major) {
-			if (min == -max)
+			if (full_scale < 10)
+				return full_scale;
+			else if (min == -max)
 				return full_scale / 4;
 			else
 				return full_scale / 5;

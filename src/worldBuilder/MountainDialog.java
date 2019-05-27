@@ -110,7 +110,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		altitude = new JSlider(JSlider.HORIZONTAL, -this.a_max, this.a_max, parms.dAltitude);
 		altitude.setMajorTickSpacing(Parameters.niceTics(-a_max, a_max, true));
-		altitude.setMinorTickSpacing(Parameters.niceTics(-a_max, a_max, false));
+		if (a_max > 10)
+			altitude.setMinorTickSpacing(Parameters.niceTics(-a_max, a_max, false));
 		altitude.setFont(fontSmall);
 		altitude.setPaintTicks(true);
 		altitude.setPaintLabels(true);
@@ -119,7 +120,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 
 		diameter1 = new JSlider(JSlider.HORIZONTAL, 0, d_max, parms.dDiameter);
 		diameter1.setMajorTickSpacing(Parameters.niceTics(0, d_max,true));
-		diameter1.setMinorTickSpacing(Parameters.niceTics(0, d_max,false));
+		if (d_max > 10)
+			diameter1.setMinorTickSpacing(Parameters.niceTics(0, d_max,false));
 		diameter1.setFont(fontSmall);
 		diameter1.setPaintTicks(true);
 		diameter1.setPaintLabels(true);
@@ -128,7 +130,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		diameter2 = new JSlider(JSlider.HORIZONTAL, 0, d_max, parms.dDiameter);
 		diameter2.setMajorTickSpacing(Parameters.niceTics(0, d_max,true));
-		diameter2.setMinorTickSpacing(Parameters.niceTics(0, d_max,false));
+		if (d_max > 10)
+			diameter2.setMinorTickSpacing(Parameters.niceTics(0, d_max,false));
 		diameter2.setFont(fontSmall);
 		diameter2.setPaintTicks(true);
 		diameter2.setPaintLabels(true);

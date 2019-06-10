@@ -80,7 +80,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		// calibrate full scale on the sliders
 		this.a_max = parms.z_range/2;
-		this.d_max = parms.xy_range / parms.mountain_divisor;
+		this.d_max = parms.xy_range / parms.m_width_divisor;
 	
 		// create the dialog box
 		Container mainPane = getContentPane();

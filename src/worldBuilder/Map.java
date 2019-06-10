@@ -409,6 +409,8 @@ public class Map extends JPanel {
 			System.err.println("FATAL: close error on input file " + filename);			
 		}
 		
+		parms.checkDefaults();	// Make sure defaults are consistent w/new world size
+		
 		RainDialog.rainFall(this, parms.dDirection, parms.dAmount);
 		
 		if (parms.debug_level > 0) {

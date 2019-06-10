@@ -51,15 +51,15 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 			}
 			pointsChooser.setSelectedItem(profilePoints[DEFAULT_PROFILE]);
 			
-			int max = parms.diameter_max/parms.diameter_scale;
-			int dflt = profileSizes[DEFAULT_PROFILE]/parms.diameter_scale;
+			int max = parms.diameter_max/parms.diam_scale;
+			int dflt = profileSizes[DEFAULT_PROFILE]/parms.diam_scale;
 			diameter = new JSlider(JSlider.HORIZONTAL, 0, max, dflt);
 			diameter.setMajorTickSpacing(Parameters.niceTics(0, max, true));
 			diameter.setMinorTickSpacing(Parameters.niceTics(0, max, false));
 			diameter.setFont(fontSmall);
 			diameter.setPaintTicks(true);
 			diameter.setPaintLabels(true);
-			String label = "Map Height/Width (" + Parameters.unit_xy + " x " + parms.diameter_scale + ")";
+			String label = "Map Height/Width (" + Parameters.unit_xy + " x " + parms.diam_scale + ")";
 			JLabel diameterLabel = new JLabel(label, JLabel.CENTER);
 			diameterLabel.setFont(fontLarge);
 			
@@ -156,7 +156,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 			
 			if (e.getSource() == profileChooser) {
 				int chosen = profileChooser.getSelectedIndex();
-				diameter.setValue(profileSizes[chosen]/parms.diameter_scale);
+				diameter.setValue(profileSizes[chosen]/parms.diam_scale);
 				pointsChooser.setSelectedItem(profilePoints[chosen]);
 				return;
 			}
@@ -183,7 +183,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 				map.setHeightMap(heightMap);
 				
 				if (parms.debug_level > 0)
-					System.out.println("Reinitialized map w/" + parms.dDiameter * parms.diameter_scale + Parameters.unit_xy + " diameter");
+					System.out.println("Reinitialized map w/" + parms.dDiameter * parms.diam_scale + Parameters.unit_xy + " diameter");
 			}
 			// discard the window
 			this.dispose();

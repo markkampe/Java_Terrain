@@ -52,10 +52,10 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			cancel = new JButton("CANCEL");
 			
 			latitude = new JTextField(Double.toString(parms.latitude));
-			JLabel latLabel = new JLabel("latitude (center of map, " + parms.unit_d + "North)");
+			JLabel latLabel = new JLabel("latitude (center of map, " + Parameters.unit_d + "North)");
 			latLabel.setFont(fontLarge);
 			longitude = new JTextField(Double.toString(parms.longitude));
-			JLabel lonLabel = new JLabel("longitude (center of map, " + parms.unit_d + "East)");
+			JLabel lonLabel = new JLabel("longitude (center of map, " + Parameters.unit_d + "East)");
 			lonLabel.setFont(fontLarge);
 			latitude.setEditable(!readOnly);
 			longitude.setEditable(!readOnly);
@@ -69,15 +69,15 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			dsc_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 			dsc_panel.add(description);
 			
-			int max = parms.diameter_max/parms.diameter_scale;
-			int dflt = parms.xy_range/parms.diameter_scale;
+			int max = parms.diameter_max/parms.diam_scale;
+			int dflt = parms.xy_range/parms.diam_scale;
 			diameter = new JSlider(JSlider.HORIZONTAL, 0, max, dflt);
 			diameter.setMajorTickSpacing(Parameters.niceTics(0, max, true));
 			diameter.setMinorTickSpacing(Parameters.niceTics(0, max, false));
 			diameter.setFont(fontSmall);
 			diameter.setPaintTicks(true);
 			diameter.setPaintLabels(true);
-			String label = "Height/Width (" + Parameters.unit_xy + " x " + parms.diameter_scale + ")";
+			String label = "Height/Width (" + Parameters.unit_xy + " x " + parms.diam_scale + ")";
 			JLabel diameterLabel = new JLabel(label, JLabel.CENTER);
 			diameterLabel.setFont(fontLarge);
 			diameter.setEnabled(!readOnly);
@@ -227,11 +227,11 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			// on acceptance, copy values into parameters
 			if (e.getSource() == accept) {
 				if (diameter.getValue() > 0) {
-					int v = diameter.getValue() * parms.diameter_scale;
-					if (v < parms.diameter_grain)	// minimum legal value
-						v = parms.diameter_grain;
+					int v = diameter.getValue() * parms.diam_scale;
+					if (v < parms.diam_grain)	// minimum legal value
+						v = parms.diam_grain;
 					else					// force it to a round number
-						v = ((v + parms.diameter_grain-1) /parms. diameter_grain) * parms.diameter_grain;
+						v = ((v + parms.diam_grain-1) /parms.diam_grain) * parms.diam_grain;
 					parms.xy_range = v;
 				}
 				if (altitude.getValue() > 0) {
@@ -243,6 +243,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 				parms.topo_minor = minor_choices[topo_minor.getValue()];
 				parms.topo_major = major_choices[topo_major.getValue()];
 				parms.setDescription(description.getText());
+				parms.checkDefaults();	// make sure defaults consistent w/new world size
 				
 				if (parms.debug_level > 0)
 					parms.worldParms();

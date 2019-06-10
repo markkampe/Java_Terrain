@@ -56,29 +56,29 @@ public class Parameters {
 	public double Tmax = 30; // mean temperature at equator
 
 	// planetary characteristics (override in config.json)
-	public int radius = 6371; // planetary radius (km)
-	public double tilt = 23.5; // (seasonal) axis tilt (deg)
+	public int radius = 6371;	// planetary radius (km)
+	public double tilt = 23.5;	// (seasonal) axis tilt (deg)
 	
 	// limits on world parameters (overide in config.json)
-	public int alt_max = 10000; // max altitude (m)
-	public int alt_maxrain = 1000; // max rain altitude (m)
-	public int diameter_max = 5000; // max world diameter (km)
-	public int msl_range = 1000; // +/- (m)
-	public int rain_max = 1000; // rain (cm/y)
-	public int mountain_divisor = 2; // world/mountain width
-	public int erosion_max = 10; // erosion cycles
-	public int tiles_max = 10000; // export warning limit
-	public int tribute_max = 1000; // max incoming river flow
+	public int alt_max = 10000;		// max altitude (m)
+	public int alt_maxrain = 1000;	// max rain altitude (m)
+	public int diameter_max = 5000;	// max world diameter (km)
+	public int msl_range = 1000;	// +/- (m)
+	public int rain_max = 1000;		// rain (cm/y)
+	public int m_width_divisor = 2; // world/mountain width
+	public int erosion_max = 10;	// erosion cycles
+	public int tiles_max = 10000;	// export warning limit
+	public int tribute_max = 1000;	// max incoming river flow
 	public double slope_init = 0.00001; // initial slope for new mesh
-	public int levels_min = 5;	// minimum number of height altitude levels
-	public int levels_max = 20;	// maximum number of height levels
-	public int delta_t_max = 15; // export temperature slider range
-	public int delta_h_max = 100; // export hydration slider range
+	public int levels_min = 5;		// minimum number of height altitude levels
+	public int levels_max = 20;		// maximum number of height levels
+	public int delta_t_max = 15;	// export temperature slider range
+	public int delta_h_max = 100;	// export hydration slider range
 
 	// world size slider units
-	public int diameter_scale = 100; // slider labeling unit (km)
-	public int diameter_grain = 500; // diameter rounding unit (km)
-	public int alt_scale = 1000; // slider labeling unit (km)
+	public int diam_scale = 100;	// slider labeling unit (km)
+	public int diam_grain = 500;	// diameter rounding unit (km)
+	public int alt_scale = 1000; 	// slider labeling unit (km)
 
 	// default display parameters (override in config.json)
 	private static final int PIXELS = 800; // display height/width
@@ -105,7 +105,7 @@ public class Parameters {
 	public double longitude; 	// central point longitude
 	public String description;	// description of this world
 
-	// persistent defaults
+	// persistent defaults for Edit dialogs
 	public double sea_level = 0;// sea level (map space)
 	public int dSlope; 			// continental slope
 	public int dDiameter; 		// mountain diameter
@@ -184,7 +184,7 @@ public class Parameters {
 
 		// default mountain size/shape
 		dAltitude = z_range / 4;
-		dDiameter = xy_range / (mountain_divisor * 4);
+		dDiameter = xy_range / (m_width_divisor * 4);
 		dShape = (CONICAL + SPHERICAL) / 2;
 
 		// default weather
@@ -223,6 +223,23 @@ public class Parameters {
 		description = "";
 		descr_height = 4;
 		descr_width = 80;
+	}
+	
+	// ensure defaults are consistent w/updated world size
+	public void checkDefaults() {
+		// default mountain width less than half the world size
+		if (dDiameter > (xy_range / m_width_divisor))
+			dDiameter = xy_range / m_width_divisor;
+		
+		// default mountain height within the world height
+		if (dAltitude > z_range/2)
+			dAltitude = z_range/4;
+		else if (dAltitude < -z_range/2)
+			dAltitude = -z_range/4;
+		
+		// world at least ten tiles across
+		if (dTileSize > (xy_range * 1000 / 10))
+			dTileSize = xy_range * 1000 / 10;
 	}
 
 	// public constructor to read from configuration file
@@ -326,16 +343,16 @@ public class Parameters {
 
 				// limits on configuration sliders
 				case "diameter_unit":
-					diameter_scale = new Integer(parser.getString());
+					diam_scale = new Integer(parser.getString());
 					break;
 				case "diameter_max":
 					diameter_max = new Integer(parser.getString());
 					break;
 				case "diameter_grain":
-					diameter_grain = new Integer(parser.getString());
+					diam_grain = new Integer(parser.getString());
 					break;
 				case "mountain_fraction":
-					mountain_divisor = new Integer(parser.getString());
+					m_width_divisor = new Integer(parser.getString());
 					break;
 				case "altitude_unit":
 					alt_scale = new Integer(parser.getString());
@@ -460,7 +477,7 @@ public class Parameters {
 			System.out.println("   mean temps: polar=" + Tmin + unit_t + ", equator=" + Tmax + unit_t);
 			System.out.println("   max ranges: " + diameter_max + unit_xy + ", altitude +/-" + alt_max + unit_z
 					+ ", msl +/-" + msl_range + unit_z);
-			System.out.println("               mountain diameter=world/" + mountain_divisor);
+			System.out.println("               mountain diameter=world/" + m_width_divisor);
 			System.out.println("               initial slope=" + String.format("%.6f", slope_init) + unit_s);
 			System.out.println("               sedimentary layer=" + String.format("%.0f%s", sediment, unit_z));
 			System.out.println(

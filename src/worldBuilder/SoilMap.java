@@ -11,11 +11,13 @@ public class SoilMap {
 	private static final int BRITE = 255;
 	
 	private Map map;
-	//private Parameters parms;
+	private boolean show_soil;
+	private boolean show_hydro;
 	
-	public SoilMap(Map map) {
+	public SoilMap(Map map, boolean show_soil, boolean show_hydro) {
 		this.map = map;
-		//this.parms = Parameters.getInstance();
+		this.show_soil = show_soil;
+		this.show_hydro = show_hydro;
 	}
 
 	/**
@@ -42,32 +44,37 @@ public class SoilMap {
 					if (hArray[r][c] < 0)	// ignore under water
 						continue;
 					int s = (int) sArray[r][c];	// soil type
-					if (eArray[r][c] < 0)
+					if (eArray[r][c] < 0)		// negative erosion is alluvial
 						s = Map.ALLUVIAL;
-					double sat = Hydrology.saturation[s];
-					double hydration = hArray[r][c] / sat;
-					int shade;
-					Color color;
-					switch(s) {
-					case Map.IGNEOUS:
-						shade = (int) Map.linear(DARK, DIM, hydration);
-						color = new Color(shade, shade, shade);
-						break;
-					case Map.METAMORPHIC:
-						shade = (int) Map.linear(DIM, BRITE, hydration);
-						color = new Color(shade, shade, shade);
-						break;
-					case Map.SEDIMENTARY:
-						shade = (int) Map.linear(DIM, BRITE, hydration);
-						color = new Color(shade, shade, 0);
-						break;
-					case Map.ALLUVIAL:
-						shade = (int) Map.linear(DIM, BRITE, hydration);
-						color = new Color(0, shade, 0);
-						break;
-					default:
+					
+					double hydration = 0.5;		// how saturated is the soil
+					if (show_hydro)
+						hydration = hArray[r][c] / Hydrology.saturation[s];
+					int shade = (int) Map.linear(DIM, BRITE, hydration);
+					Color color = new Color(0, 0, 0);
+					if (show_soil) {
+						switch(s) {
+						case Map.IGNEOUS:		// shades of dark grey
+							shade = (int) Map.linear(DARK, DIM, hydration);
+							color = new Color(shade, shade, shade);
+							break;
+						case Map.METAMORPHIC:	// shades of light grey
+							color = new Color(shade, shade, shade);
+							break;
+						case Map.SEDIMENTARY:	// shades of bright yellow
+							color = new Color(shade, shade, 0);
+							break;
+						case Map.ALLUVIAL:		// shades of bright green
+							color = new Color(0, shade, 0);
+							break;
+						default:				// no soil?
+							continue;
+						}
+					} else if (show_hydro)		// shades of light blue
+						color = new Color(0, shade, shade);
+					else						// nothing to see
 						continue;
-					}
+					
 					g.setColor(color);
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				}

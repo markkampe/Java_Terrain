@@ -38,6 +38,7 @@ public class Map extends JPanel {
 	public static final int SHOW_WATER = 0x10;
 	public static final int SHOW_ERODE = 0x20;
 	public static final int SHOW_SOIL = 0x40;
+	public static final int SHOW_HYDRO = 0x80;
 	private int display;		// bitmask for enabled SHOWs
 	
 	// soil types
@@ -907,8 +908,8 @@ public class Map extends JPanel {
 		}
 		
 		// see if we are rendering soil/hydration
-		if ((display & SHOW_SOIL) != 0) {
-			SoilMap s = new SoilMap(this);
+		if ((display & (SHOW_SOIL|SHOW_HYDRO)) != 0) {
+			SoilMap s = new SoilMap(this, (display&SHOW_SOIL) != 0, (display&SHOW_HYDRO) != 0);
 			s.paint(g, width, height, TOPO_CELL);
 		}
 		

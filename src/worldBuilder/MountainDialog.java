@@ -19,6 +19,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private Parameters parms;
 	
 	private JCheckBox symmetric;
+	private JCheckBox igneous;
+	private JCheckBox metamorphic;
+	private JCheckBox sedimentary;
 	private JComboBox<String> form;
 	private JSlider altitude;
 	private JSlider diameter1;
@@ -100,6 +103,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		symmetric.setFont(fontLarge);
 		symmetric.setSelected(true);
 		
+		igneous = new JCheckBox("Igneous");
+		metamorphic = new JCheckBox("Metamorphic");
+		sedimentary = new JCheckBox("Sedimentary");
+		
 		form = new JComboBox<String>();
 		JLabel formLabel = new JLabel("Land Form", JLabel.CENTER);
 		formLabel.setFont(fontLarge);
@@ -166,6 +173,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		 * Then pack all the controls into a 3x3 grid
 		 */
 		JPanel p0 = new JPanel();
+		p0.add(igneous);
+		p0.add(metamorphic);
+		p0.add(sedimentary);
 		p0.add(symmetric);
 		
 		JPanel formPanel = new JPanel();
@@ -246,6 +256,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		map.addKeyListener(this);
 		addKeyListener(this);
 		symmetric.addItemListener(this);
+		igneous.addItemListener(this);
+		metamorphic.addItemListener(this);
+		sedimentary.addItemListener(this);
 		form.addActionListener(this);
 		map.requestFocus();
 		
@@ -575,6 +588,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * updates to the diameter/rounding sliders
 	 */
 	public void stateChanged(ChangeEvent e) {
+			// if symmetric, changing one side changes both
 			if (symmetric.isSelected()) {
 				if (e.getSource() == rounding1)
 					rounding2.setValue(rounding1.getValue());
@@ -585,6 +599,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 				if (e.getSource() == diameter2)
 					diameter1.setValue(diameter2.getValue());
 			}
+			
 			if (selected)
 				redraw();
 	}
@@ -626,12 +641,25 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * @param e
 	 */
 	public void itemStateChanged(ItemEvent e) {
-		if (symmetric.isSelected()) {
-			diameter2.setValue(diameter1.getValue());
-			rounding2.setValue(rounding1.getValue());
-			
-			if (selected)
-				redraw();
+		if (e.getSource() == symmetric) {
+			if (symmetric.isSelected()) {
+				diameter2.setValue(diameter1.getValue());
+				rounding2.setValue(rounding1.getValue());
+				
+				if (selected)
+					redraw();
+			}
+		} else
+		// soil types are radio buttons
+		if (e.getSource() == igneous && igneous.isSelected()) {
+			metamorphic.setSelected(false);
+			sedimentary.setSelected(false);
+		} else if (e.getSource() == metamorphic && metamorphic.isSelected()) {
+			igneous.setSelected(false);
+			sedimentary.setSelected(false);
+		} else if (e.getSource() == sedimentary && sedimentary.isSelected()) {
+			metamorphic.setSelected(false);
+			igneous.setSelected(false);
 		}
 	}
 	

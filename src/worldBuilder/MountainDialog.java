@@ -463,10 +463,20 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		int shape1 = rounding1.getValue();
 		int shape2 = rounding2.getValue();
 		
+		// see if the user has chosen a composition
+		int composition = -1;
+		if (igneous.isSelected())
+			composition = Map.IGNEOUS;
+		else if (metamorphic.isSelected())
+			composition = Map.METAMORPHIC;
+		else if (sedimentary.isSelected())
+			composition = Map.SEDIMENTARY;
+		
 		// how many mountains can we create
 		if (mountains < 2) {
 			// one mountain goes in the center (likely volcanic)
-			int composition = (shape1 <= (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNEOUS : Map.METAMORPHIC;
+			if (composition < 0)
+			composition = (shape1 <= (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNEOUS : Map.METAMORPHIC;
 			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d1/2, z, shape1, composition);
 			String form;
 			if (z < 0)
@@ -480,7 +490,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 					String.format(POS_FMT, parms.latitude(X0+X1/2)) + "," + String.format(POS_FMT, parms.longitude(Y0+Y1/2)) + 
 					"> shape=" + shape1 + "/" + Parameters.CYLINDRICAL + "\n";
 		} else {
-			int composition = (alt > 0) ? Map.METAMORPHIC : Map.SEDIMENTARY;
+			if (composition < 0)
+				composition = (alt > 0) ? Map.METAMORPHIC : Map.SEDIMENTARY;
 			placeRidge(map, X0, Y0, X1, Y1, d1/2, d2/2, z, shape1, shape2, composition);
 			String form = (alt > 0) ? "ridge" : "trench";
 			placed = "Placed " + parms.km(d1+d2)/2 + Parameters.unit_xy + " wide, " +
@@ -651,6 +662,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			}
 		} else
 		// soil types are radio buttons
+		// NOTE: changing soil type does not change type of a mountain already drawn
 		if (e.getSource() == igneous && igneous.isSelected()) {
 			metamorphic.setSelected(false);
 			sedimentary.setSelected(false);

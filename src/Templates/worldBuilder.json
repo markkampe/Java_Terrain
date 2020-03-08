@@ -56,7 +56,8 @@
 	"rain": false,
 	"water": true,
     	"erosion": true,
-	"soil": false
+	"soil": false,
+	"hydro": false
     },
     "export": {
     	"map_name": "Map001",

@@ -293,6 +293,9 @@ public class Parameters {
 				case "soil":
 					display_options |= Map.SHOW_SOIL;
 					break;
+				case "hydro":
+					display_options |= Map.SHOW_HYDRO;
+					break;
 				}
 				break;
 

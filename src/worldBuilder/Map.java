@@ -848,7 +848,7 @@ public class Map extends JPanel {
 		for(int i = 0; i < erosion; i++)
 			hydro.reCalculate(i == 0);
 		
-		// start by rendering backgrounds (rain, altitude, erosion, and water bodies)
+		// start by rendering backgrounds (rain or altitude)
 		if ((display & SHOW_RAIN) != 0) {
 				RainMap r = new RainMap(this);
 				r.paint(g, width, height, TOPO_CELL);
@@ -901,18 +901,18 @@ public class Map extends JPanel {
 			}
 		}
 		
-		// see if we are rendering topographic lines
-		if ((display & SHOW_TOPO) != 0) {
-			TopoMap t = new TopoMap(this);
-			t.paint(g, width, height, TOPO_CELL);
-		}
-		
 		// see if we are rendering soil/hydration
 		if ((display & (SHOW_SOIL|SHOW_HYDRO)) != 0) {
 			SoilMap s = new SoilMap(this, (display&SHOW_SOIL) != 0, (display&SHOW_HYDRO) != 0);
 			s.paint(g, width, height, TOPO_CELL);
 		}
 		
+		// see if we are rendering topographic lines
+		if ((display & SHOW_TOPO) != 0) {
+			TopoMap t = new TopoMap(this);
+			t.paint(g, width, height, TOPO_CELL);
+		}
+				
 		// see if we are rendering rivers
 		if ((display & SHOW_WATER) != 0) {
 			RiverMap r = new RiverMap(this);

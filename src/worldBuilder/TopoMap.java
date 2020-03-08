@@ -28,7 +28,7 @@ public class TopoMap {
 	 * This method uses the Marching Squares algorithm.
 	 *   for each topo line
 	 *   	construct an over/under 2D bitmap
-	 *   	march through the bitmap, summing neigbors
+	 *   	march through the bitmap, summing neighbors
 	 *   	use sum of neighbors to select an image
 	 */
 	public void paint(Graphics g, int width, int height, int cellWidth) {

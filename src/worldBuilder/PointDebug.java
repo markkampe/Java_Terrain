@@ -72,7 +72,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			
 			// add the action listeners
 			map.addMapListener(this);
-			map.selectMode(Map.Selection.CIRCLE);
+			map.selectMode(Map.Selection.POINT);
+			map.checkSelection(Map.Selection.POINT);
 		}
 		
 		/**

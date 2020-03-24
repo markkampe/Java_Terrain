@@ -99,6 +99,9 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		flow.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
+		
+		// see if entry point has already been selected
+		map.checkSelection(Map.Selection.POINT);
 	}
 
 

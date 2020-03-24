@@ -176,7 +176,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 			}
 		});
 		
-		selected = false;
+		selected = map.checkSelection(Map.Selection.RECTANGLE);
 		newSelection = false;
 		
 		if (parms.debug_level >= EXPORT_DEBUG)

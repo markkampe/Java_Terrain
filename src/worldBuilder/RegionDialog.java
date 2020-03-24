@@ -130,7 +130,9 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		map.addMapListener(this);
+		
 		map.selectMode(Map.Selection.RECTANGLE);
+		selected = map.checkSelection(Map.Selection.RECTANGLE);
 	}
 
 	/**

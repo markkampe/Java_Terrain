@@ -90,7 +90,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	private int erosion;		// number of erosion cycles
 	
-	public enum Selection {NONE, CIRCLE, LINE, RECTANGLE, ANY};
+	public enum Selection {NONE, POINT, LINE, RECTANGLE, ANY};
 	private Selection sel_mode;	// What types of selection are enabled
 	private MapListener listener;	// who to call for selection events
 	
@@ -717,16 +717,83 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
+	 * tell the mouse-selection tool what we expect
+	 * @param type
+	 */
+	public void selectMode(Selection type) {
+		if (type == Selection.LINE && sel_type == Selection.RECTANGLE) {
+			// rectangles are trivially converted to lines
+			sel_x1 = sel_x0 + sel_width;
+			sel_y1 = sel_y0 + sel_height;
+			sel_type = Selection.LINE;
+			repaint();
+		} else if (type == Selection.POINT && sel_type == Selection.RECTANGLE) {
+			// rectangles can also be (crudely) converted to points
+			sel_x0 += sel_width/2;
+			sel_y0 += sel_height/2;
+			sel_type = Selection.POINT;
+			repaint();
+		} else if (type == Selection.NONE || sel_type != type) {
+			// current selection is wrong type, clear it
+			selected = false;
+			sel_type = Selection.NONE;
+			repaint();
+		}
+		sel_mode = type;
+	}
+	
+	/**
+	 * see if a selection has already been made and call listener
+	 * 
+	 * @param type desired type of selection
+	 * @return boolean whether or not selection is in place
+	 */
+	public boolean checkSelection(Selection type) {
+		// nothing has been selected
+		if (!selected)
+			return false;
+		
+		// there is a selection, but it is inappropriate
+		if (type != Selection.ANY && sel_type != type) {
+			selected = false;
+			sel_type = Selection.NONE;
+			repaint();
+			return false;
+		}
+		
+		// make the appropriate listener callback
+		if (listener != null)
+			switch (sel_type) {
+			case POINT:
+				listener.pointSelected(map_x(sel_x0), map_y(sel_y0));
+				break;
+			case LINE:
+				listener.regionSelected(map_x(sel_x0),  map_y(sel_y0),
+					    map_width(sel_x1 - sel_x0), map_height(sel_y1 - sel_y0),
+					    true);
+				break;
+			case RECTANGLE:
+				listener.regionSelected(map_x(sel_x0),  map_y(sel_y0),
+					    map_width(sel_width), map_height(sel_height),
+					    true);
+				break;
+			default:
+				break;
+		}
+		return true;
+	}
+	
+	/**
 	 * mouse click at an on-map location
 	 */
 	public void mouseClicked(MouseEvent e) {
-		if (sel_mode == Selection.ANY || sel_mode == Selection.CIRCLE) { 
+		if (sel_mode == Selection.ANY || sel_mode == Selection.POINT) { 
 			sel_radius = SELECT_RADIUS;
 			sel_x0 = e.getX();
 			sel_y0 = e.getY();
 			selecting = false;
 			
-			sel_type = Selection.CIRCLE;
+			sel_type = Selection.POINT;
 			repaint();
 			
 			if (listener != null && 
@@ -849,20 +916,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		if (y >= map_y(sel_y0 + sel_height))
 			return false;
 		return true;
-	}
-	
-	/**
-	 * tell the mouse-selection tool what we expect
-	 * @param type
-	 */
-	public void selectMode(Selection type) {
-		// if current selection is not what is wanted, clear it
-		if ((type == Selection.NONE || sel_type != type)) {
-			selected = false;
-			sel_type = Selection.NONE;
-			repaint();
-		}
-		sel_mode = type;
 	}
 	
 	/**
@@ -1026,7 +1079,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			g.setColor(SELECT_COLOR);
 			g.drawLine(sel_x0,  sel_y0,  sel_x1,  sel_y1);
 			break;
-		case CIRCLE:
+		case POINT:
 			g.setColor(SELECT_COLOR);
 			g.drawOval(sel_x0, sel_y0, sel_radius, sel_radius);
 			break;

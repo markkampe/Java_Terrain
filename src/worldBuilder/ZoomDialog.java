@@ -66,7 +66,7 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		accept.addActionListener(this);
 		map.addMapListener(this);
 		
-		selected = false;
+		selected = map.checkSelection(Map.Selection.RECTANGLE);
 	}
 	
 	/**
@@ -151,7 +151,7 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 			map.setWindow(new_x, new_y, new_x + new_width, new_y + new_height);
 			zoomed = true;
 			
-			// we accept no further input
+			// we accept no further input, just wait for the close
 			map.removeMapListener(this);
 			accept.setVisible(false);
 			WorldBuilder.activeDialog = false;

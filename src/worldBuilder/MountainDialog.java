@@ -262,7 +262,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		// set us up for line selection
 		map.selectMode(Map.Selection.LINE);
-		selected = false;
+		selected = map.checkSelection(Map.Selection.LINE);
 	}
 
 	/**

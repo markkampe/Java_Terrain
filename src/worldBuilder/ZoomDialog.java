@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class ZoomDialog extends JFrame implements ActionListener, WindowListener, MouseListener, MouseMotionListener {
+public class ZoomDialog extends JFrame implements ActionListener, WindowListener, MapListener {
 	private Map map;
 	private Parameters parms;
 		
@@ -12,10 +12,11 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	private JLabel sel_pixels;
 	private JLabel sel_km;
 	
-	private boolean selecting;		// selection in progress
+	private double new_x, new_y;	// start of zoom window
+	private double new_height;		// height of new zoom
+	private double new_width;		// width of new zoom
 	private boolean selected;		// selection completed
 	private boolean zoomed;
-	private int x_start, x_end, y_start, y_end;		// selection start/end coordinates
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -63,30 +64,24 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		
 		// add the action listeners
 		accept.addActionListener(this);
-		map.addMouseListener(this);
-		map.addMouseMotionListener(this);
+		map.addMapListener(this);
 		
-		selecting = false;
 		selected = false;
 	}
 	
 	/**
 	 * describe the selected area
+	 * @param width (in map units)
+	 * @param height (in map units)
 	 */
-	private void describe(int x0, int y0, int x1, int y1) {
+	private void describe(double width, double height) {
 		// selected area in pixels
-		int x_pixels = Math.abs(x1-x0);
-		int y_pixels = Math.abs(y1-y0);
-		
-		// selected area in map coordinates
-		double X0 = map.map_x(x0);
-		double X1 = map.map_x(x1);
-		double Y0 = map.map_y(y0);
-		double Y1 = map.map_y(y1);
+		int x_pixels = map.screen_x(width) - map.screen_x(0);
+		int y_pixels = map.screen_y(height) - map.screen_y(0);
 		
 		// selected area in world coordinates
-		double x_km = parms.km(X1-X0);
-		double y_km = parms.km(Y1-Y0);
+		double x_km = parms.km(width);
+		double y_km = parms.km(height);
 		
 		// update the selection legend
 		sel_pixels.setText(x_pixels + "x" + y_pixels);
@@ -94,75 +89,53 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	}
 	
 	/**
-	 * start defining a zoom window
+	 * called whenever a region selection changes
+	 * @param map_x0	left most point (map coordinate)
+	 * @param map_y0	upper most point (map coordinate)
+	 * @param width		(in map units)
+	 * @param height	(in map units)
+	 * @param complete	boolean, has selection completed
+	 * 
+	 * @return	boolean	(should selection continue)
 	 */
-	public void mousePressed(MouseEvent e) {
-		if (!zoomed) {
-			x_start = e.getX();
-			y_start = e.getY();
-			selecting = true;
-		}
-	}
-	
-	/**
-	 * progress in region selection
-	 */
-	public void mouseDragged(MouseEvent e) {
-		if (selecting) {
-			map.selectRect(x_start, y_start, e.getX()-x_start, e.getY()-y_start);
-			describe(x_start, y_start, e.getX(), e.getY());
-		}	
-	}
-	
-	/**
-	 * finish defining a zoom window
-	 */
-	public void mouseReleased(MouseEvent e) {
-		if (selecting) {
-			x_end = e.getX();
-			y_end = e.getY();
-			int dx = x_end - x_start;
-			int dy = y_end - y_start;
-			
-			// deal with negatively defined regions
-			if (dx < 0) {
-				x_start = x_end;
-				dx = -dx;
-			}
-			if (dy < 0) {
-				y_start = y_end;
-				dy = -dy;
-			}
-			
-			// enforce the map aspect ratio
-			int height = map.getHeight();
-			int width = map.getWidth();
-			double mapAspect = (double) width / height;
-			double selAspect = (double) dx / dy;
+	public boolean regionSelected(
+			double x0, double y0, 
+			double width, double height,
+			boolean complete) {
+		
+		// record the area to zoom
+		new_x = x0;
+		new_y = y0;
+		
+		if (complete) {
+			// ensure new map has correct aspect ration
+			double mapAspect = (double) map.getWidth() / map.getHeight();
+			double selAspect = (double) width / height;
 			if (selAspect >= mapAspect)
-				dy = (int) ((double) dx / mapAspect); 
+				height = width * mapAspect;
 			else
-				dx = (int) ((double) dy * mapAspect);
-			x_end = x_start + dx;
-			y_end = y_start + dy;
+				width = height / mapAspect;
 			
-			// indicate the selected region
-			map.selectRect(x_start, y_start, dx, dy);
-			describe(x_start, y_start, x_end, y_end);
-			selecting = false;
-			selected = true;
+			// and push this correction back to the display
+			map.selectRect(map.screen_x(x0), map.screen_y(y0),
+						   map.screen_x(x0+width), map.screen_y(y0+height));
 		}
+		new_height = height;
+		new_width = width;
+		describe(width, height);
+		
+		selected = complete;
+		return true;
 	}
 
 	/**
 	 * Window Close event handler ... do nothing
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.selectNone();
+		map.selectMode(Map.Selection.ANY);
 		map.setWindow(-Parameters.x_extent/2, -Parameters.y_extent/2, Parameters.x_extent/2, Parameters.y_extent/2);
+		map.removeMapListener(this);
 		this.dispose();
-		map.removeMouseListener(this);
-		map.removeMouseMotionListener(this);
 		WorldBuilder.activeDialog = false;
 	}
 
@@ -171,26 +144,22 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	 */
 	public void actionPerformed(ActionEvent e) {
 		// clear the selection
-		map.selectNone();
+		map.selectMode(Map.Selection.ANY);
 		
 		if (e.getSource() == accept && selected && !zoomed) {
 			sel_pixels.setText("DISMISS DIALOG TO UNZOOM");
-			map.setWindow(map.map_x(x_start), map.map_y(y_start), map.map_x(x_end), map.map_y(y_end));
+			map.setWindow(new_x, new_y, new_x + new_width, new_y + new_height);
 			zoomed = true;
 			
 			// we accept no further input
+			map.removeMapListener(this);
 			accept.setVisible(false);
-			map.removeMouseListener(this);
-			map.removeMouseMotionListener(this);
 			WorldBuilder.activeDialog = false;
 			accept.removeActionListener(this);
 		}
 	}
 
-	public void mouseClicked(MouseEvent arg0) {}
-	public void mouseMoved(MouseEvent arg0) {}
-	public void mouseEntered(MouseEvent arg0) {}
-	public void mouseExited(MouseEvent arg0) {}
+	public boolean pointSelected(double x, double y) { return false; }
 	public void windowActivated(WindowEvent arg0) {}
 	public void windowClosed(WindowEvent arg0) {}
 	public void windowDeactivated(WindowEvent arg0) {}

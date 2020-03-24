@@ -2,6 +2,7 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -14,7 +15,7 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 import javax.swing.*;
 
-public class Map extends JPanel {
+public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	/**
 	 * a Map is the displayable resizeable form of a Mesh.
 	 * 
@@ -55,6 +56,7 @@ public class Map extends JPanel {
 	private static final int MIN_HEIGHT = 400;	// min screen height
 	private static final int SMALL_POINT = 2;	// width of a small point
 	private static final int LARGE_POINT = 4;	// width of a large point
+	private static final int SELECT_RADIUS = 6;	// width of a selected point indicator
 	private static final int TOPO_CELL = 5;		// pixels/topographic cell
 												// CODE DEPENDS ON THIS CONSTANT
 	private Dimension size;
@@ -62,7 +64,8 @@ public class Map extends JPanel {
 	// displayed window offset and size
 	double x_min, y_min, x_max, y_max;
 	
-	public boolean isSubRegion;		// sub-region of a larger map
+	public boolean isSubRegion;	// sub-region of a larger map
+	public Mesh mesh;			// mesh of Voronoi points
 
 	// display colors
 	private static final Color SELECT_COLOR = Color.WHITE;
@@ -73,7 +76,6 @@ public class Map extends JPanel {
 	private boolean highlighting;	// are there points to highlight
 	
 	// the interesting data
-	private Mesh mesh;			// mesh of Voronoi points
 	private Hydrology hydro;	// hydrology calculator
 	
 	// per MeshPoint information
@@ -87,6 +89,10 @@ public class Map extends JPanel {
 	private int downHill[];		// down-hill neighbor
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	private int erosion;		// number of erosion cycles
+	
+	public enum Selection {NONE, CIRCLE, LINE, RECTANGLE, ANY};
+	private Selection sel_mode;	// What types of selection are enabled
+	private MapListener listener;	// who to call for selection events
 	
 	// hydrological results
 	public double max_slope;		// maximum slope
@@ -115,7 +121,10 @@ public class Map extends JPanel {
 		this.parms = Parameters.getInstance();
 		this.isSubRegion = false;
 		setWindow(-Parameters.x_extent/2, -Parameters.y_extent/2, Parameters.x_extent/2, Parameters.y_extent/2);
-		selectNone();
+		
+		this.addMouseMotionListener(this);
+		this.addMouseListener(this);
+		sel_mode = Selection.ANY;
 	}
 	
 	/**
@@ -685,14 +694,103 @@ public class Map extends JPanel {
 	}
 	
 	// description (screen coordinates) of the area to be highlighted
-	private int sel_x0, sel_y0, sel_x1, sel_y1;
-	private int sel_height, sel_width;
-	private int sel_radius;
-	private enum Selection {NONE, CIRCLE, LINE, RECTANGLE};
-	private Selection sel_type;
+	private int sel_x0, sel_y0, sel_x1, sel_y1;		// line/rectangle ends
+	private int x_start, y_start;		// where a drag started
+	private int sel_height, sel_width;	// selected rectangle size
+	private int sel_radius;				// selected point indicator size
+	
+	private Selection sel_type = Selection.NONE;	// type to be rendered
+	private boolean selecting = false;	// selection in progress
+	private boolean selected = false;	// selection complete
 	
 	/**
-	 * highlight a rectangular selection
+	 * register a listener for selection events
+	 * 
+	 * @param interested
+	 */
+	public void addMapListener(MapListener interested) {
+		listener = interested;
+	}
+	public void removeMapListener(MapListener which) {
+		if (listener == which)
+			listener = null;
+	}
+	
+	/**
+	 * mouse click at an on-map location
+	 */
+	public void mouseClicked(MouseEvent e) {
+		if (sel_mode == Selection.ANY || sel_mode == Selection.CIRCLE) { 
+			sel_radius = SELECT_RADIUS;
+			sel_x0 = e.getX();
+			sel_y0 = e.getY();
+			selecting = false;
+			
+			sel_type = Selection.CIRCLE;
+			repaint();
+			
+			if (listener != null && 
+				!listener.pointSelected(map_x(sel_x0), map_y(sel_y0)))
+					sel_type = Selection.NONE;
+		}
+	}
+	
+	/**
+	 * start the definition of region selection
+	 */
+	public void mousePressed(MouseEvent e) {
+		if (sel_mode != Selection.NONE) {
+			x_start = e.getX();
+			y_start = e.getY();
+			selecting = true;
+			selected = false;
+		}
+	}
+	
+	/**
+	 * extend/alter the region being selected
+	 */
+	public void mouseDragged(MouseEvent e) {
+		if (!selecting)
+			return;
+		if (sel_mode == Selection.LINE) {
+			selectLine(x_start, y_start, e.getX(), e.getY());
+			if (listener != null &&
+					!listener.regionSelected(map_x(sel_x0),  map_y(sel_y0),
+										    map_width(sel_x1 - sel_x0), 
+										    map_height(sel_y1 - sel_y0),
+										    selected))
+					sel_type = Selection.NONE;
+		} else if (sel_mode == Selection.ANY || sel_mode == Selection.RECTANGLE) {
+			selectRect(x_start, y_start, e.getX(), e.getY());
+			if (listener != null &&
+				!listener.regionSelected(map_x(sel_x0),  map_y(sel_y0),
+									    map_width(sel_width), map_height(sel_height),
+									    selected))
+				sel_type = Selection.NONE;
+		}
+	}
+	
+	/**
+	 * end the definition of a region selection
+	 */
+	public void mouseReleased(MouseEvent e) {
+		if (selecting) {
+			selected = true;
+			mouseDragged(e);
+			selecting = false;
+		}
+	}
+	
+	/**
+	 * entry/exit events aren't interesting
+	 */
+	public void mouseExited(MouseEvent e) { selecting = false; }
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseMoved(MouseEvent e) {}
+	
+	/**
+	 * highlight a line on the map
 	 * 
 	 * @param x0	screen x
 	 * @param y0	screen y
@@ -701,8 +799,8 @@ public class Map extends JPanel {
 	 */
 	public void selectLine(int x0, int y0, int x1, int y1) {
 		sel_x0 = x0;
-		sel_y0 = y0;
 		sel_x1 = x1;
+		sel_y0 = y0;
 		sel_y1 = y1;
 		sel_type = Selection.LINE;
 		
@@ -717,21 +815,21 @@ public class Map extends JPanel {
 	 * @param x1	screen x
 	 * @param y1	screen y
 	 */
-	public void selectRect(int x0, int y0, int width, int height) {
+	public void selectRect(int x0, int y0, int x1, int y1) {
 		// normalize boxes defined upwards or to the left
-		if (width > 0) {
+		if (x1 > x0) {
 			sel_x0 = x0;
-			sel_width = width;
+			sel_width = x1 - x0;
 		} else {
-			sel_x0 = x0 + width;
-			sel_width = -width;
+			sel_x0 = x1;
+			sel_width = x0 - x1;
 		}
-		if (height > 0) {
+		if (y1 > y0) {
 			sel_y0 = y0;
-			sel_height = height;
+			sel_height = y1 - y0;
 		} else {
-			sel_y0 = y0 + height;
-			sel_height = -height;
+			sel_y0 = y1;
+			sel_height = y0 - y1;
 		}
 		sel_type = Selection.RECTANGLE;
 		repaint();
@@ -754,27 +852,17 @@ public class Map extends JPanel {
 	}
 	
 	/**
-	 * highlight a circular selection
-	 * 
-	 * @param x		screen x
-	 * @param y		screen y
-	 * @param radius	screen radius
+	 * tell the mouse-selection tool what we expect
+	 * @param type
 	 */
-	public void selectCircle(int x, int y, int radius) {
-		sel_x0 = x;
-		sel_y0 = y;
-		sel_radius = radius;
-		sel_type = Selection.CIRCLE;
-		
-		repaint();
-	}
-	
-	/**
-	 * clear selection highlight
-	 */
-	public void selectNone() {
-		sel_type = Selection.NONE;
-		repaint();
+	public void selectMode(Selection type) {
+		// if current selection is not what is wanted, clear it
+		if ((type == Selection.NONE || sel_type != type)) {
+			selected = false;
+			sel_type = Selection.NONE;
+			repaint();
+		}
+		sel_mode = type;
 	}
 	
 	/**
@@ -947,6 +1035,7 @@ public class Map extends JPanel {
 			g.drawRect(sel_x0, sel_y0, sel_width, sel_height);
 			break;
 		case NONE:
+		case ANY:
 			break;
 		}
 	}

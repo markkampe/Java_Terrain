@@ -6,7 +6,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
-public class RiverDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, WindowListener {
+public class RiverDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {
 
 	private Map map;
 	
@@ -95,7 +95,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		setVisible(true);
 		
 		// add the action listeners
-		map.addMouseListener(this);
+		map.addMapListener(this);
 		flow.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
@@ -112,21 +112,27 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 			incoming[whichPoint] = oldFlow;
 			map.setIncoming();
 		}
-		map.removeMouseListener(this);
+		map.removeMapListener(this);
 		WorldBuilder.activeDialog = false;
 		this.dispose();
 	}
 	
-	public void mouseClicked(MouseEvent e) {
+	/**
+	 * called when a point is selected on the map
+	 * @param map_x		(map coordinate)
+	 * @param map_y		(map coordinate)
+	 * @return
+	 */
+	public boolean pointSelected(double x, double y) {
 		if (incoming == null)
-			return;
+			return true;
 		
 		// undo any previous selection
 		if (whichPoint >= 0)
 			incoming[whichPoint] = oldFlow;
 		
 		// choose the new point
-		MeshPoint p = map.choosePoint(e.getX(), e.getY());
+		MeshPoint p = map.mesh.choosePoint(x, y);
 		whichPoint = p.index;
 		double lat = parms.latitude(p.x);
 		double lon = parms.longitude(p.y);
@@ -137,6 +143,8 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		oldFlow = incoming[whichPoint];
 		incoming[whichPoint] = (int) flow.getValue();
 		map.setIncoming();
+		
+		return true;
 	}
 	
 	/**
@@ -166,15 +174,13 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		}
 		
 		// clean up the graphics
-		map.removeMouseListener(this);
+		map.removeMapListener(this);
 		WorldBuilder.activeDialog = false;
 		this.dispose();
 	}
 	
 	// perfunctory methods
-	public void mouseMoved(MouseEvent arg0) {}
-	public void mouseEntered(MouseEvent arg0) {}
-	public void mouseExited(MouseEvent arg0) {}
+	public boolean regionSelected(double x, double y, double w, double h, boolean c) {return false;}
 	public void windowActivated(WindowEvent arg0) {}
 	public void windowClosed(WindowEvent arg0) {}
 	public void windowDeactivated(WindowEvent arg0) {}

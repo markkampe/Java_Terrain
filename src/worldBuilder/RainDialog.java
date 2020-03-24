@@ -134,6 +134,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		
+		// disable all selection
+		map.selectMode(Map.Selection.NONE);
 		// initialize the direction indicator
 		setDirection(direction.getValue());
 		
@@ -250,7 +252,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.selectNone();
+		map.selectMode(Map.Selection.ANY);
 		if (oldRain != null) {
 			map.setRainMap(oldRain);
 			map.repaint();
@@ -301,7 +303,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		}
 		
 		// clean up the graphics
-		map.selectNone();
+		map.selectMode(Map.Selection.ANY);
 		this.dispose();
 	}
 	

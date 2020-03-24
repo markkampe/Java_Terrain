@@ -16,7 +16,7 @@ import javax.swing.event.*;
  * pushes and window events, as well as perhaps adding additional
  * control widgets to the CENTER controls JPanel.
  */
-public class ExportBase extends JFrame implements WindowListener, MouseListener, MouseMotionListener {	
+public class ExportBase extends JFrame implements WindowListener, MapListener {	
 	protected Map map;				// map from which we export
 	protected Parameters parms;
 	// private String format;			// selected output format
@@ -39,10 +39,9 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 	protected boolean selected;			// selection completed
 	protected boolean newSelection;		// selected area has changed
 	protected int x_points, y_points;	// selection width/height (in tiles)
-	
-	private boolean selecting;		// selection in progress
-	private int x_start, x_end, y_start, y_end;		// selection screen coordinates
-	private double x_km, y_km;		// selection width/height (in km)
+	private double box_x, box_y;		// selection box map coordinates
+	private double box_width, box_height;	// selection box size (map units)
+	private double x_km, y_km;			// selection box size (in km)
 	
 	// parameters for the tile size selection slider
 	private static final int MAX_TILE_SIZE = 10000;
@@ -158,37 +157,31 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 		
 		// add the super-class action listeners
 		// (in-place to prevent shadowing by sub-class listeners)
-		map.addMouseListener(this);
-		map.addMouseMotionListener(this);
+		map.addMapListener(this);
 		sel_t_size.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int meters = Integer.parseInt(sel_t_size.getText());
 				resolution.setValue(meters_to_slider(meters));
 				sel_t_size.setText(Integer.toString(meters));
-				if (selected)
-					select(x_start, y_start, x_end, y_end, meters);
+				tile_size(meters);
+				newSelection = true;
 			}
 		});
 		resolution.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int meters = slider_to_meters(resolution.getValue());
 				sel_t_size.setText(Integer.toString(meters));
-				if (selected)
-					select(x_start, y_start, x_end, y_end, meters);
+				tile_size(meters);
+				newSelection = true;
 			}
 		});
 		
-		selecting = false;
 		selected = false;
 		newSelection = false;
 		
 		if (parms.debug_level >= EXPORT_DEBUG)
 			System.out.println("new Export Base(" + format + ")");
 	}
-	
-	// export box (in map coordinates)
-	private double box_x, box_y;
-	private double box_width, box_height;
 	
 	/**
 	 * return the export row associated with a y @return coordinate
@@ -229,19 +222,6 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 		// export the temperature range
 		export.temps(parms.meanTemp(), parms.meanSummer(), parms.meanWinter());
 		
-		// figure out the selected region (in map coordinates)
-		box_x = map.map_x(x_start);
-		box_width = map.map_x(x_end) - box_x;
-		if (box_width < 0) {
-			box_x -= box_width;
-			box_width = -box_width;
-		}
-		box_y = map.map_y(y_start);
-		box_height = map.map_y(y_end) - box_y;
-		if (box_height < 0) {
-			box_y -= box_height;
-			box_height = -box_height;
-		}
 		double lat = parms.latitude(box_y + box_height/2);
 		double lon = parms.longitude(box_x + box_width/2);
 		export.position(lat, lon);
@@ -374,83 +354,51 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 	}
 
 	/**
-	 * describe the selected area
+	 * called whenever a region selection changes
+	 * @param mx0	left most point (map coordinate)
+	 * @param my0	upper most point (map coordinate)
+	 * @param dx	width (in map units)
+	 * @param dy	height (in map units)
+	 * @param complete	boolean, has selection completed
+	 * 
+	 * @return	boolean	(should selection continue)
 	 */
-	private void select(int x0, int y0, int x1, int y1, int res) {
-		// selected area in map coordinates
-		double X0 = map.map_x(x0);
-		double X1 = map.map_x(x1);
-		double dx = X1 - X0;
-		if (dx < 0) {
-			X0 = X1;
-			dx *= -1;
-		}
-		double Y0 = map.map_y(y0);	
-		double Y1 = map.map_y(y1);
-		double dy = Y1 - Y0;
-		if (dy < 0) {
-			Y0 = -Y1;
-			dy *= -1;
-		}
-	
-		// selected area in km
-		x_km = parms.km(dx);
-		y_km = parms.km(dy);
+	public boolean regionSelected(double mx0, double my0, 
+			  double dx, double dy, boolean complete) {
 
-		// selected area in tiles
-		x_points = (int) (x_km * 1000 / res);
-		y_points = (int) (y_km * 1000 / res);
-		int tiles = x_points * y_points;
+		// update the export box location
+		box_x = mx0;
+		box_y = my0;
+		box_width = dx;
+		box_height = dy;
+		sel_center.setText(String.format("%.6f, %.6f", 
+				parms.latitude(box_y + box_height/2),  
+				parms.longitude(box_x + box_width/2)));
 		
-		sel_center.setText(String.format("%.6f, %.6f", parms.latitude((Y1+Y0)/2),  parms.longitude((X1+X0)/2)));
+		// update the selected area size
+		x_km = parms.km(box_width);
+		y_km = parms.km(box_height);
 		sel_km.setText(String.format("%.1fx%.1f", x_km, y_km));
-		sel_points.setText(x_points + "x" + y_points);
-		sel_points.setForeground( tiles > parms.tiles_max ? Color.RED : Color.BLACK);
+
+		// and re-scale per tile size
+		tile_size(Integer.parseInt(sel_t_size.getText()));
 		
 		selected = true;
 		newSelection = true;
+		return true;
 	}
 	
 	/**
-	 * start defining an export region
+	 * update the expected export size based on a new tile size
+	 * 
+	 * @param meters
 	 */
-	public void mousePressed(MouseEvent e) {
-		x_start = e.getX();
-		y_start = e.getY();
-		selecting = true;
-	}
-
-	/**
-	 * finish defining an export region
-	 */
-	public void mouseReleased(MouseEvent e) {
-		if (selecting) {
-			if (e.getX() >= x_start)
-				x_end = e.getX();
-			else {
-				x_end = x_start;
-				x_start = e.getX();
-			}
-			if (e.getY() >= y_start)
-				y_end = e.getY();
-			else {
-				y_end = y_start;
-				y_start = e.getY();
-			}
-
-			selecting = false;
-			select(x_start, y_start, x_end, y_end, Integer.parseInt(sel_t_size.getText()));
-		}
-	}
-	
-	/**
-	 * progress in region selection
-	 */
-	public void mouseDragged(MouseEvent e) {
-		if (selecting) {
-			map.selectRect(x_start, y_start, e.getX()-x_start, e.getY()-y_start);
-			select(x_start, y_start, e.getX(), e.getY(), Integer.parseInt(sel_t_size.getText()));
-		}	
+	private void tile_size(int meters) {
+		x_points = (int) (x_km * 1000 / meters);
+		y_points = (int) (y_km * 1000 / meters);
+		int tiles = x_points * y_points;
+		sel_points.setText(x_points + "x" + y_points);
+		sel_points.setForeground( tiles > parms.tiles_max ? Color.RED : Color.BLACK);
 	}
 	
 	/**
@@ -483,14 +431,15 @@ public class ExportBase extends JFrame implements WindowListener, MouseListener,
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.selectNone();
+		map.selectMode(Map.Selection.ANY);
+		map.removeMapListener(this);
 		this.dispose();
-		map.removeMouseListener(this);
-		map.removeMouseMotionListener(this);
 		WorldBuilder.activeDialog = false;
 	}
 	
 	// perfunctory handlers for events we don't care about
+	public boolean pointSelected(double x, double y) { return false; }
+	
 	public void windowActivated(WindowEvent arg0) {}
 	public void windowClosed(WindowEvent arg0) {}
 	public void windowDeactivated(WindowEvent arg0) {}

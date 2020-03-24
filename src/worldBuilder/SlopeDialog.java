@@ -116,6 +116,9 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		
+		// disable selection
+		map.selectMode(Map.Selection.NONE);
+		
 		// initialize the slope axis
 		setAxis(0);
 	}
@@ -197,7 +200,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.selectNone();
+		map.selectMode(Map.Selection.ANY);
 		if (oldHeight != null) {
 			map.setHeightMap(oldHeight);
 			map.repaint();
@@ -221,13 +224,13 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
-			map.selectNone();
+			map.selectMode(Map.Selection.ANY);
 			map.setHeightMap(oldHeight);
 			map.repaint();
 			oldHeight = null;
 			this.dispose();
 		} else if (e.getSource() == accept) {
-			map.selectNone();
+			map.selectMode(Map.Selection.ANY);
 			int dir = axis.getValue();
 			int slope = inclination.getValue();
 			oldHeight = null;	// don't need this anymore

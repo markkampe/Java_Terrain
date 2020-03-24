@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class PointDebug extends JFrame implements WindowListener, MouseListener {
+public class PointDebug extends JFrame implements WindowListener, MapListener {
 		private Map map;
 		private Parameters parms;
 			
@@ -71,16 +71,19 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			setVisible(true);
 			
 			// add the action listeners
-			map.addMouseListener(this);
+			map.addMapListener(this);
+			map.selectMode(Map.Selection.CIRCLE);
 		}
 		
 		/**
-		 * select a point
+		 * called when a point is selected on the map
+		 * @param map_x		(map coordinate)
+		 * @param map_y		(map coordinate)
+		 * @return
 		 */
-		public void mouseClicked(MouseEvent e) {
-			int x = e.getX();
-			int y = e.getY();
-			MeshPoint point = map.choosePoint(x, y);
+		public boolean pointSelected(double map_x, double map_y) {
+			
+			MeshPoint point = map.mesh.choosePoint(map_x, map_y);
 			
 			if (point.immutable)
 				infoIndex.setText(String.format("%d (immutable)", point.index));
@@ -126,21 +129,23 @@ public class PointDebug extends JFrame implements WindowListener, MouseListener 
 			map.highlight(-1, null);
 			map.highlight(point.index, Color.MAGENTA);
 			map.repaint();
+			
+			return(true);
 		}
-
 		
 		/**
 		 * Window Close event handler ... do nothing
 		 */
 		public void windowClosing(WindowEvent e) {
+			map.highlight(-1,  null);			// clear highlights
+			map.selectMode(Map.Selection.ANY); 	// clear selections
+			map.removeMapListener(this);
 			this.dispose();
-			map.removeMouseListener(this);
 			WorldBuilder.activeDialog = false;
 		}
-
-		public void mouseMoved(MouseEvent arg0) {}
-		public void mouseEntered(MouseEvent arg0) {}
-		public void mouseExited(MouseEvent arg0) {}
+		
+		/* perfunctory entry points */
+		public boolean regionSelected(double x, double y, double w, double h, boolean f) {return false;}
 		public void windowActivated(WindowEvent arg0) {}
 		public void windowClosed(WindowEvent arg0) {}
 		public void windowDeactivated(WindowEvent arg0) {}

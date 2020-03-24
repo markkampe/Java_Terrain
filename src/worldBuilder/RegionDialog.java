@@ -8,7 +8,7 @@ import javax.swing.*;
  * SlopeDialog allows the user to choose an axis and inclination to
  * cause a uniform slope to the entire map.  
  */
-public class RegionDialog extends JFrame implements ActionListener, MouseListener, MouseMotionListener, WindowListener {	
+public class RegionDialog extends JFrame implements ActionListener, MapListener, WindowListener {	
 	private Map map;
 	private Parameters parms;
 	
@@ -20,11 +20,9 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 	private JComboBox<Integer> pointsChooser;
 	private JComboBox<Integer> improveChooser;
 	
-	private boolean selecting;		// selection in progress
-	private boolean selected;		// selection completed
-	private int x_start, x_end, y_start, y_end;		// selection screen coordinates
 	private double x_km, y_km;		// selection width/height (in km)
 	private double lat, lon;		// center of selected region
+	private boolean selected;		// a region has been selected
 	
 	// mesh points per sub-region
 	private static final int DEFAULT_POINTS = 1024;
@@ -131,101 +129,49 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		// add the action listeners
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
-		map.addMouseListener(this);
-		map.addMouseMotionListener(this);
-		
-		selecting = false;
-		selected = false;
+		map.addMapListener(this);
+		map.selectMode(Map.Selection.RECTANGLE);
 	}
 
 	/**
-	 * describe the selected area
+	 * called whenever a region selection changes
+	 * @param mx0	left most point (map coordinate)
+	 * @param my0	upper most point (map coordinate)
+	 * @param dx	width (in map units)
+	 * @param dy	height (in map units)
+	 * @param complete	boolean, has selection completed
+	 * 
+	 * @return	boolean	(should selection continue)
 	 */
-	private void select(int x0, int y0, int x1, int y1) {
-		// square the selection area
-		int width = Math.abs(x1 - x0);
-		int height = Math.abs(y1 - y0);
-		if (width > height)
-			if (y1 > y0)
-				y1 = y0 + width;
+	public boolean regionSelected(double mx0, double my0, 
+								  double dx, double dy, boolean complete) {
+		// if he's done square the area
+		if (complete)
+			if (dx > dy)
+				dy = dx;
 			else
-				y1 = y0 - width;
-		else
-			if (x1 > x0)
-				x1 = x0 + height;
-			else
-				x1 = x0 - height;
+				dx = dy;
+		// FIX: update map for squared selection
 		
-		// selected area in map coordinates
-		double mx0 = map.map_x(x0);
-		double mx1 = map.map_x(x1);
-		double dx = mx1 - mx0;
-		if (dx < 0) {
-			mx0 = mx1;
-			dx *= -1;
-		}
-		double my0 = map.map_y(y0);	
-		double my1 = map.map_y(y1);
-		double dy = my1 - my0;
-		if (dy < 0) {
-			my0 = -my1;
-			dy *= -1;
-		}
-		
-		// update the selection display
-		map.selectRect(x0, y0, x1-x0, y1-y0);
-		
-		// find selected area location and size
+		// describe the selected area
 		x_km = parms.km(dx);
 		y_km = parms.km(dy);
-		lat = parms.latitude((my0+my1)/2);
-		lon = parms.longitude((mx1+mx0)/2);
-
+		lat = parms.latitude(my0 + dy/2);
+		lon = parms.longitude(mx0 + dx/2);
 		sel_center.setText(String.format("<%.6f, %.6f>", lat, lon));
 		sel_km.setText(String.format("%.1fx%.1f (%s)", x_km, y_km, Parameters.unit_xy));
-	}
-	
-	/**
-	 * start defining a mountain range
-	 */
-	public void mousePressed(MouseEvent e) {
-		x_start = e.getX();
-		y_start = e.getY();
-		selecting = true;
+		
+		selected = complete;
+		return true;
 	}
 
-	/**
-	 * finish defining a export region
-	 */
-	public void mouseReleased(MouseEvent e) {
-		if (selecting) {
-			x_end = e.getX();
-			y_end = e.getY();
-			select(x_start, y_start, x_end, y_end);
-			
-			// and display the selected region
-			selecting = false;
-			selected = true;
-		}
-	}
-	
-	/**
-	 * progress in region selection
-	 */
-	public void mouseDragged(MouseEvent e) {
-		if (selecting) {
-			select(x_start, y_start, e.getX(), e.getY());
-		}	
-	}
-	
 	/**
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.selectNone();
+		map.selectMode(Map.Selection.ANY);
+		map.removeMapListener(this);
 		this.dispose();
-		map.removeMouseListener(this);
-		map.removeMouseMotionListener(this);
 	}
 
 	/**
@@ -253,18 +199,13 @@ public class RegionDialog extends JFrame implements ActionListener, MouseListene
 		}
 		
 		// clear the selection
-		map.selectNone();
+		map.selectMode(Map.Selection.ANY);
 		
 		// discard the dialog
 		this.dispose();
-		map.removeMouseListener(this);
-		map.removeMouseMotionListener(this);
 	}
 
-	public void mouseClicked(MouseEvent arg0) {}
-	public void mouseMoved(MouseEvent arg0) {}
-	public void mouseEntered(MouseEvent arg0) {}
-	public void mouseExited(MouseEvent arg0) {}
+	public boolean pointSelected(double x, double y) {return false;}
 	public void windowActivated(WindowEvent arg0) {}
 	public void windowClosed(WindowEvent arg0) {}
 	public void windowDeactivated(WindowEvent arg0) {}

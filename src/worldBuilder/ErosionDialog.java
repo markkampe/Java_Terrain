@@ -88,7 +88,7 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.selectNone();
+		map.selectMode(Map.Selection.ANY);
 		map.setErosion(oldCycles);
 		map.repaint();
 		this.dispose();

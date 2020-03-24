@@ -11,7 +11,7 @@ import javax.swing.event.*;
  * SlopeDialog allows the user to choose an axis and inclination to
  * cause a uniform slope to the entire map.  
  */
-public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MouseListener, MouseMotionListener, ItemListener, KeyListener, WindowListener {	
+public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MapListener, ItemListener, KeyListener, WindowListener {	
 	
 	private Map map;
 	private double[] oldHeight;	// per MeshPoint altitude at entry
@@ -31,9 +31,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private JButton accept;
 	private JButton cancel;
 	
-	private boolean selecting;		// selection in progress
 	private boolean selected;		// selection completed
-	private int x_start, x_end, y_start, y_end;		// selection start/end coordinates
+	private double x_start, x_end, y_start, y_end;		// selection start/end coordinates
 	
 	private int d_max;				// diameter: full scale
 	private int a_max;				// altitude: full scale
@@ -251,8 +250,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		rounding2.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
-		map.addMouseListener(this);
-		map.addMouseMotionListener(this);
+		map.addMapListener(this);
 		map.addKeyListener(this);
 		addKeyListener(this);
 		symmetric.addItemListener(this);
@@ -262,7 +260,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		form.addActionListener(this);
 		map.requestFocus();
 		
-		selecting = false;
+		// set us up for line selection
+		map.selectMode(Map.Selection.LINE);
 		selected = false;
 	}
 
@@ -433,12 +432,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// reset to the height map we started with
 		for(int i = 0; i < oldHeight.length; i++)
 			newHeight[i] = oldHeight[i];
-		
-		// convert screen coordinates into map coordinates
-		double X0 = map.map_x(x_start);
-		double Y0 = map.map_y(y_start);
-		double X1 = map.map_x(x_end);
-		double Y1 = map.map_y(y_end);
 
 		// turn the diameter into map units
 		double d1 = (double) diameter1.getValue();
@@ -451,7 +444,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		d2 = parms.x(d2);
 		
 		// figure out how long the mountain range is (in map coordinates)
-		double l = Math.sqrt(((X1-X0)*(X1-X0)) + (Y1-Y0)*(Y1-Y0));
+		double l = Math.sqrt(((x_end - x_start)*(x_end - x_start)) +
+							 ((y_end - y_start)*(y_end - y_start)));
 		double m = 2 * l/(d1 + d2);
 		int mountains = (int) (m + 0.5);
 		
@@ -477,7 +471,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			// one mountain goes in the center (likely volcanic)
 			if (composition < 0)
 			composition = (shape1 <= (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNEOUS : Map.METAMORPHIC;
-			placeMountain(map, (X0+X1)/2, (Y0+Y1)/2, d1/2, z, shape1, composition);
+			placeMountain(map, (x_start + x_end)/2, (y_start + y_end)/2,
+						  d1/2, z, shape1, composition);
 			String form;
 			if (z < 0)
 				form = "caldera";
@@ -486,80 +481,68 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			else
 				form = "mountain";
 			placed = "Placed " + parms.km(d1) + Parameters.unit_xy + " wide, " +
-					alt + Parameters.unit_z + " " + Map.soil_names[composition] + " " + form + " at <" +
-					String.format(POS_FMT, parms.latitude(X0+X1/2)) + "," + String.format(POS_FMT, parms.longitude(Y0+Y1/2)) + 
+					alt + Parameters.unit_z + " " + Map.soil_names[composition] + " " + 
+					form + " at <" +
+					String.format(POS_FMT, parms.latitude((x_start+x_end)/2)) + "," +
+					String.format(POS_FMT, parms.longitude((y_start + y_end)/2)) + 
 					"> shape=" + shape1 + "/" + Parameters.CYLINDRICAL + "\n";
 		} else {
 			if (composition < 0)
 				composition = (alt > 0) ? Map.METAMORPHIC : Map.SEDIMENTARY;
-			placeRidge(map, X0, Y0, X1, Y1, d1/2, d2/2, z, shape1, shape2, composition);
+			placeRidge(map, x_start, y_start, x_end, y_end, d1/2, d2/2, z, 
+					   shape1, shape2, composition);
 			String form = (alt > 0) ? "ridge" : "trench";
 			placed = "Placed " + parms.km(d1+d2)/2 + Parameters.unit_xy + " wide, " +
 					alt + Parameters.unit_z + " " +
 					Map.soil_names[composition] + " " + form + " from <" +
-					String.format(POS_FMT, parms.latitude(X0)) + "," + String.format(POS_FMT, parms.longitude(Y0)) + "> to <" +
-							String.format(POS_FMT, parms.latitude(X1)) + "," + String.format(POS_FMT, parms.longitude(Y1)) + 
-							"> shape=" + shape1 + "," + shape2 + "/" + Parameters.CYLINDRICAL + "\n";
+					String.format(POS_FMT, parms.latitude(x_start)) + "," + 
+					String.format(POS_FMT, parms.longitude(y_start)) + "> to <" +
+					String.format(POS_FMT, parms.latitude(x_end)) + "," + 
+					String.format(POS_FMT, parms.longitude(y_end)) + 
+					"> shape=" + shape1 + "," + shape2 + "/" + Parameters.CYLINDRICAL + "\n";
 		}
 		// tell the map about the update
 		map.setHeightMap(newHeight);
 	}
 	
 	/**
-	 * start defining a mountain range
+	 * called whenever a region selection changes
+	 * @param map_x0	left most point (map coordinate)
+	 * @param map_y0	upper most point (map coordinate)
+	 * @param width		(in map units, can be negative)
+	 * @param height	(in map units, can be negative)
+	 * @param complete	boolean, has selection completed
+	 * 
+	 * @return	boolean	(should selection continue)
 	 */
-	public void mousePressed(MouseEvent e) {
-		x_start = e.getX();
-		y_start = e.getY();
-		selecting = true;
+	public boolean regionSelected(
+			double map_x, double map_y, 
+			double width, double height,
+			boolean complete) {
+		x_start = map_x;
+		y_start = map_y;
+		x_end = map_x + width;
+		y_end = map_y + height;
+		selected = complete;
+		redraw();
+		return true;
 	}
 
-	/**
-	 * finish defining a mountain range
-	 */
-	public void mouseReleased(MouseEvent e) {
-		x_end = e.getX();
-		y_end = e.getY();
-		selecting = false;
-		selected = true;
-		map.selectNone();
-		redraw();	
-	}
-	
-	public void mouseClicked(MouseEvent e) {
-		x_start = e.getX();
-		y_start = e.getY();
-		x_end = x_start + 1;
-		y_end = y_start + 1;
-		selecting = false;
-		selected = true;
-		map.selectNone();
-		redraw();
-	}
-	
-	/**
-	 * progress in region selection
-	 */
-	public void mouseDragged(MouseEvent e) {
-		if (selecting) {
-			map.selectLine(x_start,  y_start,  e.getX(),  e.getY());
-		}	
-	}
-	
 	/**
 	 * restore previous height map exit dialog
 	 */
 	private void cancelDialog() {
-		map.selectNone();
+		map.selectMode(Map.Selection.NONE);
 		if (oldHeight != null) {
 			map.setHeightMap(oldHeight);
 			map.repaint();
 			oldHeight = null;
 		}
-		this.dispose();
-		map.removeMouseListener(this);
-		map.removeMouseMotionListener(this);
+		
+		map.removeMapListener(this);
 		map.removeKeyListener(this);
+		map.selectMode(Map.Selection.ANY);
+		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
 	
@@ -577,9 +560,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			oldHeight[i] = newHeight[i];
 		
 		// clean up the selection graphics
-		map.selectNone();
+		map.selectMode(Map.Selection.NONE);
+		x_start = 0; y_start = 0; x_end = 0; y_end = 0;
+		map.selectMode(Map.Selection.LINE);
 		selected = false;
-		selecting = false;
 		
 		if (!placed.equals("") && parms.debug_level > 0) {
 			System.out.print(placed);
@@ -676,9 +660,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 	
 	// perfunctory methods
-	public void mouseMoved(MouseEvent arg0) {}
-	public void mouseEntered(MouseEvent arg0) {}
-	public void mouseExited(MouseEvent arg0) {}
+	public boolean pointSelected(double map_x, double map_y) { return false; }
 	public void windowActivated(WindowEvent arg0) {}
 	public void windowClosed(WindowEvent arg0) {}
 	public void windowDeactivated(WindowEvent arg0) {}
@@ -687,6 +669,4 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	public void windowOpened(WindowEvent arg0) {}
 	public void keyPressed(KeyEvent arg0) {}
 	public void keyReleased(KeyEvent arg0) {}
-	
-	
 }

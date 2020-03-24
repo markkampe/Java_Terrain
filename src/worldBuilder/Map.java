@@ -717,12 +717,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
-	 * tell the mouse-selection tool what we expect
+	 * tell map-selection tool what kind of selection we expect
 	 * @param type
 	 */
 	public void selectMode(Selection type) {
 		if (type == Selection.LINE && sel_type == Selection.RECTANGLE) {
-			// rectangles are trivially converted to lines
+			// rectangles can be converted to lines
 			sel_x1 = sel_x0 + sel_width;
 			sel_y1 = sel_y0 + sel_height;
 			sel_type = Selection.LINE;

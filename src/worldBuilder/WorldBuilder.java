@@ -1,9 +1,11 @@
 package worldBuilder;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.filechooser.FileFilter;
 
 
 public class WorldBuilder  extends JFrame 
@@ -362,15 +364,27 @@ public class WorldBuilder  extends JFrame
 		} else if (o == fileOpen) {
 			if (modified)
 				checkSave();
-			FileDialog d = new FileDialog(this, "Choose input file", FileDialog.LOAD);
-			d.setVisible(true);
-			filename = d.getFile();
-			if (filename != null) {
-				String dir = d.getDirectory();
-				if (dir != null)
-					filename = dir + filename;
+			JFileChooser d = new JFileChooser();
+			d.setDialogTitle("Choose world description");
+			d.setCurrentDirectory(new File("."));
+			d.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			FileFilter jsonFilter = new FileFilter() {
+				public boolean accept(File f) {
+					if (f.isDirectory())
+						return true;
+					String filename = f.getPath();
+					return filename.endsWith(".json");
+				}
+				public String getDescription() {
+					return("json");
+				}
+			};
+			d.addChoosableFileFilter(jsonFilter);
+			d.setFileFilter(jsonFilter);
+			if (d.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				filename = d.getSelectedFile().getPath();
 				map.read(filename);
-	
+				
 				// newly loaded map may have changed the sea-level
 				seaLevel.setValue((int)(parms.sea_level * parms.z_range));
 				modified = false;

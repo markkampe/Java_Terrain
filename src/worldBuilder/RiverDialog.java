@@ -6,6 +6,9 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+/**
+ * Dialog to define the point at which an arterial river enters the map.
+ */
 public class RiverDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {
 
 	private Map map;

@@ -3,9 +3,7 @@ package worldBuilder;
 import java.awt.Color;
 
 /**
- * An exporter is a class that can persist a world map
- * in a form that some other software can import.
- *
+ * a class to write out a map for importation into other software
  */
 public interface Exporter {
 	/**
@@ -60,7 +58,7 @@ public interface Exporter {
 	boolean writeFile(String outputFile);
 	
 	/**
-	 * create an output preview
+	 * what type of preview are we to generate?
 	 */
 	public enum WhichMap { HEIGHTMAP, FLORAMAP };
 	void preview(WhichMap chosen, Color colorMap[]);

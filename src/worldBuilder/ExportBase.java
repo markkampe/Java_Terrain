@@ -8,11 +8,10 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 /**
- * This is intended to be a super-class for exporter dialogs.
- * It creates the basic dialog box, handles region selection,
- * and pumps data to a (provided) Exporter.
- * 
- * It is expected that the sub-classes will process the button
+ * a super-class for exporter dialogs - creates dialogs, handles
+ * handles region selection, pumps data to an Exporter
+ */ 
+/* It is expected that the sub-classes will process the button
  * pushes and window events, as well as perhaps adding additional
  * control widgets to the CENTER controls JPanel.
  */

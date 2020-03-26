@@ -4,6 +4,9 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+/**
+ * Dialog to control debug output for Flora-placement-rule execution
+ */
 public class RuleDebug extends JFrame implements WindowListener, ActionListener {
 		private Parameters parms;
 			

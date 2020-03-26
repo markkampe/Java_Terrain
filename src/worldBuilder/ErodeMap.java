@@ -3,6 +3,10 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * a class to render world mesh erosion and deposition coloration:
+ *   shades of violet for erosion, yellow for deposition.
+ */
 public class ErodeMap {
 
 	private static final int DIM = 128;

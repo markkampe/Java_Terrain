@@ -3,6 +3,9 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * a class to render rivers, lakes, and oceans in shares of blue.
+ */
 public class WaterMap {
 
 	private Map map;

@@ -1,10 +1,10 @@
 package worldBuilder;
 
+/**
+ * types of terrain known to the tile exporting engines
+ */
 public class TerrainType {
 	
-	/**
-	 * types of terrain known to the tile exporting engines
-	 */
 	public static final int NONE = 0;
 	public static final int DEEP_WATER = 1;
 	public static final int SHALLOW_WATER = 2;

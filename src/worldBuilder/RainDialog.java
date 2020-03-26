@@ -8,8 +8,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 /**
- * SlopeDialog allows the user to choose an axis and inclination to
- * cause a uniform slope to the entire map.  
+ * a Dialog to control the direction and amount of rainfall on the world map.
  */
 public class RainDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
 	private Map map;

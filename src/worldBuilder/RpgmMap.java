@@ -1,5 +1,8 @@
 package worldBuilder;
 
+/**
+ * represents identifying information in an RPGMaker map
+ */
 public class RpgmMap {
 	
 	public String name;		// file name within data directory

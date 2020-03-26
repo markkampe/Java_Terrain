@@ -5,6 +5,9 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+/**
+ * a Dialog to control the creation of a new (Voronoi) mesh
+ */
 public class MeshDialog extends JFrame implements ActionListener, WindowListener {	
 		private Parameters parms;
 		private Map map;

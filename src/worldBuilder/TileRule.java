@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.util.LinkedList;
 
 
+/**
+ * parameters and bids for a single flora-placement-rule
+ */
 public class TileRule {
 	
 	public static LinkedList<TileRule> rules;

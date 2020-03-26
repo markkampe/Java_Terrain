@@ -18,6 +18,9 @@ import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+/**
+ * Dialog to collect the parameters for an RPGMaker export.
+ */
 public class RPGMexport extends ExportBase implements ActionListener, ChangeListener{
 
 	private String format; // export type/ rules file

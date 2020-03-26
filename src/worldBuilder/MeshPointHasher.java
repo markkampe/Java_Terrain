@@ -1,8 +1,7 @@
 package worldBuilder;
 /**
- * This class is used to generate a single unique MapPoint for 
- * each unique coordinate pair, and find the already allocated 
- * point when coordinates are repeated.
+ * class generates a single unique MapPoint for each unique coordinate pair, 
+ * and find the already allocated point when coordinates are repeated.
  * 
  * I have chosen to do this with an open hash table for time
  * efficiency.

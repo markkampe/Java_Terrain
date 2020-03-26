@@ -2,8 +2,7 @@ package worldBuilder;
 
 
 /**
- * a MeshPoint has an X and Y coordinate
- * 		if part of a Mesh, it has an index and neighbors
+ * a MeshPoint has X and Y coordinates, and index, and neighbors
  */
 public class MeshPoint {
 	public double x;			// X coordinate

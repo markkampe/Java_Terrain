@@ -6,6 +6,9 @@ package worldBuilder;
 
 import javax.swing.JSlider;
 
+/**
+ * cusom-widget - a slider with upper and lower values
+ */
 public class RangeSlider extends JSlider {
 
 	private static final long serialVersionUID = 1L;

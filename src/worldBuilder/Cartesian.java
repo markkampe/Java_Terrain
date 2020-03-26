@@ -1,9 +1,8 @@
 package worldBuilder;
 
 /**
- * this is a dense 2D array w/Cartesian coordinates
- * whose values cn be interpolated from the random points
- * in a Voronoi mesh.
+ * a dense 2D array w/Cartesian coordinates, whose values have
+ * been interpolated from the Voronoi mesh points.
  */
 public class Cartesian {
 

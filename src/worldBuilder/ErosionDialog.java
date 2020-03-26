@@ -5,6 +5,9 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+/**
+ * a Dialog to control the degree of erosion/deposition
+ */
 public class ErosionDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {
 	private Map map;
 	private int oldCycles;

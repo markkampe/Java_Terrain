@@ -4,6 +4,9 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+/**
+ * a JFrame that displays all the infomration about a selected mesh-point
+ */
 public class PointDebug extends JFrame implements WindowListener, MapListener {
 		private Map map;
 		private Parameters parms;

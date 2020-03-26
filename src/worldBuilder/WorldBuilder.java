@@ -8,6 +8,9 @@ import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 
 
+/**
+ * main class - instantiate JFrame, map and widgets and service control actions on them
+ */
 public class WorldBuilder  extends JFrame 
 						   implements ActionListener, ChangeListener,  WindowListener, ComponentListener {
 	

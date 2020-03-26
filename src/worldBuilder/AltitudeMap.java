@@ -3,6 +3,9 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * a class to render the world mesh as a 2D brightness-for-altitude image
+ */
 public class AltitudeMap {
 
 	// topographic lines are shades of gray

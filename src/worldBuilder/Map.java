@@ -15,10 +15,12 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 import javax.swing.*;
 
+/**
+ * the displayable, resizeable, 2D representation of a mesh and
+ * the attributes of its points.
+ */
 public class Map extends JPanel implements MouseListener, MouseMotionListener {
-	/**
-	 * a Map is the displayable resizeable form of a Mesh.
-	 * 
+	/*
 	 * This class maintains a few basic types of information:
 	 * 	 1. a Mesh of random Voronoi MeshPoints (with attributes) 
 	 *   2. Cartesian arrays with the attributes of displayable points
@@ -90,6 +92,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	private int erosion;		// number of erosion cycles
 	
+	/**
+	 * What are we selecting?  Points?  a line?  a rectangle?
+	 */
 	public enum Selection {NONE, POINT, LINE, RECTANGLE, ANY};
 	private Selection sel_mode;	// What types of selection are enabled
 	private MapListener listener;	// who to call for selection events

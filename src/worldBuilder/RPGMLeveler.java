@@ -1,8 +1,8 @@
 package worldBuilder;
 
 /**
- * This class maps altitude/depth/slope information into levels
- * through the use of corresponding percentile-to-level maps.
+ * maps altitude/depth/slope information into RPGMaker "levels",
+ * through use of corresponding percentile-to-level maps.
  * 
  * RPGMaker L1/2 tiling is more commonly based on (bucketized) 
  * levels rather than altitudes and depths.  This makes it much

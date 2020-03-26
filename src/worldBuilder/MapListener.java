@@ -1,5 +1,8 @@
 package worldBuilder;
 
+/**
+ * interface for call-backs resulting from select clicks on the Map
+ */
 public interface MapListener {
 
 	/**

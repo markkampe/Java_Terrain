@@ -3,6 +3,9 @@ package worldBuilder;
 import java.awt.FileDialog;
 import java.awt.event.*;
 
+/**
+ * Dialog to collect information for a Raw (JSON) export
+ */
 public class RawExport extends ExportBase implements ActionListener {
 	
 	private static final long serialVersionUID = 1L;

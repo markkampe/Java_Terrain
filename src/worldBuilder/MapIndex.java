@@ -11,6 +11,9 @@ import java.util.ListIterator;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
+/**
+ * methods to read, digest and write an RPGMaker "MapInfos.json" file
+ */
 public class MapIndex {
 
 	private static final String INFO_FILE_NAME = "MapInfos.json";

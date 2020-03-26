@@ -13,7 +13,7 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 
 /**
- * This is a singleton class containing global program parameters.
+ * a Singleton class containing global program parameters.
  * 
  * values may be default or overridden from command line or dialogs
  */

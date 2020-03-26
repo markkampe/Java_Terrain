@@ -7,7 +7,7 @@ import java.util.ListIterator;
 import java.util.Random;
 
 /**
- * exporter that creates an RPGMaker map
+ * exporter to write world map as tile numbers in RPGMaker levels
  */
 public class RPGMTiler implements Exporter {
 

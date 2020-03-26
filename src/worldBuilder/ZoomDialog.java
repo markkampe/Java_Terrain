@@ -4,6 +4,9 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+/**
+ * Dialog to (temporarily) zoom in on a small piece of the world map.
+ */
 public class ZoomDialog extends JFrame implements ActionListener, WindowListener, MapListener {
 	private Map map;
 	private Parameters parms;

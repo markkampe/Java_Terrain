@@ -3,6 +3,9 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * a class to render the MeshPoint soil types in shades of yellow-to-blue
+ */
 public class SoilMap {
 
 	// topographic lines are shades of gray

@@ -1,5 +1,7 @@
 package worldBuilder;
 /**
+ * a class to keep track of the (3) neighbors of each Voronoi mesh point (by index).
+ *
  * Each cell of the Voronoi to grid map is represented by a MeshRef, which
  * describes the 3=N nearest Voronoi points.
  * 

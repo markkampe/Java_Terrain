@@ -21,12 +21,9 @@ import org.rogach.jopenvoronoi.VertexType;
 import org.rogach.jopenvoronoi.VoronoiDiagram;
 
 /**
- * @module mesh ... functions to generate the basic map
- *
- *  A mesh is a set of irregularly spaced interconnected points:
- *      all <x,y,z> coordinates are relative to the center
- *      all <x,y,z> coordinates fit within a unit cube (-0.5 to +0.5)
- *  	operations on the mesh are agnostic to real-world size 
+ *  a set of irregularly spaced interconnected points:
+ *      all (x,y,z) coordinates are relative to the center of a
+ *      (-0.5 to +0.5) unit-cube.
  *  
  *  Once created, the mesh (collection of connected points) does not
  *  change, but the attributes of the individual points (e.g. altitude

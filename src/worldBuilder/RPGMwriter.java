@@ -3,6 +3,9 @@ package worldBuilder;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * write out a series of levels-of-tiles as an RPGMaker map
+ */
 public class RPGMwriter {
 
 	private FileWriter out;	

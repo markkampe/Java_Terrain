@@ -7,6 +7,9 @@ import java.util.Hashtable;
 import javax.swing.*;
 import javax.swing.event.*;
 
+/**
+ * Dialog to gather information about the size and locaion of this map on the world.
+ */
 public class WorldDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
 		private Parameters parms;
 	

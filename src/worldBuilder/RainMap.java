@@ -3,6 +3,9 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * a class to render the world mesh rainfall as a 2D image in shades of blue-green
+ */
 public class RainMap {
 	// rain fall is indicated by shades of cyan
 	private static final int RAIN_DIM = 0;

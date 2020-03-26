@@ -3,6 +3,9 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * a class to render the oceans and rivers as an image in shades of blue
+ */
 public class RiverMap {
 	private Map map;		// mesh to which we correspond
 
@@ -14,9 +17,6 @@ public class RiverMap {
 		this.map = m;
 		this.parms = Parameters.getInstance();
 	}
-	
-	
-	
 	
 	/**
 	 * Display the streams and rivers

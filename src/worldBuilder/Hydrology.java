@@ -3,12 +3,13 @@ package worldBuilder;
 import java.awt.Color;
 
 /*
+ * engine to use topology to compute water placement, flow,
+ * erosion an dsedimentation.
+ */
+/*
  * This is probably the most complex and computationally expensive
- * class in the entire program.  It calculates topology, water 
- * placement and flow, erosion and sedimentation and embodies a
- * considerable amount of (badly approximated) physics.
- * 
-
+ * class in the entire program as it embodies a considerable amount 
+ * of (badly approximated) physics.
  */
 public class Hydrology {
 	

@@ -6,8 +6,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 /**
- * SlopeDialog allows the user to choose an axis and inclination to
- * cause a uniform slope to the entire map.  
+ * Dialog to choose axis and inclination for a constant slope to the map.
  */
 public class SlopeDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
 	private Map map;

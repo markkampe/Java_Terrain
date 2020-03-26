@@ -12,6 +12,9 @@ import java.util.ListIterator;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
+/**
+ * read in and digest a collection of Tile Rules
+ */
 public class TileRules {
 	private static final String DEFAULT_CONFIG = "/Templates";
 	private static final int NO_VALUE = 666666;

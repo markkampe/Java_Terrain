@@ -5,8 +5,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 /**
- * SlopeDialog allows the user to choose an axis and inclination to
- * cause a uniform slope to the entire map.  
+ * Dialog to enable the creation a consistent map of a sub-region of the current world.
  */
 public class RegionDialog extends JFrame implements ActionListener, MapListener, WindowListener {	
 	private Map map;

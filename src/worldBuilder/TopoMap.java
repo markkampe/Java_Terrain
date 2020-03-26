@@ -3,6 +3,9 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * a class to render a set of mesh points as a traditional topographic map image.
+ */
 public class TopoMap {
 	// topographic lines are shades of gray
 	private static final int TOPO_DIM = 0;

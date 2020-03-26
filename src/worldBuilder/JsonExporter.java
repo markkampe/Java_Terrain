@@ -5,7 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * exporter that creates a generic json summary of a map
+ * Exporter to render a Cartesian map w/JSON descriptions of each point.
  */
 public class JsonExporter implements Exporter {	
 

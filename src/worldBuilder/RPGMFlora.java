@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.util.ListIterator;
 
 /**
- * this class populates a grid with appropriate plants
- * 	based on a set of plant rules, and characteristics of each square
+ * class to populates a grid with appropriate plants
+ * (based on a set of plant rules, and characteristics of each square)
  *
  */
 public class RPGMFlora {

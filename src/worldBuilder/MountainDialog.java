@@ -8,8 +8,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 /**
- * SlopeDialog allows the user to choose an axis and inclination to
- * cause a uniform slope to the entire map.  
+ * Dialog to create mountains and valleys.
  */
 public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MapListener, ItemListener, KeyListener, WindowListener {	
 	

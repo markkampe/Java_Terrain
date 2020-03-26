@@ -222,7 +222,7 @@ public class MapIndex {
 	
 	/**
 	 * look up the Map ID associated with a name
-	 * @param name to look up
+	 * @param id - name to look up
 	 */
 	public boolean hasChildren(int id) {
 		for( ListIterator<RpgmMap> it = maps.listIterator(); it.hasNext(); ) {

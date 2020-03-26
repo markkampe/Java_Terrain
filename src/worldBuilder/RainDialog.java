@@ -146,8 +146,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	/**
 	 * calculate the rainfall received at each Mesh point
 	 * 
-	 * @param Map
-	 * @param rain map to update
+	 * @param map
 	 * @param degrees (from which rain comes)
 	 * @param incoming (rain density)
 	 * 

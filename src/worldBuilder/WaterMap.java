@@ -16,10 +16,10 @@ public class WaterMap {
 	/**
 	 * Render bodies of water
 	 * 
-	 * @param graphics context
-	 * @param display map width
-	 * @param display map height
-	 * @param pixels per displayed cell (MUST BE 5)
+	 * @param g Graphics context
+	 * @param width of the display map
+	 * @param height of the display map
+	 * @param cellWidth - pixels per cell
 	 */
 	public void paint(Graphics g, int width, int height, int cellWidth) {
 		int h = height/cellWidth;

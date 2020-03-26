@@ -122,8 +122,8 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	
 	/**
 	 * called when a point is selected on the map
-	 * @param map_x		(map coordinate)
-	 * @param map_y		(map coordinate)
+	 * @param x		(map coordinate)
+	 * @param y		(map coordinate)
 	 * @return
 	 */
 	public boolean pointSelected(double x, double y) {

@@ -521,7 +521,7 @@ public class Parameters {
 	/**
 	 * print out the rain parameters (after changes and reloads)
 	 * 
-	 * @param	annual rainfall (cm/y)
+	 * @param	incoming - annual rainfall (cm/y)
 	 */
 	public void rainParms(int incoming) {
 		System.out.println("Rainfall: " + incoming + unit_r + ", from " + 
@@ -531,9 +531,8 @@ public class Parameters {
 	/**
 	 * attractive slider calibration
 	 * 
-	 * @param min
-	 *            value
-	 * @param max_value
+	 * @param min value
+	 * @param max value
 	 * @param major
 	 *            ... major tics (vs minor)
 	 */
@@ -619,8 +618,8 @@ public class Parameters {
 	/**
 	 * turn a world distance into a map x/y value
 	 * 
-	 * @param distance
-	 *            (km)
+	 * @param km - distance
+	 *
 	 * @return map delta-x
 	 */
 	public double x(double km) {

@@ -249,8 +249,8 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	 * 		the maps because a river is not distributed over the
 	 * 		entire MeshPoint, but only in specific tiles.
 	 * 
-	 * @param	cartesian hydration map (to update)
-	 * @param 	tile size (in meters)
+	 * @param	hydration (cartesian map to update)
+	 * @param 	tilesize (in meters)
 	 */
 	protected void add_rivers(double[][] hydration, int tilesize) {
 		

@@ -90,7 +90,7 @@ public class Mesh {
 	/**
 	 * read mesh of MapPoints from a file
 	 * 
-	 * @param name of input file
+	 * @param filename of input file
 	 */
 	public void read(String filename) {
 		JsonParser parser;

@@ -266,7 +266,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 
 	/**
-	 * @param Map
+	 * @param map
 	 * @param x: (map) x coordinate
 	 * @param y: (map) y coordinate
 	 * @param radius: (map) radius (0 = full map)
@@ -332,12 +332,17 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 	
 	/**
-	 * @param Map
-	 * @param x: (map) x coordinate
-	 * @param y: (map) y coordinate
-	 * @param radius: (map) radius (0 = full map)
+	 * @param map
+	 * @param x0: (map) x coordinate of start
+	 * @param y0: (map) y coordinate start
+	 * @param x1: (map) x coordinate of end
+	 * @param y1: (map) y coordinate end
+	 * @param radius1: left side radius
+	 * @param radius2: right side radius
 	 * @param zMax: max (map) z value
-	 * @param shape: curvature
+	 * @param shape1: shape of left side
+	 * @param shape2: shape of left side
+	 * @param mineral - soil type
 	 *
 	 * compute the delta_h associated with placing a ridge
 	 * 	find all points within the effective elipse
@@ -507,8 +512,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	
 	/**
 	 * called whenever a region selection changes
-	 * @param map_x0	left most point (map coordinate)
-	 * @param map_y0	upper most point (map coordinate)
+	 * @param map_x		left most point (map coordinate)
+	 * @param map_y		upper most point (map coordinate)
 	 * @param width		(in map units, can be negative)
 	 * @param height	(in map units, can be negative)
 	 * @param complete	boolean, has selection completed

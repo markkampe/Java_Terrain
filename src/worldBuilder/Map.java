@@ -113,8 +113,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 *            ... preferred width (in pixels)
 	 * @param height
 	 *            ... perferred height 9in pixels)
-	 * @param background
-	 *            ... background color
 	 */
 	public Map(int width, int height) {
 		this.size = new Dimension(width, height);
@@ -130,7 +128,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	/**
 	 * create a new sub-region map
 	 * 
-	 * @param points ... number of desired points in new Mesh
+	 * @param numpoints ... number of desired points in new Mesh
 	 */
 	public void subregion(int numpoints) {
 		// compute x/y coordinate translation coefficients
@@ -203,7 +201,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	/**
 	 * read saved map from a file
 	 * 
-	 * @param name of input file
+	 * @param filename - of input file
 	 */
 	public void read(String filename) {
 		// start by reading in the underlying mesh
@@ -922,7 +920,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * highlight points (typically for diagnostic purposes
 	 * 
 	 * @param point number (-1 = reset)
-	 * @param color
+	 * @param c Color for highlighing
 	 */
 	public void highlight(int point, Color c) {
 		if (point >= 0) {

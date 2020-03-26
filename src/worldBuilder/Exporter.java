@@ -33,7 +33,7 @@ public interface Exporter {
 
 	/**
 	 * @param erode	per point height (in meters) of soil lost to erosion
-	 * 		negative -> sedimentqation
+	 * 		negative means sedimentqation
 	 */
 	void erodeMap(double[][] erode);
 
@@ -43,19 +43,19 @@ public interface Exporter {
 	void rainMap(double[][] rain);
 
 	/**
-	 * @param per point soil type
+	 * @param soil - per point soil type
 	 */
 	void soilMap(double[][] soil);
 	
 	/**
-	 * @param per point depth of water
+	 * @param hydration - per point depth of water
 	 */
 	void waterMap(double[][] hydration);
 	
 	/**
 	 * write the output
 	 * 
-	 * @param name out of output file
+	 * @param outputFile - name of output file
 	 */
 	boolean writeFile(String outputFile);
 	

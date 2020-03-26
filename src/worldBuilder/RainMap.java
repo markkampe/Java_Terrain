@@ -19,12 +19,12 @@ public class RainMap {
 	/**
 	 * Render current mesh as a rainfall map
 	 * 
-	 * @param graphics context
-	 * @param display map width
-	 * @param display map height
-	 * @param pixels per displayed cell
+	 * @param g Graphics context
+	 * @param width of the display map
+	 * @param height of the display map
+	 * @param cellWidth - pixels per cell
 	 * 
-	 * for each <row,col> compute interpolated rain generate shaded background
+	 * for each (row,col) compute interpolated rain generate shaded background
 	 */
 	public void paint(Graphics g, int width, int height, int cellWidth) {
 

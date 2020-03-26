@@ -67,7 +67,7 @@ public class MeshPoint {
 	}
 	
 	/**
-	 * compute the distance to a line defined by <x0,y0>-<x1,y1>
+	 * compute the distance to a line defined by (x0,y0)-(x1,y1)
 	 *
 	 * @param ... two points on the line
 	 * @return distance (which can be positive or negative)

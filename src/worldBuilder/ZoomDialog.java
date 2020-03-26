@@ -90,8 +90,8 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	
 	/**
 	 * called whenever a region selection changes
-	 * @param map_x0	left most point (map coordinate)
-	 * @param map_y0	upper most point (map coordinate)
+	 * @param x0		left most point (map coordinate)
+	 * @param y0		upper most point (map coordinate)
 	 * @param width		(in map units)
 	 * @param height	(in map units)
 	 * @param complete	boolean, has selection completed

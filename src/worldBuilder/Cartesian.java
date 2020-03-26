@@ -52,7 +52,7 @@ public class Cartesian {
 	/**
 	 * interpolate values for every Cartesian cell
 	 * 
-	 * @param array of per-MeshPoint values
+	 * @param meshValues - array of per-MeshPoint values
 	 * @return Cartesian array of interpolated values
 	 */
 	public double[][] interpolate(double[] meshValues) {

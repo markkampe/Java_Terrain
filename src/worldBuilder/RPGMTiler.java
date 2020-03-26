@@ -49,10 +49,9 @@ public class RPGMTiler implements Exporter {
 	/**
 	 * create a new output writer
 	 * 
-	 * @param filename ... name of output file
-	 * @param tileRules ... name of rules file
-	 * @param map width (cells)
-	 * @param map height (cells)
+	 * @param tileRules ... name of output file
+	 * @param width of map (in cells)
+	 * @param height of map (in cells)
 	 */
 	public RPGMTiler(String tileRules, int width, int height) {
 		this.parms = Parameters.getInstance();
@@ -518,7 +517,7 @@ public class RPGMTiler implements Exporter {
 	/**
 	 * initialize the bucketized level map
 	 * @param levels ... level for every map point
-	 * @param typemap ... terrain type of each level
+	 * @param typeMap ... terrain type of each level
 	 */
 	public void levelMap(int[][] levels, int[] typeMap ) {
 		this.levels = levels;

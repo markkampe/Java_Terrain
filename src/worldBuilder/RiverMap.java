@@ -21,9 +21,9 @@ public class RiverMap {
 	/**
 	 * Display the streams and rivers
 	 * 
-	 * @param graphics context
-	 * @param display map width
-	 * @param display map height
+	 * @param g Graphics context
+	 * @param width of the display map
+	 * @param height of the display map
 	 */
 	public void paint(Graphics g, int width, int height) {
 		

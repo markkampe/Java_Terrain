@@ -22,7 +22,7 @@ public class RPGMFlora {
 	 * Instantiate a flora populator
 	 * 
 	 * @param tiler ... associated tiler
-	 * @param pallettFile ... floral palette file
+	 * @param paletteFile ... name of floral palette file
 	 */
 	public RPGMFlora(RPGMTiler tiler, String paletteFile) {
 		this.parms = Parameters.getInstance();
@@ -59,10 +59,8 @@ public class RPGMFlora {
 	/**
 	 * getFlora ... populate a map with appropriately chosen plant classes
 	 * 
-	 * @param tiler ... RPGMTiler with fully loaded topography
 	 * @param classes ... array of plant class names
 	 * @param quotas ... array of plant class quotas (in tiles)
-	 * @param palette ... file of plant class definitions
 	 * 
 	 * @return	2D array of plant class name (per tile)
 	 * 

@@ -208,7 +208,7 @@ public class Mesh {
 	 * 
 	 * @param point
 	 */
-	boolean isNearEdege(MeshPoint p) {
+	boolean isNearEdege(MeshPoint point) {
 		return false;
 	}
 

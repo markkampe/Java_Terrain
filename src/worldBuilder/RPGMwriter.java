@@ -14,16 +14,31 @@ public class RPGMwriter {
 	private int numCols;
 	private int[] typeMap;
 	
+	/**
+	 * crate an RPGMaker map writer
+	 * @param outfile open output file
+	 * @param rules tile selection rules to be used
+	 */
 	public RPGMwriter(FileWriter outfile, TileRules rules) {
 		out = outfile;
 		this.rules = rules;
 		typeMap = null;
 	}
 	
+	/** 
+	 * set the level-to-TerrainType map
+	 * @param map	new map
+	 */
 	public void typeMap(int[] map) {
 		this.typeMap = map;
 	}
 	
+	/**
+	 * write out the prologue for a set of tables
+	 * @param height (in tiles) of map
+	 * @param width (in tiles) of map
+	 * @param tileset (number of the tileset to be used in this map)
+	 */
 	public void prologue( int height, int width, int tileset ) throws IOException {
 		
 		// patch in the array size and tile set
@@ -253,6 +268,9 @@ public class RPGMwriter {
 			return level < ref;
 	}
 
+	/**
+	 * terminate the list of tables
+	 */
 	public void epilogue() throws IOException {
 		out.write("}\n");
 	}

@@ -6,9 +6,12 @@ package worldBuilder;
  */
 public class Cartesian {
 
-	public int width;			// columns in this map
-	public int height;			// rows in this map
-	private Vicinity cells[][];	// mapping from Cartesian points to MeshPoints
+	/** number of tile columns in this map	*/
+	public int width;
+	/** number of tile rows in this map */
+	public int height;
+	/** the three nearest MeshPoints to every tile in our map	*/
+	private Vicinity cells[][];
 
 	/**
 	 * create a new Cartesian map

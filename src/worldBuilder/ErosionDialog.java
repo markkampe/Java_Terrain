@@ -20,6 +20,9 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 	
 	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * create the widgits and register the listeners
+	 */
 	public ErosionDialog(Map map)  {
 		// pick up references
 		this.map = map;
@@ -98,7 +101,7 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 	}
 	
 	/**
-	 * updates to the axis/inclination/profile sliders
+	 * updates to the amount-of-erosion slider
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == amount) {
@@ -128,14 +131,13 @@ public class ErosionDialog extends JFrame implements ActionListener, ChangeListe
 		this.dispose();
 	}
 	
-	// perfunctory methods
-	public void mouseMoved(MouseEvent arg0) {}
-	public void mouseEntered(MouseEvent arg0) {}
-	public void mouseExited(MouseEvent arg0) {}
-	public void windowActivated(WindowEvent arg0) {}
-	public void windowClosed(WindowEvent arg0) {}
-	public void windowDeactivated(WindowEvent arg0) {}
-	public void windowDeiconified(WindowEvent arg0) {}
-	public void windowIconified(WindowEvent arg0) {}
-	public void windowOpened(WindowEvent arg0) {}
+	/** (perfunctory) */ public void mouseMoved(MouseEvent arg0) {}
+	/** (perfunctory) */ public void mouseEntered(MouseEvent arg0) {}
+	/** (perfunctory) */ public void mouseExited(MouseEvent arg0) {}
+	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
 }

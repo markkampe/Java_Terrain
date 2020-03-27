@@ -32,23 +32,25 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * about real-world (e.g. meters) coordinates.
 	 */
 
-	// types of displays
-	public static final int SHOW_ALL = 0xff;
-	public static final int SHOW_POINTS = 0x01;
-	public static final int SHOW_MESH = 0x02;
-	public static final int SHOW_TOPO = 0x04;
-	public static final int SHOW_RAIN = 0x08;
-	public static final int SHOW_WATER = 0x10;
-	public static final int SHOW_ERODE = 0x20;
-	public static final int SHOW_SOIL = 0x40;
-	public static final int SHOW_HYDRO = 0x80;
+	/** options for enabled display types	*/
+	public static final int SHOW_ALL = 0xff,
+							SHOW_POINTS = 0x01,
+							SHOW_MESH = 0x02,
+							SHOW_TOPO = 0x04,
+							SHOW_RAIN = 0x08,
+							SHOW_WATER = 0x10,
+							SHOW_ERODE = 0x20,
+							SHOW_SOIL = 0x40,
+							SHOW_HYDRO = 0x80;
 	private int display;		// bitmask for enabled SHOWs
 	
-	// soil types
-	public static final int SEDIMENTARY = 0;
-	public static final int METAMORPHIC = 1;
-	public static final int IGNEOUS = 2;
-	public static final int ALLUVIAL = 3;
+	/** defined soil types	*/
+	public static final int SEDIMENTARY = 0,
+							METAMORPHIC = 1,
+							IGNEOUS = 2,
+							ALLUVIAL = 3;
+
+	/** names of defined soil types	*/
 	public static final String soil_names[] = {
 			"Sedimentary", "Metamorphic", "Igneous", "Alluvial"
 	};
@@ -64,10 +66,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private Dimension size;
 	
 	// displayed window offset and size
-	double x_min, y_min, x_max, y_max;
+	private double x_min, y_min, x_max, y_max;
 	
-	public boolean isSubRegion;	// sub-region of a larger map
-	public Mesh mesh;			// mesh of Voronoi points
+	/** current map is a subRegion of a larger map */
+	public boolean isSubRegion;
+	/** underlying Mesh of Voronoi points */
+	public Mesh mesh;
 
 	// display colors
 	private static final Color SELECT_COLOR = Color.WHITE;
@@ -92,19 +96,17 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	private int erosion;		// number of erosion cycles
 	
-	/**
-	 * What are we selecting?  Points?  a line?  a rectangle?
-	 */
+	/** selection types: points, line, rectangle, ... */
 	public enum Selection {NONE, POINT, LINE, RECTANGLE, ANY};
 	private Selection sel_mode;	// What types of selection are enabled
 	private MapListener listener;	// who to call for selection events
 	
-	// hydrological results
-	public double max_slope;		// maximum slope
-	public double max_flux;			// maximum river flow
-	public double max_velocity;		// maximum water velocity
-	public double max_erosion;		// maximum soil loss due to erosion
-	public double max_deposition;	// maximum soil gain due to sedimentation
+	/** results of hydrological computation	*/
+	public double max_slope,		// maximum slope
+				  max_flux,			// maximum river flow
+				  max_velocity,		// maximum water velocity
+				  max_erosion,		// maximum soil loss due to erosion
+				  max_deposition;	// maximum soil gain due to sedimentation
 
 	private Parameters parms;
 	
@@ -204,7 +206,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	
 	
 	/**
-	 * read saved map from a file
+	 * read a saved map in from a file
 	 * 
 	 * @param filename - of input file
 	 */
@@ -434,6 +436,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	
 	/**
 	 * write a mesh of MapPoints out to a file
+	 * @param filename - of the file to be (re)written
 	 */
 	public boolean write(String filename) {
 		try {
@@ -536,9 +539,14 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
-	 * get/set routines for Mesh and per MeshPoint attributes
+	 * return the Mesh underlying the current map
 	 */
 	public Mesh getMesh() { return mesh; }
+
+	/**
+	 * create a map around a new Mesh
+	 * @param mesh to be used
+	 */
 	public void setMesh(Mesh mesh) {
 		this.mesh = mesh;	
 		if (mesh != null) {
@@ -572,8 +580,15 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		repaint();
 	}
 	
-	/* Z value (pre-erosion) for each Mesh point */
+	/**
+	 * return heightmap (pre-erosion Z values) for the current mesh
+	 */
 	public double[] getHeightMap() {return heightMap;}
+
+	/**
+	 * update the height map for the current mesth
+	 * @param newHeight new set of Z values
+	 */
 	public double[] setHeightMap(double newHeight[]) {
 		double old[] = heightMap; 
 		heightMap = newHeight; 
@@ -583,8 +598,15 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		return old;
 	}
 
-	/* rainfall (in cm) for each Mesh point */
+	/**
+	 * return rainMap (cm of rainfall) for the current mesh
+	 */
 	public double[] getRainMap() {return rainMap;}
+
+	/**
+	 * update the rainfall map for the current mesth
+	 * @param newRain new set of rainfall values
+	 */
 	public double[] setRainMap(double newRain[]) {
 		double old[] = rainMap; 
 		rainMap = newRain; 
@@ -594,8 +616,15 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		return old;
 	}
 	
-	/* Number of configured erosion cycles	*/
+	/**
+	 * return number of configured erosion cycles
+	 */
 	public int getErosion() {return erosion;}
+
+	/**
+	 * update the number of configured erosion sycles
+	 * @param cycles - number of configured erosion cycles
+	 */
 	public int setErosion(int cycles) {
 		int old = erosion;
 		erosion = cycles;
@@ -605,12 +634,25 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		return old;
 	}
 	
-	/* incoming arterial river	*/
+	/**
+	 * return location of incoming arterial river
+	 */
 	public double[] getIncoming() { return incoming; }
+
+	/**
+	 * update the water-flow after a change to the incoming arterial river
+	 */
 	public void setIncoming() {repaint(); }
 	
-	/* soil type for each Mesh point	*/
+	/**
+	 * return map of soil type for the current mesh
+	 */
 	public double [] getSoilMap() {return soilMap;}
+
+	/**
+	 * update the soil map for the current mesth
+	 * @param newSoil new set of soil types
+	 */
 	public double[] setSoilMap(double[] newSoil) {
 		double[] old = soilMap;
 		soilMap = newSoil;
@@ -622,19 +664,37 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * these arrays are regularly re-calculated from height/rain
 	 * and so do not need to be explicitly SET
 	 */
+
+	/**
+	 * return array of down-hill neigbor for each mesh point
+	 */
 	public int[] getDownHill() { return downHill; }
+
+	/**
+	 * return array of water flow through each mesh point
+	 */
 	public double[] getFluxMap() {return fluxMap;}
+
+	/**
+	 * return array of net erosion/deposition at each mesh point
+	 */
 	public double[] getErodeMap() {return erodeMap;}
+
+	/**
+	 * return array of soil hydration for each mesh point
+	 */
 	public double [] getHydrationMap() { return hydrationMap; }
 	
-	/* Meshpoint to Cartesian translation matrix */
+	/**
+	 * return MeshPoint to Cartesian translation matrix
+	 */
 	public Cartesian getCartesian() {return map;}
 	
 	/**
 	 * enable/disable display elements
 	 * 
 	 * @param view to be enabled/disabled
-	 * @param on/off
+	 * @param on ... should this be enabled or disabled
 	 * @return current sense of that view
 	 */
 	public int setDisplay(int view, boolean on) {
@@ -648,7 +708,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
-	 * convert a screen coordinate into a map coordinate
+	 * return map (-0.5 to 0.5) x position for a screen column
 	 */
 	public double map_x(int screen_x) {
 		double x = (double) screen_x / getWidth();
@@ -656,37 +716,52 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		return x_min + (x * range);
 	}
 
+	/**
+	 * return map (-0.5 to 0.5) y position for a screen row
+	 */
 	public double map_y(int screen_y) {
 		double y = (double) screen_y / getHeight();
 		double range = y_max - y_min;
 		return y_min + (y * range);
 	}
 	
+	/**
+	 * return width (in pixels) of the current Map
+	 */
 	public double map_width(int x_pixels) {
 		double pixels = x_pixels;
 		return pixels/getWidth();
 	}
 	
+	/**
+	 * return height (in pixels) of the current Map
+	 */
 	public double map_height(int y_pixels) {
 		double pixels = y_pixels;
 		return pixels/getHeight();
 	}
 	
 	/**
-	 * convert a map coordinate into a screen coordinate
+	 * return pixel column for a given map x position
 	 */
 	public int screen_x(double x) {
 		double X = getWidth() * (x - x_min)/(x_max - x_min);
 		return (int) X;
 	}
 	
+	/**
+	 * return pixel row for a given map y position
+	 */
 	public int screen_y(double y) {
 		double Y = getHeight() * (y - y_min)/(y_max - y_min);
 		return (int) Y;
 	}
 
 	/**
-	 * is a screen coordinate within the current display window
+	 * is a map position within the current display window
+	 * @param x coordinate (e.g. -0.5 to 0.5)
+	 * @param y coordinate (e.g. -0.5 to 0.5)
+	 * @return boolean ... are those coordinates in the display window
 	 */
 	public boolean on_screen(double x, double y) {
 		if (x < x_min || x > x_max)
@@ -709,11 +784,17 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	/**
 	 * register a listener for selection events
 	 * 
-	 * @param interested
+	 * @param interested class to receive call-backs
 	 */
 	public void addMapListener(MapListener interested) {
 		listener = interested;
 	}
+
+	/**
+	 * un-register a selection event listener
+	 * 
+	 * @param which class to be removed
+	 */
 	public void removeMapListener(MapListener which) {
 		if (listener == which)
 			listener = null;
@@ -721,7 +802,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	
 	/**
 	 * tell map-selection tool what kind of selection we expect
-	 * @param type
+	 * @param type (RECTANGLE, POINT, LINE, ...)
 	 */
 	public void selectMode(Selection type) {
 		if (type == Selection.LINE && sel_type == Selection.RECTANGLE) {
@@ -852,15 +933,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		}
 	}
 	
-	/**
-	 * entry/exit events aren't interesting
-	 */
-	public void mouseExited(MouseEvent e) { selecting = false; }
-	public void mouseEntered(MouseEvent e) {}
-	public void mouseMoved(MouseEvent e) {}
+	/** perfunctory */ public void mouseExited(MouseEvent e) { selecting = false; }
+	/** perfunctory */ public void mouseEntered(MouseEvent e) {}
+	/** perfunctory */ public void mouseMoved(MouseEvent e) {}
 	
 	/**
-	 * highlight a line on the map
+	 * highlight a line on the displayed map
 	 * 
 	 * @param x0	screen x
 	 * @param y0	screen y
@@ -878,7 +956,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
-	 * highlight a rectangular selection
+	 * highlight a rectangular selection on the displayed map
 	 * 
 	 * @param x0	screen x
 	 * @param y0	screen y
@@ -906,7 +984,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
-	 * determine whether or not a Map point is within a selected box
+	 * return whether or not Map coordinates are within a selected box
 	 */
 	public boolean inTheBox(double x, double y) {
 
@@ -950,7 +1028,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	
 	/*
 	 * change the display window to the specified range
-	 * @param map x/y upper left, lower right
+	 * @param x0 new left edge (map coordinate)
+	 * @param y0 new upper edge (map coordinate)
+	 * @param x1 new right edge (map coordinate)
+	 * @param y1 new lower edge (map coordinate)
 	 */
 	public void setWindow(double x0, double y0, double x1, double y1) {
 		x_min = (x1 >= x0) ? x0 : x1;
@@ -965,10 +1046,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 
 	/**
-	 * repaint the map pane
+	 * repaint the entire displayed map pane
+	 * @param g - Graphics component (pane) for displayed map
 	 * 
-	 *  Note: order of painting is to enable layering of some things
-	 *  	  atop others
+	 *  Note: order of painting is carefully chosen to enable 
+	 *	      layering of some things atop others
 	 */
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -1099,9 +1181,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	/**
 	 * linear interpolation of a (color) value within a range
 	 * 
-	 * @param min return value
-	 * @param max return value
-	 * @param value (0-1) to be scaled
+	 * @param min value in desired range
+	 * @param max value in desired range
+	 * @param value (0.0-1.0) to be scaled
+	 # @return interpolated value between min and max
 	 */
 	public static double linear(int min, int max, double value) {
 		if (value <= 0)
@@ -1116,14 +1199,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	/**
 	 * logarithmic interpolation of a (color) value within a range
 	 * 
-	 * @param min
-	 *            return value
-	 * @param max
-	 *            return value
-	 * @param value
-	 *            (0-1) to be scaled
-	 * @param base
-	 *            (result/2 for each increment)
+	 * @param min value in desired range
+	 * @param max value in desired range
+	 * @param value (0.0-1.0) to be scaled
+	 * @param base - fraction of value corresponding to half of range
+	 # @return interpolated value between min and max
 	 */
 	public static double logarithmic(int min, int max, double value, double base) {
 		if (value <= 0)
@@ -1145,14 +1225,14 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
-	 * @return minimum acceptable canvas size
+	 * return minimum acceptable canvas size
 	 */
 	public Dimension getMinimumSize() {
 		return new Dimension(MIN_WIDTH, MIN_HEIGHT);
 	}
 
 	/**
-	 * @return preferred canvas size
+	 * return preferred canvas size
 	 */
 	public Dimension getPreferredSize() {
 		return size;

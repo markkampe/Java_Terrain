@@ -28,6 +28,9 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 	
 	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * instantiate the widgets and register the listeners
+	 */
 	public RegionDialog(Map map)  {
 		// pick up references
 		this.map = map;
@@ -206,11 +209,11 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 		this.dispose();
 	}
 
-	public boolean pointSelected(double x, double y) {return false;}
-	public void windowActivated(WindowEvent arg0) {}
-	public void windowClosed(WindowEvent arg0) {}
-	public void windowDeactivated(WindowEvent arg0) {}
-	public void windowDeiconified(WindowEvent arg0) {}
-	public void windowIconified(WindowEvent arg0) {}
-	public void windowOpened(WindowEvent arg0) {}
+	/** (perfunctory) */ public boolean pointSelected(double x, double y) {return false;}
+	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
 }

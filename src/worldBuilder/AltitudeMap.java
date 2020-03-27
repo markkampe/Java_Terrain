@@ -15,6 +15,10 @@ public class AltitudeMap {
 	private Map map;
 	//private Parameters parms;
 	
+	/**
+	 * instantiate a (brightness) height map renderer
+	 * @param map	to be rendered
+	 */
 	public AltitudeMap(Map map) {
 		this.map = map;
 		//this.parms = Parameters.getInstance();
@@ -49,6 +53,5 @@ public class AltitudeMap {
 					g.setColor(new Color((int) shade, (int) shade, (int) shade));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				}
-			
 	}
 }

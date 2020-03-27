@@ -14,8 +14,7 @@ public class RawExport extends ExportBase implements ActionListener {
 	private boolean exported = false;
 
 	/**
-	 * Set up the dialog (base class is fine) and
-	 * register the action listeners.
+	 * Register our own action listners (BaseExport dialog is fine)
 	 * 
 	 * @param map ... Map to be exported
 	 */
@@ -35,7 +34,7 @@ public class RawExport extends ExportBase implements ActionListener {
 	}
 	
 	/**
-	 * click events on ACCEPT/CANCEL buttons
+	 * process ACCEPT/CANCEL button events
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {

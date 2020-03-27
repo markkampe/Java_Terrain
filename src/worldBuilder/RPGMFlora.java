@@ -43,14 +43,14 @@ public class RPGMFlora {
 	}
 	
 	/**
-	 * @return array to map Flora indices into names
+	 * return array to map Flora indices into names
 	 */
 	public String[] getFloraNames() {
 		return names;
 	}
 	
 	/**
-	 * @return array to map Flora indices into colors
+	 * return array to map Flora indices into colors
 	 */
 	public Color[] getFloraColors() {
 		return colors;

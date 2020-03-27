@@ -17,6 +17,12 @@ public class SoilMap {
 	private boolean show_soil;
 	private boolean show_hydro;
 	
+	/**
+	 * instantiate a soil map generator
+	 * @param map to be displayed
+	 * @param show_soil should we display soil type
+	 * @param show_hydro should we display water content
+	 */
 	public SoilMap(Map map, boolean show_soil, boolean show_hydro) {
 		this.map = map;
 		this.show_soil = show_soil;

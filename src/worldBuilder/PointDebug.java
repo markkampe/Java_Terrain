@@ -25,6 +25,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 		private JLabel infoHydro;
 		private JLabel infoDownhill;
 		
+		/** instantiate the point information display, register for selection events */
 		public PointDebug(Map map)  {
 			// pick up references
 			this.map = map;
@@ -148,14 +149,13 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			WorldBuilder.activeDialog = false;
 		}
 		
-		/* perfunctory entry points */
-		public boolean regionSelected(double x, double y, double w, double h, boolean f) {return false;}
-		public void windowActivated(WindowEvent arg0) {}
-		public void windowClosed(WindowEvent arg0) {}
-		public void windowDeactivated(WindowEvent arg0) {}
-		public void windowDeiconified(WindowEvent arg0) {}
-		public void windowIconified(WindowEvent arg0) {}
-		public void windowOpened(WindowEvent arg0) {}
-		public void mousePressed(MouseEvent arg0) {}
-		public void mouseReleased(MouseEvent arg0) {}
+		/** (perfunctory) */ public boolean regionSelected(double x, double y, double w, double h, boolean f) {return false;}
+		/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
+		/** (perfunctory) */ public void mousePressed(MouseEvent arg0) {}
+		/** (perfunctory) */ public void mouseReleased(MouseEvent arg0) {}
 }

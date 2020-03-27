@@ -14,7 +14,7 @@ import javax.swing.filechooser.FileFilter;
 public class WorldBuilder  extends JFrame 
 						   implements ActionListener, ChangeListener,  WindowListener, ComponentListener {
 	
-	// default map/mesh to load on start-up
+	/** default configuration file to be read on start-up	*/
 	public static final String DEFAULT_TEMPLATE = "/Templates/default_%d.json";
 	
 	// identification information
@@ -24,8 +24,8 @@ public class WorldBuilder  extends JFrame
 	private static final String license = "";	// TBD
 	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [-p projectdir] [mesh file]";
 	
-	// active mouse-hogging dialog (for serialization)
-	public static boolean activeDialog;
+	/** active mouse-hogging dialog (for serialization)	*/
+	protected static boolean activeDialog;
 	
 	// active file
 	private String filename;	// name of current input/output file
@@ -100,7 +100,7 @@ public class WorldBuilder  extends JFrame
 	private static final long serialVersionUID = 0xdeadbeef;	// this is stupid
 	
 	/**
-	 * instantiate a map and control panel
+	 * instantiate window containing map and menus
 	 */
 	public WorldBuilder(String filename) {
 		
@@ -135,8 +135,7 @@ public class WorldBuilder  extends JFrame
 	}
 	
 	/**
-	 * create the hierarchy of menus that will drive most 
-	 * of our actions
+	 * create hierarchy of menus that will drive our actions
 	 */
 	private void createMenus() {
 		
@@ -285,7 +284,7 @@ public class WorldBuilder  extends JFrame
 	}
 	
 	/**
-	 * create a panel of control widgets
+	 * create a panel of control widgets (Sea-Level slider)
 	 */
 	private void createWidgets() {
 		
@@ -320,6 +319,7 @@ public class WorldBuilder  extends JFrame
 	
 	/**
 	 * save the current map
+	 * @param filename of the map to be saved
 	 */
 	private void doSave(String filename) {
 		String title = (filename == null) ? "Save As" : "Save";
@@ -339,7 +339,7 @@ public class WorldBuilder  extends JFrame
 	}
 	
 	/**
-	 * see the current map should be saved
+	 * see the current map should be saved, and of so, save it
 	 */
 	private void checkSave() {
 		if (JOptionPane.showConfirmDialog(new JFrame(), "Save current map?", "Save?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
@@ -348,7 +348,7 @@ public class WorldBuilder  extends JFrame
 	}
 
 	/**
-	 * action handler for menu widgets
+	 * menu item selection handler ... where everything happens
 	 */
 	public void actionPerformed( ActionEvent e ) {
 		Object o = e.getSource();
@@ -519,7 +519,9 @@ public class WorldBuilder  extends JFrame
 		updateDisplayMenus(parms.display_options);
 	}
 	
-	// these may all be just place holders
+	/**
+	 * handle changes to erosion, sea-level and rainfall sliders
+	 */
 	public void stateChanged(ChangeEvent e) {
 		Object o = e.getSource();
 		if (o == erosion) {
@@ -591,19 +593,25 @@ public class WorldBuilder  extends JFrame
 		System.exit(exitCode);
 	}
 
-	// perfunctory event handlers
-	public void windowClosing(WindowEvent e) { shutdown(EXIT_OK); }	
-	public void windowActivated(WindowEvent arg0) {	}
-	public void windowClosed(WindowEvent arg0) {}
-	public void windowDeactivated(WindowEvent arg0) {}
-	public void windowDeiconified(WindowEvent arg0) {}
-	public void windowIconified(WindowEvent arg0) {}
-	public void windowOpened(WindowEvent arg0) {}
-	public void componentShown(ComponentEvent arg0) {}
-	public void componentHidden(ComponentEvent arg0) {}
-	public void componentMoved(ComponentEvent arg0) {}
-	public void componentResized(ComponentEvent e) {}
+	/** (perfunctory) */ public void windowClosing(WindowEvent e) { shutdown(EXIT_OK); }
+	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {	}
+	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
+	/** (perfunctory) */ public void componentShown(ComponentEvent arg0) {}
+	/** (perfunctory) */ public void componentHidden(ComponentEvent arg0) {}
+	/** (perfunctory) */ public void componentMoved(ComponentEvent arg0) {}
+	/** (perfunctory) */ public void componentResized(ComponentEvent e) {}
 
+	/**
+	 * main application entry point
+	 * @param args [-v] [-d debug-level] [-c config-file] [-p project-dir] map-file
+	 *		map-file is a (previously saved) map to be read in and displayed
+	 *		config-file contains initial values for all parameters
+	 *		project-dir is destination for exported maps
+	 */
 	public static void main(String[] args) {
 		// process the arguments
 		String filename = null;

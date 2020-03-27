@@ -30,7 +30,7 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		private static final long serialVersionUID = 1L;
 		
 		/**
-		 * put up a world parameters Dialog
+		 * instantiate the dialog widgets and register the listeners
 		 * 
 		 * @param readOnly ... sub-region w/fixed world parameters
 		 *			disabling these updates makes it more difficult
@@ -276,12 +276,11 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			}
 		}
 
-		// perfunctory methods
-		public void stateChanged(ChangeEvent e) {}
-		public void windowActivated(WindowEvent arg0) {}
-		public void windowClosed(WindowEvent arg0) {}
-		public void windowDeactivated(WindowEvent arg0) {}
-		public void windowDeiconified(WindowEvent arg0) {}
-		public void windowIconified(WindowEvent arg0) {}
-		public void windowOpened(WindowEvent arg0) {}
+		/** (perfunctory) */ public void stateChanged(ChangeEvent e) {}
+		/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
 	}

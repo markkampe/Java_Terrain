@@ -80,8 +80,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	/**
 	 * figure out what export control widgets we need and create them
 	 * 
-	 * @param map
-	 *            ... Map to be exported
+	 * @param map ... Map to be exported
 	 */
 	public RPGMexport(String format, Map map) {
 		super("RPGMaker " + format, map);
@@ -118,7 +117,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	}
 
 	/**
-	 * create the control widgets required for this export
+	 * create the control widgets and register listeners for this export
 	 */
 	private void create_GUI() {
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
@@ -407,7 +406,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	}
 
 	/**
-	 * changes to sliders may force some re-exporting
+	 * record slider changes and note a re-export will be required
 	 */
 	public void stateChanged(ChangeEvent e) {
 		Object source = e.getSource();
@@ -753,7 +752,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	/**
 	 * determine the owning plant type for every square
 	 */
-	public void floraMap() {
+	private void floraMap() {
 		
 		RPGMFlora flora = new RPGMFlora(tiler, flora_palette.getText());
 		

@@ -15,6 +15,10 @@ public class TopoMap {
 	
 	private Parameters parms;
 
+	/**
+	 * instantiate a (topographic lines) height map renderer
+	 * @param map	to be rendered
+	 */
 	public TopoMap(Map map) {
 		this.map = map;
 		this.parms = Parameters.getInstance();

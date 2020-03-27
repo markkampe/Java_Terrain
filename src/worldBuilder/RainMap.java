@@ -14,6 +14,10 @@ public class RainMap {
 	private Map map;
 	private Parameters parms;
 
+	/**
+	 * instantiate a rainfall map renderer
+	 * @param map	to be rendered
+	 */
 	public RainMap(Map map) {
 		this.map = map;
 		this.parms = Parameters.getInstance();

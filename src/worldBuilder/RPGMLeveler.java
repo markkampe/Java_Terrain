@@ -16,11 +16,8 @@ package worldBuilder;
  */
 public class RPGMLeveler {
 	
-	public RPGMLeveler() {
-	}
-	
 	/**
-	 * compute a level for every map square
+	 * compute an abstract level for every map square
 	 * 
 	 * @param altMap	altitude pctile to level map
 	 * @param waterMap	depth pctile to level map

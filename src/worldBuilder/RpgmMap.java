@@ -5,14 +5,21 @@ package worldBuilder;
  */
 public class RpgmMap {
 	
-	public String name;		// file name within data directory
-	public int id;			// map ID index (starts w/1)
-	public int parent;		// map ID of parent
+	/** file name within the project/map directory	*/
+	public String name;
+	/** map ID index (starts with 1)				*/
+	public int id;
+	/** map ID index of parent (containing) map		*/
+	public int parent;
 	//public int order;		// listing order in index
 	//public boolean expanded;	// is this a tactical scale map
-	public double x;		// x coordinate of top left
-	public double y;		// y coordinate of top left
+	/** RPGMaker big-map coordinates of the top left corner	*/
+	public double x, y;
 	
+	/** 
+	 * instantiate a new map (within an index)	
+	 * @param name of the map file
+	 */
 	public RpgmMap(String name) {
 		this.name = name;
 	}

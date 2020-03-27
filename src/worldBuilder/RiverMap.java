@@ -13,8 +13,12 @@ public class RiverMap {
 	
 	private Parameters parms;
 	
-	public RiverMap(Map m) {
-		this.map = m;
+	/**
+	 * instantiate a river and water-body map renderer
+	 * @param map	to be rendered
+	 */
+	public RiverMap(Map map) {
+		this.map = map;
 		this.parms = Parameters.getInstance();
 	}
 	

@@ -5,18 +5,12 @@ package worldBuilder;
  */
 public class TerrainType {
 	
-	public static final int NONE = 0;
-	public static final int DEEP_WATER = 1;
-	public static final int SHALLOW_WATER = 2;
-	public static final int PASSABLE_WATER = 3;
-	public static final int PIT = 4;
-	public static final int GROUND = 5;
-	public static final int HILL = 6;
-	public static final int MOUNTAIN = 7;
-	public static final int LAND = 8;
-	public static final int LOW = 9;
-	public static final int HIGH = 10;
-	public static final int SLOPE = 11;
+	/** constants for defined TerrainTypes */
+	public static final int NONE = 0,
+							DEEP_WATER = 1, SHALLOW_WATER = 2, PASSABLE_WATER = 3,
+							PIT = 4, GROUND = 5,
+							HILL = 6, MOUNTAIN = 7,
+							LAND = 8, LOW = 9, HIGH = 10, SLOPE = 11;
 	
 	private static final String typeNames[] = {
 			"NONE", 
@@ -26,6 +20,8 @@ public class TerrainType {
 	};
 	
 	/**
+	 * return terrain description string
+	 * @param type constant to be displayed
 	 * @return string describing this Terrain
 	 */
 	public static String terrainType(int type) {
@@ -35,7 +31,9 @@ public class TerrainType {
 	}
 	
 	/**
-	 * @return terrainType associated with namejk
+	 * map a name into a TerrainType
+	 * @param name of terrain class to be encoded
+	 * @return terrainType associated with name
 	 */
 	public static int terrainType(String name) {
 		for(int i = 0; i < typeNames.length; i++)
@@ -44,6 +42,11 @@ public class TerrainType {
 		return NONE;
 	}
 	
+	/**
+	 * determine if a TerrainType is water
+	 * @param type terrain class to be checked
+	 * @return (boolean) is this surface water
+	 */
 	public static boolean isWater(int type) {
 		switch(type) {
 		case DEEP_WATER:
@@ -56,6 +59,11 @@ public class TerrainType {
 		}
 	}
 	
+	/**
+	 * determine if a TerrainType is land
+	 * @param type terrain class to be checked
+	 * @return (boolean) is this a (nonwater) land terrain
+	 */
 	public static boolean isLand(int type) {
 		switch(type) {
 		case HILL:
@@ -69,6 +77,11 @@ public class TerrainType {
 		}
 	}
 	
+	/**
+	 * determine if a TerrainType is low-land
+	 * @param type terrain class to be checked
+	 * @return (boolean) is this a non-highland terrain
+	 */
 	public static boolean isLowLand(int type) {
 		switch(type) {
 		case GROUND:
@@ -80,6 +93,11 @@ public class TerrainType {
 		}
 	}
 	
+	/**
+	 * determine if a TerrainType is high-land
+	 * @param type terrain class to be checked
+	 * @return (boolean) is this a highland terrain
+	 */
 	public static boolean isHighLand(int type) {
 		switch(type) {
 		case HILL:

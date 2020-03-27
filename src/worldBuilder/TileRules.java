@@ -19,11 +19,18 @@ public class TileRules {
 	private static final String DEFAULT_CONFIG = "/Templates";
 	private static final int NO_VALUE = 666666;
 	
-	public String ruleset;				// name of these rules
-	public int tileset;					// associated tile set ID
+	/** name of this set of rules	*/
+	public String ruleset;
+	/** RPGMaker tile-set ID		*/
+	public int tileset;
 	
-	public LinkedList<TileRule> rules;	// the rules
+	/** list of the rules			*/
+	public LinkedList<TileRule> rules;
 	
+	/**
+	 * open and process an export rules file
+	 * @param exportRules name of file to be processed
+	 */
 	public TileRules(String exportRules) {
 		rules = new LinkedList<TileRule>();
 	
@@ -350,6 +357,7 @@ public class TileRules {
 	}
 	
 	/**
+	 * tile information: number of (auto-tile) neghbors for a base tile
 	 * @param   base tile
 	 * @return  number of (auto-tile) neighors
 	 */
@@ -364,6 +372,7 @@ public class TileRules {
 	}
 	
 	/**
+	 * tile information: does this tile represent an impassible barrier
 	 * @param	base tile
 	 * @return	whether or not tile creates barriers
 	 */

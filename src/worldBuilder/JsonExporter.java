@@ -56,21 +56,40 @@ public class JsonExporter implements Exporter {
 			System.out.println("new JSON exporter (" + height + "x" + width + ")");
 	}
 
+	/**
+	 * Set the size of a single tile
+	 * @param meters real-world width of a tile
+	 */
 	public void tileSize(int meters) {
 		this.tile_size = meters;
 	}
 
+	/**
+	 * Set the lat/lon of the region being exported
+	 * @param lat real world latitude of map center
+	 * @param lon real world longitude of map center
+	 */
 	public void position(double lat, double lon) {
 		this.lat = lat;
 		this.lon = lon;
 	}
 
+	/**
+	 * Set seasonal temperature range for region being exported
+	 * @param meanTemp	mean (all year) temperature
+	 * @param meanSummer	mean (summer) temperature
+	 * @param meanWinter	mean (winter) temperature
+	 */
 	public void temps(double meanTemp, double meanSummer, double meanWinter) {
 		this.Tmean = meanTemp;
 		this.Tsummer = meanSummer;
 		this.Twinter = meanWinter;
 	}
 
+	/**
+	 * Up-load the altitude of every tile
+	 * @param heights	height (in meters) of every point
+	 */
 	public void heightMap(double[][] heights) {
 		this.heights = heights;
 		
@@ -86,18 +105,35 @@ public class JsonExporter implements Exporter {
 			}
 	}
 
+	/**
+	 * Up-load the net erosion/deposition for every tile
+	 * @param erode	per point height (in meters) of soil lost to erosion
+	 * 		negative means sedimentqation
+	 */
 	public void erodeMap(double[][] erode) {
 		this.erode = erode;	
 	}
 
+	/**
+	 * Up-load the annual rainfall for every tile
+	 * @param rain	per point depth (in meters) of annual rainfall
+	 */
 	public void rainMap(double[][] rain) {
 		this.rain = rain;
 	}
 
+	/**
+	 * Up-load the soil type for every tile
+	 * @param soil - per point soil type
+	 */
 	public void soilMap(double[][] soil) {
 		this.soil = soil;
 	}
 
+	/**
+	 * Up-load the surface-water-depth for every tile
+	 * @param hydration - per point depth of water
+	 */
 	public void waterMap(double[][] hydration) {
 		this.hydration = hydration;
 		
@@ -111,7 +147,9 @@ public class JsonExporter implements Exporter {
 	}
 
 	/**
-	 * export a map as high resolution tiles
+	 * Export the up-loaded information in selected format
+	 * 
+	 * @param filename - name of output file
 	 */
 	public boolean writeFile( String filename ) {
 		// strip off suffix and leading directories to get base name
@@ -213,10 +251,9 @@ public class JsonExporter implements Exporter {
 	}
 	
 	/**
-	 * create a preview of the pending export
-	 * 
-	 * @param ... which map to preview
-	 * @param ... mapping of values to colors (unused in this class)
+	 * generate a preview of the currently up-loaded export
+	 * @param chosen map type (e.g. height, flora)
+	 * @param colorMap - palette to be used in preview
 	 */
 	public void preview(WhichMap chosen, Color colorMap[]) {
 	

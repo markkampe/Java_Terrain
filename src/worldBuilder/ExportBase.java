@@ -11,33 +11,35 @@ import javax.swing.event.*;
  * a super-class for exporter dialogs - creates dialogs, handles
  * handles region selection, pumps data to an Exporter
  */ 
-/* It is expected that the sub-classes will process the button
- * pushes and window events, as well as perhaps adding additional
- * control widgets to the CENTER controls JPanel.
- */
 public class ExportBase extends JFrame implements WindowListener, MapListener {	
-	protected Map map;				// map from which we export
+	/*
+	 * the following fields/widgets are created by this base class, to be
+	 * used by what ever export sub-class is being used
+	 */
+	/** map from which we will export	*/
+	protected Map map;
+	/** parameters Singleton			*/
 	protected Parameters parms;
-	// private String format;			// selected output format
 
-	// standard (to all subclasses) widgets
-	protected JTextField sel_name;	// name of region
-	protected JButton accept;
-	protected JButton cancel;
-	protected JButton previewT;
-	protected JButton previewF;
+	/** common widget - name of region to be exported	*/
+	protected JTextField sel_name;
+	/** common widget - control buttons*/
+	protected JButton accept, cancel, previewT, previewF;
+	/** common widget - JPannel for additional controls	*/
 	protected JPanel controls;
 	
+	/** an export region has been selected or changed	*/
+	protected boolean selected, newSelection;
+
+	/** the size (in tiles) of the region to be exported */
+	protected int x_points, y_points;
+
 	private JLabel sel_center;		// lat/lon of center
 	private JLabel sel_km;			// size of region (in km)
 	private JTextField sel_t_size;	// size of tile (in m)
 	private JLabel sel_points;		// number of tiles in region
 	private JSlider resolution;		// tile size @return selection
 	
-	// variables describing the region selection process
-	protected boolean selected;			// selection completed
-	protected boolean newSelection;		// selected area has changed
-	protected int x_points, y_points;	// selection width/height (in tiles)
 	private double box_x, box_y;		// selection box map coordinates
 	private double box_width, box_height;	// selection box size (map units)
 	private double x_km, y_km;			// selection box size (in km)
@@ -51,7 +53,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	private static final long serialVersionUID = 1L;
 	
 	/**
-	 * common subset of exports
+	 * create the initial export selection dialog and register the listeners
 	 * 
 	 * @param format ... perhaps not needed
 	 * @param map ... the map from which we are exporting
@@ -185,7 +187,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	/**
 	 * return the export row associated with a y @return coordinate
 	 */
-	int box_row(double y) {
+	private int box_row(double y) {
 		if (y < box_y)
 			return(0);
 		if (y >= box_y + box_height)
@@ -198,7 +200,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	/**
 	 * return the export column associated with an x coordinate
 	 */
-	int box_col(double x) {
+	private int box_col(double x) {
 		if (x < box_x)
 			return(0);
 		if (x >= box_x + box_width)
@@ -209,7 +211,8 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	}
 	
 	/**
-	 * export a map as high resolution tiles
+	 * create a full set of per-tile maps and pass them to the Exporter
+	 * @param export - Exporter for the selected format
 	 */
 	protected void export(Exporter export) {
 
@@ -353,7 +356,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	}
 
 	/**
-	 * called whenever a region selection changes
+	 * MapListener for region selection changes
 	 * @param mx0	left most point (map coordinate)
 	 * @param my0	upper most point (map coordinate)
 	 * @param dx	width (in map units)
@@ -401,6 +404,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	}
 	
 	/**
+	 * convert a tile-size slider position into meters-per-tile
 	 * @return the number of meters associated with a slider value
 	 * @param slider
 	 */
@@ -416,6 +420,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	}
 	
 	/**
+	 * convert a meters-per-tile value into a slider position
 	 * @return the slider value associated with a number of meters
 	 * @param meters
 	 */
@@ -436,18 +441,17 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		WorldBuilder.activeDialog = false;
 	}
 	
-	// perfunctory handlers for events we don't care about
-	public boolean pointSelected(double x, double y) { return false; }
+	/** (perfunctory) */ public boolean pointSelected(double x, double y) { return false; }
 	
-	public void windowActivated(WindowEvent arg0) {}
-	public void windowClosed(WindowEvent arg0) {}
-	public void windowDeactivated(WindowEvent arg0) {}
-	public void windowDeiconified(WindowEvent arg0) {}
-	public void windowIconified(WindowEvent arg0) {}
-	public void windowOpened(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
 	
-	public void mouseClicked(MouseEvent arg0) {}
-	public void mouseMoved(MouseEvent arg0) {}
-	public void mouseEntered(MouseEvent arg0) {}
-	public void mouseExited(MouseEvent arg0) {}
+	/** (perfunctory) */ public void mouseClicked(MouseEvent arg0) {}
+	/** (perfunctory) */ public void mouseMoved(MouseEvent arg0) {}
+	/** (perfunctory) */ public void mouseEntered(MouseEvent arg0) {}
+	/** (perfunctory) */ public void mouseExited(MouseEvent arg0) {}
 }

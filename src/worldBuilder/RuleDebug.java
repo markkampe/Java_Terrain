@@ -13,10 +13,13 @@ public class RuleDebug extends JFrame implements WindowListener, ActionListener 
 		private static final int BORDER_WIDTH = 5;
 		private static final long serialVersionUID = 1L;
 		
-		JTextField rulename;
-		JButton accept;
-		JButton cancel;
+		private JTextField rulename;
+		private JButton accept;
+		private JButton cancel;
 		
+		/**
+		 * instantiate the dialog widgets and register listeners
+		 */
 		public RuleDebug()  {
 			// pick up references
 			this.parms = Parameters.getInstance();
@@ -72,12 +75,12 @@ public class RuleDebug extends JFrame implements WindowListener, ActionListener 
 			this.dispose();
 		}
 
-		public void windowActivated(WindowEvent arg0) {}
-		public void windowClosed(WindowEvent arg0) {}
-		public void windowDeactivated(WindowEvent arg0) {}
-		public void windowDeiconified(WindowEvent arg0) {}
-		public void windowIconified(WindowEvent arg0) {}
-		public void windowOpened(WindowEvent arg0) {}
-		public void mousePressed(MouseEvent arg0) {}
-		public void mouseReleased(MouseEvent arg0) {}
+		/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
+		/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
+		/** (perfunctory) */ public void mousePressed(MouseEvent arg0) {}
+		/** (perfunctory) */ public void mouseReleased(MouseEvent arg0) {}
 }

@@ -225,7 +225,9 @@ public class Parameters {
 		descr_width = 80;
 	}
 	
-	// ensure defaults are consistent w/updated world size
+	/**
+	 * ensure defaults are consistent w/(updated) world size
+	 */
 	public void checkDefaults() {
 		// default mountain width less than half the world size
 		if (dDiameter > (xy_range / m_width_divisor))
@@ -242,7 +244,11 @@ public class Parameters {
 			dTileSize = xy_range * 1000 / 10;
 	}
 
-	// public constructor to read from configuration file
+	/**
+	 * read parameter values from a configuration file
+	 * @param filename of configuration file to be read
+	 * @debug level of debug output to be produced
+	 */
 	public Parameters(String filename, int debug) {
 		debug_level = debug;
 		singleton = this;
@@ -495,6 +501,9 @@ public class Parameters {
 		}
 	}
 
+	/**
+	 * @return Singleton Parameter instance
+	 */
 	public static Parameters getInstance() {
 		if (singleton == null)
 			singleton = new Parameters();
@@ -531,10 +540,10 @@ public class Parameters {
 	/**
 	 * attractive slider calibration
 	 * 
-	 * @param min value
-	 * @param max value
-	 * @param major
-	 *            ... major tics (vs minor)
+	 * @param min slider value
+	 * @param max slider value
+	 * @param major tic interval
+	 * @return recommended minor tic interval
 	 */
 	public static int niceTics(int min, int max, boolean major) {
 		int full_scale = max - min;
@@ -563,6 +572,11 @@ public class Parameters {
 		return Tmin + Tmax * Math.cos(radians);
 	}
 
+	/**
+	 * mean Winter temperature (for this latitude)
+	 * 
+	 * @return mean temperature (degC)
+	 */
 	public double meanWinter() {
 		double lat = latitude > 0 ? latitude + tilt : latitude - tilt;
 		double radians = lat * Math.PI / 180;
@@ -570,6 +584,11 @@ public class Parameters {
 
 	}
 
+	/**
+	 * mean Summer temperature (for this latitude)
+	 * 
+	 * @return mean temperature (degC)
+	 */
 	public double meanSummer() {
 		double lat = latitude > 0 ? latitude - tilt : latitude + tilt;
 		double radians = lat * Math.PI / 180;
@@ -577,10 +596,10 @@ public class Parameters {
 	}
 
 	/**
-	 * turn a map coordinate into a latitude
+	 * translate map coordinate into a latitude
 	 * 
-	 * @param y
-	 *            (map coordinate)
+	 * @param y	map coordinate (-0.5 to 0.5)
+	 * return latitude (in degrees)
 	 */
 	public double latitude(double y) {
 		double degrees = 180.0 * xy_range / (Math.PI * radius);
@@ -589,10 +608,10 @@ public class Parameters {
 	}
 
 	/**
-	 * turn a map coordinate into a longitude
+	 * translate map coordinate into a longitude
 	 * 
-	 * @param x
-	 *            (map coordinate)
+	 * @param x	map coordinate (-0.5 to 0.5)
+	 * return longitude (in degrees)
 	 */
 	public double longitude(double x) {
 		// radius must be corrected for latitude
@@ -607,9 +626,8 @@ public class Parameters {
 	/**
 	 * turn a map distance into world km
 	 * 
-	 * @param d
-	 *            (distance in map coordiantes)
-	 * @return km
+	 * @param d (distance in map coordiantes)
+	 * @return distance in kilometers
 	 */
 	public double km(double d) {
 		return d * xy_range / x_extent;
@@ -620,7 +638,7 @@ public class Parameters {
 	 * 
 	 * @param km - distance
 	 *
-	 * @return map delta-x
+	 * @return map delta-x (0.0-1.0)
 	 */
 	public double x(double km) {
 		return x_extent * km / xy_range;
@@ -629,8 +647,7 @@ public class Parameters {
 	/**
 	 * turn a map z value into a world height
 	 * 
-	 * @param z
-	 *            (map coordinate)
+	 * @param z (height in map coordinates)
 	 * @return meters
 	 */
 	public double height(double z) {
@@ -640,8 +657,7 @@ public class Parameters {
 	/**
 	 * turn a map z coordinate into a world altitude
 	 * 
-	 * @param z
-	 *            (map coordinate)
+	 * @param z (height in map coordinates)
 	 * @return meters (above sea level)
 	 */
 	public double altitude(double z) {
@@ -651,16 +667,15 @@ public class Parameters {
 	/**
 	 * turn a world height into a map z value
 	 * 
-	 * @param height
-	 *            (m)
-	 * @return map delta-z
+	 * @param height in megers
+	 * @return map delta-z (0.0 - 1.0)
 	 */
 	public double z(double height) {
 		return z_extent * height / z_range;
 	}
 	
 	/**
-	 * @return description string with \n escapes replaced by newlines
+	 * @return world description string (\n escapes replaced by newlines)
 	 */
 	public String getDescription() {
 		String result = "";
@@ -675,8 +690,8 @@ public class Parameters {
 		return result + description.substring(start);
 	}
 	/**
-	 * set description string, replacing newlines with \n escapes
-	 * @param descr string, possibly containing newlines
+	 * set world description string
+	 * @param descr string (possibly containing newlines, which will be escaped)
 	 */
 	public void setDescription(String descr) {
 		description = "";

@@ -5,52 +5,71 @@ import java.util.LinkedList;
 
 
 /**
- * parameters and bids for a single flora-placement-rule
+ * parameters and bids for a single RPGMaker tile
  */
 public class TileRule {
 	
+	/** list of all ingested rules	*/
 	public static LinkedList<TileRule> rules;
 	
-	public String ruleName;
-	public String className;/// what class of rules is this part of
-	public int level;		// map level
-	public int tileSet;		// tile set ID
+	/** name of this rule and its class	*/
+	public String ruleName, className;
+
+	/** RPGMaker map level	*/
+	public int level;
+	/** RPGMaker tile set	*/
+	public int tileSet;
+	/** base tile number for this rule	*/
 	public int baseTile;	// base tile for this rule
+	/** base tile number for what we might surround*/
 	public int altTile;		// base tile for surrounded version
-	public int height;		// stamp height
-	public int width;		// stamp width
-	public int neighbors;	// # autotile neighbors
+	/** dimensions (if this is a stamp)	*/
+	public int height, width;
+	/** number of neighbors for auto-tiling	*/
+	public int neighbors;
 	
+	/** TerrainType for this rule	*/
 	public int terrain;
-	public int minAltitude;
-	public int maxAltitude;
-	public double minDepth;
-	public double maxDepth;
-	public double minHydro;
-	public double maxHydro;
-	public double minTemp;
-	public double maxTemp;
-	public double minSlope;
-	public double maxSlope;
-	public double minSoil;
-	public double maxSoil;
-	public double maxFace;
-	public double minFace;
+	/** Altitude ranges for this rule	*/
+	public int minAltitude, maxAltitude;
+	/** Hydration and water-depth ranges for this rule	*/
+	public double minDepth, maxDepth, minHydro, maxHydro;
+	/** Temperature range for this rule	*/
+	public double minTemp, maxTemp;
+	/** slope/face ranges for this rule	*/
+	public double minSlope, maxSlope, minFace, maxFace;
+	/** soil type range for this rule	*/
+	public double minSoil, maxSoil;
+	/** is there flexibility in these ranges	*/
 	public boolean flexRange;
+	/** taper bids as we move away from mid-range	*/
 	public boolean taperedBid;
 	
+	/** does this tile represent an impassable barrier	*/
 	public boolean barrier;
 	
+	/** how high should this rule bid	*/
 	public int vigor;
 	
+	/** what color should this render as in previews	*/
 	public Color previewColor;
 	
+	/** Debug: trace bids from this rule	*/
 	public boolean debug;			// trace bids from this rule
-	public String justification;	// reason for the last bid
+
+	/** Debug: explain the basis for the last bid	*/
+	public String justification;
 	
 	private static Parameters parms = Parameters.getInstance();
 	private static final double IMPOSSIBLE = -666.0;
 	
+	/**
+	 * create a new rule
+	 * @param name of this rule
+	 * @param tileset RPGMaker tile set ID
+	 * @param level RPGMaker level to which this rule applies
+	 * @param base-tile number for this rule
+	 */
 	public TileRule(String name, int tileset, int level, int base) {
 		this.ruleName = name;
 		this.tileSet = tileset;
@@ -208,8 +227,9 @@ public class TileRule {
 	
 	/**
 	 * is this rule inapplicable to a particular terrain
+	 * @parm terrain-type to be checked
 	 */
-	boolean wrongTerrain(int terrain) {
+	public boolean wrongTerrain(int terrain) {
 		// see if the terrain type precludes this tile-bid
 		switch (this.terrain) {
 		case TerrainType.LAND:
@@ -237,8 +257,9 @@ public class TileRule {
 
 	/**
 	 * is this rule inapplicable to a particular floral class
+	 * @param  floraClass to be checked
 	 */
-	boolean wrongFlora(String floraClass) {
+	public boolean wrongFlora(String floraClass) {
 		return (className != null && !className.equals(floraClass));
 	}
 }

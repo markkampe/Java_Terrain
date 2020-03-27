@@ -19,20 +19,27 @@ public class MapIndex {
 	private static final String INFO_FILE_NAME = "MapInfos.json";
 	private static final int NO_VALUE = 666666;
 	
+	/** list of the maps in this index	*/
 	public LinkedList<RpgmMap> maps;
 	private static int numMaps;
 	private String path;
 	private Parameters parms;
 	static private MapIndex instance;
 	
+	/** return next ID for a new map */
 	public static int nextID() {
 		return(numMaps + 1);
 	}
 	
+	/** return (Singleton) instance */
 	static public MapIndex getInstance() {
 		return instance;
 	}
 	
+	/**
+	 * Digest an existing MapInfos.json
+	 * @param directory - name of directory containing maps
+	 */
 	public MapIndex(String directory) {
 		path = directory;
 		maps = new LinkedList<RpgmMap>();
@@ -134,10 +141,10 @@ public class MapIndex {
 		}
 	}
 	
-	/**
-	 * rewrite the index
-	 */
 	private int written;
+	/**
+	 * write out the (newly accumulated) index
+	 */
 	public void flush() {
 		String filename = path + "/" + INFO_FILE_NAME;
 		try {
@@ -172,7 +179,8 @@ public class MapIndex {
 	}
 	
 	/**
-	 * write out one map entry
+	 * write out a single map description
+	 * @param m - the RpgmMap to be written
 	 */
 	public void flushMap(RpgmMap m, FileWriter output) throws IOException {
 			if (written > 0)

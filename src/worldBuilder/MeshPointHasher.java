@@ -7,8 +7,11 @@ package worldBuilder;
  * efficiency.
  */
 public class MeshPointHasher {
-	public MeshPoint[] vertices;	// list of known vertices
-	public int numVertices;		// number of vertices in list
+	/** number of (already) recorded MeshPoints	*/
+	public int numVertices;
+	/** list of (already) recorded MeshPoints	*/
+	public MeshPoint[] vertices;
+
 	private int tableSize;		// total size of hash table
 	private int[] hashTable;	// index known vertices (or -1)
 	private double x_extent;	// needed to normalize hash values
@@ -18,8 +21,8 @@ public class MeshPointHasher {
 	 * allocate a hash table and vertex list
 	 * 
 	 * @param max ... max # of vertices
-	 * @param x_extent ... x diameter
-	 * @param y_extent ... y_diameter
+	 * @param x_extent ... x diameter (in -0.5 to 0.5 map coordinates)
+	 * @param y_extent ... y_diameter (in -0.5 to 0.5 map coordinates)
 	 */
 	public MeshPointHasher(int max, double x_extent, double y_extent) {
 		vertices = new MeshPoint[max];
@@ -33,16 +36,13 @@ public class MeshPointHasher {
 	}
 
 	/**
-	 * find or create reference to MapPoint(x,y)
+	 * find or create reference to MeshPoint at MapPoint(x,y)
 	 * 
-	 * We use an open hash table to note the index associated with a particular hash
-	 * value
-	 * 
-	 * @param x
-	 *            x coordinate
-	 * @param y
-	 *            y coordinate
-	 * @return associated MapPoint
+	 * @param x desired location (in -0.5 to 0.5 map coordinates)
+	 * @param y desired location (in -0.5 to 0.5 map coordinates)
+	 * @return new (or already associated) MeshPoint
+	 *
+	 * We use an open hash table to note index associated w/each hash value
 	 */
 	public MeshPoint findPoint(double x, double y) {
 		double value = ((x + x_extent / 2) + (y + y_extent / 2)) * tableSize;

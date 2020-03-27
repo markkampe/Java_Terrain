@@ -37,7 +37,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private int a_max;				// altitude: full scale
 	
 	/**
-	 * a LandForm is a macro for a collection of mountain settings
+	 * a LandForm is a macro for a collection of (size, shape) mountain parameters
 	 */
 	private static class LandForm {
 		public String name;
@@ -67,6 +67,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	
 	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * instantiate the widgets and register the listeners
+	 */
 	public MountainDialog(Map map)  {
 		// pick up references
 		this.map = map;
@@ -265,6 +268,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 
 	/**
+	 * construct a mountain w/specified parameters
+	 *
 	 * @param map
 	 * @param x: (map) x coordinate
 	 * @param y: (map) y coordinate
@@ -331,6 +336,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 	
 	/**
+	 * construct a mountain range w/specified parameters
+	 *
 	 * @param map
 	 * @param x0: (map) x coordinate of start
 	 * @param y0: (map) y coordinate start
@@ -510,7 +517,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 	
 	/**
-	 * called whenever a region selection changes
+	 * called whenever a (Map) region selection changes
 	 * @param map_x		left most point (map coordinate)
 	 * @param map_y		upper most point (map coordinate)
 	 * @param width		(in map units, can be negative)
@@ -533,7 +540,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 
 	/**
-	 * restore previous height map exit dialog
+	 * restore previous height map and exit dialog
 	 */
 	private void cancelDialog() {
 		map.selectMode(Map.Selection.NONE);
@@ -663,14 +670,13 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		}
 	}
 	
-	// perfunctory methods
-	public boolean pointSelected(double map_x, double map_y) { return false; }
-	public void windowActivated(WindowEvent arg0) {}
-	public void windowClosed(WindowEvent arg0) {}
-	public void windowDeactivated(WindowEvent arg0) {}
-	public void windowDeiconified(WindowEvent arg0) {}
-	public void windowIconified(WindowEvent arg0) {}
-	public void windowOpened(WindowEvent arg0) {}
-	public void keyPressed(KeyEvent arg0) {}
-	public void keyReleased(KeyEvent arg0) {}
+	/** (perfunctory) */ public boolean pointSelected(double map_x, double map_y) { return false; }
+	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
+	/** (perfunctory) */ public void keyPressed(KeyEvent arg0) {}
+	/** (perfunctory) */ public void keyReleased(KeyEvent arg0) {}
 }

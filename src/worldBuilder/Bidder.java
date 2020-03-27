@@ -5,7 +5,6 @@ package worldBuilder;
  * based on weighted bids.  It was created to choose tiles 
  * appropriate to a grid location.
  */
-
 public class Bidder {
 	
 	private int numBidders;	// number of bidders 

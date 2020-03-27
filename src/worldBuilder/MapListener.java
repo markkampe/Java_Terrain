@@ -1,7 +1,7 @@
 package worldBuilder;
 
 /**
- * interface for call-backs resulting from select clicks on the Map
+ * interface for call-backs resulting from select clicks/drags on the Map
  */
 public interface MapListener {
 
@@ -24,7 +24,7 @@ public interface MapListener {
 	 * called when a point is selected on the map
 	 * @param map_x		(map coordinate)
 	 * @param map_y		(map coordinate)
-	 * @return
+	 * @return	ignored ... selection is complete
 	 */
 	public boolean pointSelected(double map_x, double map_y);
 }

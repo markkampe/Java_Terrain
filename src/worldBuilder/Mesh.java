@@ -51,14 +51,14 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
  *         three neighbors).
  */
 public class Mesh {
-	public MeshPoint[] vertices;	// grid vertices	
+	/** the MeshPoints in this Mesh */
+	public MeshPoint[] vertices;
 	private Parameters parms;		// global options
 	
 	private static final int MESH_DEBUG = 3;
 	
 	/**
-	 * create an initial set of points
-	 * 
+	 * create an initial (empty) array of MeshPoints
 	 */
 	public Mesh() {
 		parms = Parameters.getInstance();
@@ -67,6 +67,8 @@ public class Mesh {
 	
 	/**
 	 * create a set of mesh points
+	 * @param numpoints in the desired mesh
+	 * @return array of new MeshPoints
 	 */
 	public MeshPoint[] makePoints( int numpoints ) {
 		// create a set of random points
@@ -204,14 +206,11 @@ public class Mesh {
 	}
 	
 	/**
-	 * is a point near the edge
-	 * 
-	 * @param point
+	 * find the MeshPoint closest to a map coordinate
+	 * @param x desired map coordinate (e.g. -0.5 to 0.5)
+	 * @param y desired map coordinate (e.g. -0.5 to 0.5)
+	 * @return MeshPoint (closest)
 	 */
-	boolean isNearEdege(MeshPoint point) {
-		return false;
-	}
-
 	public MeshPoint choosePoint(double x, double y) {
 		MeshPoint spot = new MeshPoint(x,y);
 		MeshPoint closest = null;
@@ -230,6 +229,7 @@ public class Mesh {
 
 	/**
 	 * truncate values outside the extent box to the edge of the box
+	 * @param p Point coordinates to be adjusted
 	 */
 	private Point truncate(Point p) {
 		double x = p.x;
@@ -328,6 +328,8 @@ public class Mesh {
 	
 	/**
 	 * turn a set of points into a mesh
+	 * @param points set of (not yet connected) MeshPoints
+	 *
 	 * 		compute the Voronoi tesselation
 	 * 		for each edge (that is within the box)
 	 * 			add each new end to our vertex list

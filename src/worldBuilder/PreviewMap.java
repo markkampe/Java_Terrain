@@ -6,6 +6,9 @@ import javax.swing.JFrame;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * generic (small) preview map generator
+ */
 public class PreviewMap extends JPanel {
 	
 	private Color colormap[][];	// map to be rendered
@@ -17,13 +20,18 @@ public class PreviewMap extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * instantiate a preview map JFrame
+	 * @param name to be displayed at the top of map
+	 * @param array (2D) of Colors to be displayed
+	 */
 	public PreviewMap(String name, Color array[][]) {
 		
-		// get the dimensions
+		// get the dimensions of the provided map
 		height=array.length;
 		width = array[0].length;
 		
-		// figure out how many pixels per tile
+		// figure out how many pixels we want per tile
 		size = 1;
 		while( size * width < MIN_PIXELS || size * height < MIN_PIXELS)
 			size++;

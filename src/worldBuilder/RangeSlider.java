@@ -14,16 +14,16 @@ public class RangeSlider extends JSlider {
 	private static final long serialVersionUID = 1L;
 
 	/**
-     * Constructs a RangeSlider with default minimum and maximum values of 0
-     * and 100.
+     * Constructs a RangeSlider with default values of 0-100
      */
     public RangeSlider() {
         initSlider();
     }
 
     /**
-     * Constructs a RangeSlider with the specified default minimum and maximum 
-     * values.
+     * Constructs a RangeSlider with specified default minimum and maximum values.
+	 * @param min (default) initial minimum value
+	 * @param max (default) initial maximum value
      */
     public RangeSlider(int min, int max) {
         super(min, max);

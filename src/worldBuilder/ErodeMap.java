@@ -14,13 +14,17 @@ public class ErodeMap {
 	private Map map;
 	//private Parameters parms;
 	
+	/**
+	 * instantiate an erosion/deposition map renderer
+	 * @param map	to be rendered
+	 */
 	public ErodeMap(Map map) {
 		this.map = map;
 		//this.parms = Parameters.getInstance();
 	}
 
 	/**
-	 * Render current mesh as an altitude map
+	 * Render current mesh as an erosion/deposition map
 	 * 
 	 * @param g Graphics context
 	 * @param width of the display map

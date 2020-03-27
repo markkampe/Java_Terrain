@@ -21,26 +21,33 @@ public class RPGMTiler implements Exporter {
 	
 	private boolean useSLOPE;	// enables special level processing
 	
-	// physical map parameters
-	public int x_points; 		// width of map (in points)
-	public int y_points; 		// height of map (in points)flushflush
+	/** map dimensions (in tiles)	*/
+	public int x_points, y_points;
 	private int tile_size; 		// tile size (in meters)
 	private double lat;			// latitude
 	private double lon;			// longitude
 
-	// tile selection parameters
+	/** seasonal mean temperatures	*/
+	public double Tsummer, Twinter;
 	private double Tmean; 	// mean temperature (degC)
-	public double Tsummer; 	// mean summer temperature (degC)
-	public double Twinter; 	// mean winter temperature (degC)
 	//private double[][] rain;	// per point rainfall (meters)
-	public double[][] heights;	// per point height (meters)
-	public double[][] erode;	// per point erosion (meters)
-	public double[][] hydration; // per point water depth (meters)
-	public double[][] soil;	// per point soil type
-	public int[][] levels;		// per point terrain level
-	public int[][] floraTypes;	// per point flora type
-	public int[] typeMap;		// map terrain level to type
-	public String[] floraNames;	// map flora type to class name
+
+	/** per point height (meters)	*/
+	public double[][] heights;
+	/** per point erosion/depostion (meters)	*/
+	public double[][] erode;
+	/** per point water depth (meters)	*/
+	public double[][] hydration;
+	/** per point soil type	*/
+	public double[][] soil;
+	/** per point terrain level	*/
+	public int[][] levels;
+	/** per point flora type	*/
+	public int[][] floraTypes;
+	/** mapping from levels to TerrainTypes	*/
+	public int[] typeMap;
+	/** map from flora types to class names	*/
+	public String[] floraNames;
 	//private double minHeight;	// lowest altitude in export
 	//private double maxHeight;	// highest altitude in export
 	//private double minDepth;	// shallowest water in export
@@ -72,6 +79,7 @@ public class RPGMTiler implements Exporter {
 
 	/**
 	 * write out an RPGMaker map
+	 * @param filename of output file
 	 */
 	public boolean writeFile(String filename) {		
 		random = new Random((int) (lat * lon * 1000));
@@ -444,8 +452,11 @@ public class RPGMTiler implements Exporter {
 	}
 	
 	
-	/*
-	 * return the slope at a point
+	/**
+	 * aggregate slope
+	 * @param row (tile) within the export region
+	 * @param col (tile) within the export region
+	 * @return aggregate slope (dZdTILE) of that tile
 	 */
 	public double slope(int row, int col) {
 		double z0 = heights[row][col] - erode[row][col];
@@ -458,7 +469,10 @@ public class RPGMTiler implements Exporter {
 	}
 	
 	/**
-	 * slope upwards to the east
+	 * slope (upwards to the east)
+	 * @param row (tile) within the export region
+	 * @param col (tile) within the export region
+	 * @return slope upwards to the east
 	 */
 	public double dZdX(int row, int col) {
 		if (col == x_points - 1)
@@ -469,7 +483,10 @@ public class RPGMTiler implements Exporter {
 	}
 
 	/**
-	 * slope upwards to the south
+	 * slope (upwards to the south)
+	 * @param row (tile) within the export region
+	 * @param col (tile) within the export region
+	 * @return slope upwards to the south
 	 */
 	public double dZdY(int row, int col) {
 		if (row == y_points - 1)
@@ -481,6 +498,9 @@ public class RPGMTiler implements Exporter {
 	
 	/**
 	 * compass orientation of face
+	 * @param row (tile) within the export region
+	 * @param col (tile) within the export region
+	 * @return compass orientation (0-359) of face
 	 */
 	public double direction(int row, int col) {
 		double dzdy = dZdY(row, col);
@@ -495,21 +515,40 @@ public class RPGMTiler implements Exporter {
 	
 	
 
+	/**
+	 * Set the size of a single tile
+	 * @param meters real-world width of a tile
+	 */
 	public void tileSize(int meters) {
 		this.tile_size = meters;
 	}
 
+	/**
+	 * Set the lat/lon of the region being exported
+	 * @param lat real world latitude of map center
+	 * @param lon real world longitude of map center
+	 */
 	public void position(double lat, double lon) {
 		this.lat = lat;
 		this.lon = lon;
 	}
 
+	/**
+	 * Set seasonal temperature range for region being exported
+	 * @param meanTemp	mean (all year) temperature
+	 * @param meanSummer	mean (summer) temperature
+	 * @param meanWinter	mean (winter) temperature
+	 */
 	public void temps(double meanTemp, double meanSummer, double meanWinter) {
 		this.Tmean = meanTemp;
 		this.Tsummer = meanSummer;
 		this.Twinter = meanWinter;
 	}
 
+	/**
+	 * Up-load the altitude of every tile
+	 * @param heights	height (in meters) of every point
+	 */
 	public void heightMap(double[][] heights) {
 		this.heights = heights;
 	}
@@ -524,22 +563,44 @@ public class RPGMTiler implements Exporter {
 		this.typeMap = typeMap;
 	}
 	
+	/**
+	 * Up-load the net erosion/deposition for every tile
+	 * @param erode	per point height (in meters) of soil lost to erosion
+	 * 		negative means sedimentqation
+	 */
 	public void erodeMap(double[][] erode) {
 		this.erode = erode;
 	}
 
+	/**
+	 * Up-load the annual rainfall for every tile
+	 * @param rain	per point depth (in meters) of annual rainfall
+	 */
 	public void rainMap(double[][] rain) {
 		//this.rain = rain;
 	}
 
+	/**
+	 * Up-load the soil type for every tile
+	 * @param soil - per point soil type
+	 */
 	public void soilMap(double[][] soil) {
 		this.soil = soil;
 	}
 
+	/**
+	 * Up-load the surface-water-depth for every tile
+	 * @param hydration - per point depth of water
+	 */
 	public void waterMap(double[][] hydration) {
 		this.hydration = hydration;
 	}
 	
+	/**
+	 * Up-load the flora assignments for every tile
+	 * @param flora assignments per point
+	 * @param names of flora classes
+	 */
 	public void floraMap(int[][] flora, String[] names) {
 		this.floraTypes = flora;
 		this.floraNames = names;

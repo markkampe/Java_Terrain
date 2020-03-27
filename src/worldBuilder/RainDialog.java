@@ -28,6 +28,9 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	
 	private static final int RAIN_DEBUG = 3;
 	
+	/**
+	 * instantiate the widgets and register the listeners
+	 */
 	public RainDialog(Map map)  {
 		// pick up references
 		this.map = map;
@@ -146,7 +149,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 * calculate the rainfall received at each Mesh point
 	 * 
 	 * @param map
-	 * @param degrees (from which rain comes)
+	 * @param degrees - direction from which rain comes
 	 * @param incoming (rain density)
 	 * 
 	 * SOMEDAY: rain shadows in 1 pass
@@ -305,14 +308,13 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		this.dispose();
 	}
 	
-	// perfunctory methods
-	public void mouseMoved(MouseEvent arg0) {}
-	public void mouseEntered(MouseEvent arg0) {}
-	public void mouseExited(MouseEvent arg0) {}
-	public void windowActivated(WindowEvent arg0) {}
-	public void windowClosed(WindowEvent arg0) {}
-	public void windowDeactivated(WindowEvent arg0) {}
-	public void windowDeiconified(WindowEvent arg0) {}
-	public void windowIconified(WindowEvent arg0) {}
-	public void windowOpened(WindowEvent arg0) {}
+	/** (perfunctory) */ public void mouseMoved(MouseEvent arg0) {}
+	/** (perfunctory) */ public void mouseEntered(MouseEvent arg0) {}
+	/** (perfunctory) */ public void mouseExited(MouseEvent arg0) {}
+	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
+	/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
 }

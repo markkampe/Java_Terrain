@@ -2,7 +2,7 @@ package worldBuilder;
 
 import java.awt.Color;
 
-/*
+/**
  * engine to use topology to compute water placement, flow,
  * erosion an dsedimentation.
  */
@@ -23,7 +23,7 @@ public class Hydrology {
 	private double surface[];	// Z depression padding
 	private int byHeight[];		// MeshPoints sorted from high to low
 	
-	// how much water can different types of soil hold (m^3/m^3)
+	/** how much water can different types of soil hold (m^3/m^3) */
 	public static double saturation[] = {
 		0.30,	// max water content of sedimentary soil
 		0.15,	// max water content of metamorphic soil
@@ -31,7 +31,7 @@ public class Hydrology {
 		0.40	// max water content of alluvial soil
 	};
 	
-	// relative erosion resistances for various bed rocks
+	/** relative erosion resistances for various bed rocks */
 	public static double competence[] = {
 		1.0,	// sedimentary erosion resistance
 		4.0,	// metamorphic erosion resistance
@@ -40,15 +40,19 @@ public class Hydrology {
 	};
 	
 	// drainage notations
-	public static final int UNKNOWN = -666;
-	public static final int OCEAN = -1;
-	public static final int OFF_MAP = -2;
+	private static final int UNKNOWN = -666;
+	private static final int OCEAN = -1;
+	private static final int OFF_MAP = -2;
 	
 	private static final double EPSILON = .0000001;
 	private static final double MAX_RATIO = 20;	// max river W/D
 	
 	private static final int HYDRO_DEBUG = 2;
 	
+	/**
+	 * instantiate a flow/erosion/deposition engine
+	 * @param map to be calculated
+	 */
 	public Hydrology(Map map) {
 		this.map = map;
 		this.parms = Parameters.getInstance();
@@ -72,11 +76,12 @@ public class Hydrology {
 	}
 	
 	/**
-	 * re-calculate downHill, flux, and erosion
+	 * reCalculate downHill, flux, and erosion
 	 * 		needed whenever Height, Rain or Erosion changes
 	 * 
-	 * @param reset erosion map (vs incremental erosion)
-	 * 
+	 * @param reset ... new erosion map (vs incremental erosion)
+	 */
+	/* Calculation:
 	 * 1. figure out what is down-hill from what
 	 * 2. sort MeshPoints by descending height
 	 * 3. identify all local depressions and sink points
@@ -397,12 +402,24 @@ public class Hydrology {
 		return (ratio > MAX_RATIO) ? MAX_RATIO : ratio;
 	}
 	
+	/**
+	 * estimated river width
+	 * @param flow speed (cubic meters/second)
+	 * @param velocity ... flow speed (meters/second)
+	 * @return estimated width (meters)
+	 */
 	public static double width(double flow, double velocity) {
 		double area = flow / velocity;
 		double ratio = widthToDepth(velocity);
 		return Math.sqrt(area * ratio);
 	}
 
+	/**
+	 * estimated river depth
+	 * @param flow speed (cubic meters/second)
+	 * @param velocity ... flow speed (meters/second)
+	 * @return estimated depth (meters)
+	 */
 	public static double depth(double flow, double velocity) {
 		double area = flow / velocity;
 		double ratio = widthToDepth(velocity);

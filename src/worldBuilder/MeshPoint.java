@@ -1,27 +1,42 @@
 package worldBuilder;
 
-
 /**
  * a MeshPoint has X and Y coordinates, and index, and neighbors
  */
 public class MeshPoint {
-	public double x;			// X coordinate
-	public double y;			// Y coordinate
+	/** Map coordinates of this point */
+	public double x, y;
 	
-	public int index;			// point index #
-	public int neighbors;		// number of neighbors
-	public MeshPoint[] neighbor;	// neighboring points
+	/** index (in Mesh array) of this MeshPoint */
+	public int index;
+
+	/** number of neighboring MeshPoints	*/
+	public int neighbors;
+	/** array of neighboring MeshPoints	*/
+	public MeshPoint[] neighbor;
 	
+	/** corresponds to main-map point and cannot be changed	*/
 	public boolean immutable;
 	
 	private static final String format="%7.5f";
 	
+	/**
+	 * instantiate a MeshPoint w/no index
+	 * @param x position (-0.5 to 0.5 map coordinate)
+	 * @param y position (-0.5 to 0.5 map coordinate)
+	 */
 	public MeshPoint(double x,double y) {
 		this.x = x;
 		this.y = y;
 		this.index = -1;
 	}
 	
+	/**
+	 * instantiate a MeshPoint w/known index
+	 * @param x position (-0.5 to 0.5 map coordinate)
+	 * @param y position (-0.5 to 0.5 map coordinate)
+	 * @param index (in Mesh) of this point
+	 */
 	public MeshPoint(double x,double y, int index) {
 		this.x = x;
 		this.y = y;
@@ -46,9 +61,14 @@ public class MeshPoint {
 		neighbor[neighbors++] = p;
 	}
 	
-	public boolean isNeighbor(MeshPoint p) {
+	/**
+	 * is a particular MeshPoint one of my neighbors
+	 * @param point MeshPoint to be checked
+	 * @return true if it is one of my neighbors
+	 */
+	public boolean isNeighbor(MeshPoint point) {
 		for(int i = 0; i < neighbors; i++)
-			if (neighbor[i] == p)
+			if (neighbor[i] == point)
 				return(true);
 		return(false);
 	}
@@ -66,9 +86,12 @@ public class MeshPoint {
 	}
 	
 	/**
-	 * compute the distance to a line defined by (x0,y0)-(x1,y1)
+	 * compute the distance to a specified line
 	 *
-	 * @param ... two points on the line
+	 * @param x1 map powition (-0.5 to 0.5) of one end of line
+	 * @param y1 map powition (-0.5 to 0.5) of one end of line
+	 * @param x2 map powition (-0.5 to 0.5) of other end of line
+	 * @param y2 map powition (-0.5 to 0.5) of other end of line
 	 * @return distance (which can be positive or negative)
 	 */
 	public double distanceLine(double x1, double y1, double x2, double y2) {
@@ -77,7 +100,8 @@ public class MeshPoint {
 	}
 	
 	/**
-	 * is a point on the edge
+	 * is a point on the edge of the map
+	 * @return true if point has fewer than three neighbors
 	 */
 	boolean isOnEdge() {
 		return neighbors < 3;
@@ -124,6 +148,9 @@ public class MeshPoint {
             quickSort(arr, i, right);
     }
 	
+	/**
+	 * @return (string) coordinates of point
+	 */
 	public String toString() {
 		return "<" + String.format(format,x) + "," + String.format(format,y) + ">";
 	}	

@@ -174,7 +174,7 @@ class WaterMap {
 
 /**
  * @opt all
- * @depend - - - Vicninity
+ * @depend - - - Vicinity
  */
 class Cartesian {
 	double[][] interpolate(double[] meshValues) {};

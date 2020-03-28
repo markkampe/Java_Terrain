@@ -46,6 +46,7 @@ class RegionDialog  implements MapListener, ActionListener, WindowListener {
  * @opt enumconstants
  * @composed - Has - Mesh
  * @depend - - - Parameters
+ * @depend - - - Vicinity
  */
 class Map extends JPanel {
 	Mesh mesh;
@@ -107,6 +108,14 @@ class MeshPoint {
 class MeshPointHasher {
 	MeshPointHasher(int vax_vertices, double x_extent, double y_extent) {};
 	MeshPoint findPoint(double x, double y) {};
+}
+
+/**
+ * @opt all
+ */
+class Vicinity {
+	void consider(int index, double distance) {};
+	double interpolate(double values[]) {};
 }
 
 class Parameters {}

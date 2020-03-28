@@ -150,6 +150,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 		}
 		
 		/** (perfunctory) */ public boolean regionSelected(double x, double y, double w, double h, boolean f) {return false;}
+		/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }
 		/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
 		/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
 		/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}

@@ -442,6 +442,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	}
 	
 	/** (perfunctory) */ public boolean pointSelected(double x, double y) { return false; }
+	/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }
 	
 	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}

@@ -671,6 +671,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	}
 	
 	/** (perfunctory) */ public boolean pointSelected(double map_x, double map_y) { return false; }
+	/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }
 	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}

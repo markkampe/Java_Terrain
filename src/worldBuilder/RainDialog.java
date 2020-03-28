@@ -10,17 +10,15 @@ import javax.swing.event.*;
 /**
  * a Dialog to control the direction and amount of rainfall on the world map.
  */
-public class RainDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
+public class RainDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {	
 	private Map map;
 	private double[] oldRain;	// per MeshPoint rainfall at entry
 	private double[] newRain;	// edited per MeshPoint rainfall
-	private int x0, x1, y0, y1;	// weather axis line
+	private boolean[] selected;	// which points are being edited
 	
 	private Parameters parms;
 	
-	private JSlider direction;
 	private JSlider amount;
-	private JSlider altitude;
 	private JButton accept;
 	private JButton cancel;
 	
@@ -57,15 +55,6 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		accept = new JButton("ACCEPT");
 		cancel = new JButton("CANCEL");
 		
-		direction = new JSlider(JSlider.HORIZONTAL, -180, 180, parms.dDirection);
-		direction.setMajorTickSpacing(90);
-		direction.setMinorTickSpacing(30);
-		direction.setFont(fontSmall);
-		direction.setPaintTicks(true);
-		direction.setPaintLabels(true);
-		JLabel dirLabel = new JLabel("Dominant Direction (North = 0" + Parameters.unit_d + ")", JLabel.CENTER);
-		dirLabel.setFont(fontLarge);
-
 		amount = new JSlider(JSlider.HORIZONTAL, 0, parms.rain_max, parms.dAmount);
 		amount.setMajorTickSpacing(Parameters.niceTics(0, parms.rain_max,true));
 		amount.setMinorTickSpacing(Parameters.niceTics(0, parms.rain_max,false));
@@ -75,16 +64,6 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		JLabel amtLabel = new JLabel("Annual Rainfall(cm/yr)", JLabel.CENTER);
 		amtLabel.setFont(fontLarge);
 		
-		altitude = new JSlider(JSlider.HORIZONTAL, 0, parms.alt_maxrain, parms.dRainHeight);
-		altitude.setMajorTickSpacing(Parameters.niceTics(0, parms.alt_maxrain, true));
-		altitude.setMinorTickSpacing(Parameters.niceTics(0, parms.alt_maxrain, false));
-		altitude.setFont(fontSmall);
-		altitude.setPaintTicks(true);
-		altitude.setPaintLabels(true);
-		JLabel altLabel = new JLabel("Cloud Bottoms(m x 1000)", JLabel.CENTER);
-		altLabel.setFont(fontLarge);
-
-		
 		/*
 		 * Pack them into:
 		 * 		a vertical Box layout containing sliders and buttons
@@ -92,29 +71,15 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		 * 			each being a vertical Box w/label and slider
 		 * 		buttons a horizontal Box layout
 		 */
-		JPanel altPanel = new JPanel();
-		altPanel.setLayout(new BoxLayout(altPanel, BoxLayout.PAGE_AXIS));
-		altPanel.add(dirLabel);
-		altPanel.add(direction);
-		
 		JPanel diaPanel = new JPanel();
 		diaPanel.setLayout(new BoxLayout(diaPanel, BoxLayout.PAGE_AXIS));
 		diaPanel.add(amtLabel);
 		diaPanel.add(amount);
-		
-		JPanel rndPanel = new JPanel();
-		rndPanel.setLayout(new BoxLayout(rndPanel, BoxLayout.PAGE_AXIS));
-		rndPanel.add(altLabel);
-		rndPanel.add(altitude);
 
 		JPanel sliders = new JPanel();
 		sliders.setLayout(new BoxLayout(sliders, BoxLayout.LINE_AXIS));
-		altPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
 		diaPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 15));
-		rndPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
-		sliders.add(altPanel);
 		sliders.add(diaPanel);
-		sliders.add(rndPanel);
 		
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new BoxLayout(buttons, BoxLayout.LINE_AXIS));
@@ -130,150 +95,87 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		setVisible(true);
 		
 		// add the action listeners
-		direction.addChangeListener(this);
 		amount.addChangeListener(this);
-		altitude.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
+		map.addMapListener(this);
 		
-		// disable all selection
-		map.selectMode(Map.Selection.NONE);
-		// initialize the direction indicator
-		setDirection(direction.getValue());
+		// set the map for point-group selection and get current selection
+		map.selectMode(Map.Selection.POINTS);
+		map.checkSelection(Map.Selection.POINTS);
 		
 		// initialize the rainfall to default values
-		rainFall(map, direction.getValue(), (double) amount.getValue());
+		rainFall((double) amount.getValue());
 	}
 
 	/**
-	 * calculate the rainfall received at each Mesh point
-	 * 
-	 * @param map
-	 * @param degrees - direction from which rain comes
+	 * calculate the rainfall received at each selected Mesh point
 	 * @param incoming (rain density)
-	 * 
-	 * SOMEDAY: rain shadows in 1 pass
-	 * 		define a set of stripes, originating off screen
-	 * 		sort the mesh points by proximity to the source
-	 * 		enumerate the mesh points, calculating how much rain hits each
-	 * 			based on distance, MeshPoint area, and altitude
-	 * 		rain that falls decreases what remains in the stripe
-	 * 
 	 */
-	public static void rainFall(Map map, int degrees, double incoming) {
-		// we need to do these so we can be called statically
-		Mesh m = map.getMesh();
+	private void rainFall(double incoming) {
+		if (selected == null)
+			return;
+		
+		// set this rainfall at every selected point
 		double[] rainmap = map.getRainMap();
-		Parameters parms = Parameters.getInstance();
-		
-		// rain originates along an imaginary line that is a corner
-		//	radius out from the center of the map (just off the map)
-		double d = Math.sqrt((Parameters.x_extent*Parameters.x_extent) + (Parameters.y_extent*Parameters.y_extent))/2;
-		double X0, X1, Y0, Y1;
-		double radians = Math.PI * ((double) degrees)/180;
-		double sin = Math.sin(radians);
-		double cos = Math.cos(radians);
-		double Xc = sin * d;
-		double Yc = -cos * d;
-		double dy = sin;
-		double dx = cos;
-		X0 = Xc - dx;
-		Y0 = Yc - dy;
-		X1 = Xc + dx;
-		Y1 = Yc + dy;
-
-		// specified rainfall is for the center of the map
-		//	scale that up to account for reduction over distance
-		double Rc = Math.pow(1-parms.dRdX, parms.km(d));
-		incoming /= Rc;
-		
-		// compute the rain at every point
-		for(int i = 0; i < m.vertices.length; i++) {
-			MeshPoint p = m.vertices[i];
-			d = parms.km(p.distanceLine(X0,  Y0,  X1,  Y1));
-			double r = incoming * Math.pow(1-parms.dRdX, Math.abs(d));
-			rainmap[i] = r;
-		}
+		for(int i = 0; i < selected.length; i++)
+			if (selected[i])
+				rainmap[i] = incoming;
 		
 		// tell the map about the update
 		map.setRainMap(rainmap);
 		if (parms.debug_level >= RAIN_DEBUG)
-			parms.rainParms((int)incoming);
+			System.out.println("Update rainfall: " + incoming + parms.unit_r);
 	}
 
 	/**
 	 * @return mean rainfall over the entire map
 	 */
 	private double meanRain() {
-		Mesh m = map.getMesh();
 		double mean = 0;
-		for(int i = 0; i < m.vertices.length; i++) {
+		for(int i = 0; i < newRain.length; i++) {
 			mean += newRain[i];
 		}
-		mean /= m.vertices.length;
+		mean /= newRain.length;
 		return mean;
-	}
-	
-	/**
-	 * display weather direction as a select line
-	 * 
-	 * @param angle (0 = north)
-	 */
-	private void setDirection(int degrees) {
-		
-		// figure out line center and length
-		int x_center = map.getWidth()/2;
-		int x_len = 3 * x_center / 2;
-		int y_center = map.getHeight()/2;
-		int y_len = 3 * y_center / 2;
-		
-		// vertical lines are a special case
-		if (degrees == -90 || degrees == 90) {
-			x0 = x_center;
-			x1 = x_center;
-			y0 = map.getHeight()/8;
-			y1 = map.getHeight()*7/8;
-		} else {
-			double radians = Math.PI * ((double) degrees)/180;
-			double sin = Math.sin(radians);
-			double cos = Math.cos(radians);
-			double dy = sin * y_len / 2;
-			double dx = cos * x_len / 2;
-			x0 = x_center - (int) dx;
-			y0 = y_center - (int) dy;
-			x1 = x_center + (int) dx;
-			y1 = y_center + (int) dy;
-		}
-		
-		// display the slope axis
-		map.selectLine(x0, y0, x1, y1);
 	}
 	
 	/**
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.selectMode(Map.Selection.ANY);
+		// clear selected points and updated rainfall
+		map.selectMode(Map.Selection.NONE);
 		if (oldRain != null) {
 			map.setRainMap(oldRain);
-			map.repaint();
 			oldRain = null;
 		}
+		
 		this.dispose();
+		map.removeMapListener(this);
+		map.repaint();
+		map.selectMode(Map.Selection.ANY);
 	}
 	
 	/**
 	 * updates to the axis/inclination/profile sliders
 	 */
 	public void stateChanged(ChangeEvent e) {
-			if (e.getSource() == direction) {
-				setDirection(direction.getValue());
-				rainFall(map, direction.getValue(), (double) amount.getValue());
-			} else if (e.getSource() == amount) {
-				rainFall(map, direction.getValue(), (double) amount.getValue());
-			} else if (e.getSource() == altitude) {
-				rainFall(map, direction.getValue(), (double) amount.getValue());
-			}
+		if (e.getSource() == amount) {
+			rainFall((double) amount.getValue());	
+		} 
+	}
+	
+	/**
+	 * called when a group of points is selected on the map
+	 * @param selected	array of per point booleans (true=selected)
+	 * @param complete	mouse button has been released
+	 * @return	boolean	(should selection continue)
+	 */
+	public boolean groupSelected(boolean[] selected, boolean complete) {
+		this.selected = selected;
+		rainFall((double) amount.getValue());
+		return true;
 	}
 
 	/**
@@ -288,26 +190,28 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		} else if (e.getSource() == accept) {
 			// make the new parameters official
 			parms.dAmount = amount.getValue();
-			parms.dDirection = direction.getValue();
-			parms.dRainHeight = altitude.getValue();
 			
 			if (parms.debug_level > 0) {
-				parms.rainParms((int) meanRain());
-				if (parms.debug_level == 1)
-					parms.rainParms(parms.dAmount);
+				System.out.println("Mean rainfall: " + (int) meanRain() + parms.unit_r);
 				System.out.println("Rivers:    " +
 						"max flow " + String.format("%.2f", map.max_flux) + Parameters.unit_f +
 						", max speed " + String.format("%.2f",  map.max_velocity) + Parameters.unit_v);
 			}
+			
 			// we no longer need the old rain map
 			oldRain = null;
 		}
 		
-		// clean up the graphics
-		map.selectMode(Map.Selection.ANY);
+		// clean up the selection and graphics
 		this.dispose();
+		map.removeMapListener(this);
+		map.selectMode(Map.Selection.NONE);
+		map.repaint();
+		map.selectMode(Map.Selection.ANY);
 	}
 	
+	/** (perfunctory) */ public boolean pointSelected(double x, double y) {return false;}
+	/** (perfunctory) */ public boolean regionSelected(double x, double y, double w, double h, boolean c) {return false;}
 	/** (perfunctory) */ public void mouseMoved(MouseEvent arg0) {}
 	/** (perfunctory) */ public void mouseEntered(MouseEvent arg0) {}
 	/** (perfunctory) */ public void mouseExited(MouseEvent arg0) {}

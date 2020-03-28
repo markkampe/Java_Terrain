@@ -188,6 +188,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		this.dispose();
 	}
 	
+	/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }
 	/** (perfunctory) */ public boolean regionSelected(double x, double y, double w, double h, boolean c) {return false;}
 	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}

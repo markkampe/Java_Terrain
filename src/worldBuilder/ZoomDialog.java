@@ -165,6 +165,7 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		}
 	}
 
+	/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }
 	/** (perfunctory) */ public boolean pointSelected(double x, double y) { return false; }
 	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}

@@ -61,7 +61,6 @@ public class Parameters {
 	
 	// limits on world parameters (overide in config.json)
 	public int alt_max = 10000;		// max altitude (m)
-	public int alt_maxrain = 1000;	// max rain altitude (m)
 	public int diameter_max = 5000;	// max world diameter (km)
 	public int msl_range = 1000;	// +/- (m)
 	public int rain_max = 1000;		// rain (cm/y)
@@ -108,15 +107,15 @@ public class Parameters {
 	// persistent defaults for Edit dialogs
 	public double sea_level = 0;// sea level (map space)
 	public int dSlope; 			// continental slope
+	public int dDirection; 		// continental slope axis
 	public int dDiameter; 		// mountain diameter
 	public int dAltitude; 		// mountain altitude
 	public int dShape; 			// mountain shape
 	public static final int CONICAL = 0;
 	public static final int SPHERICAL = 4;
 	public static final int CYLINDRICAL = 8;
-	public int dDirection; 		// incoming weather
+
 	public int dAmount; 		// annual rainfall
-	public int dRainHeight; 	// mean height of incoming rain
 	public int dErosion; 		// erosion cycles
 	public int dTribute; 		// incoming river
 	public int dTileSize;		// default tile size
@@ -149,7 +148,7 @@ public class Parameters {
 	public double vMin = 0.005; // minimum water velocity
 	public double Cd = .001; 	// coefficient of deposition
 								// deposition = load * Cd/V
-	public double dRdX = .005; 	// fraction of rain that falls per km
+	// public double dRdX = .005; 	// fraction of rain that falls per km
 	public double Dp = 1.0; 	// rain penetration (m)
 	public double Edeg = 10; 	// degC to halve evaporation rate
 	public double E35C = 100; 	// transpiration half-time at 35C (days)
@@ -181,6 +180,7 @@ public class Parameters {
 
 		// default inclination
 		dSlope = 1;
+		dDirection = 0; 	// north/south
 
 		// default mountain size/shape
 		dAltitude = z_range / 4;
@@ -188,9 +188,8 @@ public class Parameters {
 		dShape = (CONICAL + SPHERICAL) / 2;
 
 		// default weather
-		dDirection = 0; // weather from the north
+		
 		dAmount = rain_max / 10; // moderate rainfall
-		dRainHeight = alt_maxrain / 4;// not particularly high
 
 		// default erosion
 		dErosion = erosion_max / 2;
@@ -375,9 +374,6 @@ public class Parameters {
 				case "rain_max":
 					rain_max = new Integer(parser.getString());
 					break;
-				case "altitude_rain":
-					alt_maxrain = new Integer(parser.getString());
-					break;
 				case "erosion_max":
 					erosion_max = new Integer(parser.getString());
 					break;
@@ -403,9 +399,6 @@ public class Parameters {
 					break;
 				case "Cd": // coefficient of deposition
 					Cd = new Double(parser.getString());
-					break;
-				case "dR/dX": // precipitation/km
-					dRdX = new Double(parser.getString());
 					break;
 				case "Dp": // rain penetration depth (m)
 					Dp = new Double(parser.getString());
@@ -481,16 +474,15 @@ public class Parameters {
 					+ ", Vd=" + String.format("%.2f", Vd) + unit_v 
 					+ ", Ce=" + String.format("%.4f", Ce)
 					+ ", Cd=" + String.format("%.4f", Cd));
-			System.out.println(
-					"   rainfall:   " + dRdX * 100 + "%/" + unit_xy + ", Dp=" + String.format("%.1f", Dp) + unit_z);
+			System.out.println("   rainfall:   " + "default=" + dAmount + unit_r
+					+ ", rain_max=" + rain_max + unit_r
+					+ ", Dp=" + String.format("%.1f",  Dp) + unit_z);
 			System.out.println("   mean temps: polar=" + Tmin + unit_t + ", equator=" + Tmax + unit_t);
 			System.out.println("   max ranges: " + diameter_max + unit_xy + ", altitude +/-" + alt_max + unit_z
 					+ ", msl +/-" + msl_range + unit_z);
 			System.out.println("               mountain diameter=world/" + m_width_divisor);
 			System.out.println("               initial slope=" + String.format("%.6f", slope_init) + unit_s);
 			System.out.println("               sedimentary layer=" + String.format("%.0f%s", sediment, unit_z));
-			System.out.println(
-					"               rainfall=" + rain_max + unit_r + " (bottoms at " + alt_maxrain + unit_z + ")");
 			System.out.println("               watershed=" + tribute_max + " " + unit_f);
 			System.out.println("   export:     name=" + map_name);
 			for (ListIterator<String> it = exportRules.listIterator(); it.hasNext();) {
@@ -525,16 +517,6 @@ public class Parameters {
 		System.out.println("   topo maps:  " + topo_minor + unit_z + "/line, " + topo_major + " minors/major");
 		if (description != "")
 			System.out.println("   description:" + getDescription() + "\n");
-	}
-	
-	/**
-	 * print out the rain parameters (after changes and reloads)
-	 * 
-	 * @param	incoming - annual rainfall (cm/y)
-	 */
-	public void rainParms(int incoming) {
-		System.out.println("Rainfall: " + incoming + unit_r + ", from " + 
-				String.format("%03d", dDirection) + unit_d + ", cloud bottoms at " + dRainHeight + unit_z);
 	}
 
 	/**

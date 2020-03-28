@@ -27,4 +27,12 @@ public interface MapListener {
 	 * @return	ignored ... selection is complete
 	 */
 	public boolean pointSelected(double map_x, double map_y);
+	
+	/**
+	 * called when a group of points is selected on the map
+	 * @param selected	array of per point booleans (true=selected)
+	 * @param complete	mouse button has been released
+	 * @return	boolean	(should selection continue)
+	 */
+	public boolean groupSelected(boolean[] selected, boolean complete);
 }

@@ -97,7 +97,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private int erosion;		// number of erosion cycles
 	
 	/** selection types: points, line, rectangle, ... */
-	public enum Selection {NONE, POINT, LINE, RECTANGLE, ANY};
+	public enum Selection {NONE, POINT, POINTS, LINE, RECTANGLE, ANY};
 	private Selection sel_mode;	// What types of selection are enabled
 	private MapListener listener;	// who to call for selection events
 	
@@ -317,14 +317,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 						parms.dDirection = new Integer(parser.getString());
 						break;
 						
-					case "cloudbase":
-						s = parser.getString();
-						u = s.indexOf(Parameters.unit_z);
-						if (u != -1)
-							s = s.substring(0, u);
-						parms.dRainHeight = new Integer(s);
-						break;
-						
 					case "erosion":
 						parms.dErosion = new Integer(parser.getString());
 						break;
@@ -426,11 +418,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		
 		parms.checkDefaults();	// Make sure defaults are consistent w/new world size
 		
-		RainDialog.rainFall(this, parms.dDirection, parms.dAmount);
-		
 		if (parms.debug_level > 0) {
 			parms.worldParms();
-			parms.rainParms(parms.dAmount);
 		}
 	}
 	
@@ -443,7 +432,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			FileWriter output = new FileWriter(filename);
 			final String T_FORMAT = "    \"subregion\": true,\n";
 			final String S_FORMAT = "    \"sealevel\": \"%d%s\",\n";
-			final String R_FORMAT = "    \"rainfall\": { \"amount\": \"%d%s\", \"direction\": %d, \"cloudbase\": \"%d%s\" },\n";
+			final String R_FORMAT = "    \"rainfall\": { \"amount\": \"%d%s\" },\n";
 			final String E_FORMAT = "    \"erosion\": %d,\n";
 			final String L_FORMAT = "    \"center\": { \"latitude\": \"%.6f\", \"longitude\": \"%.6f\" },\n";
 			final String W_FORMAT = "    \"world\": { \"radius\": \"%d%s\", \"tilt\": \"%.1f\" },\n";
@@ -470,8 +459,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				double l = parms.sea_level * parms.z_range;
 				output.write(String.format(S_FORMAT, (int) l, Parameters.unit_z));
 			}
-			output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r, 
-					parms.dDirection, parms.dRainHeight, Parameters.unit_z));
+			output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r));
 			output.write(String.format(E_FORMAT, parms.dErosion));
 			
 			if (parms.description != "")
@@ -776,6 +764,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private int x_start, y_start;		// where a drag started
 	private int sel_height, sel_width;	// selected rectangle size
 	private int sel_radius;				// selected point indicator size
+	private boolean[] sel_points;		// which points are in selected group
 	
 	private Selection sel_type = Selection.NONE;	// type to be rendered
 	private boolean selecting = false;	// selection in progress
@@ -817,9 +806,17 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			sel_y0 += sel_height/2;
 			sel_type = Selection.POINT;
 			repaint();
+		} else if (type == Selection.POINTS && sel_type == Selection.RECTANGLE) {
+			// rectangles can be converted to point groups
+			selectPoints(sel_x0, sel_y0, sel_x0 + sel_width, sel_y0 + sel_height);
+			repaint();
 		} else if (type == Selection.NONE || sel_type != type) {
 			// current selection is wrong type, clear it
 			selected = false;
+			if (sel_type == Selection.POINTS) {
+				for(int i = 0; i < sel_points.length; i++)
+					sel_points[i] = false;
+			}
 			sel_type = Selection.NONE;
 			repaint();
 		}
@@ -860,6 +857,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				listener.regionSelected(map_x(sel_x0),  map_y(sel_y0),
 					    map_width(sel_width), map_height(sel_height),
 					    true);
+				break;
+			case POINTS:
+				listener.groupSelected(sel_points, true);
 				break;
 			default:
 				break;
@@ -912,6 +912,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 										    map_height(sel_y1 - sel_y0),
 										    selected))
 					sel_type = Selection.NONE;
+		} else if (sel_mode == Selection.POINTS) {
+			selectPoints(x_start, y_start, e.getX(), e.getY());
+			if (listener != null && !listener.groupSelected(sel_points, false))
+				sel_type = Selection.NONE;
 		} else if (sel_mode == Selection.ANY || sel_mode == Selection.RECTANGLE) {
 			selectRect(x_start, y_start, e.getX(), e.getY());
 			if (listener != null &&
@@ -933,9 +937,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		}
 	}
 	
-	/** perfunctory */ public void mouseExited(MouseEvent e) { selecting = false; }
-	/** perfunctory */ public void mouseEntered(MouseEvent e) {}
-	/** perfunctory */ public void mouseMoved(MouseEvent e) {}
+	/** (perfunctory) */ public void mouseExited(MouseEvent e) { selecting = false; }
+	/** (perfunctory) */ public void mouseEntered(MouseEvent e) {}
+	/** (perfunctory) */ public void mouseMoved(MouseEvent e) {}
 	
 	/**
 	 * highlight a line on the displayed map
@@ -980,6 +984,43 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			sel_height = y0 - y1;
 		}
 		sel_type = Selection.RECTANGLE;
+		repaint();
+	}
+	
+	/**
+	 * highlight points in rectangular selection on the displayed map
+	 * 
+	 * @param x0	screen x
+	 * @param y0	screen y
+	 * @param x1	screen x
+	 * @param y1	screen y
+	 */
+	public void selectPoints(int x0, int y0, int x1, int y1) {
+		// make sure we have a point selection map
+		if (sel_points == null)
+			sel_points = new boolean[mesh.vertices.length];
+		
+		// normalize boxes defined upwards or to the left
+		if (x1 > x0) {
+			sel_x0 = x0;
+			sel_width = x1 - x0;
+		} else {
+			sel_x0 = x1;
+			sel_width = x0 - x1;
+		}
+		if (y1 > y0) {
+			sel_y0 = y0;
+			sel_height = y1 - y0;
+		} else {
+			sel_y0 = y1;
+			sel_height = y0 - y1;
+		}
+		
+		// set selected bit for every point within the box
+		for(int i = 0; i < sel_points.length; i++)
+			sel_points[i] = inTheBox(mesh.vertices[i].x, mesh.vertices[i].y);
+		
+		sel_type = Selection.POINTS;
 		repaint();
 	}
 	
@@ -1172,6 +1213,13 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			g.setColor(SELECT_COLOR);
 			g.drawRect(sel_x0, sel_y0, sel_width, sel_height);
 			break;
+		case POINTS:
+			g.setColor(SELECT_COLOR);
+			for(int i = 0; i < sel_points.length; i++)
+				if (sel_points[i])
+					g.drawOval(screen_x(mesh.vertices[i].x), 
+							   screen_y(mesh.vertices[i].y), 
+							   SELECT_RADIUS, SELECT_RADIUS);
 		case NONE:
 		case ANY:
 			break;

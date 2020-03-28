@@ -1,0 +1,335 @@
+<html>
+<head>
+<title>WorldBuilder</title>
+</head>
+<body>
+<center>
+<H1>WorldBuilder - Code Overview</h1>
+</center>
+<H2>Introduction</h2>
+<P>
+This is an introduction to and overview of the code for the <em>WorldBuilder</em> application.
+The intended audience is (ideally Java) programmers who are interested in understanding
+the design and operation of this tool.
+</P>
+<P>
+The descriptions are presented in three parts:
+<ul>
+    <li> Prose descriptions of the overall <a href="#overview">structure</a>, 
+         and slightly more <a href="#drilldowns">detailed drill-downs</a>
+	 on flow control, and most interesting operations.</li>
+    <li> UML class diagrams for the
+    	 <a href="#UML_fundamental">fundamental</a>,
+	 <a href="#UML_display">info display dialog</a>,
+    	 <a href="#UML_edit">map editing dialog</a>, and
+	 <a href="#UML_export">output/export</a> classes.
+    </li>
+    <li> A fairly <a href="JavaDoc/index.html">complete set of JavaDocs</a>
+    	 for all public methods and fields.</li>
+</ul>
+<H3>History</H3>
+<P>
+<P>
+The development of this tool was motivated by 
+<A href="https://www.linkedin.com/in/christopher-kampe-8a386048">Christopher Kampe</a>'s
+observation that, in RPG development, the creation of the underlying maps had 
+a relatively poor cost/value performance.  He wanted to make it easy for 
+game developers to start with realistic maps, atop of which they could
+add their more creative and interesting features and encounters.
+</p>
+This program is majorly inspired by the 
+<A Href="https://mewo2.com">Marton O'Leary</a>'s
+<A Href="https://twitter.com/unchartedatlas">Uncharted Atlas</A> project.
+His
+<A href="https:github.com/mewo2/terrain">Terrain Builder</a> is a
+JavaScript Web-app to synthesize pages of a fantasy Atlas.
+The <em>WorldBuilder</em> is Java application to enable game designers
+to create 3D regional landscapes that can be exported as maps for a 
+variety of computer-based Role Playing Games (starting with RPG Maker).
+While these goals have very different scopes, calling for rather
+different approaches, this program still draws heavily on several of
+O'Leary's insights:
+<UL>
+   <LI> defining a large Cartesian landscape by
+   	interpolations of the altitudes of (randomly
+	placed) points in a Voronoi mesh.</li>
+   <LI> defining (satisfyingly irregular) topographic
+   	features by imposing vertical displacements associated
+	with regular (e.g. conical) geometric figures
+	on the random Voronoi mesh.</li>
+   <LI> simplifying the simulation of water-flow by
+   	restricing all flow to the paths between 
+	(the few) points in the Voronoi mesh</li>
+   <LI> using that flow to compute erosion as a 
+   	downards deformation of the points through
+	which water flowed.</li>
+   <LI> defining geo-political borders as the points
+   	where the cost of travel from two adjacent
+	capitals are equal.</LI>
+</UL>
+</P>
+<P>
+The evolution of this tool has been driven by a combination of 
+<A Href="https://www.linkedin.com/in/markkampe">Mark Kampe</a>'s 
+architectural thoughts (about how to structure geo-physics simulations 
+and plug-in RPG-map exporters) and
+Christopher Kampe's experiences (with how to make a more usable tool
+for creating satisfying worlds).
+</P>
+
+<a name="overview">
+<H2>Structural Overview</H2>
+</a>
+<P>
+To greatly over-simplify, this program can be divided into:
+<ul>
+	<li>a set of points (in a Voronoi, triangluar, mesh) each of which has
+	    a variety of attributes (e.g. altitude, soil type, water flow).</li>
+	<li>a collection of graphical renderers to display 2D maps to illustrate
+	    those attributes (e.g. topography and water, erosion and deposition, etc.).</li>
+	<li>a collection of exporters, to translate such maps into a form that can be
+	    imported into another program (e.g. RPG Maker).</li>
+	<li>a collection of dialogs and editors for changing the attributes (e.g.
+	    creating mountains or changing water flow) of map points.</li>
+	<li>a collection of menus and dialog widgets for accepting and executing commands.</li>
+	<li>a collection of parsers to read program parameters, maps,
+	    and export generation rules from (mostly <em>JSON</em>) configuration files.
+</ul>
+<P>
+The classes that create and operate on Meshes of Voronoi points are
+<A href="JavaDoc/worldBuilder/Mesh.html">Mesh.java</A>,
+<A href="JavaDoc/worldBuilder/MeshPoint.html">Mesh.Pointjava</A> and
+<A href="JavaDoc/worldBuilder/MeshPointHasher.html">MeshPointHasher.java</A>.
+The set of MeshPoints that define the world are stored in a <em>Mesh</em> array.
+Their attributes (e.g. altitude, soil type, water flow) are stored in parallel arrays
+(e.g. <tt>Map.heightMap</tt>, <tt>Map.soilMap</tt>, <tt>Map.fluxMap</tt>) ... 
+all of which are accessed through their common <em>MeshPoint index</em>.
+</P>
+<P>
+There are several different map renderers, one for each major attribute:
+<a Href="JavaDoc/worldBuilder/AltitudeMap.html">AltitudeMap.java</a>,
+<a Href="JavaDoc/worldBuilder/ErodeMap.html">ErodeMap.java</a>,
+<a Href="JavaDoc/worldBuilder/RainMap.html">RainMap.java</a>,
+<a Href="JavaDoc/worldBuilder/RiverMap.html">RiverMap.java</a>,
+<a Href="JavaDoc/worldBuilder/SoilMap.html">SoilMap.java</a>,
+<a Href="JavaDoc/worldBuilder/TopoMap.html">TopoMap.java</a>,
+<a Href="JavaDoc/worldBuilder/WaterMap.html">WaterMap.java</a>.
+The mapping from a (sparse and irregular) Voronoi mesh to a 
+(dense and continuous) 2D map is greatly facilitated by the
+<a Href="JavaDoc/worldBuilder/Cartesian.html">Cartesian.java</a>
+interpolation service.
+The overall orchestration of creating a display from all of these
+independent layers is managed by (the largest and most important class in the program)
+<a Href="JavaDoc/worldBuilder/Map.html">Map.java</a>.
+</P>
+<P>
+All Exporters implement a 
+<a Href="JavaDoc/worldBuilder/Exporter.html">standard interface</a>,
+and a common
+<a Href="JavaDoc/worldBuilder/ExportBase.html">export orchestrater</a>
+creates a series of 2D per-tile maps which it pushes to the
+output-format-specific implementations.
+The simplest of these,
+<a Href="JavaDoc/worldBuilder/JsonExporter.html">JsonExporter.java</a>,
+simply creates a collection of per-point attribute descriptions.
+More interesting is
+<a Href="JavaDoc/worldBuilder/RPGMexport.html">RPGMexport.java</a>,
+which uses tile placement rules (managed by
+<a Href="JavaDoc/worldBuilder/TileRule.html">TileRule.java</a> and
+<a Href="JavaDoc/worldBuilder/TileRules.html">TileRules.java</a>)
+to drive a very <em>RPG-Maker</em>-savvy
+<a Href="JavaDoc/worldBuilder/RPGMTiler.html">RPGMTiler.java</a>
+to reproduce the map in tiles, and cause the (<em>RPG Maker map</em>) output to be written by
+<a Href="JavaDoc/worldBuilder/RPGMwriter.html">RPGMwriter.java</a>.
+</P>
+<P>
+The main-screen menus and controls are put-up and responded to by the main class
+(<a Href="JavaDoc/worldBuilder/WorldBuilder.html">WorldBuilder.java)</a>.
+Simple operations like saving updated maps and loading new ones, it handles
+directly.  But display and update operations are handled by one
+of the sub-dialog managers:
+<a Href="JavaDoc/worldBuilder/ErosionDialog.html">ErosionDialog.java</a>,
+<a Href="JavaDoc/worldBuilder/MeshDialog.html">MeshDialog.java</a>,
+<a Href="JavaDoc/worldBuilder/MountainDialog.html">MountainDialog.java</a>,
+<a Href="JavaDoc/worldBuilder/PointDebug.html">PointDebug.java</a>,
+<a Href="JavaDoc/worldBuilder/RainDialog.html">RainDialog.java</a>,
+<a Href="JavaDoc/worldBuilder/RegionDialog.html">RegionDialog.java</a>,
+<a Href="JavaDoc/worldBuilder/RiverDialog.html">RiverDialog.java</a>,
+<a Href="JavaDoc/worldBuilder/RuleDebug.html">RuleDebug.java</a>,
+<a Href="JavaDoc/worldBuilder/SlopeDialog.html">SlopeDialog.java</a>,
+<a Href="JavaDoc/worldBuilder/WorldDialog.html">WorldDialog.java</a>,
+<a Href="JavaDoc/worldBuilder/ZoomDialog.html">ZoomDialog.java</a>.
+These put-up and respond to their own widgets, but on-map selection
+(e.g. of lines, rectangles or groups of MeshPoints) is handled by
+<a Href="JavaDoc/worldBuilder/Map.html">Map.java</a>.
+<br>
+These dialogs effect their updates by creating updated copies of
+the attribute maps (arrays containing the values of a particular attribute
+for each <em>MeshPoint</em>) and using calling <em>set</em> functions
+(e.g. <tt>setHeightMap()</tt> or <tt>setSoilMap()</tt>) in the
+in the <em>Map</em> class.
+</P>
+<P>
+Most program parameters are read-in and accessed through the <em>Singleton</em>
+implemented by
+<a Href="JavaDoc/worldBuilder/Parameters.html">Parameters.java</a>.
+<br>
+When a map is read in (or written out), this is done by
+<a Href="JavaDoc/worldBuilder/Map.html">Map.java</a>.
+<br>
+<em>RPG Maker</em> tile placement rules are read in by 
+<a Href="JavaDoc/worldBuilder/TileRules.html">TileRules.java</a>.
+</P>
+<P>
+Most operations are initiated as a result of widget actions in the main class,
+and most of those result in the creation of a new interactive dialog
+by one of the sub-dialog managers.
+</P>
+
+<a name="drilldowns">
+<H2>Key Classes and Operations</H2>
+</a>
+<P>
+The <em>worldBuilder</em> application is moderately large
+(over 10,000 lines of code spread over a few dozen modules).
+The high level class structure can be (crudely) summarized by
+a few UML class diagrams.
+</P>
+<P>
+The first class diagram shows the main <em>WorldBuilder</em> class,
+the <em>awt</em> and <em>swing</em> GUI classes it builds on,
+and the <em>Map</em> and <em>Mesh</em> classes that support
+the <em>MeshPoints</em> on which the map is based.
+Note that the only <em>Map</em> methods shown in this 
+figure are those involved in basic map creation.
+</P>
+<a name="UML_fundamental"></a>
+<img src="Fundamental.png" width="600">
+<H4>Mesh Creation</H4>
+<P>
+O'Leary observed that if we create map points in a rectilinear grid,
+deformations tend to retain that (unnatural) rectilinearity.  This
+problem is elimnated if the map points are placed at random.  
+Truly random points exhibit unattractive degrees of sparse-ness
+and clumpy-ness.  O'Leary evens this out by a few iterations
+of connecting points into a Voronoi mesh and then choosing,
+as new points, the centroids of those Voronoi polygons.
+We use a <em>Voronoi</em> library to assign three neighbors to
+each point and create the desired Mesh.
+</P>
+<P>
+The second class diagram shows the simpler (non-point-attribute-editing)
+dialogs and the primary <em>Map</em> class functions they use.
+</P>
+<a name="UML_display"></a>
+<img src="ViewDialogs.png" width="800">
+<P>
+These are all very simple dialogs.  Some of them
+(e.g. <em>PointDebug</em>) simply display the attributes of
+a selected point.  
+Others simply update parameters (e.g. <em>WorldDialog</em> 
+adjusts the latitude, longitude and size of the world map).  
+The most complex is probably the <em>ZoomDialog</em>, which
+allows a sub-region of the world map to be selected, and
+uses the <em>Map.setWindow</em> function to cause the 
+displayed map to zoom into the selected sub-region.
+</P>
+<H4>Point and Region Selection</H4>
+<P>
+The <em>Map</em> class is a <em>Mouse</em> and <em>MouseMotion</em>
+<em>Listener</em>, interprets mouse actions as selection attempts,
+and indicates the selected points/areas on the currently displayed
+map.  Any dialog that needs to know about point or region selections
+can register as a 
+<a Href="JavaDoc/worldBuilder/MapListener.html">MapListener</a>
+and receive call-backs in response to selection actions.  They can
+also use the <tt>Map.selectMode()</tt> and <tt>Map.checkSelection()</tt>
+operations to enable the desired selection mode (e.g. point, line, region)
+and query any selections that may have already been made.
+</P>
+
+<P>
+The third class diagram shows the attribute-editing dialogs and the
+<em>Map</em> selection and get/set functions they use to update
+the <em>MeshPoint</em> attribute maps.
+</P>
+<a name="UML_edit"></a>
+<img src="EditDialogs.png" width="2000">
+</P>
+<P>
+The operations in this richer set of dialogs (a) update point attributes and 
+(b) drive refreshes of the displayed map to show the updated information.
+</P>
+<H4>Attribute Maps</H4>
+<P>
+As random points in a 2D space <em>MeshPoint</em>s are not very exciting.
+What makes them interesting is the collection of attributes associated
+with each point.  As mentioned previously, each <em>MeshPoint</em> has
+a stable index in the <em>Mesh</em> array, and the <em>MeshPoint</em>
+attributes are stored in series of parallel arrays:
+<ul>
+	<li><tt>heightMap</tt> stores the altitude (in -0.5 to +0.5 map coordinates) 
+	     of each <em>MeshPoint</em></li>
+	<li><tt>soilMap</tt> stores the mineral type (sedimentary, metamorphic, igneous, alluvial)
+	     of each <em>MeshPoint</em></li>
+	<li><tt>rainMap</tt> stores the annual rainfal (in cm)
+	     for each <em>MeshPoint</em></li>
+	<li><tt>hydrationMap</tt> stores the depth (in meters) of water
+	     on top of  each <em>MeshPoint</em></li>
+	<li><tt>fluxMap</tt> stores the flow of water (in cubic meters/year) 
+	     into each <em>MeshPoint</em></li>
+	<li><tt>erodeMap</tt> stores the net (negative) erosion or (positive) sedimentation
+	     of each <em>MeshPoint</em></li>
+</ul>
+The attribute editing dialogs load the appropriate attribute maps from the <em>Map</em>
+class, update them according to the user's instructions, and then pass the
+updated values back to the <em>Map</em> class.
+</P>
+
+<H4>Displayed Map(s)</H4>
+<P>
+Whenenver attributes are changed the <em>awt.repaint()</em> method invoked,
+causing a call to <tt>Map.paintComponent()</tt>.
+</P>
+<P>
+There are many different
+attributes for each <em>MeshPoint</em>.  Which will be displayed is controlled
+by calls to <tt>Map.setDisplay()</tt>.
+</P>
+<P>
+When the call is made to repaint the map, <tt>Map.PaintComponent</tt> will:
+<ol type="1">
+	<li>decide on the dimensions of the (to be updated) map.</li>
+	<li>create a <em>Cartesian</em> interpolation matrix to compute
+	    the values at every pixel from the nearest three <em>MeshPoints</em>.</li>
+	<li>go through the display-enabled attributes, using the 
+	    appropriate map-rendering class
+	    (e.g. <tt>AltitudeMap</tt> or <tt>RiverMap</tt>) to compute
+	    the attribute values for every pixel on the map and generate
+	    the appropriate display updates.</li>
+	<li>if any selection areas are to be highlighted, add appropriate
+	    rectangles, lines or point-halos to indicate them.</li>
+</ol>
+</P>
+<P>
+The final class diagram shows the <em>Export</em> related classes
+(that handle both raw JSON and <em>RPG Maker</em> maps).
+</P>
+<a name="UML_export"></a>
+<img src="ExportDialogs.png" width="1200">
+<P>
+TO BE CONTINUED
+</P>
+
+<H2>Issues</H2>
+<P>
+TO BE CONTINUED
+</P>
+
+<H2>Musings</H2>
+<P>
+TO BE CONTINUED
+</P>
+
+</body>
+</html>

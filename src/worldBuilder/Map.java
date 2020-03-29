@@ -808,7 +808,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			repaint();
 		} else if (type == Selection.POINTS && sel_type == Selection.RECTANGLE) {
 			// rectangles can be converted to point groups
-			selectPoints(sel_x0, sel_y0, sel_x0 + sel_width, sel_y0 + sel_height);
+			selectPoints(sel_x0, sel_y0, sel_x0 + sel_width, sel_y0 + sel_height, false);
 			repaint();
 		} else if (type == Selection.NONE || sel_type != type) {
 			// current selection is wrong type, clear it
@@ -913,7 +913,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 										    selected))
 					sel_type = Selection.NONE;
 		} else if (sel_mode == Selection.POINTS) {
-			selectPoints(x_start, y_start, e.getX(), e.getY());
+			selectPoints(x_start, y_start, e.getX(), e.getY(),
+					(e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 			if (listener != null && !listener.groupSelected(sel_points, false))
 				sel_type = Selection.NONE;
 		} else if (sel_mode == Selection.ANY || sel_mode == Selection.RECTANGLE) {
@@ -994,8 +995,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * @param y0	screen y
 	 * @param x1	screen x
 	 * @param y1	screen y
+	 * @param add	add these to already selected points
 	 */
-	public void selectPoints(int x0, int y0, int x1, int y1) {
+	public void selectPoints(int x0, int y0, int x1, int y1, boolean add) {
 		// make sure we have a point selection map
 		if (sel_points == null)
 			sel_points = new boolean[mesh.vertices.length];
@@ -1016,9 +1018,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			sel_height = y0 - y1;
 		}
 		
-		// set selected bit for every point within the box
+		// update selection status for every point in the box
 		for(int i = 0; i < sel_points.length; i++)
-			sel_points[i] = inTheBox(mesh.vertices[i].x, mesh.vertices[i].y);
+			if (!add)
+				sel_points[i] = inTheBox(mesh.vertices[i].x, mesh.vertices[i].y);
+			else if (inTheBox(mesh.vertices[i].x, mesh.vertices[i].y))
+				sel_points[i] = true;
 		
 		sel_type = Selection.POINTS;
 		repaint();

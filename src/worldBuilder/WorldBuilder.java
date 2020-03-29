@@ -322,17 +322,33 @@ public class WorldBuilder  extends JFrame
 	 * @param filename of the map to be saved
 	 */
 	private void doSave(String filename) {
-		String title = (filename == null) ? "Save As" : "Save";
-		FileDialog d = new FileDialog(this, title, FileDialog.SAVE);
-		if (filename == null)
-			filename = parms.map_name + ".json";
-		d.setFile(filename);
-		d.setVisible(true);
-		filename = d.getFile();
+		JFileChooser d = new JFileChooser();
+		d.setApproveButtonText("Save");
 		if (filename != null) {
-			String dir = d.getDirectory();
-			if (dir != null)
-				filename = dir + filename;
+			d.setDialogTitle("Save");
+			d.setSelectedFile(new File(filename));
+		} else {
+			d.setDialogTitle("Save As");
+			d.setSelectedFile(new File(parms.map_name + ".json"));
+			d.setCurrentDirectory(new File("."));
+		}
+		
+		d.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		FileFilter jsonFilter = new FileFilter() {
+			public boolean accept(File f) {
+				if (f.isDirectory())
+					return true;
+				String filename = f.getPath();
+				return filename.endsWith(".json");
+			}
+			public String getDescription() {
+				return("json");
+			}
+		};
+		d.addChoosableFileFilter(jsonFilter);
+		d.setFileFilter(jsonFilter);
+		if (d.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			filename = d.getSelectedFile().getPath();
 			map.write(filename);
 			modified = false;
 		}

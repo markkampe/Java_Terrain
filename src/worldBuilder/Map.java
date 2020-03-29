@@ -432,7 +432,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			FileWriter output = new FileWriter(filename);
 			final String T_FORMAT = "    \"subregion\": true,\n";
 			final String S_FORMAT = "    \"sealevel\": \"%d%s\",\n";
-			final String R_FORMAT = "    \"rainfall\": { \"amount\": \"%d%s\" },\n";
 			final String E_FORMAT = "    \"erosion\": %d,\n";
 			final String L_FORMAT = "    \"center\": { \"latitude\": \"%.6f\", \"longitude\": \"%.6f\" },\n";
 			final String W_FORMAT = "    \"world\": { \"radius\": \"%d%s\", \"tilt\": \"%.1f\" },\n";
@@ -459,7 +458,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				double l = parms.sea_level * parms.z_range;
 				output.write(String.format(S_FORMAT, (int) l, Parameters.unit_z));
 			}
-			output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r));
+			// output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r));
 			output.write(String.format(E_FORMAT, parms.dErosion));
 			
 			if (parms.description != "")

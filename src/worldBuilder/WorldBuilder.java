@@ -58,6 +58,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem fileExit;
 	private JMenuItem editWorld;
 	private JMenuItem editMountain;
+	private JMenuItem editLand;
 	private JMenuItem editSlope;
 	private JMenuItem editRiver;
 	private JMenuItem editRain;
@@ -191,6 +192,8 @@ public class WorldBuilder  extends JFrame
 		editWorld.addActionListener(this);
 		editMountain = new JMenuItem("add mountain(s)");
 		editMountain.addActionListener(this);
+		editLand = new JMenuItem("height/erosion");
+		editLand.addActionListener(this);
 		editSlope = new JMenuItem("define slope");
 		editSlope.addActionListener(this);
 		editRain = new JMenuItem("define rainfall");
@@ -209,6 +212,7 @@ public class WorldBuilder  extends JFrame
 		editMenu.add(editWorld);
 		editMenu.add(editSlope);
 		editMenu.add(editMountain);
+		editMenu.add(editLand);
 		editMenu.add(editRiver);
 		editMenu.add(editRain);
 		editMenu.add(editErode);
@@ -461,6 +465,13 @@ public class WorldBuilder  extends JFrame
 				twoDialogError();
 			else {
 				placeDialog(new MountainDialog(map), false);
+				activeDialog = true;
+			}
+		} else if (o == editLand) {
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new LandDialog(map), false);
 				activeDialog = true;
 			}
 		} else if (o == editSlope) {

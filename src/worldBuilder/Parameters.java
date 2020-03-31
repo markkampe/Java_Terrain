@@ -62,17 +62,20 @@ public class Parameters {
 	// limits on world parameters (overide in config.json)
 	public int alt_max = 10000;		// max altitude (m)
 	public int diameter_max = 5000;	// max world diameter (km)
+	public double slope_init = 0.00001; // initial slope for new mesh
+
+	// range limits on sliders
 	public int msl_range = 1000;	// +/- (m)
 	public int rain_max = 1000;		// rain (cm/y)
 	public int m_width_divisor = 2; // world/mountain width
 	public int erosion_max = 10;	// erosion cycles
 	public int tiles_max = 10000;	// export warning limit
 	public int tribute_max = 1000;	// max incoming river flow
-	public double slope_init = 0.00001; // initial slope for new mesh
 	public int levels_min = 5;		// minimum number of height altitude levels
 	public int levels_max = 20;		// maximum number of height levels
 	public int delta_t_max = 15;	// export temperature slider range
 	public int delta_h_max = 100;	// export hydration slider range
+	public int delta_z_max = 1000;	// max land-form altitude delta (m)
 
 	// world size slider units
 	public int diam_scale = 100;	// slider labeling unit (km)

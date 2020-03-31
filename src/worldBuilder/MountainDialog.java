@@ -270,12 +270,12 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	/**
 	 * construct a mountain w/specified parameters
 	 *
-	 * @param map
-	 * @param x: (map) x coordinate
-	 * @param y: (map) y coordinate
-	 * @param radius: (map) radius (0 = full map)
-	 * @param zMax: max (map) z value
-	 * @param shape: curvature
+	 * @param map to be updated
+	 * @param x (map) x coordinate
+	 * @param y (map) y coordinate
+	 * @param radius (map) radius (0 = full map)
+	 * @param zMax max (map) z value
+	 * @param shape curvature
 	 *
 	 * compute the delta_h associated with placing one mountain
 	 * 	find all points within the effective diameter
@@ -338,16 +338,16 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	/**
 	 * construct a mountain range w/specified parameters
 	 *
-	 * @param map
-	 * @param x0: (map) x coordinate of start
-	 * @param y0: (map) y coordinate start
-	 * @param x1: (map) x coordinate of end
-	 * @param y1: (map) y coordinate end
-	 * @param radius1: left side radius
-	 * @param radius2: right side radius
-	 * @param zMax: max (map) z value
-	 * @param shape1: shape of left side
-	 * @param shape2: shape of left side
+	 * @param map to be updated
+	 * @param x0 (map) x coordinate of start
+	 * @param y0 (map) y coordinate start
+	 * @param x1 (map) x coordinate of end
+	 * @param y1 (map) y coordinate end
+	 * @param radius1 - left side radius
+	 * @param radius2 - right side radius
+	 * @param zMax max (map) z value
+	 * @param shape1 - shape of left side
+	 * @param shape2 - shape of left side
 	 * @param mineral - soil type
 	 *
 	 * compute the delta_h associated with placing a ridge

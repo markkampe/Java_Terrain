@@ -52,7 +52,7 @@ public class Bidder {
 	/**
 	 * determine the winner of the auction
 	 * @param value ... random value that chooses the winner
-	 * @return
+	 * @return index of the winning bidder
 	 */
 	public int winner(double value) {
 		// TODO - lose random # in bids?

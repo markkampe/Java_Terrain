@@ -84,7 +84,6 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 		 * called when a point is selected on the map
 		 * @param map_x		(map coordinate)
 		 * @param map_y		(map coordinate)
-		 * @return
 		 */
 		public boolean pointSelected(double map_x, double map_y) {
 			

@@ -249,7 +249,7 @@ public class Parameters {
 	/**
 	 * read parameter values from a configuration file
 	 * @param filename of configuration file to be read
-	 * @debug level of debug output to be produced
+	 * @param debug level of output to be produced
 	 */
 	public Parameters(String filename, int debug) {
 		debug_level = debug;

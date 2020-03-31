@@ -68,7 +68,7 @@ public class TileRule {
 	 * @param name of this rule
 	 * @param tileset RPGMaker tile set ID
 	 * @param level RPGMaker level to which this rule applies
-	 * @param base-tile number for this rule
+	 * @param base tile number for this rule
 	 */
 	public TileRule(String name, int tileset, int level, int base) {
 		this.ruleName = name;
@@ -227,7 +227,7 @@ public class TileRule {
 	
 	/**
 	 * is this rule inapplicable to a particular terrain
-	 * @parm terrain-type to be checked
+	 * @param terrain type to be checked
 	 */
 	public boolean wrongTerrain(int terrain) {
 		// see if the terrain type precludes this tile-bid

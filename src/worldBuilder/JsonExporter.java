@@ -45,7 +45,8 @@ public class JsonExporter implements Exporter {
 	/**
 	 * create a new Raw JSON exporter
 	 * 
-	 * @param width, height (in tiles)
+	 * @param width of the export area (in tiles)
+	 * @param height of the export area ((in tiles)
 	 */
 	public JsonExporter(int width, int height) {
 		this.x_points = width;

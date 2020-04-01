@@ -53,8 +53,8 @@ class SlopeDialog  implements ActionListener, ChangeListener, WindowListener {
  * @opt all
  * @depend - - - Map
  */
-class ErosionDialog  implements ActionListener, ChangeListener, WindowListener {
-	ErosionDialog(Map map) {};
+class LandDialog  implements ActionListener, ChangeListener, WindowListener {
+	LandDialog(Map map) {};
 }
 
 /**

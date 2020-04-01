@@ -1,7 +1,7 @@
-LIBS=../lib/OpenVoronoi.jar:../lib/javax.json-1.0.jar
+LIBS=../lib/OpenVoronoi.jar:../lib/javax.json-1.0.2.jar
 SOURCES=../src/worldBuilder/*.java
-SCOPE=package
-JD_OPTS=-public -notree -exclude java.awt --show-members $(SCOPE)
+#SCOPE=package
+JD_OPTS=-public -notree -exclude java.awt $(SCOPE)
 
 all:	javadoc uml
 	

@@ -62,7 +62,6 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem editSlope;
 	private JMenuItem editRiver;
 	private JMenuItem editRain;
-	private JMenuItem editErode;
 	private JMenuItem editCity;
 	private JMenuItem editRoads;
 	private JMenuItem viewMesh;
@@ -200,8 +199,6 @@ public class WorldBuilder  extends JFrame
 		editRain.addActionListener(this);
 		editRiver = new JMenuItem("add arterial river");
 		editRiver.addActionListener(this);
-		editErode = new JMenuItem("erosion/deposition");
-		editErode.addActionListener(this);
 		editCity = new JMenuItem("add city");
 		editCity.addActionListener(this);
 		editCity.setEnabled(false);	// SOMEDAY implement city creation
@@ -215,7 +212,6 @@ public class WorldBuilder  extends JFrame
 		editMenu.add(editLand);
 		editMenu.add(editRiver);
 		editMenu.add(editRain);
-		editMenu.add(editErode);
 		editMenu.add(new JSeparator());
 		editMenu.add(editCity);
 		editMenu.add(editRoads);
@@ -485,8 +481,6 @@ public class WorldBuilder  extends JFrame
 				placeDialog(new RiverDialog(map), false);
 				activeDialog = true;
 			}
-		} else if (o == editErode) {
-			placeDialog(new ErosionDialog(map), true);
 		} else if (o == editCity) {
 			System.out.println("implement edit:City");
 		} else if (o == editRoads) {
@@ -555,6 +549,7 @@ public class WorldBuilder  extends JFrame
 			System.out.println("Erosion changed to " + erosion.getValue());
 		} else if (o == seaLevel) {
 			parms.sea_level = ((double) seaLevel.getValue()) / parms.z_range;
+			map.recompute();
 			map.repaint();
 		} else if (o == rainfall) {
 			System.out.println("rainfall changed to " + rainfall.getValue());

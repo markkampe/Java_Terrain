@@ -119,7 +119,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		// undo any previous selection
 		if (whichPoint >= 0 && incoming != null) {
 			incoming[whichPoint] = oldFlow;
-			map.setIncoming();
+			map.setIncoming(incoming);
 		}
 		map.removeMapListener(this);
 		WorldBuilder.activeDialog = false;
@@ -150,7 +150,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		// note the change in flux
 		oldFlow = incoming[whichPoint];
 		incoming[whichPoint] = (int) flow.getValue();
-		map.setIncoming();
+		map.setIncoming(incoming);
 		
 		return true;
 	}
@@ -162,7 +162,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		if (e.getSource() == flow) {
 			if (whichPoint >= 0 && incoming != null) {
 				incoming[whichPoint] = (int) flow.getValue();
-				map.setIncoming();
+				map.setIncoming(incoming);
 			}
 		} 
 	}
@@ -173,7 +173,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel && whichPoint >= 0) {
 			incoming[whichPoint] = oldFlow;
-			map.setIncoming();
+			map.setIncoming(incoming);
 		} else if (e.getSource() == accept) {
 			// make the new parameters official
 			parms.dTribute = (int) flow.getValue();

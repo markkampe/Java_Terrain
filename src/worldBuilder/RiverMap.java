@@ -55,11 +55,9 @@ public class RiverMap {
 				    !map.on_screen(mesh.vertices[d].x, mesh.vertices[d].y))
 				   		continue;
 				
-				// ignore (flux accounting) flows from depressions to escape points
-				if (heightMap[i] - erodeMap[i] < heightMap[d] + erodeMap[d]) {
-					System.out.println("suppress escape route");
+				// ignore (flux redirection) flows from depressions to escape points
+				if (heightMap[i] - erodeMap[i] < heightMap[d] + erodeMap[d])
 					continue;
-				}
 				
 				// figure out where the end-points are on screen
 				int x1 = map.screen_x(mesh.vertices[i].x);

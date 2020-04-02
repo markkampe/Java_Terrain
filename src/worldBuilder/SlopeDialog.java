@@ -244,7 +244,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 						", max slope=" + String.format("%.1f", map.max_slope * cm_per_km) + Parameters.unit_s);
 			}
 			
-			// by default, weather comes from off-shore
+			// convert direction so that slope is always positive
 			if (dir >= 0)
 				if (slope >= 0)
 					parms.dDirection = dir - 180;

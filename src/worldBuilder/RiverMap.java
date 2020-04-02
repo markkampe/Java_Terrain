@@ -34,6 +34,8 @@ public class RiverMap {
 		Mesh mesh = map.getMesh();
 		int downHill[] = map.getDownHill();
 		double flux[] = map.getFluxMap();
+		double heightMap[] = map.getHeightMap();
+		double erodeMap[] = map.getErodeMap();
 		
 		// calculate the color curve (blue vs flow)
 		int blue_range = 255 - WATER_DIM;
@@ -52,6 +54,12 @@ public class RiverMap {
 				if (!map.on_screen(mesh.vertices[i].x, mesh.vertices[i].y) &&
 				    !map.on_screen(mesh.vertices[d].x, mesh.vertices[d].y))
 				   		continue;
+				
+				// ignore (flux accounting) flows from depressions to escape points
+				if (heightMap[i] - erodeMap[i] < heightMap[d] + erodeMap[d]) {
+					System.out.println("suppress escape route");
+					continue;
+				}
 				
 				// figure out where the end-points are on screen
 				int x1 = map.screen_x(mesh.vertices[i].x);

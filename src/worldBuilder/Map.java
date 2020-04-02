@@ -94,7 +94,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double incoming[];	// incoming water from off-map
 	private int downHill[];		// down-hill neighbor
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
-	private int erosion;		// number of erosion cycles
 	
 	/** selection types: points, line, rectangle, ... */
 	public enum Selection {NONE, POINT, POINTS, LINE, RECTANGLE, ANY};
@@ -200,6 +199,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		rainMap = r;
 		soilMap = s;
 		incoming = f;
+		
+		// instantiate a new hydrology calculator and compute the topography
+		hydro = new Hydrology(this);
 		setHeightMap(h);	// force the hydrology recalculation
 	}
 	
@@ -317,10 +319,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 						parms.dDirection = new Integer(parser.getString());
 						break;
 						
-					case "erosion":
-						parms.dErosion = new Integer(parser.getString());
-						break;
-						
 					case "radius":
 						s = parser.getString();
 						u = s.indexOf(Parameters.unit_xy);
@@ -432,7 +430,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			FileWriter output = new FileWriter(filename);
 			final String T_FORMAT = "    \"subregion\": true,\n";
 			final String S_FORMAT = "    \"sealevel\": \"%d%s\",\n";
-			final String E_FORMAT = "    \"erosion\": %d,\n";
 			final String L_FORMAT = "    \"center\": { \"latitude\": \"%.6f\", \"longitude\": \"%.6f\" },\n";
 			final String W_FORMAT = "    \"world\": { \"radius\": \"%d%s\", \"tilt\": \"%.1f\" },\n";
 			final String Z_FORMAT = "    \"scale\": { \"xy_range\": \"%d%s\", \"z_range\": \"%d%s\" },\n";
@@ -458,8 +455,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				double l = parms.sea_level * parms.z_range;
 				output.write(String.format(S_FORMAT, (int) l, Parameters.unit_z));
 			}
-			// output.write(String.format(R_FORMAT, parms.dAmount, Parameters.unit_r));
-			output.write(String.format(E_FORMAT, parms.dErosion));
 			
 			if (parms.description != "")
 				output.write(String.format(D_format,  parms.description));
@@ -548,8 +543,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
-			this.erosion = 1; // TODO s.b parms.dErosion;
-			hydro.reCalculate(true);
 		} else {
 			this.map = null;
 			this.heightMap = null;
@@ -579,10 +572,18 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public double[] setHeightMap(double newHeight[]) {
 		double old[] = heightMap; 
 		heightMap = newHeight; 
-		for(int i = 0; i < erosion; i++)
-			hydro.reCalculate(i == 0);
+		hydro.drainage();
+		hydro.waterFlow();
 		repaint();
 		return old;
+	}
+	
+	/**
+	 * recompute the drainage and water flow
+	 */
+	public void recompute() {
+		hydro.drainage();
+		hydro.waterFlow();
 	}
 
 	/**
@@ -597,39 +598,23 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public double[] setRainMap(double newRain[]) {
 		double old[] = rainMap; 
 		rainMap = newRain; 
-		for(int i = 0; i < erosion; i++)
-			hydro.reCalculate(i == 0);
+		hydro.waterFlow();
 		repaint();
 		return old;
 	}
 	
 	/**
-	 * return number of configured erosion cycles
-	 */
-	public int getErosion() {return erosion;}
-
-	/**
-	 * update the number of configured erosion sycles
-	 * @param cycles - number of configured erosion cycles
-	 */
-	public int setErosion(int cycles) {
-		int old = erosion;
-		erosion = cycles;
-		for(int i = 0; i < erosion; i++)
-			hydro.reCalculate(i == 0);
-		repaint();
-		return old;
-	}
-	
-	/**
-	 * return location of incoming arterial river
+	 * return incoming off-map rivers
 	 */
 	public double[] getIncoming() { return incoming; }
 
 	/**
 	 * update the water-flow after a change to the incoming arterial river
+	 * @param new_map new incoming flux per point
 	 */
-	public void setIncoming() {repaint(); }
+	public void setIncoming(double[] new_map) {
+		incoming = new_map;
+		repaint(); }
 	
 	/**
 	 * return map of soil type for the current mesh
@@ -1114,10 +1099,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		// make sure the Cartesian translation is up-to-date
 		if (map.height != height/TOPO_CELL || map.width != width/TOPO_CELL)
 			map = new Cartesian(mesh, x_min, y_min, x_max, y_max, width/TOPO_CELL, height/TOPO_CELL);
-		
-		// make sure all the rainfall/river/erosion data is up-to-date
-		for(int i = 0; i < erosion; i++)
-			hydro.reCalculate(i == 0);
 		
 		// start by rendering backgrounds (rain or altitude)
 		if ((display & SHOW_RAIN) != 0) {

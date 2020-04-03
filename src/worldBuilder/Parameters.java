@@ -68,7 +68,6 @@ public class Parameters {
 	public int msl_range = 1000;	// +/- (m)
 	public int rain_max = 1000;		// rain (cm/y)
 	public int m_width_divisor = 2; // world/mountain width
-	public int erosion_max = 10;	// erosion cycles
 	public int tiles_max = 10000;	// export warning limit
 	public int tribute_max = 1000;	// max incoming river flow
 	public int levels_min = 5;		// minimum number of height altitude levels
@@ -119,7 +118,6 @@ public class Parameters {
 	public static final int CYLINDRICAL = 8;
 
 	public int dAmount; 		// annual rainfall
-	public int dErosion; 		// erosion cycles
 	public int dTribute; 		// incoming river
 	public int dTileSize;		// default tile size
 	
@@ -193,9 +191,6 @@ public class Parameters {
 		// default weather
 		
 		dAmount = rain_max / 10; // moderate rainfall
-
-		// default erosion
-		dErosion = erosion_max / 2;
 
 		// default watershed
 		dTribute = tribute_max / 10; // pretty studley
@@ -377,9 +372,6 @@ public class Parameters {
 				case "rain_max":
 					rain_max = new Integer(parser.getString());
 					break;
-				case "erosion_max":
-					erosion_max = new Integer(parser.getString());
-					break;
 				case "tribute_max":
 					tribute_max = new Integer(parser.getString());
 					break;
@@ -472,7 +464,7 @@ public class Parameters {
 			System.out.println("   window:     " + width + "x" + height + unit_p + ", border=" + border + unit_p);
 			System.out.println("   waterways:  stream=" + stream_flux + unit_f + ", river=" + river_flux + unit_f
 					+ ", artery=" + artery_flux + unit_f + ", deep=" + deep_threshold + unit_z);
-			System.out.println("   erosion:    cycles=" + erosion_max 
+			System.out.println("   erosion:  "
 					+ "  Ve=" + String.format("%.2f", Ve) + unit_v
 					+ ", Vd=" + String.format("%.2f", Vd) + unit_v 
 					+ ", Ce=" + String.format("%.4f", Ce)

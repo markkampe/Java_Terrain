@@ -113,14 +113,17 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 * @param incoming (rain density)
 	 */
 	private void rainFall(double incoming) {
-		if (selected == null)
-			return;
 		
-		// set this rainfall at every selected point
+		// set the rainfall for every selected point (default all)
 		double[] rainmap = map.getRainMap();
-		for(int i = 0; i < selected.length; i++)
-			if (selected[i])
+		if (selected == null) {
+			for(int i = 0; i < rainmap.length; i++)
 				rainmap[i] = incoming;
+		} else {
+			for(int i = 0; i < selected.length; i++)
+				if (selected[i])
+					rainmap[i] = incoming;
+		}
 		
 		// tell the map about the update
 		map.setRainMap(rainmap);

@@ -416,6 +416,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		
 		parms.checkDefaults();	// Make sure defaults are consistent w/new world size
 		
+		// initialize the Hydrology engine
+		hydro.drainage();
+		hydro.waterFlow();
+		
 		if (parms.debug_level > 0) {
 			parms.worldParms();
 		}

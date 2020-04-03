@@ -340,7 +340,7 @@ public class Hydrology {
 			if (fluxMap[x] > map.max_flux)
 				map.max_flux = fluxMap[x];
 		}
-		// we already updated the in-place flux and hydration maps
+		// we have already updated the in-place flux and hydration maps
 	}
 
 	/**
@@ -408,7 +408,6 @@ public class Hydrology {
 	}
 
 	/*
-	
 			// calculate the down-hill flow and erosion
 			double v = 0;
 			if (downHill[x] >= 0) {
@@ -558,7 +557,5 @@ public class Hydrology {
 		double half_time = parms.E35C * Math.pow(2, (35-degC)/parms.Edeg);
 		return 1 - Math.pow(0.5, 365.25/half_time);
 	}
-	
-	
 }
 

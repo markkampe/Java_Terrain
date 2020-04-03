@@ -55,8 +55,11 @@ public class RiverMap {
 				    !map.on_screen(mesh.vertices[d].x, mesh.vertices[d].y))
 				   		continue;
 				
-				// ignore (flux redirection) flows from depressions to escape points
-				if (heightMap[i] - erodeMap[i] < heightMap[d] + erodeMap[d])
+				// don't draw flowing water between non-neighbors
+				boolean is_neighbor = false;
+				for(int n = 0; n < mesh.vertices[i].neighbors; n++)
+					is_neighbor |= mesh.vertices[i].neighbor[n].index == d;
+				if (!is_neighbor)
 					continue;
 				
 				// figure out where the end-points are on screen

@@ -618,6 +618,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 */
 	public void setIncoming(double[] new_map) {
 		incoming = new_map;
+		hydro.waterFlow();
 		repaint(); }
 	
 	/**

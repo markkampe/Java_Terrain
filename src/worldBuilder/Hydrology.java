@@ -27,10 +27,10 @@ public class Hydrology {
 	
 	/** how much water can different types of soil hold (m^3/m^3) */
 	public static double saturation[] = {
-		0.03,	// max water content of sedimentary soil
-		0.02,	// max water content of metamorphic soil
-		0.01,	// max water content of igneous soil
-		0.06	// max water content of alluvial soil
+		0.30,	// max water content of sedimentary soil
+		0.15,	// max water content of metamorphic soil
+		0.10,	// max water content of igneous soil
+		0.40	// max water content of alluvial soil
 	};
 	
 	/** relative erosion resistances for various bed rocks */
@@ -175,7 +175,7 @@ public class Hydrology {
 			// others inherit sink from their downHill neighbor
 			int d = downHill[point];
 			if (d >= 0) {
-					sinkMap[point] = sinkMap[d];
+					sinkMap[point] = oceanic[d] ? OCEAN : sinkMap[d];
 					continue;
 			}
 			
@@ -247,7 +247,7 @@ public class Hydrology {
 				 */
 				if (parms.debug_level >= HYDRO_DEBUG)
 					if (escapePoint >= 0) {
-						map.highlight(escapePoint, oceanic[escapePoint] ? Color.BLUE : Color.GREEN);
+						map.highlight(escapePoint, sinkMap[escapePoint] == OCEAN ? Color.BLUE : Color.GREEN);
 						// XXX I have seen blue (likely intermediate) escape points inside of a depression
 						map.highlight(s,  Color.ORANGE);
 					} else

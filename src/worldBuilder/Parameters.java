@@ -152,7 +152,7 @@ public class Parameters {
 	public double Cd = .001; 	// coefficient of deposition
 								// deposition = load * Cd/V
 	// public double dRdX = .005; 	// fraction of rain that falls per km
-	public double Dp = 0.3; 	// rain penetration (m)
+	public double Dp = 0.5; 	// rain penetration (m)
 	public double Edeg = 10; 	// degC to halve evaporation rate
 	public double E35C = 100; 	// transpiration half-time at 35C (days)
 	public double sediment = 100; // thickness of sedimentry layer (m)

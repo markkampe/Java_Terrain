@@ -26,7 +26,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	 * the old maps.
 	 */
 	private double[] old_height, new_height;
-	// private double[] old_erosion, new_erosion;
+	private double[] old_erosion, erodeMap;
 	private double[] old_soil, new_soil;
 	
 	private JCheckBox igneous;
@@ -43,6 +43,9 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	private boolean have_selection;		// there is a selected point set
 	private boolean[] selected_points;	// which points are selected
 	
+	private static final int LAND_DEBUG = 2;
+	private static final int ERODE_DEBUG = 3;
+	
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -54,25 +57,25 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		// pick up references current maps
 		this.map = map;
 		this.old_height = map.getHeightMap();
-		// this.old_erosion = map.getErodeMap();
 		this.old_soil = map.getSoilMap();
+		this.erodeMap = map.getErodeMap();	// erodeMap is edit-in-place
 		
 		// make new (WIP) copies of each
 		int points = old_height.length;
 		new_height = new double[points];
-		// new_erosion = new double[points];
+		old_erosion = new double[points];
 		new_soil = new double[points];
 		for(int i = 0; i < points; i++) {
 			new_height[i] = old_height[i];
-			// new_erosion[i] = old_erosion[i];
 			new_soil[i] = old_soil[i];
+			old_erosion[i] = erodeMap[i];
 		}
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
 		int border = parms.dialogBorder;
 		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
-		setTitle("Landform height/erosion/deposition");
+		setTitle("Edit soil, height, erosion/deposition");
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
@@ -241,12 +244,12 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 			}
 		double z_mid = (z_min + z_max)/2;
 		double z_radius = z_max - z_mid;
-		int how_flat = flatness.getValue();
-		double z_mult = 1.0;
-		if (how_flat < -1)
-			z_mult = 1.0/how_flat;
-		else if (how_flat > 1)
-			z_mult = how_flat;
+		double z_mult = multiplier(flatness.getValue());
+		
+		int v = erosion.getValue();
+		double e_value = (v == 0) ? 1.0 : multiplier(v);
+		v = deposition.getValue();
+		double d_value = (v == 0) ? 1.0 : multiplier(v);
 		
 		// go through and update all of the selected points
 		for(int i = 0; i < points; i++) {
@@ -290,10 +293,11 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		// disable any in-progress selection
 		map.selectMode(Map.Selection.NONE);
 		
-		// restore the old maps
+		// restore the old height, soil and erosion maps
 		map.setHeightMap(old_height);
 		map.setSoilMap(old_soil);
-		// FIX how to change/restore erosion
+		for(int i = 0; i < erodeMap.length; i++)
+			erodeMap[i] = old_erosion[i];
 		
 		map.removeMapListener(this);
 		map.removeKeyListener(this);
@@ -303,15 +307,51 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	}
 	
 	/**
-	 * make the most recently created mountain official
+	 * make the most recently created changes official
 	 */
 	private void acceptChanges() {
 		// make the current height, erosion, and soil-maps official
 		int points = new_height.length;
 		for(int i = 0; i < points; i++) {
 			old_height[i] = new_height[i];
-			// old_erosion[i] = new_erosion[i];
 			old_soil[i] = new_soil[i];
+			old_erosion[i] = erodeMap[i];
+		}
+		
+		// describe what we have just done
+		if (selected_points != null && parms.debug_level >= LAND_DEBUG) {
+			points = 0;
+			for(int i = 0; i < selected_points.length; i++)
+				if (selected_points[i])
+					points++;
+			String descr = String.format("Updated %d points", points);
+			
+			double s = soilType();
+			if (s >= 0)
+				descr += ", soil=" + Map.soil_names[(int)s];
+			
+			int v = altitude.getValue();
+			if (v != 0)
+				descr += String.format(", deltaH=%d%s", v, Parameters.unit_z);
+			
+			v = flatness.getValue();
+			if (v > 1)
+				descr += String.format(", vertical=*%d", v);
+			else if (v < -1)
+				descr += String.format(", vertical=/%d", -v);
+			
+			v = erosion.getValue();
+			if (v > 0)
+				descr += String.format(", erosion=*%d", v);
+			else if (v < 0)
+				descr += String.format(", erosion=/%d", -v);
+			
+			v = deposition.getValue();
+			if (v > 0)
+				descr += String.format(", deposition=*%d", v);
+			else if (v < 0)
+				descr += String.format(", deposition=/%d", -v);
+			System.out.println(descr);
 		}
 		
 		/*
@@ -400,7 +440,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	/**
 	 * return the currently selected soil type
 	 */
-	public double soilType() {
+	private double soilType() {
 		if (igneous.isSelected())
 			return(Map.IGNEOUS);
 		if (metamorphic.isSelected())
@@ -410,6 +450,18 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		if (sedimentary.isSelected())
 			return Map.SEDIMENTARY;
 		return -1;
+	}
+	
+	/**
+	 * convert a (-10 to 10) slider value into a (.1 to 10) multiplier
+	 */
+	private double multiplier(int value) {
+		if (value < -1)
+			return -1.0/value;
+		else if (value > 1)
+			return (double) value;
+		else
+			return 1.0;
 	}
 	
 	/** (perfunctory) */ public boolean regionSelected(double x, double y, double w, double h, boolean c) {return false;}

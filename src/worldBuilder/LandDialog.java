@@ -247,30 +247,38 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		double z_mult = multiplier(flatness.getValue());
 		
 		int v = erosion.getValue();
-		double e_value = (v == 0) ? 1.0 : multiplier(v);
+		double e_mult = (v == 0) ? 1.0 : multiplier(v);
 		v = deposition.getValue();
-		double d_value = (v == 0) ? 1.0 : multiplier(v);
+		double d_mult = (v == 0) ? 1.0 : multiplier(v);
 		
 		// go through and update all of the selected points
 		for(int i = 0; i < points; i++) {
 			if (!selected_points[i])
 				continue;
-			
+			/* FIX this is going bad
 			// apply the vertical range exaggeration
 			double off_middle = old_height[i] - z_mid; 
 			new_height[i] = old_height[i] + (off_middle * z_mult / z_radius);
-			
+			*/
+			new_height[i] = old_height[i];
+		
 			// apply the general altitude shift
 			new_height[i] += delta_z;
 			
 			// update the soil type (if a type has been selected)
 			if (soil >= 0)
 				new_soil[i] = soil;
+			
+			// perform incremental erosion
+			double e_meters = e_mult * map.hydro.erosion(i);
+			if (e_meters > 0)
+				erodeMap[i] = old_erosion[i] + parms.z(e_meters);
 		}
 		
 		// instantiate these updates and redraw the map
 		map.setHeightMap(new_height);
 		map.setSoilMap(new_soil);
+		// no-need to update erodeMap, that being edit-in-place
 		map.repaint();
 	}
 	
@@ -283,6 +291,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	public boolean groupSelected(boolean[] selected, boolean complete) {
 		selected_points = selected;
 		have_selection = true;
+		redraw();	// and update the display
 		return true;
 	}
 

@@ -21,6 +21,7 @@ public class Hydrology {
 	private double heightMap[];	// Z value of each MeshPoint
 	private double erodeMap[];	// Z erosion of each MeshPoint
 	private double velocityMap[];	// water speed through MeshPoint
+	private double fluxMap[];	// water flow through MeshPoint
 	private int downHill[];		// down-hill neighbor of each MeshPoint
 	private int byHeight[];		// MeshPoint indices, sorted by height
 	private boolean oceanic[];	// which points are under the sea
@@ -72,9 +73,9 @@ public class Hydrology {
 		sinkMap = new int[mesh.vertices.length];
 		velocityMap = new double[mesh.vertices.length];
 		byHeight = new int[mesh.vertices.length];
-		for(int i = 0; i < byHeight.length; i++)
+		for(int i = 0; i < mesh.vertices.length; i++)
 			byHeight[i] = i;
-
+		
 		// many square meters per (average) mesh point
 		area = 1000000 * (parms.xy_range * parms.xy_range) / mesh.vertices.length;
 		// how many M^3/s is 1cm of annual rainfall
@@ -274,11 +275,12 @@ public class Hydrology {
 			return;
 		
 		// initialize our output maps
-		double[] fluxMap = map.getFluxMap();
+		fluxMap = map.getFluxMap();
 		double[] hydrationMap = map.getHydrationMap();
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			fluxMap[i] = 0.0;
 			hydrationMap[i] = 0.0;
+			velocityMap[i] = 0.0;
 		}
 		
 		// calculate the incoming water flux for each point
@@ -327,7 +329,9 @@ public class Hydrology {
 					hydrationMap[x] = myHeight - hisHeight;
 					velocityMap[x] = 0.0;
 				} else {
-					double s = slope(d,x);
+					double s = slope(x,d);
+					if (s < 0)
+						s *= -1;
 					if (s > map.max_slope)
 						map.max_slope = s;
 					velocityMap[x] = velocity(s);
@@ -408,17 +412,7 @@ public class Hydrology {
 	}
 
 	/*
-			// calculate the down-hill flow and erosion
-			double v = 0;
-			if (downHill[x] >= 0) {
-				// figure out slope and velocity
-				double s = slope(downHill[x], x);
-				if (s > map.max_slope)
-					map.max_slope = s;
-				v = velocity(s);
-				if (v > map.max_velocity)
-					map.max_velocity = v;
-				
+			
 				// are we eroding or depositing
 				double e = erosion(v);
 				if (e > 0) {
@@ -450,7 +444,7 @@ public class Hydrology {
 	 * compute the slope between two MeshPoints
 	 * @param here	point from which flow originates
 	 * @param there point towards which water flows
-	 * @return slope between two MeshPoints
+	 * @return slope between two MeshPoints (likely negative)
 	 */
 	private double slope(int here, int there) {
 		double dx = (parms.km(mesh.vertices[there].x) - parms.km(mesh.vertices[here].x)) * 1000;
@@ -463,12 +457,10 @@ public class Hydrology {
 	 * estimated water flow velocity
 	 * @param slope ... dZ/dX
 	 * @return flow speed (meters/second)
-	 * 
-	 * NOTE: velocity ranges from .1m/s to 3m/s
 	 */
-	public static double velocity(double slope) {
-		double v = 3 * slope;
-		double vMin = Parameters.getInstance().vMin;
+	public double velocity(double slope) {
+		double v = (slope > 0) ? 3 * slope : -3 * slope;
+		double vMin = parms.vMin;
 		return (v < vMin) ? vMin : v;
 	}
 	
@@ -502,7 +494,7 @@ public class Hydrology {
 	 * @param velocity ... flow speed (meters/second)
 	 * @return estimated width (meters)
 	 */
-	public static double width(double flow, double velocity) {
+	public double width(double flow, double velocity) {
 		double area = flow / velocity;
 		double ratio = widthToDepth(velocity);
 		return Math.sqrt(area * ratio);
@@ -514,30 +506,44 @@ public class Hydrology {
 	 * @param velocity ... flow speed (meters/second)
 	 * @return estimated depth (meters)
 	 */
-	public static double depth(double flow, double velocity) {
+	public double depth(double flow, double velocity) {
 		double area = flow / velocity;
 		double ratio = widthToDepth(velocity);
 		return Math.sqrt(area / ratio);
 	}
 	
 	/**
-	 * estimated erosion and deposition
+	 * estimated erosion
+	 * @param index of point being checked
+	 * @return meters of erosion
 	 * 
 	 * NOTE:
 	 * 	The Hjulstrom curve says that 
 	 * 		erosion starts at 1m/s and is major by 2m/s
 	 * 			slopes between .6 and 1.2
+	 */
+	public double erosion(int index) {
+		double v = velocityMap[index];
+		double flux = fluxMap[index];
+		double Ve = parms.Ve;
+		if (v < Ve || flux == 0)
+			return 0.0;
+		
+		return flux * parms.Ce * (v * v)/(Ve * Ve);
+	}
+	
+	/**
+	 * estimated deposition
+	 * @param index of the point being checked
+	 * @return fraction of the carried load that will settle out
+	 * 
+	 * NOTE:
+	 * 	The Hjulstrom curve says that 
 	 * 		sedimentation starts at .1m/s and is done by .005m/s
 	 * 			slopes between .03 and .0015
 	 */
-	// returns M3 soil that will be eroded per M3 of flow
-	private double erosion( double v ) {
-		double Ve = parms.Ve;
-		return (v < Ve) ? 0 : parms.Ce * (v * v)/(Ve * Ve);
-	}
-	
-	// returns fraction of carried load that will settle out
-	private double sedimentation( double v) {
+	public double sedimentation(int index) {
+		double v = velocityMap[index];
 		if (v > parms.Vd)
 			return 0;
 		return parms.Cd/v;

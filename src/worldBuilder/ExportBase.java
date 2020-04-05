@@ -299,9 +299,9 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 			double slope = parms.height(z0 - z1)/dist;
 		
 			// figure out the river depth and width
-			double v = Hydrology.velocity(slope);
-			double depth = Hydrology.depth(fluxMap[i],  v);
-			double width = Hydrology.width(fluxMap[i],  v);
+			double v = map.hydro.velocity(slope);
+			double depth = map.hydro.depth(fluxMap[i],  v);
+			double width = map.hydro.width(fluxMap[i],  v);
 			
 			// figure out how many tiles wide the river should be
 			int stroke = (width <= tilesize) ? 1 : (int) ((width + width - 1) / tilesize);

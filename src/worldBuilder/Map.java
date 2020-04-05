@@ -81,8 +81,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private Color highLights[];		// points to highlight
 	private boolean highlighting;	// are there points to highlight
 	
-	// the interesting data
-	private Hydrology hydro;	// hydrology calculator
+	public Hydrology hydro;		// hydrology calculator for current map
 	
 	// per MeshPoint information
 	private double heightMap[]; // Height of each mesh point

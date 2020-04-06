@@ -136,19 +136,37 @@ public class Hydrology {
 		/*
 		 * 2. determine the down-hill neighbor of all non-oceanic points
 		 */
+		map.max_slope = 0;
+		map.max_height = -666.0;
+		map.min_height = 666.0;
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			if (oceanic[i])			// sub-oceanic points have none
 				continue;
 
+			// note the hightest and lowest points on the map
+			double best = heightMap[i] - erodeMap[i];
+			if (best > map.max_height)
+				map.max_height = best;
+			else if (best < map.min_height)
+				map.min_height = best;
+			
 			// find the lowest neighbor who is lower than me
-			double lowest_height = heightMap[i] - erodeMap[i];
 			for( int n = 0; n < mesh.vertices[i].neighbors; n++) {
 				int x = mesh.vertices[i].neighbor[n].index;
 				double z = heightMap[x] - erodeMap[x];
-				if (z < lowest_height) {
+				if (z < best) {
 					downHill[i] = x;
-					lowest_height = z;
+					best = z;
 				}
+			}
+			
+			// keep track of the steepest slope
+			if (downHill[i] >= 0) {
+				double s = slope(downHill[i], i);
+				if (s < 0)
+					s = -s;
+				if (s > map.max_slope)
+					map.max_slope = s;
 			}
 		}
 
@@ -284,7 +302,6 @@ public class Hydrology {
 		}
 		
 		// calculate the incoming water flux for each point
-		map.max_slope = 0.0;
 		map.max_flux = 0.0;
 		map.max_velocity = 0.0;
 		heightSort(0, byHeight.length - 1);
@@ -332,8 +349,6 @@ public class Hydrology {
 					double s = slope(x,d);
 					if (s < 0)
 						s *= -1;
-					if (s > map.max_slope)
-						map.max_slope = s;
 					velocityMap[x] = velocity(s);
 					if (velocityMap[x] > map.max_velocity)
 						map.max_velocity = velocityMap[x];
@@ -533,9 +548,9 @@ public class Hydrology {
 	}
 	
 	/**
-	 * estimated deposition
+	 * estimated sediment deposition
 	 * @param index of the point being checked
-	 * @return fraction of the carried load that will settle out
+	 * @return meters of deposited sediment
 	 * 
 	 * NOTE:
 	 * 	The Hjulstrom curve says that 
@@ -544,9 +559,26 @@ public class Hydrology {
 	 */
 	public double sedimentation(int index) {
 		double v = velocityMap[index];
-		if (v > parms.Vd)
-			return 0;
-		return parms.Cd/v;
+		double flux = fluxMap[index];
+		if (flux == 0 || v < parms.vMin || v > parms.Vd)
+			return 0.0;
+		
+		/*
+		 * Measured suspended sediment in real rivers is typically
+		 * in the range of 1-100mg/L (or 1-100g/M^3).  Assuming the
+		 * eroded material had a density in the range of 1.5-2.5kg/L
+		 * (or 0.4-0.6cc/g), the suspended soil would have a volume of
+		 * 0.5-50cc/M^3 (or .0000005 to .00005 the volume of the water).
+		 * 
+		 * This model assumes the water can carry as much as 10g (5cc) 
+		 * of suspended soil per cubic meter, proportional to speed.
+		 */
+		double soil_per_M3 = 0.000005;	// M^3 of soil/M^3 of water
+		//soil_per_M3 *= v/parms.Vd;			// scaled by the water speed
+		double M3 = flux * year * 1000;	// M^3 of water per millennium
+		double soil = soil_per_M3 * M3;	// M^3 of soil per millennium
+		double depth = soil / area;		// spread over over entire MeshPoint
+		return depth;
 	}
 	
 	/*

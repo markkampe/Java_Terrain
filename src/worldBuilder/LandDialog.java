@@ -251,6 +251,8 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		v = deposition.getValue();
 		double d_mult = (v == 0) ? 1.0 : multiplier(v);
 		
+		map.max_erosion = 0.0;
+		map.max_deposition = 0.0;
 		// go through and update all of the selected points
 		for(int i = 0; i < points; i++) {
 			if (!selected_points[i])
@@ -269,10 +271,21 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 			if (soil >= 0)
 				new_soil[i] = soil;
 			
-			// perform incremental erosion
+			// perform incremental erosion 
 			double e_meters = e_mult * map.hydro.erosion(i);
-			if (e_meters > 0)
+			if (e_meters > 0) {
 				erodeMap[i] = old_erosion[i] + parms.z(e_meters);
+				if (erodeMap[i] > map.max_erosion)
+					map.max_erosion = erodeMap[i];
+			}
+			
+			// perform incremental sediment deposition
+			double d_meters = d_mult * map.hydro.sedimentation(i);
+			if (d_meters > 0) {
+				erodeMap[i] = old_erosion[i] - parms.z(d_meters);
+				if (erodeMap[i] < 0 && erodeMap[i] < -map.max_deposition)
+					map.max_deposition = -erodeMap[i];
+			}
 		}
 		
 		// instantiate these updates and redraw the map
@@ -328,7 +341,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		}
 		
 		// describe what we have just done
-		if (selected_points != null && parms.debug_level >= LAND_DEBUG) {
+		if (selected_points != null && parms.debug_level >= 0) {
 			points = 0;
 			for(int i = 0; i < selected_points.length; i++)
 				if (selected_points[i])
@@ -361,6 +374,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 			else if (v < 0)
 				descr += String.format(", deposition=/%d", -v);
 			System.out.println(descr);
+			map.region_stats();
 		}
 		
 		/*

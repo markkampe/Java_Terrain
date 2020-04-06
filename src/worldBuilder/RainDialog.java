@@ -196,9 +196,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			
 			if (parms.debug_level > 0) {
 				System.out.println("Mean rainfall: " + (int) meanRain() + Parameters.unit_r);
-				System.out.println("Rivers:    " +
-						"max flow " + String.format("%.2f", map.max_flux) + Parameters.unit_f +
-						", max speed " + String.format("%.2f",  map.max_velocity) + Parameters.unit_v);
+				map.region_stats();
 			}
 			
 			// we no longer need the old rain map

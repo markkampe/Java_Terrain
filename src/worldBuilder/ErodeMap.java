@@ -11,8 +11,10 @@ public class ErodeMap {
 
 	private static final int DIM = 128;
 	private static final int BRITE = 255;
+	private static final double MIN_DEPOSITION = 0.1;	// meters
+	
 	private Map map;
-	//private Parameters parms;
+	private Parameters parms;
 	
 	/**
 	 * instantiate an erosion/deposition map renderer
@@ -20,7 +22,7 @@ public class ErodeMap {
 	 */
 	public ErodeMap(Map map) {
 		this.map = map;
-		//this.parms = Parameters.getInstance();
+		this.parms = Parameters.getInstance();
 	}
 
 	/**
@@ -34,6 +36,7 @@ public class ErodeMap {
 	public void paint(Graphics g, int width, int height, int cellWidth) {
 		int h = height/cellWidth;
 		int w = width/cellWidth;
+		double min_deposition = parms.z(MIN_DEPOSITION);
 		
 		// interpolate erosion values from the latest mesh
 		Cartesian cart = map.getCartesian();
@@ -49,14 +52,13 @@ public class ErodeMap {
 					double shade = Map.linear(DIM, BRITE, e);
 					g.setColor(new Color((int) shade, 0, (int) shade));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
-				} else if (e < 0) {	// deposition
+				} else if (e < -min_deposition) {	// deposition
 					// TODO: move deposition to a fixed loagarithmic scale
 					e /= map.max_deposition;
 					double shade = Map.linear(DIM, BRITE, e);
 					g.setColor(new Color((int) shade, (int) shade, 0));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				}
-				
 			}
 	}
 }

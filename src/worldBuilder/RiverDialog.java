@@ -177,9 +177,12 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		} else if (e.getSource() == accept) {
 			// make the new parameters official
 			parms.dTribute = (int) flow.getValue();
-			if (parms.debug_level > 0)
+			if (parms.debug_level > 0) {
 				System.out.println("Artial river enters at " + entryPoint.getText() + ", flow=" + (int) incoming[whichPoint] + " " + Parameters.unit_f);
+				map.region_stats();
+			}
 		}
+			
 		
 		// clean up the graphics
 		map.removeMapListener(this);

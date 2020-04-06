@@ -75,7 +75,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		this.map = map;
 		this.oldHeight = map.getHeightMap();
 		this.parms = Parameters.getInstance();
-		
+
 		// copy the current height map
 		this.newHeight = new double[oldHeight.length];
 		for(int i = 0; i < oldHeight.length; i++)
@@ -578,7 +578,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		if (!placed.equals("") && parms.debug_level > 0) {
 			System.out.print(placed);
-			System.out.println("   max slope=" + String.format("%.4f", map.max_slope));
+			map.region_stats();
 		}
 		placed = "";
 	}

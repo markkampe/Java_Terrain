@@ -100,7 +100,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private MapListener listener;	// who to call for selection events
 	
 	/** results of hydrological computation	*/
-	public double max_slope,		// maximum slope
+	public double max_height,		// maximum altitude (MSL)
+				  min_height,		// minimum altitude (MSL)
+				  max_slope,		// maximum slope
 				  max_flux,			// maximum river flow
 				  max_velocity,		// maximum water velocity
 				  max_erosion,		// maximum soil loss due to erosion
@@ -202,8 +204,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		// instantiate a new hydrology calculator and compute the topography
 		hydro = new Hydrology(this);
 		setHeightMap(h);	// force the hydrology recalculation
+		
+		if (parms.debug_level > 0) {
+			parms.worldParms();
+			region_stats();
+		}
 	}
-	
 	
 	
 	/**
@@ -421,7 +427,34 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		
 		if (parms.debug_level > 0) {
 			parms.worldParms();
+			region_stats();
 		}
+	}
+	
+	/**
+	 * summarize the world topography and hydrology
+	 */
+	public void region_stats() {
+		System.out.println("Topographic Extremes");
+		String format = parms.altitude(min_height) > 2 ? "%.0f-%.0f%s" :
+														 "%.1f-%.0f%s";
+		System.out.println(String.format("  altitude: " + format + " (MSL)",
+								parms.altitude(min_height), 
+								parms.altitude(max_height),
+								Parameters.unit_z));
+		System.out.println(String.format("  slope:    %.3f", max_slope));
+		
+		if (max_flux == 0)
+			return;
+		System.out.println(String.format("  rivers:   velocity=%.2f%s, flow=%.2f%s",
+								max_velocity, Parameters.unit_v, 
+								max_flux, Parameters.unit_f));
+		
+		if (max_erosion == 0 && max_deposition == 0)
+			return;
+		System.out.println(String.format("  erosion:  %.2f%s, deposition: %.2f%s",
+								max_erosion, Parameters.unit_z,
+								max_deposition, Parameters.unit_z));
 	}
 	
 	/**

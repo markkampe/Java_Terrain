@@ -502,16 +502,16 @@ public class Parameters {
 	 */
 	public void worldParms() {
 		System.out.println("World Configuration");
-		System.out.println("   maped area: " + xy_range + "x" + xy_range + unit_xy2 + ", max altitude "
+		System.out.println("   mapped area: " + xy_range + "x" + xy_range + unit_xy2 + ", max altitude "
 				+ z_range / 2 + unit_z);
-		System.out.println("   planetary:  lat=" + latitude + unit_d + ", lon=" + longitude + unit_d 
+		System.out.println("   planetary:   lat=" + latitude + unit_d + ", lon=" + longitude + unit_d 
 				+ ", radius=" + radius + unit_xy + ", tilt=" + tilt + unit_d);
-		System.out.println("               Tmean=" + String.format("%.1f", meanTemp()) + unit_t + ", Tsummer="
+		System.out.println("                Tmean=" + String.format("%.1f", meanTemp()) + unit_t + ", Tsummer="
 				+ String.format("%.1f", meanSummer()) + unit_t + ", Twinter=" + String.format("%.1f", meanWinter())
 				+ unit_t);
-		System.out.println("   topo maps:  " + topo_minor + unit_z + "/line, " + topo_major + " minors/major");
+		System.out.println("   topo maps:   " + topo_minor + unit_z + "/line, " + topo_major + " minors/major");
 		if (description != "")
-			System.out.println("   description:" + getDescription() + "\n");
+			System.out.println("   description: " + getDescription() + "\n");
 	}
 
 	/**

@@ -436,9 +436,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 */
 	public void region_stats() {
 		System.out.println("Topographic Extremes");
-		String format = parms.altitude(min_height) > 2 ? "%.0f-%.0f%s" :
-														 "%.1f-%.0f%s";
-		System.out.println(String.format("  altitude: " + format + " (MSL)",
+		System.out.println(String.format("  altitude: %.1f-%.0f%s (MSL)",
 								parms.altitude(min_height), 
 								parms.altitude(max_height),
 								Parameters.unit_z));

@@ -140,7 +140,7 @@ public class Hydrology {
 		map.max_height = -666.0;
 		map.min_height = 666.0;
 		for(int i = 0; i < mesh.vertices.length; i++) {
-			if (oceanic[i])			// sub-oceanic points have none
+			if (oceanic[i])			// sub-oceanic points don't count
 				continue;
 
 			// note the hightest and lowest points on the map

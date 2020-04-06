@@ -191,9 +191,9 @@ public class WorldBuilder  extends JFrame
 		editWorld.addActionListener(this);
 		editMountain = new JMenuItem("add mountain(s)");
 		editMountain.addActionListener(this);
-		editLand = new JMenuItem("soil/height/erosion");
+		editLand = new JMenuItem("soil/height/transport");
 		editLand.addActionListener(this);
-		editSlope = new JMenuItem("define slope");
+		editSlope = new JMenuItem("continental slope");
 		editSlope.addActionListener(this);
 		editRain = new JMenuItem("define rainfall");
 		editRain.addActionListener(this);

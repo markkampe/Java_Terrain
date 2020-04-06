@@ -238,13 +238,11 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 			oldHeight = null;	// don't need this anymore
 			this.dispose();
 			
-			if (parms.debug_level > 0) {
-				final int cm_per_km = 100000;
-				System.out.println("Incline continent: axis=" + dir + ", slope=" + slope + Parameters.unit_s +
-						", max slope=" + String.format("%.1f", map.max_slope * cm_per_km) + Parameters.unit_s);
-			}
+			if (parms.debug_level > 0)
+				System.out.println("Incline continent: axis=" + dir + Parameters.unit_d + 
+						", slope=" + slope + Parameters.unit_s);
 			
-			// convert direction so that slope is always positive
+			// convert direction so that default slope is always positive
 			if (dir >= 0)
 				if (slope >= 0)
 					parms.dDirection = dir - 180;

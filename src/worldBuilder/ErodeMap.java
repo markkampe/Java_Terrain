@@ -38,6 +38,10 @@ public class ErodeMap {
 		int w = width/cellWidth;
 		double min_deposition = parms.z(MIN_DEPOSITION);
 		
+		// note the range on our map
+		double max_erosion = parms.z(map.max_erosion);
+		double max_deposition = parms.z(map.max_deposition);
+		
 		// interpolate erosion values from the latest mesh
 		Cartesian cart = map.getCartesian();
 		double eArray[][] = cart.interpolate(map.getErodeMap());
@@ -47,15 +51,11 @@ public class ErodeMap {
 			for(int c = 0; c < w; c++) {
 				double e = eArray[r][c];
 				if (e > 0) {		// erosion
-					// TODO: move erosion to a fixed loagarithmic scale
-					e /= map.max_erosion;
-					double shade = Map.linear(DIM, BRITE, e);
+					double shade = Map.logarithmic(DIM, BRITE, e/max_erosion, 0.1);
 					g.setColor(new Color((int) shade, 0, (int) shade));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				} else if (e < -min_deposition) {	// deposition
-					// TODO: move deposition to a fixed loagarithmic scale
-					e /= map.max_deposition;
-					double shade = Map.linear(DIM, BRITE, e);
+					double shade = Map.logarithmic(DIM, BRITE, -e/max_deposition, 0.1);
 					g.setColor(new Color((int) shade, (int) shade, 0));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				}

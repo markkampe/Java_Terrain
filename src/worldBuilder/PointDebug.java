@@ -22,6 +22,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 		private JLabel infoFlux;
 		private JLabel infoRain;
 		private JLabel infoErode;
+		private JLabel infoSuspended;
 		private JLabel infoSoil;
 		private JLabel infoHydro;
 		private JLabel infoDownhill;
@@ -46,11 +47,12 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			infoFlux = new JLabel();
 			infoRain = new JLabel();
 			infoErode = new JLabel();
+			infoSuspended = new JLabel();
 			infoSoil = new JLabel();
 			infoHydro = new JLabel();
 			infoDownhill = new JLabel();
 			
-			JPanel info = new JPanel(new GridLayout(10,2));
+			JPanel info = new JPanel(new GridLayout(11,2));
 			info.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
 			info.add(new JLabel("Index:"));
 			info.add(infoIndex);
@@ -60,12 +62,14 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			info.add(infoWorld);
 			info.add(new JLabel("Altitude:"));
 			info.add(infoAlt);
-			info.add(new JLabel("Water Flux:"));
-			info.add(infoFlux);
 			info.add(new JLabel("rainfall:"));
 			info.add(infoRain);
+			info.add(new JLabel("Water Flux:"));
+			info.add(infoFlux);
 			info.add(new JLabel("Erosion/(Deposition):"));
 			info.add(infoErode);
+			info.add(new JLabel("Suspended"));
+			info.add(infoSuspended);
 			info.add(new JLabel("Soil Type:"));
 			info.add(infoSoil);
 			info.add(new JLabel("Hydration:"));
@@ -119,6 +123,9 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			else
 				desc = String.format("%.3f%s", h, Parameters.unit_z);
 			infoErode.setText(desc);
+			
+			double susp = map.hydro.suspended[point.index];
+			infoSuspended.setText(String.format("%f%s", susp, Parameters.unit_f));
 			
 			double soilMap[] = map.getSoilMap();
 			desc = erodeMap[point.index] < 0 ? Map.soil_names[Map.ALLUVIAL] + "/" : "";

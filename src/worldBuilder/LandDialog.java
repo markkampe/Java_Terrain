@@ -257,12 +257,13 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		for(int i = 0; i < points; i++) {
 			if (!selected_points[i])
 				continue;
-			/* FIX this is going bad
-			// apply the vertical range exaggeration
-			double off_middle = old_height[i] - z_mid; 
-			new_height[i] = old_height[i] + (off_middle * z_mult / z_radius);
-			*/
-			new_height[i] = old_height[i];
+
+			// see if we need to expand/compress height
+			if (z_mult != 1.0) {
+				double my_delta = old_height[i] - z_mid;
+				new_height[i] = z_mid + (z_mult * my_delta);
+			} else
+				new_height[i] = old_height[i];
 		
 			// apply the general altitude shift
 			new_height[i] += delta_z;
@@ -273,19 +274,13 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 			
 			// perform incremental erosion 
 			double e_meters = e_mult * map.hydro.erosion(i);
-			if (e_meters > 0) {
+			if (e_meters > 0)
 				erodeMap[i] = old_erosion[i] + parms.z(e_meters);
-				if (erodeMap[i] > map.max_erosion)
-					map.max_erosion = erodeMap[i];
-			}
 			
 			// perform incremental sediment deposition
 			double d_meters = d_mult * map.hydro.sedimentation(i);
-			if (d_meters > 0) {
+			if (d_meters > 0)
 				erodeMap[i] = old_erosion[i] - parms.z(d_meters);
-				if (erodeMap[i] < 0 && erodeMap[i] < -map.max_deposition)
-					map.max_deposition = -erodeMap[i];
-			}
 		}
 		
 		// instantiate these updates and redraw the map

@@ -454,8 +454,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		if (max_erosion == 0 && max_deposition == 0)
 			return;
 		System.out.println(String.format("  erosion:  %.2f%s, deposition: %.2f%s",
-								max_erosion, Parameters.unit_z,
-								max_deposition, Parameters.unit_z));
+								parms.height(max_erosion), Parameters.unit_z,
+								parms.height(max_deposition), Parameters.unit_z));
 	}
 	
 	/**

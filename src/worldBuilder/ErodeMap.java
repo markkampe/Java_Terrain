@@ -39,8 +39,8 @@ public class ErodeMap {
 		double min_deposition = parms.z(MIN_DEPOSITION);
 		
 		// note the range on our map
-		double max_erosion = parms.z(map.max_erosion);
-		double max_deposition = parms.z(map.max_deposition);
+		double max_erosion = map.max_erosion;
+		double max_deposition = map.max_deposition;
 		
 		// interpolate erosion values from the latest mesh
 		Cartesian cart = map.getCartesian();

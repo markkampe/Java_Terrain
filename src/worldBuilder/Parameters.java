@@ -33,7 +33,7 @@ public class Parameters {
 	public LinkedList<String> exportRules;
 	public String config_directory = "";
 
-	// operating units ... hard-wired into the code
+	// operating units ... hard-wired into the code (assumes UTF8)
 	public static final String unit_xy = "km";			// distance
 	public static final String unit_xy2 = "km\u00B2";	// land area
 	public static final String unit_z = "m";			// altitude
@@ -41,6 +41,7 @@ public class Parameters {
 	public static final String unit_s = "cm/km";		// slope
 	public static final String unit_f = "m\u00B3/s";	// flow rate
 	public static final String unit_v = "m/s";			// velocity
+	public static final String unit_V = "m\u00B3";		// volume
 	public static final String unit_t = "\u00B0C";		// temperature
 	public static final String unit_d = "\u00B0";		// direction in degrees
 	public static final String unit_p = "px";			// screen resolution
@@ -141,14 +142,14 @@ public class Parameters {
 	public String Out_palette;	// Outside: palette file
 
 	// tunable physical process parameters
-	// others (less likely to change) are in Hydrology.java
-	public double Ve = 0.75; 	// minimum velocity for erosion
-	public double Ce = 1.5; 	// coefficient of erosion
-								// erosion = flow * Ce * (V/Ve)^2
-	public double Vd = 0.15; 	// maximum velocity for deposition
-	public double vMin = 0.005; // minimum water velocity
-	public double Cd = .001; 	// coefficient of deposition
-								// deposition = load * Cd/V
+	public double Vmin = 0.005; // minimum velocity (M/s) for flowing water
+	public double Vd = 0.30; 	// (Hjulstrom) maximum velocity (M/s) for deposition
+	public double Ve = 0.40; 	// (Hjulstrom) minimum velocity (M/s) for erosion
+	public double Vmax = 3.0;	// maximum velocity (M/s) for flowing water
+	public double Smax = 0.10;	// maximum liters of soil per liter of water
+	public double Ce = 0.10;	// how much of possible erosion allowed per point
+	public double Cd = 0.10;	// how much of possible deposition allowed per point
+	
 	// public double dRdX = .005; 	// fraction of rain that falls per km
 	public double Dp = 0.5; 	// rain penetration (m)
 	public double Edeg = 10; 	// degC to halve evaporation rate
@@ -386,17 +387,21 @@ public class Parameters {
 				case "Ve": // critical velocity for erosion
 					Ve = new Double(parser.getString());
 					break;
-				case "Ce": // coefficient of erosion
-					Ce = new Double(parser.getString());
-					break;
 				case "Vd": // critical velocity for deposition
 					Vd = new Double(parser.getString());
 					break;
-				case "Cd": // coefficient of deposition
-					Cd = new Double(parser.getString());
-					break;
+				case "Vmin": // lowest water velocity
+					Vmin = new Double(parser.getString());
+				case "Vmax": // highest water velocity
+					Vmax = new Double(parser.getString());
 				case "Dp": // rain penetration depth (m)
 					Dp = new Double(parser.getString());
+					break;
+				case "Ce": // per-point erosion coefficient
+					Ce = new Double(parser.getString());
+					break;
+				case "Cd": // per-point deposition coefficient
+					Cd = new Double(parser.getString());
 					break;
 				case "Edeg": // evaporation half-time doubling temp
 					Edeg = new Double(parser.getString());
@@ -466,9 +471,13 @@ public class Parameters {
 					+ ", artery=" + artery_flux + unit_f + ", deep=" + deep_threshold + unit_z);
 			System.out.println("   erosion:  "
 					+ "  Ve=" + String.format("%.2f", Ve) + unit_v
-					+ ", Vd=" + String.format("%.2f", Vd) + unit_v 
-					+ ", Ce=" + String.format("%.4f", Ce)
-					+ ", Cd=" + String.format("%.4f", Cd));
+					+ ", Vmax=" + String.format("%.1f", Vmax) + unit_v
+					+ ", Ce=" + String.format("%.2f",  Ce)
+					+ ", max susp=" + String.format("%4.1f%%", 100 * Smax));
+			System.out.println("   sediment: "
+					+ "  Vmin=" + String.format("%.3f", Vmin) + unit_v
+					+ ", Vd=" + String.format("%.2f", Vd) + unit_v
+					+ ", Cd=" + String.format("%.2f",  Cd));
 			System.out.println("   rainfall:   " + "default=" + dAmount + unit_r
 					+ ", rain_max=" + rain_max + unit_r
 					+ ", Dp=" + String.format("%.1f",  Dp) + unit_z);

@@ -100,13 +100,16 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private MapListener listener;	// who to call for selection events
 	
 	/** results of hydrological computation	*/
-	public double max_height,		// maximum altitude (MSL)
-				  min_height,		// minimum altitude (MSL)
-				  max_slope,		// maximum slope
-				  max_flux,			// maximum river flow
-				  max_velocity,		// maximum water velocity
-				  max_erosion,		// maximum soil loss due to erosion
-				  max_deposition;	// maximum soil gain due to sedimentation
+	public double max_height,		// maximum altitude (m MSL)
+				  min_height,		// minimum altitude (m MSL)
+				  min_slope,		// shallowest slope
+				  max_slope,		// steepest slope
+				  min_flux,			// minimum river flow (m^3/s)
+				  max_flux,			// maximum river flow (m^3/s)
+				  min_velocity,		// minimum water velocity (m/s)
+				  max_velocity,		// maximum water velocity (m/s)
+				  max_erosion,		// maximum soil loss due to erosion (m)
+				  max_deposition;	// maximum soil gain due to sedimentation (m)
 
 	private Parameters parms;
 	
@@ -440,13 +443,13 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 								parms.altitude(min_height), 
 								parms.altitude(max_height),
 								Parameters.unit_z));
-		System.out.println(String.format("  slope:    %.3f", max_slope));
+		System.out.println(String.format("  slope:    %.3f-%.3f", min_slope, max_slope));
 		
 		if (max_flux == 0)
 			return;
-		System.out.println(String.format("  rivers:   velocity=%.2f%s, flow=%.2f%s",
-								max_velocity, Parameters.unit_v, 
-								max_flux, Parameters.unit_f));
+		System.out.println(String.format("  rivers:   velocity=%.4f-%.2f%s, flow=%.3f-%.2f%s",
+								min_velocity, max_velocity, Parameters.unit_v, 
+								min_flux, max_flux, Parameters.unit_f));
 		
 		if (max_erosion == 0 && max_deposition == 0)
 			return;

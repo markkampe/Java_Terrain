@@ -46,11 +46,11 @@ public class Hydrology {
 	};
 	
 	/** relative erosion resistances for various bed rocks */
-	public static double competence[] = {
+	public static double resistance[] = {
 		1.0,	// sedimentary erosion resistance
 		4.0,	// metamorphic erosion resistance
 		2.5,	// igneous erosion resistance
-		0.3		// alluvial erosion resistance
+		0.5		// alluvial erosion resistance
 	};
 	
 	/**
@@ -447,94 +447,76 @@ public class Hydrology {
 			hydrationMap[x] = saturation[soilType];
 			fluxMap[x] -= lost / YEAR;
 			
-			
 			// figure out what happens to the excess water
 			int d = downHill[x];
 			if (d >= 0) {
 				String msg = null;	// debug message string
 				
-				// it flows to my downHill neighbor
+				// my net incoming flows to my downhill neightbor
 				fluxMap[d] += fluxMap[x];
 				
-				// if we are below our escape point, we are under water
-				if (outlet[x] != UNKNOWN) {
-					// all of our suspended soil flows to our downhill
-					suspended[d] += suspended[x];
+				// calculate the down-hill water velocity
+				double v = velocity(slopeMap[x]);
+				if (velocityMap[d] < v)
+					velocityMap[d] = v;
+				
+				// take average of my incoming and outgoing
+				v = (velocityMap[x] + velocityMap[d]) / 2;
+				if (v > map.max_velocity)
+					map.max_velocity = v;
+				if (v >= Vmin && v < map.min_velocity)
+					map.min_velocity = v;
+				
+				// we might be constructing a debug log entry
+				msg = (debug_log == null) ? null :
+					String.format("x=%4d, v=%6.3f, f=%6.3f", x, v, fluxMap[x]);
+				
+				if (v >= Ve) {	
+					// erosion doesn't happen in lakes, and only up to max capacity
+					double can_hold = Smax * fluxMap[x];
+					double taken = 0.0;
+					if (outlet[x] == UNKNOWN && suspended[x] < can_hold) {
+						double can_take = erosion((int) soilMap[x], v) * fluxMap[x];
+						taken = Math.min(can_take, can_hold - suspended[x]);
+						removal[x] += taken;
+					}
 					
-					// record this point as being under water
-					if (heightMap[x] - erodeMap[x] < outlet[x])
-						hydrationMap[x] = (heightMap[x] - erodeMap[x]) - outlet[x];
-					else
-						hydrationMap[x] = -parms.z(0.01);
+					// downhill gets our incoming plus our erosion
+					suspended[d] += suspended[x] + taken;
+					
+					// see if this is the worst erosion on the map
+					double delta_z = parms.z(erosion(x));
+					if (erodeMap[x] + delta_z > map.max_erosion)
+						map.max_erosion = erodeMap[x] + delta_z;
 					
 					if (debug_log != null) {
-						msg = String.format("x=%4d,%4.1fM u/w, f=%6.3f", x,
-											parms.height(-hydrationMap[x]), fluxMap[x]);
-						msg += String.format(", e/d=NONE, susp[%4d]=%6.2f", d, suspended[d]);
-					}
-				} else {
-					// calculate the down-hill water velocity
-					double v = velocity(slopeMap[x]);
-					if (velocityMap[d] < v)
-						velocityMap[d] = v;
-					
-					// take average of my incoming and outgoing
-					v = (velocityMap[x] + velocityMap[d]) / 2;
-					if (v > map.max_velocity)
-						map.max_velocity = v;
-					if (v >= Vmin && v < map.min_velocity)
-						map.min_velocity = v;
-					
-					// we might be constructing a debug log entry
-					msg = (debug_log == null) ? null :
-						String.format("x=%4d, v=%6.3f, f=%6.3f", x, v, fluxMap[x]);
-					
-					if (v >= Ve) {	
-						// figure out how much soil this water can take/hold
-						double taken = 0.0;
-						double can_hold = Smax * fluxMap[x];
-						if (suspended[x] < can_hold) {
-							double can_take = erosion((int) soilMap[x], v) * fluxMap[x];
-							taken = Math.min(can_take, can_hold - suspended[x]);
-						}
-						// take it from here and add it to my down-hill
-						removal[x] += taken;
-						suspended[d] += suspended[x] + taken;
-						
-						// see if this is the worst erosion on the map
-						double delta_z = parms.z(erosion(x));
-						if (erodeMap[x] + delta_z > map.max_erosion)
-							map.max_erosion = erodeMap[x] + delta_z;
-						
-						if (debug_log != null) {
-							msg += String.format(", e=%6.4f, susp[%4d]=%6.4f", taken, d, suspended[d]);
-							if (!oceanic[d])
-								msg += String.format(", vin=%6.3f, vout=%6.3f", velocityMap[x], velocityMap[d]);
-							else	
-								msg += " (flows into the ocean)";
-						}
-					} else if (suspended[x] > 0 && v < Vd) {
-						double dropped = precipitation(v) * suspended[x];
-						removal[x] -= dropped;
-						suspended[d] += suspended[x] - dropped;
-						
-						// see if this is the deepest sedimentation on the map
-						double delta_z = parms.z(sedimentation(x));
-						if (erodeMap[x] - delta_z < -map.max_deposition)
-							map.max_deposition = -(erodeMap[x] - delta_z);
-						
-						if (debug_log != null)
-							msg += String.format(", d=%6.4f, susp[%4d]=%6.4f", dropped, d, suspended[d]);
-					} else if (suspended[x] > 0) {
-						// forward all suspended material down hill (can result in sediment over-saturation
-						suspended[d] += suspended[x];
-						if (debug_log != null) {
-							msg += String.format(", e/d=NONE, susp[%4d]=%6.2f", d, suspended[d]);
+						msg += String.format(", e=%6.4f, susp[%4d]=%6.4f", taken, d, suspended[d]);
+						if (!oceanic[d])
 							msg += String.format(", vin=%6.3f, vout=%6.3f", velocityMap[x], velocityMap[d]);
-						}
-					} else
-						msg = null;	// nothing happens at this point
-				}
+						else	
+							msg += " (flows into the ocean)";
+					}
+				} else if (suspended[x] > 0 && v < Vd) {
+					double dropped = precipitation(v) * suspended[x];
+					removal[x] -= dropped;
+					suspended[d] += suspended[x] - dropped;
+					if (debug_log != null)
+						msg += String.format(", d=%6.4f, susp[%4d]=%6.4f", dropped, d, suspended[d]);
+					
+					// see if this is the deepest sedimentation on the map
+					double delta_z = parms.z(sedimentation(x));
+					if (erodeMap[x] - delta_z < -map.max_deposition)
+						map.max_deposition = -(erodeMap[x] - delta_z);
+				} else if (suspended[x] > 0) {
+					// forward all suspended material down hill (can result in sediment over-saturation
+					suspended[d] += suspended[x];
+					if (debug_log != null) {
+						msg += String.format(", e/d=NONE, susp[%4d]=%6.2f", d, suspended[d]);
+						msg += String.format(", vin=%6.3f, vout=%6.3f", velocityMap[x], velocityMap[d]);
+					}
+				} else
+					msg = null;	// XXX no downhill, but should do deposition
+					
 				// debug logging
 				if (debug_log != null && msg != null)
 					try {
@@ -542,6 +524,13 @@ public class Hydrology {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+				
+				// if this point is under water, figure out how deep
+				if (outlet[x] != UNKNOWN)
+					if (heightMap[x] - erodeMap[x] < outlet[x])
+						hydrationMap[x] = (heightMap[x] - erodeMap[x]) - outlet[x];
+					else
+						hydrationMap[x] = -parms.z(0.01);
 			}
 			
 			if (fluxMap[x] > map.max_flux)
@@ -736,7 +725,7 @@ public class Hydrology {
 		double suspended = parms.Smax;
 		if (velocity < parms.Vmax)
 			suspended *= velocity/parms.Vmax;
-		return parms.Ce * suspended;
+		return parms.Ce * suspended / resistance[mineral];
 	}
 	
 	/**

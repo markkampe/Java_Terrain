@@ -20,6 +20,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 		private JLabel infoWorld;
 		private JLabel infoAlt;
 		private JLabel infoFlux;
+		private JLabel infoVelocity;
 		private JLabel infoRain;
 		private JLabel infoErode;
 		private JLabel infoSuspended;
@@ -45,14 +46,16 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			infoWorld = new JLabel();
 			infoAlt = new JLabel();
 			infoFlux = new JLabel();
+			infoVelocity = new JLabel();
 			infoRain = new JLabel();
 			infoErode = new JLabel();
 			infoSuspended = new JLabel();
 			infoSoil = new JLabel();
 			infoHydro = new JLabel();
 			infoDownhill = new JLabel();
+			int fields = 12;
 			
-			JPanel info = new JPanel(new GridLayout(11,2));
+			JPanel info = new JPanel(new GridLayout(fields,2));
 			info.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
 			info.add(new JLabel("Index:"));
 			info.add(infoIndex);
@@ -66,6 +69,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			info.add(infoRain);
 			info.add(new JLabel("Water Flux:"));
 			info.add(infoFlux);
+			info.add(new JLabel("Water Velocity:"));
+			info.add(infoVelocity);
 			info.add(new JLabel("Erosion/(Deposition):"));
 			info.add(infoErode);
 			info.add(new JLabel("Suspended"));
@@ -105,7 +110,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			infoWorld.setText(String.format("<%.6f, %.6f>", parms.latitude(point.y), parms.longitude(point.x)));
 			
 			double heightMap[] = map.getHeightMap();
-			infoAlt.setText(String.format("%.6f%s MSL", parms.altitude(heightMap[point.index]), Parameters.unit_z));
+			infoAlt.setText(String.format("%.1f%s MSL", parms.altitude(heightMap[point.index]), Parameters.unit_z));
 			
 			double fluxMap[] = map.getFluxMap();
 			infoFlux.setText(String.format("%.1f%s", fluxMap[point.index], Parameters.unit_f));
@@ -123,6 +128,9 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			else
 				desc = String.format("%.3f%s", h, Parameters.unit_z);
 			infoErode.setText(desc);
+			
+			double speed = map.hydro.velocityMap[point.index];
+			infoVelocity.setText(String.format("%.3f%s", speed, Parameters.unit_v));
 			
 			double susp = map.hydro.suspended[point.index];
 			infoSuspended.setText(String.format("%f%s", susp, Parameters.unit_f));

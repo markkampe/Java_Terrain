@@ -149,7 +149,7 @@ public class Parameters {
 	public double Smax = 0.10;	// maximum liters of soil per liter of water
 	public double Ce = 0.100;	// how much of possible erosion allowed per point
 	public double Cd = 0.100;	// how much of possible deposition allowed per point
-	public double Cs = 0.020;	// silt deposition (m per m3/s of sub-Vd flow)
+	public double Cs = 0.003;	// possible silt deposition (m per m3/s of sub-Vd flow)
 	public double flood_mult = 2.0;	// how Spring vs average flow
 	
 	// public double dRdX = .005; 	// fraction of rain that falls per km

@@ -11,7 +11,7 @@ public class ErodeMap {
 
 	private static final int DIM = 128;
 	private static final int BRITE = 255;
-	private static final double MIN_DEPOSITION = 0.1;	// meters
+	private static final double MIN_DEPOSITION = 0.05;	// meters
 	
 	private Map map;
 	private Parameters parms;

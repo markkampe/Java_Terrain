@@ -9,9 +9,10 @@ import java.io.IOException;	// writes to debug log
  * erosion an dsedimentation.
  */
 /*
- * This is probably the most complex and computationally expensive
- * class in the entire program as it embodies a considerable amount 
- * of (badly approximated) physics.
+ * This is probably the most computationally complex and expensive
+ * code in the entire program, and embodies a considerable amount 
+ * of (badly approximated) physics, which has been (shamelessly)
+ * tweaked until it produced results that "looked reasonable".
  */
 public class Hydrology {
 	
@@ -19,23 +20,29 @@ public class Hydrology {
 	private Mesh mesh;
 	private Parameters parms;
 	
-	// instance variables used by reCacluate & height Sort
-	private double heightMap[];	// Z value of each MeshPoint
-	private double erodeMap[];	// Z erosion of each MeshPoint
-	private double fluxMap[];	// water flow through MeshPoint
-	private double hydrationMap[];	// hydration or water depth of MeshPoint
-	private double removal[];	// M^3 of removed soil
-	private double velocityMap[]; // water velocity at MeshPoint
-	private double slopeMap[];	// slope downhill from MeshPoint
-	public double suspended[];	// M^3 of suspended sediment per second
-	private double outlet[];	// height at which detained water escapes
-	private int downHill[];		// down-hill neighbor of each MeshPoint
-	private int references[];	// number of nodes for which we are downHill
-	private int byHeight[];		// MeshPoint indices, sorted by height
-	private int byFlow[];		// MeshPoint indices, sorted by water flow
-	private boolean oceanic[];	// which points are under the sea
+	// maps that we import from Map and use
+	private double heightMap[];		// Z value of each MeshPoint (from Map)
+	private double erodeMap[];		// Z erosion of each MeshPoint (from Map)
 	
-	private int landPoints;		// number of non-oceanic points
+	// maps we create, that will be pushed into the Map
+	private int downHill[];			// down-hill neighbor of each MeshPoint
+	private double fluxMap[];		// water flow through MeshPoint
+	private double hydrationMap[];	// hydration or water depth of MeshPoint
+	
+	// maps we create and use to compute water flow, erosion and deposition
+	private int sinkMap[];			// the point to which each MeshPoint drains
+	private double slopeMap[];		// slope downhill from MeshPoint
+	private double removal[];		// M^3 of removed soil
+	private double outlet[];		// height at which detained water escapes
+	private int references[];		// number of nodes for which we are downHill
+	private int byHeight[];			// MeshPoint indices, sorted by height
+	private int byFlow[];			// MeshPoint indices, sorted by water flow
+	private boolean oceanic[];		// which points are under the sea
+	private int landPoints;			// number of non-oceanic points
+	
+	// these should be private, but are exposed for PointDebug use
+	protected double suspended[]; 	// M^3 of suspended sediment per second
+	protected double velocityMap[]; // water velocity at MeshPoint
 	
 	/** how much water can different types of soil hold (m^3/m^3) */
 	public static double saturation[] = {
@@ -46,31 +53,25 @@ public class Hydrology {
 	};
 	
 	/** relative erosion resistances for various bed rocks */
-	public static double resistance[] = {
+	private static double resistance[] = {
 		1.0,	// sedimentary erosion resistance
 		4.0,	// metamorphic erosion resistance
 		2.5,	// igneous erosion resistance
 		0.5		// alluvial erosion resistance
 	};
 	
-	/**
-	 * The sinkMap indicates, for each non-oceanic MeshPoint, the 
-	 * point to which it ultimately drains.  It is used to identify
-	 * the set of points within a common depression.
-	 */
-	private int sinkMap[];
-	private static final int UNKNOWN = -666;	// sink point not yet found
-	private static final int OCEAN = -1;		// drains to ocean
-	private static final int OFF_MAP = -2;		// drains off map
+	private static final int UNKNOWN = -666;	// sinkMap: sink point not yet found
+	private static final int OCEAN = -1;		// sinkMap: drains to ocean
+	private static final int OFF_MAP = -2;		// sinkMap: drains off map
 
 	// a few useful conversion constants
 	private static final double YEAR = 365.25 * 24 * 60 *  60;
 	private double area;			// square meters per MeshPoint
 	private double rain_to_flow;	// mapping from rain(cm) to flow(M^3/s)
 	
-	private static final String DEBUG_FILE = null; // "/tmp/WB_erosion.log";
-	private FileWriter debug_log;
-	private static final int HYDRO_DEBUG = 2;
+	private static final int HYDRO_DEBUG = 2;	// 3 enables painful tracing
+	private static final String DEBUG_LOG_FILE = "/tmp/erosion_debug.log";
+	private DebugLog debug_log;
 	
 	/**
 	 * Water flow and level calculation engine
@@ -97,6 +98,17 @@ public class Hydrology {
 		area = 1000000 * (parms.xy_range * parms.xy_range) / mesh.vertices.length;
 		// how many M^3/s is 1cm of annual rainfall
 		rain_to_flow = .01 * area / YEAR;
+		
+		// see if we are producing an erosion log
+		if (parms.debug_level > HYDRO_DEBUG)
+			debug_log = new DebugLog(DEBUG_LOG_FILE);
+		else
+			debug_log = null;
+	}
+	
+	protected void finalize() {
+		if (debug_log != null)
+			debug_log.close();
 	}
 
 	/**
@@ -389,12 +401,7 @@ public class Hydrology {
 	 */
 	public void waterFlow() {
 
-		// see if we are producing an erosion log
-		try {
-			debug_log = (DEBUG_FILE == null) ? null : new FileWriter(DEBUG_FILE);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
 		
 		// import the rainfall and arterial river influx
 		double[] rainMap = map.getRainMap();
@@ -415,8 +422,8 @@ public class Hydrology {
 		}
 		
 		// pick up the erosion parameters
-		double Ve = parms.Ve;	// minimum velocity for erosion
-		double Vd = parms.Vd;	// maximum velocity for sedimentation
+		double Ve = parms.Ve;	// erosion/deposition threshold
+		double Vd = parms.Vd;	// maximum velocity for silting
 		double Vmin = parms.Vmin;	// minimum velocity to carry water
 		double Smax = parms.Smax	;	// maximum sediment per M^3 of water
 		
@@ -496,7 +503,7 @@ public class Hydrology {
 						else	
 							msg += " (flows into the ocean)";
 					}
-				} else if (suspended[x] > 0 && v < Vd) {
+				} else if (suspended[x] > 0) {
 					double dropped = precipitation(v) * suspended[x];
 					removal[x] -= dropped;
 					suspended[d] += suspended[x] - dropped;
@@ -507,23 +514,12 @@ public class Hydrology {
 					double delta_z = parms.z(sedimentation(x));
 					if (erodeMap[x] - delta_z < -map.max_deposition)
 						map.max_deposition = -(erodeMap[x] - delta_z);
-				} else if (suspended[x] > 0) {
-					// forward all suspended material down hill (can result in sediment over-saturation
-					suspended[d] += suspended[x];
-					if (debug_log != null) {
-						msg += String.format(", e/d=NONE, susp[%4d]=%6.2f", d, suspended[d]);
-						msg += String.format(", vin=%6.3f, vout=%6.3f", velocityMap[x], velocityMap[d]);
-					}
 				} else
-					msg = null;	// XXX no downhill, but should do deposition
+					msg = null;	// no deposition or erosion
 					
 				// debug logging
 				if (debug_log != null && msg != null)
-					try {
-						debug_log.write(msg + "\n");
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					debug_log.write(msg + "\n");
 				
 				// if this point is under water, figure out how deep
 				if (outlet[x] != UNKNOWN)
@@ -539,14 +535,10 @@ public class Hydrology {
 				map.min_flux = fluxMap[x];
 		}
 		
-		if (debug_log != null) {
-			try {
-				debug_log.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			debug_log = null;
-		}
+		// flush out any debugging info
+		if (debug_log != null)
+			debug_log.flush();
+		
 		// we have already updated the in-place flux and hydration maps
 		
 		// if there was no water flow, fix the Map flow parameters
@@ -576,9 +568,33 @@ public class Hydrology {
 	 * @return meters of deposited sediment
 	 */
 	public double sedimentation(int index) {
-		if (removal[index] >= 0)
-			return 0.0;
-		return -removal[index] * YEAR / area;
+		/*
+		 * I do two strange things here:
+		 * 
+		 *   - even tho the calcualations leading to removal[index] seem
+		 *     reasonable, I always felt that maps showed more erosion
+		 *     than sedimentation.  And since this is more about expectations
+		 *     than physics I added an EXAGGERATE factor to goose 
+		 *     sedimentation to yield more satisfactory results.
+		 *     
+		 *   - sedimentation was tracking the erosion of riverbeds (which
+		 *     settles out pretty quickly) but in the real world it probably
+		 *     has more to do with topsoil that washes into the rivers and
+		 *     settles out in much slower water.  Rather than trying to 
+		 *     compute this from erosion, I simply said that slow water
+		 *     always deposits silt in proportion to flux (and inverse
+		 *     proportion to speed).
+		 */
+		final double EXAGGERATE = 4.0;	// this looks good :-)
+		
+		double sediment = 0.0;
+		if (removal[index] < 0)
+			sediment = EXAGGERATE * -removal[index] * YEAR / area;
+		else if (velocityMap[index] <= parms.Vd) {
+			double sloth = (parms.Vd - velocityMap[index]) / (parms.Vd - parms.Vmin);
+			sediment = sloth * fluxMap[index] * parms.Cs * YEAR / area;
+		}
+		return sediment;
 	}
 	
 	/**
@@ -705,9 +721,11 @@ public class Hydrology {
 	 * 	      w/solids concentration rising linearly w/speed
 	 * 
 	 * My over-simplfied deposition model:
-	 * 	- deposition happens at velocities between Vd and Vmin,
+	 * 	- deposition happens at velocities between Ve and Vmin,
 	 * 	      w/between 0 and 1/2 (a linear function of speed)
 	 * 		  of the suspended solids settling out per MeshPoint.
+	 *     below Vd, we start seeing silt deposition (and there is
+	 *     	   more silt in water than was eroded from river bed
 	 */
 	/**
 	 * Compute the erosive power of fast moving water
@@ -734,11 +752,11 @@ public class Hydrology {
 	 * @return fraction of suspended load that will fall out
 	 */
 	private double precipitation(double velocity) {
-		if (velocity >= parms.Vd)
+		if (velocity >= parms.Ve)
 			return 0.0;			// fast water drops nothing
 		double precip = parms.Cd;
 		if (velocity > parms.Vmin)
-			precip *= (parms.Vd - velocity)/parms.Vd;
+			precip *= (parms.Ve - velocity)/parms.Ve;
 		return precip;
 	}
 	
@@ -819,6 +837,67 @@ public class Hydrology {
 			if (found != expect)
 				System.err.println("5: x=" + point + ", expected " + expect + ", found " + found);
 		}
+	}
+	
+	/*
+	 * this class encapsulates writes to a debug log file
+	 * which has (sadly) often been necessary to analyze
+	 * complex anomalous results in erosion and deposition. 
+	 */
+	private class DebugLog {
+		
+		private FileWriter log;
+		private String filename;
+		boolean failed = false;
+		
+		public DebugLog(String filename) {
+			try {
+				log = new FileWriter(filename);
+				this.filename = filename;
+				System.out.println("Erosion tracing enabled to " + filename);
+			} catch (IOException e) {
+				System.err.println("Unable to create log file " + filename);
+				failed = true;
+			}
+		}
+		
+		public void write(String message) {
+			if (!failed)
+				try {
+					log.write(message);
+				} catch (IOException e) {
+					System.err.println("Write error to log file " + filename);
+					failed = true;
+				}
+		}
+		
+		public void flush() {
+			if (!failed)
+				try {
+					log.flush();
+				} catch (IOException e) {
+					System.err.println("Write error to log file " + filename);
+					failed = true;
+				}	
+		}
+		
+		public void close() {
+			if (!failed)
+				try {
+					log.close();
+				} catch (IOException e) {
+					System.err.println("Close error on log file " + filename);
+					failed = true;
+				}	
+		}
+	}
+	
+	/**
+	 * enable outside callers to flush the debug log out
+	 */
+	protected void flushLog() {
+		if (debug_log != null)
+			debug_log.flush();
 	}
 }
 

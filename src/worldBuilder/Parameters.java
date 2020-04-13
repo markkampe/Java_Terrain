@@ -142,13 +142,15 @@ public class Parameters {
 	public String Out_palette;	// Outside: palette file
 
 	// tunable physical process parameters
-	public double Vmin = 0.005; // minimum velocity (M/s) for flowing water
-	public double Vd = 0.30; 	// (Hjulstrom) maximum velocity (M/s) for deposition
-	public double Ve = 0.40; 	// (Hjulstrom) minimum velocity (M/s) for erosion
+	public double Vmin = 0.002; // minimum velocity (M/s) for flowing water
+	public double Vd = 0.01; 	// (Hjulstrom) maximum velocity (M/s) for silt deposition
+	public double Ve = 0.40; 	// (Hjulstrom) erosion/deposition threshold
 	public double Vmax = 3.0;	// maximum velocity (M/s) for flowing water
 	public double Smax = 0.10;	// maximum liters of soil per liter of water
-	public double Ce = 0.10;	// how much of possible erosion allowed per point
-	public double Cd = 0.10;	// how much of possible deposition allowed per point
+	public double Ce = 0.100;	// how much of possible erosion allowed per point
+	public double Cd = 0.100;	// how much of possible deposition allowed per point
+	public double Cs = 0.020;	// silt deposition (m per m3/s of sub-Vd flow)
+	public double flood_mult = 2.0;	// how Spring vs average flow
 	
 	// public double dRdX = .005; 	// fraction of rain that falls per km
 	public double Dp = 0.5; 	// rain penetration (m)
@@ -402,6 +404,9 @@ public class Parameters {
 					break;
 				case "Cd": // per-point deposition coefficient
 					Cd = new Double(parser.getString());
+					break;
+				case "Cs": // per-point silting coefficient
+					Cs = new Double(parser.getString());
 					break;
 				case "Edeg": // evaporation half-time doubling temp
 					Edeg = new Double(parser.getString());

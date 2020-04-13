@@ -44,7 +44,7 @@ public class RiverMap {
 		double min_artery = parms.artery_flux;
 		double dBdF = blue_range/(min_river - min_stream);
 		
-		// draw the streams, rivers, lakes and oceans
+		// draw the streams and rivers
 		for(int i = 0; i < flux.length; i++) {
 			if (flux[i] < min_stream)
 				continue;	// don't display flux below stream cut-off
@@ -60,7 +60,7 @@ public class RiverMap {
 				for(int n = 0; n < mesh.vertices[i].neighbors; n++)
 					is_neighbor |= mesh.vertices[i].neighbor[n].index == d;
 				if (!is_neighbor)
-					continue;
+					continue;	// d must be my escape point
 				
 				// figure out where the end-points are on screen
 				int x1 = map.screen_x(mesh.vertices[i].x);
@@ -74,8 +74,9 @@ public class RiverMap {
 				double blue = WATER_DIM + delta;
 				double green = Math.max(0, WATER_DIM - delta);
 				g.setColor(new Color(0, (int) green, (int) blue));
-				// SOMEDAY use stroke-width for rivers
 				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+				
+				// if a river or artery, extra lines to make it wider
 				if (flux[i] < min_river)
 					continue;
 				g.drawLine((int) (x1+1), (int) (y1+1), (int) (x2+1), (int) (y2+1));

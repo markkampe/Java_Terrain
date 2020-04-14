@@ -248,7 +248,7 @@ public class Hydrology {
 		 * 4. find the escape point from each local sink, and then 
 		 *	  re-route all flow in that sink to the escape point
 		 */
-		int escapePoint;
+		int escapeTo, escapeThru;
 		double escapeHeight;
 		boolean combined = false;
 		do { combined = false;	// iterate until no more changes
@@ -258,42 +258,64 @@ public class Hydrology {
 					continue;
 				
 				// search all points in this sink for lowest outside neighbor
-				escapePoint = -1;
+				escapeTo = -1; escapeThru = -1;
 				escapeHeight = Parameters.z_extent;
 				for(int i = 0; i < byHeight.length; i++) {
 					int point = byHeight[i];
 					if (sinkMap[point] != s)	// point not in this sink
 						continue;
 					
+					double z1 = heightMap[i] - erodeMap[i];
 					for(int j = 0; j < mesh.vertices[point].neighbors; j++) {
 						int n = mesh.vertices[point].neighbor[j].index;
 						if (sinkMap[n] == s)	// neighbor still in this sink
 							continue;
-						double z = heightMap[n] - erodeMap[n];
-						if (z < escapeHeight) {
-							escapePoint = n;
-							escapeHeight = heightMap[n] - erodeMap[n];
+						double z2 = heightMap[n] - erodeMap[n];
+						if (z2 >= z1 && z2 < escapeHeight) {
+							// this point, up-hill from us, is in another sink
+							escapeThru = n;
+							escapeTo = n;
+							escapeHeight = z2;
+						} else if (z1 >= z2 && z1 < escapeHeight) {
+							// this point, in our sink, can drain to another sink
+							escapeThru = i;
+							escapeTo = n;
+							escapeHeight = z1;
 						}
 					}
 				}
 				
 				// coalesce this sink into the escape point's sink
-				if (escapePoint >= 0) {
+				if (escapeTo >= 0) {
 					// 1. route downhill flow from sink bottom to escape point
-					downHill[s] = escapePoint;
-					references[escapePoint] += 1;
+					if (escapeTo == escapeThru) {	// escape point in another sink
+						downHill[s] = escapeTo;
+						references[escapeTo] += 1;
+					} else {	// escape point at edge of our sink
+						downHill[s] = escapeThru;
+						references[escapeThru] += 1;
+						int prev = downHill[escapeThru];
+						System.err.println(String.format("bottom=%d, thru=%d, downhill %d->%d\n", 
+								s, escapeThru, prev, escapeTo));
+						if (prev >= 0)
+							references[prev] -= 1;
+						downHill[escapeThru] = escapeTo;
+						references[escapeTo] += 1;
+						System.err.println(String.format("\trefs[%d] ->%d\n", escapeTo, references[escapeTo]));
+					}
 					
 					// 2. move all points in this sink to escape point's sink
 					for(int i = 0; i < mesh.vertices.length; i++) {
 						if (sinkMap[i] == s) {
-							sinkMap[i] = sinkMap[escapePoint];
+							sinkMap[i] = sinkMap[escapeTo];
 							if (heightMap[i] - erodeMap[i] <= escapeHeight)
 								outlet[i] = escapeHeight;
 						}
 					}
 					
-					// 3. consider escape point part of the lake
-					outlet[escapePoint] = escapeHeight;
+					// 3. consider escape point on edge part of the lake
+					if (escapeTo == escapeThru)
+						outlet[escapeTo] = escapeHeight;
 					
 					// this pass was successful, so try another
 					combined = true;
@@ -307,8 +329,8 @@ public class Hydrology {
 				 *  GREEN	escape point to another sink
 				 */
 				if (parms.debug_level >= HYDRO_DEBUG)
-					if (escapePoint >= 0) {
-						map.highlight(escapePoint, sinkMap[escapePoint] == OCEAN ? Color.BLUE : Color.GREEN);
+					if (escapeTo >= 0) {
+						map.highlight(escapeTo, sinkMap[escapeTo] == OCEAN ? Color.BLUE : Color.GREEN);
 						// XXX I have seen blue (likely intermediate) escape points inside of a depression
 						map.highlight(s,  Color.ORANGE);
 					} else
@@ -400,9 +422,6 @@ public class Hydrology {
 	 *	Assertion: drainage has been called: oceanic & downHill are up-to-date
 	 */
 	public void waterFlow() {
-
-		
-		
 		// import the rainfall and arterial river influx
 		double[] rainMap = map.getRainMap();
 		double[] incoming = map.getIncoming();
@@ -547,8 +566,7 @@ public class Hydrology {
 			map.max_flux = 0;
 			map.min_velocity = 0;
 			map.max_velocity = 0;
-		}
-			
+		}	
 	}
 	
 	/**
@@ -835,7 +853,7 @@ public class Hydrology {
 				if (downHill[byHeight[j]] == point)
 					found += 1;
 			if (found != expect)
-				System.err.println("5: x=" + point + ", expected " + expect + ", found " + found);
+				System.err.println("x=" + point + ", expected " + expect + ", found " + found);
 		}
 	}
 	

@@ -1154,21 +1154,27 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			e.paint(g, width, height, TOPO_CELL);
 		}
 		
-		// see if we are rendering points
-		if ((display & SHOW_POINTS) != 0) {
-			g.setColor(POINT_COLOR);
-			MeshPoint[] points = mesh.vertices;
-			for (int i = 0; i < points.length; i++) {
-				MeshPoint p = points[i];
-				double x = screen_x(p.x) - SMALL_POINT / 2;
-				double y = screen_y(p.y) - SMALL_POINT / 2;
-				if (x >= 0 && y >= 0)
-					g.drawString(Integer.toString(p.index), 
-								 (int) (x - 2*charWidth), (int) (y + charHeight/2));
-			}
+		// see if we are rendering soil/hydration
+		if ((display & (SHOW_SOIL|SHOW_HYDRO)) != 0) {
+			SoilMap s = new SoilMap(this, (display&SHOW_SOIL) != 0, (display&SHOW_HYDRO) != 0);
+			s.paint(g, width, height, TOPO_CELL);
 		}
-
-		// see if we are rendering the mesh
+		
+		// see if we are rendering topographic lines
+		if ((display & SHOW_TOPO) != 0) {
+			TopoMap t = new TopoMap(this);
+			t.paint(g, width, height, TOPO_CELL);
+		}
+		
+		// see if we are rendering lakes and rivers
+		if ((display & SHOW_WATER) != 0) {
+			RiverMap r = new RiverMap(this);
+			r.paint(g, width, height);
+			WaterMap w = new WaterMap(this);
+			w.paint(g, width, height, TOPO_CELL);		
+		}
+				
+		// see if we are rendering the mesh (debugging, put it on top)
 		if ((display & SHOW_MESH) != 0) {
 			g.setColor(MESH_COLOR);
 			// for each mesh point
@@ -1194,27 +1200,21 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			}
 		}
 		
-		// see if we are rendering soil/hydration
-		if ((display & (SHOW_SOIL|SHOW_HYDRO)) != 0) {
-			SoilMap s = new SoilMap(this, (display&SHOW_SOIL) != 0, (display&SHOW_HYDRO) != 0);
-			s.paint(g, width, height, TOPO_CELL);
+		// see if we are rendering point indices (debugging, put it on top)
+		if ((display & SHOW_POINTS) != 0) {
+			g.setColor(POINT_COLOR);
+			MeshPoint[] points = mesh.vertices;
+			for (int i = 0; i < points.length; i++) {
+				MeshPoint p = points[i];
+				double x = screen_x(p.x) - SMALL_POINT / 2;
+				double y = screen_y(p.y) - SMALL_POINT / 2;
+				if (x >= 0 && y >= 0)
+					g.drawString(Integer.toString(p.index), 
+								 (int) (x - 2*charWidth), (int) (y + charHeight/2));
+			}
 		}
 		
-		// see if we are rendering topographic lines
-		if ((display & SHOW_TOPO) != 0) {
-			TopoMap t = new TopoMap(this);
-			t.paint(g, width, height, TOPO_CELL);
-		}
-				
-		// see if we are rendering rivers
-		if ((display & SHOW_WATER) != 0) {
-			RiverMap r = new RiverMap(this);
-			r.paint(g, width, height);
-			WaterMap w = new WaterMap(this);
-			w.paint(g, width, height, TOPO_CELL);		
-		}
-		
-		// see if we have points to highlight
+		// see if we have points to highlight (debugging, put it on top)
 		if (highlighting)
 			for(int i = 0; i < highLights.length; i++)
 				if (highLights[i] != null) {

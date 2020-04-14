@@ -64,6 +64,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem editRain;
 	private JMenuItem editCity;
 	private JMenuItem editRoads;
+	private JMenuItem viewPoints;
 	private JMenuItem viewMesh;
 	private JMenuItem viewTopo;
 	private JMenuItem viewRain;
@@ -217,8 +218,8 @@ public class WorldBuilder  extends JFrame
 		editMenu.add(editRoads);
 		
 		// create our view menu
-//		viewPoints = new JMenuItem("Points");
-//		viewPoints.addActionListener(this);
+		viewPoints = new JMenuItem("Points");
+		viewPoints.addActionListener(this);
 		viewMesh = new JMenuItem("Mesh");
 		viewMesh.addActionListener(this);
 		viewTopo = new JMenuItem("Topo");
@@ -238,7 +239,7 @@ public class WorldBuilder  extends JFrame
 		viewDebug = new JMenuItem("Point Details");
 		viewDebug.addActionListener(this);
 		JMenu viewMenu = new JMenu("View");
-//		viewMenu.add(viewPoints);
+		viewMenu.add(viewPoints);
 		viewMenu.add(viewMesh);
 		viewMenu.add(viewTopo);
 		viewMenu.add(viewRain);
@@ -488,8 +489,8 @@ public class WorldBuilder  extends JFrame
 		}
 		
 		// view menu toggles individual views on and off
-//		else if (o == viewPoints)
-//			parms.display_options = map.setDisplay(Map.SHOW_POINTS, (parms.display_options & Map.SHOW_POINTS) == 0);
+		else if (o == viewPoints)
+			parms.display_options = map.setDisplay(Map.SHOW_POINTS, (parms.display_options & Map.SHOW_POINTS) == 0);
 		else if (o == viewMesh)
 			parms.display_options = map.setDisplay(Map.SHOW_MESH, (parms.display_options & Map.SHOW_MESH) == 0);
 		else if (o == viewTopo)
@@ -557,7 +558,7 @@ public class WorldBuilder  extends JFrame
 	}
 	
 	private void updateDisplayMenus(int opts) {
-		// viewPoints.setText( (opts & Map.SHOW_POINTS) != 0 ? "~points" : "Points");
+		viewPoints.setText( (opts & Map.SHOW_POINTS) != 0 ? "~points" : "Points");
 		viewMesh.setText( (opts & Map.SHOW_MESH) != 0 ? "~mesh" : "Mesh");
 		viewTopo.setText( (opts & Map.SHOW_TOPO) != 0 ? "~topo" : "Topo");
 		viewRain.setText( (opts & Map.SHOW_RAIN) != 0 ? "~rain" : "Rain");

@@ -1124,6 +1124,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		super.paintComponent(g);
 		int height = getHeight();
 		int width = getWidth();
+		final int charWidth = 7;	// XXX do better
+		final int charHeight = 12;	// XXX do better
 		
 		// make sure we have something to display
 		if (mesh == null || mesh.vertices.length == 0) {
@@ -1161,7 +1163,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				double x = screen_x(p.x) - SMALL_POINT / 2;
 				double y = screen_y(p.y) - SMALL_POINT / 2;
 				if (x >= 0 && y >= 0)
-					g.drawOval((int) x, (int) y, SMALL_POINT, SMALL_POINT);
+					g.drawString(Integer.toString(p.index), 
+								 (int) (x - 2*charWidth), (int) (y + charHeight/2));
 			}
 		}
 

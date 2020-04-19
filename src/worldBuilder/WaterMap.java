@@ -9,7 +9,7 @@ import java.awt.Graphics;
 public class WaterMap {
 
 	private Map map;
-	// private Parameters parms;
+	private Parameters parms;
 	
 	/**
 	 * instantiate a river and water-body map renderer
@@ -17,7 +17,7 @@ public class WaterMap {
 	 */
 	public WaterMap(Map map) {
 		this.map = map;
-		// this.parms = Parameters.getInstance();
+		this.parms = Parameters.getInstance();
 	}
 	
 	/**
@@ -32,8 +32,8 @@ public class WaterMap {
 		int h = height/cellWidth;
 		int w = width/cellWidth;
 		
-		// interpolate per-cell hydration from the mesh
-		double hArray[][] = map.getCartesian().interpolate(map.getHydrationMap());
+		// interpolate per-cell water depth from the mesh
+		double hArray[][] = submergence();
 			
 		// use height to generate background colors
 		g.setColor(Color.BLUE);
@@ -56,6 +56,34 @@ public class WaterMap {
 				// render a cell of the appropriate shape
 				waterCell(g, r, c, cellWidth, sum);
 			}
+	}
+	
+	/**
+	 * @return	Cartesian water depth map
+	 */
+	double[][] submergence() {
+		double[] hydrationMap = map.getHydrationMap();
+		double[] heightMap = map.getHeightMap();
+		double[] erodeMap = map.getErodeMap();
+		double[] outlets = map.hydro.outlet;
+		double[] depthMap = new double[hydrationMap.length];
+		
+		// label the depth of all under-water and exit points
+		for(int i = 0; i < hydrationMap.length; i++) {
+			if (hydrationMap[i] < 0)	// point known to be u/w
+				depthMap[i] = parms.height(hydrationMap[i]);
+			else {	// altitude above highest neighboring outlet
+				double water_level = parms.sea_level;
+				for(int j = 0; j < map.mesh.vertices[i].neighbors; j++) {
+					int n = map.mesh.vertices[i].neighbor[j].index;
+					if (outlets[n] != Hydrology.UNKNOWN && outlets[n] > water_level)
+						water_level = outlets[n];
+				}
+				depthMap[i] = (heightMap[i] - erodeMap[i]) - water_level;
+			}
+		}
+		// interpolate those depths into a Cartesian map
+		return map.getCartesian().interpolate(depthMap);
 	}
 	
 	/**

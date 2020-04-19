@@ -73,6 +73,8 @@ public class Hydrology {
 	private static final String DEBUG_LOG_FILE = "/tmp/erosion_debug.log";
 	private DebugLog debug_log;
 	
+	private static final double EXIT_DEPTH = 1.0;	// presumed depth at lake exit
+	
 	/**
 	 * Water flow and level calculation engine
 	 * @param Map (and Mesh) on which we will operate
@@ -553,8 +555,8 @@ public class Hydrology {
 							msg += String.format("\n\tflood %d (at %.1fMSL) %.1f%s u/w",
 									x, parms.altitude(heightMap[x] - erodeMap[x]),
 									parms.height(-hydrationMap[x]), Parameters.unit_z);
-					} else {
-						hydrationMap[x] = -parms.z(0.1);
+					} else {	// escape point is trivially under water
+						hydrationMap[x] = -parms.z(EXIT_DEPTH);
 						if (debug_log != null)
 							msg += String.format("\n\tflood exit point %d %.2f%s u/w",
 												x, parms.height(-hydrationMap[x]), Parameters.unit_z);

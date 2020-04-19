@@ -27,6 +27,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 		private JLabel infoSoil;
 		private JLabel infoHydro;
 		private JLabel infoDownhill;
+		private JLabel infoOutlet;
 		
 		/** instantiate the point information display, register for selection events */
 		public PointDebug(Map map)  {
@@ -53,7 +54,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			infoSoil = new JLabel();
 			infoHydro = new JLabel();
 			infoDownhill = new JLabel();
-			int fields = 12;
+			infoOutlet = new JLabel();
+			int fields = 13;
 			
 			JPanel info = new JPanel(new GridLayout(fields,2));
 			info.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
@@ -81,6 +83,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			info.add(infoHydro);
 			info.add(new JLabel("Down-hill:"));
 			info.add(infoDownhill);
+			info.add(new JLabel("Outlet:"));
+			info.add(infoOutlet);
 
 			mainPane.add(info,  BorderLayout.CENTER);
 			
@@ -144,12 +148,18 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			if (h >= 0)
 				desc = String.format("%.0f%%",h * 100);
 			else
-				desc = String.format("%.1f%s under water", -h, Parameters.unit_z);
-				
+				desc = String.format(h > 10.0 ? "%.2f%s" : "%.1f%s",
+									parms.height(-h), Parameters.unit_z) + 
+									" under water";
 			infoHydro.setText(desc);
 			
 			int downHill[] = map.getDownHill();
 			infoDownhill.setText(String.format("%d", downHill[point.index]));
+			
+			double outlet = map.hydro.outlet[point.index];
+			infoOutlet.setText(outlet == Hydrology.UNKNOWN ? "NONE" :
+								String.format("%.1fMSL", parms.altitude(outlet)));
+			
 			pack();
 			
 			// highlight selected point

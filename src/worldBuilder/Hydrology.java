@@ -33,7 +33,6 @@ public class Hydrology {
 	private int sinkMap[];			// the point to which each MeshPoint drains
 	private double slopeMap[];		// slope downhill from MeshPoint
 	private double removal[];		// M^3 of removed soil
-	private double outlet[];		// height at which detained water escapes
 	private int references[];		// number of nodes for which we are downHill
 	private int byHeight[];			// MeshPoint indices, sorted by height
 	private int byFlow[];			// MeshPoint indices, sorted by water flow
@@ -43,6 +42,7 @@ public class Hydrology {
 	// these should be private, but are exposed for PointDebug use
 	protected double suspended[]; 	// M^3 of suspended sediment per second
 	protected double velocityMap[]; // water velocity at MeshPoint
+	protected double outlet[];		// height at which detained water escapes
 	
 	/** how much water can different types of soil hold (m^3/m^3) */
 	public static double saturation[] = {
@@ -60,9 +60,9 @@ public class Hydrology {
 		0.5		// alluvial erosion resistance
 	};
 	
-	private static final int UNKNOWN = -666;	// sinkMap: sink point not yet found
-	private static final int OCEAN = -1;		// sinkMap: drains to ocean
-	private static final int OFF_MAP = -2;		// sinkMap: drains off map
+	protected static final int UNKNOWN = -666;	// sinkMap: sink point not yet found
+	protected static final int OCEAN = -1;		// sinkMap: drains to ocean
+	protected static final int OFF_MAP = -2;	// sinkMap: drains off map
 
 	// a few useful conversion constants
 	private static final double YEAR = 365.25 * 24 * 60 *  60;
@@ -287,6 +287,19 @@ public class Hydrology {
 				
 				// coalesce this sink into the escape point's sink
 				if (escapeTo >= 0) {
+					// users will never care, but I've spent much debug time here
+					if (debug_log != null) {
+						double sinkHeight = heightMap[s] - erodeMap[s];
+						String msg = String.format("sink bottom %d at %.1fMSL escapes to %d", 
+													s, parms.altitude(sinkHeight), escapeTo);
+						msg += (sinkMap[escapeTo] == OCEAN) ? " (to the ocean)" : 
+								String.format(" (in sink %d)", sinkMap[escapeTo]);
+						if (escapeTo != escapeThru)
+							msg += String.format(" thru saddle %d", escapeThru);
+						msg += String.format(" at %.1f MSL", parms.altitude(escapeHeight));
+						debug_log.write(msg + "\n");
+					}
+					
 					// 1. route downhill flow from sink bottom to escape point
 					if (escapeTo == escapeThru) {	// escape point in another sink
 						downHill[s] = escapeTo;
@@ -438,10 +451,9 @@ public class Hydrology {
 		}
 		
 		// pick up the erosion parameters
-		double Ve = parms.Ve;	// erosion/deposition threshold
-		double Vd = parms.Vd;	// maximum velocity for silting
-		double Vmin = parms.Vmin;	// minimum velocity to carry water
-		double Smax = parms.Smax	;	// maximum sediment per M^3 of water
+		double Ve = parms.Ve;		// erosion/deposition threshold
+		double Vmin = parms.Vmin;	// minimum velocity to carry sediment
+		double Smax = parms.Smax;	// maximum sediment per M^3 of water
 		
 		// calculate the incoming water flux for each non-oceanic point
 		map.min_flux = 666.0;
@@ -533,16 +545,24 @@ public class Hydrology {
 				} else
 					msg = null;	// no deposition or erosion
 					
+				// if this point is under water, figure out how deep
+				if (outlet[x] != UNKNOWN)
+					if (heightMap[x] - erodeMap[x] < outlet[x]) {
+						hydrationMap[x] = (heightMap[x] - erodeMap[x]) - outlet[x];
+						if (debug_log != null)
+							msg += String.format("\n\tflood %d (at %.1fMSL) %.1f%s u/w",
+									x, parms.altitude(heightMap[x] - erodeMap[x]),
+									parms.height(-hydrationMap[x]), Parameters.unit_z);
+					} else {
+						hydrationMap[x] = -parms.z(0.1);
+						if (debug_log != null)
+							msg += String.format("\n\tflood exit point %d %.2f%s u/w",
+												x, parms.height(-hydrationMap[x]), Parameters.unit_z);
+					}
+					
 				// debug logging
 				if (debug_log != null && msg != null)
 					debug_log.write(msg + "\n");
-				
-				// if this point is under water, figure out how deep
-				if (outlet[x] != UNKNOWN)
-					if (heightMap[x] - erodeMap[x] < outlet[x])
-						hydrationMap[x] = (heightMap[x] - erodeMap[x]) - outlet[x];
-					else
-						hydrationMap[x] = -parms.z(0.01);
 			}
 			
 			if (fluxMap[x] > map.max_flux)

@@ -253,10 +253,10 @@ public class WorldBuilder  extends JFrame
 		
 		// create help menu
 		helpInfo = new JMenuItem("about WorldBuilder");
-		debug0 = new JMenuItem("0");
-		debug1 = new JMenuItem("1");
-		debug2 = new JMenuItem("2");
-		debug3 = new JMenuItem("3");
+		debug0 = new JMenuItem("none");
+		debug1 = new JMenuItem("basic");
+		debug2 = new JMenuItem("verbose");
+		debug3 = new JMenuItem("debug");
 		JMenu dbgMenu = new JMenu("Verbosity");
 		dbgMenu.add(debug0);
 		dbgMenu.add(debug1);

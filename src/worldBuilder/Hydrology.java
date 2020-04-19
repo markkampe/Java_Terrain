@@ -265,7 +265,7 @@ public class Hydrology {
 					if (sinkMap[point] != s)	// point not in this sink
 						continue;
 					
-					double z1 = heightMap[i] - erodeMap[i];
+					double z1 = heightMap[point] - erodeMap[point];
 					for(int j = 0; j < mesh.vertices[point].neighbors; j++) {
 						int n = mesh.vertices[point].neighbor[j].index;
 						if (sinkMap[n] == s)	// neighbor still in this sink
@@ -278,7 +278,7 @@ public class Hydrology {
 							escapeHeight = z2;
 						} else if (z1 >= z2 && z1 < escapeHeight) {
 							// this point, in our sink, can drain to another sink
-							escapeThru = i;
+							escapeThru = point;
 							escapeTo = n;
 							escapeHeight = z1;
 						}
@@ -295,13 +295,10 @@ public class Hydrology {
 						downHill[s] = escapeThru;
 						references[escapeThru] += 1;
 						int prev = downHill[escapeThru];
-						System.err.println(String.format("bottom=%d, thru=%d, downhill %d->%d\n", 
-								s, escapeThru, prev, escapeTo));
 						if (prev >= 0)
 							references[prev] -= 1;
 						downHill[escapeThru] = escapeTo;
 						references[escapeTo] += 1;
-						System.err.println(String.format("\trefs[%d] ->%d\n", escapeTo, references[escapeTo]));
 					}
 					
 					// 2. move all points in this sink to escape point's sink

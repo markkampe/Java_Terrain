@@ -6,7 +6,7 @@ import java.io.IOException;	// writes to debug log
 
 /**
  * engine to use topology to compute water placement, flow,
- * erosion an dsedimentation.
+ * erosion and sedimentation.
  */
 /*
  * This is probably the most computationally complex and expensive
@@ -634,22 +634,6 @@ public class Hydrology {
 		return sediment;
 	}
 	
-	/**
-	 * flood all points in a sink up to a specified depth
-	 * @param index of the sink node
-	 * @param water_level (z units)
-	 */
-	private void flood_sink(int index, double water_level) {
-		for(int i = 0; i < landPoints; i++) {
-			int point = byHeight[i];
-			if (sinkMap[point] == index) {
-				double cur_z = heightMap[point] - erodeMap[point];
-				if (cur_z < water_level)
-					hydrationMap[point] = cur_z - water_level;
-			}
-		}
-	}
-
 	/**
 	 * (recursive) QuickSort a list of points by height
 	 * @param left ... left most index of sort region

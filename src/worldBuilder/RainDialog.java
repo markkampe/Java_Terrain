@@ -3,6 +3,7 @@ package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Hashtable;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -21,6 +22,10 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	private JSlider amount;
 	private JButton accept;
 	private JButton cancel;
+	
+	// 0-100 amount slider should be vaguely logarithmic
+	private static final int amounts[] = {0, 10, 25, 50, 100, 150, 200, 250, 300, 400, 500};
+	private static final int FULL_SCALE = 100;
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -55,14 +60,19 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		accept = new JButton("ACCEPT");
 		cancel = new JButton("CANCEL");
 		
-		amount = new JSlider(JSlider.HORIZONTAL, 0, parms.rain_max, parms.dAmount);
-		amount.setMajorTickSpacing(Parameters.niceTics(0, parms.rain_max,true));
-		amount.setMinorTickSpacing(Parameters.niceTics(0, parms.rain_max,false));
+		amount = new JSlider(JSlider.HORIZONTAL, 0, FULL_SCALE, rainfall2slider(parms.dAmount));
+		amount.setPreferredSize(new Dimension(400,50));
 		amount.setFont(fontSmall);
 		amount.setPaintTicks(true);
 		amount.setPaintLabels(true);
 		JLabel amtLabel = new JLabel("Annual Rainfall(cm/yr)", JLabel.CENTER);
 		amtLabel.setFont(fontLarge);
+		
+		// create the labels
+		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
+		for(int i = 0; i < amounts.length; i++)
+			labels.put(i*10, new JLabel(Integer.toString(amounts[i])));
+		amount.setLabelTable(labels);
 		
 		/*
 		 * Pack them into:
@@ -105,14 +115,51 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		map.checkSelection(Map.Selection.POINTS);
 		
 		// initialize the rainfall to default values
-		rainFall((double) amount.getValue());
+		rainFall(slider2rainfall(amount.getValue()));
+	}
+	
+	/**
+	 * translate a (logarithmic) slider value into rainfall
+	 * @param cm ... number of cm/year
+	 * @return corresponding slider value
+	 */
+	private int rainfall2slider(int cm) {
+		// find the first equal or greater index
+		int major = 0;
+		while(major < amounts.length && amounts[major] < (int)cm)
+			major++;
+
+		if (major >= amounts.length)
+			return FULL_SCALE;		// ran off end of scale
+		if (amounts[major] == (int) cm)
+			return major * 10;		// hit it exactly
+		
+		// interpolate between greater and lesser values
+		double range = amounts[major] - amounts[major-1];
+		double excess = cm - amounts[major-1];
+		double ticks = ((major-1) + (excess/range)) * 10;
+		return (int) ticks;
+	}
+	
+	/**
+	 * translate a rainfall amount into a slider value
+	 * @param value on slider
+	 * @return cm of annual rainfall
+	 */
+	private int slider2rainfall(int value) {
+		int base = value/10;
+		int cm = amounts[base];
+		int offset = value % 10;
+		if (offset > 0)
+			cm += offset * (amounts[base+1] - amounts[base])/10;
+		return cm;
 	}
 
 	/**
 	 * calculate the rainfall received at each selected Mesh point
-	 * @param incoming (rain density)
+	 * @param incoming (rain density, cm/yr)
 	 */
-	private void rainFall(double incoming) {
+	private void rainFall(int incoming) {
 		
 		// set the rainfall for every selected point (default all)
 		double[] rainmap = map.getRainMap();
@@ -165,7 +212,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == amount) {
-			rainFall((double) amount.getValue());	
+			rainFall(slider2rainfall(amount.getValue()));	
 		} 
 	}
 	
@@ -177,7 +224,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	public boolean groupSelected(boolean[] selected, boolean complete) {
 		this.selected = selected;
-		rainFall((double) amount.getValue());
+		rainFall(slider2rainfall(amount.getValue()));
 		return true;
 	}
 
@@ -192,7 +239,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			oldRain = null;
 		} else if (e.getSource() == accept) {
 			// make the new parameters official
-			parms.dAmount = amount.getValue();
+			parms.dAmount = slider2rainfall(amount.getValue());
 			
 			if (parms.debug_level > 0) {
 				System.out.println("Mean rainfall: " + (int) meanRain() + Parameters.unit_r);

@@ -107,13 +107,15 @@ all of which are accessed through their common <em>MeshPoint index</em>.
 </P>
 <P>
 There are several different map renderers, one for each major attribute:
-<a Href="JavaDoc/worldBuilder/AltitudeMap.html">AltitudeMap.java</a>,
-<a Href="JavaDoc/worldBuilder/ErodeMap.html">ErodeMap.java</a>,
-<a Href="JavaDoc/worldBuilder/RainMap.html">RainMap.java</a>,
-<a Href="JavaDoc/worldBuilder/RiverMap.html">RiverMap.java</a>,
-<a Href="JavaDoc/worldBuilder/SoilMap.html">SoilMap.java</a>,
-<a Href="JavaDoc/worldBuilder/TopoMap.html">TopoMap.java</a>,
-<a Href="JavaDoc/worldBuilder/WaterMap.html">WaterMap.java</a>.
+<ul>
+    <li> <a Href="JavaDoc/worldBuilder/AltitudeMap.html">AltitudeMap.java</a>,</li>
+    <li> <a Href="JavaDoc/worldBuilder/TopoMap.html">TopoMap.java</a>,</li>
+    <li> <a Href="JavaDoc/worldBuilder/WaterMap.html">WaterMap.java</a>,</li>
+    <li> <a Href="JavaDoc/worldBuilder/RiverMap.html">RiverMap.java</a>,</li>
+    <li> <a Href="JavaDoc/worldBuilder/RainMap.html">RainMap.java</a>,</li>
+    <li> <a Href="JavaDoc/worldBuilder/ErodeMap.html">ErodeMap.java</a>,</li>
+    <li> <a Href="JavaDoc/worldBuilder/SoilMap.html">SoilMap.java</a>.</li>
+</ul>
 The mapping from a (sparse and irregular) Voronoi mesh to a 
 (dense and continuous) 2D map is greatly facilitated by the
 <a Href="JavaDoc/worldBuilder/Cartesian.html">Cartesian.java</a>
@@ -130,8 +132,10 @@ and a common
 creates a series of 2D per-tile maps which it pushes to the
 output-format-specific implementations.
 The simplest of these,
+<a Href="JavaDoc/worldBuilder/RawExport.html">RawExport.java</a>
+and 
 <a Href="JavaDoc/worldBuilder/JsonExporter.html">JsonExporter.java</a>,
-simply creates a collection of per-point attribute descriptions.
+simply create a collection of per-point attribute descriptions.
 More interesting is
 <a Href="JavaDoc/worldBuilder/RPGMexport.html">RPGMexport.java</a>,
 which uses tile placement rules (managed by
@@ -145,20 +149,23 @@ to reproduce the map in tiles, and cause the (<em>RPG Maker map</em>) output to 
 <P>
 The main-screen menus and controls are put-up and responded to by the main class
 (<a Href="JavaDoc/worldBuilder/WorldBuilder.html">WorldBuilder.java)</a>.
+<br>
 Simple operations like saving updated maps and loading new ones, it handles
 directly.  But display and update operations are handled by one
 of the sub-dialog managers:
-<a Href="JavaDoc/worldBuilder/LandDialog.html">LandDialog.java</a>,
-<a Href="JavaDoc/worldBuilder/MeshDialog.html">MeshDialog.java</a>,
-<a Href="JavaDoc/worldBuilder/MountainDialog.html">MountainDialog.java</a>,
-<a Href="JavaDoc/worldBuilder/PointDebug.html">PointDebug.java</a>,
-<a Href="JavaDoc/worldBuilder/RainDialog.html">RainDialog.java</a>,
-<a Href="JavaDoc/worldBuilder/RegionDialog.html">RegionDialog.java</a>,
-<a Href="JavaDoc/worldBuilder/RiverDialog.html">RiverDialog.java</a>,
-<a Href="JavaDoc/worldBuilder/RuleDebug.html">RuleDebug.java</a>,
-<a Href="JavaDoc/worldBuilder/SlopeDialog.html">SlopeDialog.java</a>,
-<a Href="JavaDoc/worldBuilder/WorldDialog.html">WorldDialog.java</a>,
-<a Href="JavaDoc/worldBuilder/ZoomDialog.html">ZoomDialog.java</a>.
+<ul>
+   <li> <a Href="JavaDoc/worldBuilder/MeshDialog.html">MeshDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/WorldDialog.html">WorldDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/MountainDialog.html">MountainDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/LandDialog.html">LandDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/RainDialog.html">RainDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/RegionDialog.html">RegionDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/RiverDialog.html">RiverDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/PointDebug.html">PointDebug.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/SlopeDialog.html">SlopeDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/ZoomDialog.html">ZoomDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/RuleDebug.html">RuleDebug.java</a>.</li>
+</ul>
 These put-up and respond to their own widgets, but on-map selection
 (e.g. of lines, rectangles or groups of MeshPoints) is handled by
 <a Href="JavaDoc/worldBuilder/Map.html">Map.java</a>.
@@ -170,13 +177,19 @@ for each <em>MeshPoint</em>) and using calling <em>set</em> functions
 in the <em>Map</em> class.
 </P>
 <P>
+The most complex module is probably the 
+<a Href="JavaDoc/worldBuilder/Hydrology.html">Hydrology</a> class,
+which uses rainfall and topology to compute water flow, erosion, 
+deposition, and lake boundaries.
+</P>
+<P>
 Most program parameters are read-in and accessed through the <em>Singleton</em>
 implemented by
 <a Href="JavaDoc/worldBuilder/Parameters.html">Parameters.java</a>.
 <br>
 When a map is read in (or written out), this is done by
 <a Href="JavaDoc/worldBuilder/Map.html">Map.java</a>.
-<br>
+<br> 
 <em>RPG Maker</em> tile placement rules are read in by 
 <a Href="JavaDoc/worldBuilder/TileRules.html">TileRules.java</a>.
 </P>
@@ -318,8 +331,102 @@ The final class diagram shows the <em>Export</em> related classes
 <a name="UML_export"></a>
 <img src="ExportDialogs.png" width="1200">
 <P>
-TO BE CONTINUED
 </P>
+<H3>Notes on hydrological simulations</H3>
+<P>
+The most important methods in the
+<a Href="JavaDoc/worldBuilder/Hydrology.html">Hydrology</a> class are:
+<ul>
+    <li> <em>drainage</em> ... figure out how water would flow between the mesh points:
+        <ol type="1">
+	    <li> mark all sub-sea-level points on the edge of the map as oceanic.</li>
+	    <li> determine the most down-hill (steepest) neighbor or each land point.</li>
+	    <li> identify the lowest point in each depression (sink).</li>
+	    <li> identify the lowest escape point for each depression (sink) if it fills with water ...
+	         and if the escape is into a larger depression, combine them.</li>
+	    <li> create a <em>source-to-sink ordered</em> list of non-oceanic points
+	         (to be used in the next pass).</li>
+	</ol>
+    </li>
+    <P>
+    </P>
+    <li> <em>waterFlow</em> ... compute water velocity, erosion, deposition, and lake boundaries:
+        <ol type="1">
+	    <li> compute the incoming rainfall and flow, vs evaporation to determine
+	         whether or not there is net water (flowing or lake) on each point.</li>
+	    <li> use the down-hill slope to compute the velocity of flow through each point.</li>
+	    <li> if the velocity is high enough to cause erosion, compute the amount of
+	         soil removed from this point and added to the flow.</li>
+	    <li> if the velocity is lowe enough to cause sedimentation, compute how
+	         much soil is removed from the flow and deposited on this point.</li>
+	    <li> if this point is in a depression, compute the water depth 
+	    	 (as the altitude difference between this point and its escape point identified
+		 in the <em>drainage</em> pass).</li>
+	</ol>
+    </li>
+    <P>
+    </P>
+    <li> <em>erosion</em> ... return the (number of meters of) erosion for 
+    	 a specified mesh point (based on the <em>waterFlow</em> computations).</li>
+    <P>
+    </P>
+    <li> <em>sedimentation</em> ... return the (number of meters of) sedimentation for
+    	 a specified mesh point (based on the <em>waterFlow</em> computations).</li>
+</ul>
+</P>
+<P>
+I started out trying to use real physics for erosion and sedimentation:
+<ul>
+   <li> the Manning formula to compute water velocity from slope.</li>
+   <li> suspended concentration studies to estimate how much soil could be carried by water at each speed..
+   <li> the Hjulstrom curves to distinguish erosion and deposition ranges.</li>
+</ul>
+</P>
+but the results were disappointing:
+<ul>
+   <li> Fantasy maps seem to have a wider vertical range than real topographies,
+   	so the water would always be moving too fast for any sedimentation to happen.
+	<br>
+	I changed the velocity computation to simply interpolate a reasonable range
+	of water speeds (0.005m/s - 3m/s) from a wide range of slopes (1/1000 - 1/1).
+   </li>
+   <li> The Hjulstrom curves tell us what sized particles are being eroded
+        or deposited at a given velocity, but not the rate at which these
+	processes proceed.
+	<br>
+   	I said the amount of erosion was proportional to the water
+	velocity, and the amount of deposition was inversely 
+	proportional to the water velocity ... and use those results
+	to scale a fraction (<em>Ce</em> or <em>Cd</em>) of the 
+	possible erosion (or deposition) that would take place
+	at a particular point.
+   </li>
+   <li> Silt is not dug out of the river-bed, but washed off the top 
+        of the entire watershed.
+   	<br>
+	Even after the eroded rock has all been deposited, I said that
+	sufficently slow moving water still has more silt to deposit.
+   </li>
+</ul>
+<P>
+I have seen much higher resolution erosion/deposition simulations,
+performed by GPUs on a much denser Cartesian grid.  The results were
+very beautiful, but require many orders of magnitude more computer
+power (to do anything), and lack the (very satisfying) irregularity
+that emerges from points on our Voronoi mesh.
+The erosion/deposition models used by those simulations were even
+simpler than mine:
+<UL>
+    <li> velocity is a simple function of slope, and the allowable
+    	 amount of sediment carried by water is directly proportional
+	 to its velocity.</li>
+    <li> erosion is the shortfall (amount of allowable sediment not
+         yet carried) divided by the hardness of the rock.</li>
+    <li> deposition is the surplus (amount of carried sediment
+         beyond what is currently allowed for that water).</li>
+</UL>
+</P>
+
 
 <H2>Issues</H2>
 <P>

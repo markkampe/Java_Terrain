@@ -67,7 +67,7 @@ public class Parameters {
 
 	// range limits on sliders
 	public int msl_range = 1000;	// +/- (m)
-	public int rain_max = 1000;		// rain (cm/y)
+	public int rain_max = 500;		// rain (cm/y)
 	public int m_width_divisor = 2; // world/mountain width
 	public int tiles_max = 10000;	// export warning limit
 	public int tribute_max = 1000;	// max incoming river flow
@@ -372,9 +372,6 @@ public class Parameters {
 				case "msl_range":
 					msl_range = new Integer(parser.getString());
 					break;
-				case "rain_max":
-					rain_max = new Integer(parser.getString());
-					break;
 				case "tribute_max":
 					tribute_max = new Integer(parser.getString());
 					break;
@@ -484,7 +481,6 @@ public class Parameters {
 					+ ", Vd=" + String.format("%.2f", Vd) + unit_v
 					+ ", Cd=" + String.format("%.2f",  Cd));
 			System.out.println("   rainfall:   " + "default=" + dAmount + unit_r
-					+ ", rain_max=" + rain_max + unit_r
 					+ ", Dp=" + String.format("%.1f",  Dp) + unit_z);
 			System.out.println("   mean temps: polar=" + Tmin + unit_t + ", equator=" + Tmax + unit_t);
 			System.out.println("   max ranges: " + diameter_max + unit_xy + ", altitude +/-" + alt_max + unit_z

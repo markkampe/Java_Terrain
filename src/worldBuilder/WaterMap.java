@@ -11,6 +11,19 @@ public class WaterMap {
 	private Map map;
 	private Parameters parms;
 	
+	double[][] waterMap;	// + = above water, - = below water
+	
+	// returned bitmap from check_neighbors
+	private static final int UL  = 0x01;	// upper left neighbor
+	private static final int TOP = 0x02;	// top neighbor
+	private static final int UR  = 0x04;	// upper right neighbor
+	private static final int RGT = 0x08;	// right side neighbor
+	private static final int LR  = 0x10;	// lower right neighbor
+	private static final int BOT = 0x20;	// bottom neighbor
+	private static final int LL  = 0x40;	// lower left neighbor
+	private static final int LFT = 0x80;	// left side neighbor
+	private static final int ALL = 0xff;	// all neighbors
+	
 	/**
 	 * instantiate a river and water-body map renderer
 	 * @param map	to be rendered
@@ -33,29 +46,132 @@ public class WaterMap {
 		int w = width/cellWidth;
 		
 		// interpolate per-cell water depth from the mesh
-		double hArray[][] = submergence();
-			
-		// use height to generate background colors
-		g.setColor(Color.BLUE);
+		waterMap = submergence();
+		
+		/*
+		 * We paint blue any point that is under water, and
+		 * leave land points as already painted.  But if we
+		 * just painted squares of water, the shore-lines
+		 * would be very jaggetd.
+		 * 
+		 * If a water-corner is surrounded (on both sides) by
+		 * land, we round it off by adjusting the starting and
+		 * ending points of each scan line to leave a triangle
+		 * of land in that corner.
+		 * 
+		 * If a land-corner is surrounded (on both sides) by
+		 * water, we round it off by drawing a triangle of 
+		 * water in that corner.
+		 */
+		int starts[] = new int[cellWidth];
+		int ends[] = new int[cellWidth];
+		for(int i = 0; i < cellWidth; i++) {
+			starts[i] = 0;			// all water-cell scan lines
+			ends[i] = cellWidth;	// default to full width
+		}
+		
+		g.setColor(Color.BLUE);		// we only draw water
 		for(int r = 0; r < h; r++)
 			for(int c = 0; c < w; c++) {
-				int sum = 0;
-				if (r < h-1 && c < w-1) {
-					// see which of our neighbors are above water
-					if (hArray[r][c] >= 0)
-						sum += 8;
-					if (hArray[r][c + 1] >= 0)
-						sum += 4;
-					if (hArray[r + 1][c] >= 0)
-						sum += 1;
-					if (hArray[r + 1][c + 1] >= 0)
-						sum += 2;
-				} else
-						sum = (hArray[r][c] >= 0) ? 15 : 0;
+				// locate upper left-hand corner of this cell
+				int x = c * cellWidth;
+				int y = r * cellWidth;
 				
-				// render a cell of the appropriate shape
-				waterCell(g, r, c, cellWidth, sum);
+				if (waterMap[r][c] < 0) {	// this cell is under-water
+					int drys = check_neighbors(r, c, true);
+					if ((drys & (LFT+UL+TOP)) == (LFT+UL+TOP)) {
+						// round off the upper left corner
+						starts[0] = 2;
+						starts[1] = 1;
+					} else {
+						starts[0] = 0;
+						starts[1] = 0;
+					}
+					if ((drys & (TOP+UR+RGT)) == (TOP+UR+RGT)) {
+						// round off the upper right corner
+						ends[0] = cellWidth - 2;
+						ends[1] = cellWidth - 1;
+					} else {
+						ends[0] = cellWidth;
+						ends[1] = cellWidth;
+					}
+					if ((drys & (LFT+LL+BOT)) == (LFT+LL+BOT)) {
+						// round off the lower left corner
+						starts[cellWidth-2] = 1;
+						starts[cellWidth-1] = 2;
+					} else {
+						starts[cellWidth-2] = 0;
+						starts[cellWidth-1] = 0;
+					}
+					if ((drys & (RGT+LR+BOT)) == (RGT+LR+BOT)) {
+						// round off the lower right corner
+						ends[cellWidth-2] = cellWidth - 1;
+						ends[cellWidth-1] = cellWidth - 2;
+					} else {
+						ends[cellWidth-2] = cellWidth;
+						ends[cellWidth-1] = cellWidth;
+					}
+					for(int i = 0; i < cellWidth; i++)
+						g.drawLine(x + starts[i], y+i, x + ends[i], y+i);
+				} else {
+					// cell is above water, round off any corner surrounded by water
+					int wets = check_neighbors(r, c, false);
+					if ((wets & (LFT+UL+TOP)) == (LFT+UL+TOP)) {
+						// round off the upper left corner
+						g.drawLine(x, y, x+2, y);
+						g.drawLine(x, y+1, x+1, y+1);
+					}
+					if ((wets & (TOP+UR+RGT)) == (TOP+UR+RGT)) {
+						// round off the upper right corner
+						g.drawLine(x+3, y, x+cellWidth, y);
+						g.drawLine(x+cellWidth-1, y+1, x+cellWidth, y);
+					}
+					if ((wets & (LFT+LL+BOT)) == (LFT+LL+BOT)) {
+						// round off the lower left corner
+						g.drawLine(x, y+cellWidth-2, x+1, y+cellWidth-2);
+						g.drawLine(x, y+cellWidth-1, x+2, y+cellWidth-1);
+					}
+					if ((wets & (RGT+LR+BOT)) == (RGT+LR+BOT)) {
+						// round off the lower right corner
+						g.drawLine(x+cellWidth-1, y+cellWidth-2, x+cellWidth, y+cellWidth-2);
+						g.drawLine(x+cellWidth-2, y+cellWidth-1, x+cellWidth, y+cellWidth-1);
+					}
+				}
 			}
+	}
+
+	/**
+	 * check to see which of our neighbors are dry/wet
+	 * 
+	 * @param row of point to be checked
+	 * @param col of point to be checked
+	 * @param dry do we want to know about dry (vs wet) neighbors
+	 * @return bit mask of which neighbors are dry (or wet)
+	 */
+	int check_neighbors(int row, int col, boolean dry) {
+		
+		int dry_neighbors = 0;
+		if (row > 0) {
+			if (col > 0)
+				dry_neighbors += waterMap[row-1][col-1] >= 0 ? UL : 0;
+			dry_neighbors += waterMap[row-1][col]   >= 0 ? TOP : 0;
+			if (col < waterMap[0].length - 1)
+				dry_neighbors += waterMap[row-1][col+1] >= 0 ? UR : 0;
+		}
+		if (col > 0)
+			dry_neighbors += waterMap[row][col-1]   >= 0 ? LFT : 0;
+		if (col < waterMap[0].length - 1)
+			dry_neighbors += waterMap[row][col+1]   >= 0 ? RGT : 0;
+		if (row < waterMap.length - 1) {
+			if (col > 0)
+				dry_neighbors += waterMap[row+1][col-1] >= 0 ? LL : 0;
+			dry_neighbors += waterMap[row+1][col]   >= 0 ? BOT : 0;
+			if (col < waterMap[0].length-1)
+				dry_neighbors += waterMap[row+1][col+1] >= 0 ? LR: 0;
+		}
+		
+		// if asked for wet points, complement the mask
+		return dry ? dry_neighbors : dry_neighbors ^ ALL;
 	}
 	
 	/**
@@ -85,93 +201,4 @@ public class WaterMap {
 		// interpolate those depths into a Cartesian map
 		return map.getCartesian().interpolate(depthMap);
 	}
-	
-	/**
-	 * render a cellWidth*cellWidth block of a water, with
-	 * 	the particular pixels determined by the neighbor sum
-	 * 
-	 * @param Graphics context
-	 * @param topographic row
-	 * @param topographic column
-	 * @param pixel width of a cell (MUST BE 5)
-	 * @param sum of corners (from Marching Square)
-	 */
-	private void waterCell(Graphics g, int r, int c, int cellWidth, int sum) {
-	
-		// if it is all above water, there is nothing to draw
-		if (sides[sum] == 0)
-			return;
-		
-		// load up the coordinates
-		int Xs[] = new int[6];
-		int Ys[] = new int[6];
-		for(int i = 0; i < 6; i++) {
-			Xs[i] = c * cellWidth + xOffsets[sum][i];
-			Ys[i] = r * cellWidth + yOffsets[sum][i];
-		}
-		
-		g.fillPolygon(Xs, Ys, sides[sum]);
-	}
-	
-	// TODO: why is the coast line ragged?
-	
-	// how many sides in the water polygon
-	private static final int sides[] = {
-			4,	// 0: all under water
-			5,	// 1: lower left above
-			5,	// 2: lower right above
-			4,	// 3: top half under
-			5,	// 4: top right above
-			6,	// 5: SW/NE saddle above
-			4,	// 6: left half under
-			3,	// 7: top left under
-			5,	// 8: top left above
-			4,	// 9: right half under
-			6,	// 10: NW/SE saddle above
-			3,	// 11: top right under
-			4,	// 12: bottom half under
-			3,	// 13: bottom right under
-			3,	// 14: bottom left under
-			0	// 15: all above water	
-	};
-	
-	// x offsets for each vertex, for each sum
-	private static final int xOffsets[][] = {
-			{ 0, 5, 5, 0, 0, 0 },	// 0: all under water
-			{ 1, 5, 5, 3, 1, 0 },	// 1: lower left above
-			{ 0, 3, 3, 1, 0, 0 },	// 2: lower right above
-			{ 0, 5, 5, 0, 0, 0 },	// 3: top half under
-			{ 0, 1, 3, 3, 0, 0 },	// 4: top right above
-			{ 0, 1, 5, 5, 3, 0 },	// 5: SW/NE saddle above
-			{ 0, 2, 2, 0, 0, 0 },	// 6: left half under
-			{ 0, 2, 0, 0, 0, 0 },	// 7: top left under
-			{ 3, 5, 5, 0, 0, 0 },	// 8: top left above
-			{ 3, 5, 5, 3, 0, 0 },	// 9: right half under
-			{ 3, 5, 5, 1, 0, 0 },	// 10: NW/SE saddle above
-			{ 3, 5, 5, 0, 0, 0 },	// 11: top right under
-			{ 0, 5, 5, 0, 0, 0 },	// 12: bottom half under
-			{ 5, 5, 3, 0, 0, 0 },	// 13: bottom right under
-			{ 0, 2, 0, 0, 0, 0 },	// 14: bottom left under
-			{ 0, 0, 0, 0, 0, 0 }	// 15: all above water
-	};
-	
-	// y offsets for each vertex, for each sum
-	private static final int yOffsets[][] = {
-			{ 0, 0, 5, 5, 0, 0 },	// 0: all under water
-			{ 0, 5, 5, 3, 1, 0 },	// 1: lower left above
-			{ 0, 0, 1, 3, 5, 0 },	// 2: lower right above
-			{ 0, 0, 2, 2, 0, 0 },	// 3: top half under
-			{ 0, 0, 3, 5, 5, 0 },	// 4: top right above
-			{ 0, 0, 3, 5, 5, 1 },	// 5: SW/NE saddle above
-			{ 0, 0, 5, 5, 0, 0 },	// 6: left half under
-			{ 0, 0, 2, 0, 0, 0 },	// 7: top left under
-			{ 0, 0, 5, 5, 3, 0 },	// 8: top left above
-			{ 0, 0, 5, 5, 0, 0 },	// 9: right half under
-			{ 0, 0, 1, 3, 5, 3 },	// 10: NW/SE saddle above
-			{ 0, 0, 2, 0, 0, 0 },	// 11: top right under
-			{ 3, 3, 5, 5, 0, 0 },	// 12: bottom half under
-			{ 3, 5, 5, 0, 0, 0 },	// 13: bottom right under
-			{ 3, 5, 5, 0, 0, 0 },	// 14: bottom left under
-			{ 0, 0, 0, 0, 0, 0 }	// 15: all above water
-	};
 }

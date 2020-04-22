@@ -378,7 +378,7 @@ The most important methods in the
 I started out trying to use real physics for erosion and sedimentation:
 <ul>
    <li> the Manning formula to compute water velocity from slope.</li>
-   <li> suspended concentration studies to estimate how much soil could be carried by water at each speed..
+   <li> suspended concentration studies to estimate how much soil could be carried by water at each speed.
    <li> the Hjulstrom curves to distinguish erosion and deposition ranges.</li>
 </ul>
 </P>
@@ -387,25 +387,32 @@ but the results were disappointing:
    <li> Fantasy maps seem to have a wider vertical range than real topographies,
    	so the water would always be moving too fast for any sedimentation to happen.
 	<br>
-	I changed the velocity computation to simply interpolate a reasonable range
-	of water speeds (0.005m/s - 3m/s) from a wide range of slopes (1/1000 - 1/1).
+	I dealt with this by changing the velocity computation to simply interpolate a 
+	reasonable range of water speeds (0.005m/s - 3m/s) from a wide range of 
+	slopes (1/1000 - 1/1).
    </li>
    <li> The Hjulstrom curves tell us what sized particles are being eroded
         or deposited at a given velocity, but not the rate at which these
 	processes proceed.
 	<br>
-   	I said the amount of erosion was proportional to the water
-	velocity, and the amount of deposition was inversely 
-	proportional to the water velocity ... and use those results
-	to scale a fraction (<em>Ce</em> or <em>Cd</em>) of the 
-	possible erosion (or deposition) that would take place
-	at a particular point.
+	Based on my experience with other such processes, I said 
+	that erosion and deposition were exponential processes,
+	with some fraction of the possible erosion/deposition happening
+	at each mesh point.  The possible erosion was proportional to 
+	the water velocity, and the deposition inversely proportional to 
+	the water velocity.  The fraction of possible erosion/deposition
+	that happens per point is controlled by two tunable parameters:
+	<em>Ce</em> and <em>Cd</em>.
    </li>
    <li> Silt is not dug out of the river-bed, but washed off the top 
-        of the entire watershed.
+        of the entire watershed.  Consequently, the amount of silt
+	deposition should greatly exceed the amount of river-bed
+	erosion.
    	<br>
-	Even after the eroded rock has all been deposited, I said that
-	sufficently slow moving water still has more silt to deposit.
+	I dealt with this by making silt deposition a distinct process
+	from the deposition of eroded rock.  I made the simplifying
+	assumption that sufficently slow moving water always has more 
+	silt to deposit.
    </li>
 </ul>
 <P>

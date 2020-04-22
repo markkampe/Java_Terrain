@@ -193,11 +193,14 @@ class Vicinity {
  */
 class Hydrology {
 	Hydrology(Map map) {};
-	void reCalculate(boolean reset) {};
+	void drainage();
+	void waterFlow();
+	double erosion(int index);
+	double sedimentation(int index);
 	static double velocity(double slope) {};
 	static double widthToDepth(double velocity) {};
-	static double width(double flow, double velocity) {};
-	static double depth(double flow, double velocity) {};
+	double width(double flow, double velocity) {};
+	double depth(double flow, double velocity) {};
 }
 
 /** @hidden */ class Color {}

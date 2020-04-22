@@ -208,6 +208,7 @@ The <em>worldBuilder</em> application is moderately large
 The high level class structure can be (crudely) summarized by
 a few UML class diagrams.
 </P>
+<H3>Mesh and Map-related Classes</h3>
 <P>
 The first class diagram shows the main <em>WorldBuilder</em> class,
 the <em>awt</em> and <em>swing</em> GUI classes it builds on,
@@ -230,6 +231,7 @@ as new points, the centroids of those Voronoi polygons.
 We use a <em>Voronoi</em> library to assign three neighbors to
 each point and create the desired Mesh.
 </P>
+<H3>Simple Dialog Classes</h3>
 <P>
 The second class diagram shows the simpler (non-point-attribute-editing)
 dialogs and the primary <em>Map</em> class functions they use.
@@ -260,7 +262,7 @@ also use the <tt>Map.selectMode()</tt> and <tt>Map.checkSelection()</tt>
 operations to enable the desired selection mode (e.g. point, line, region)
 and query any selections that may have already been made.
 </P>
-
+<H3>Terrain Editing Dialog Classes</H3>
 <P>
 The third class diagram shows the attribute-editing dialogs and the
 <em>Map</em> selection and get/set functions they use to update
@@ -324,6 +326,7 @@ When the call is made to repaint the map, <tt>Map.PaintComponent</tt> will:
 	    rectangles, lines or point-halos to indicate them.</li>
 </ol>
 </P>
+<H3>Export Classes</H3>
 <P>
 The final class diagram shows the <em>Export</em> related classes
 (that handle both raw JSON and <em>RPG Maker</em> maps).

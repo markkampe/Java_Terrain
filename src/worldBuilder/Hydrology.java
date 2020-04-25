@@ -431,7 +431,8 @@ public class Hydrology {
 	/**
 	 * compute water flow, water depth, and soil hydration
 	 *
-	 *	Assertion: drainage has been called: oceanic & downHill are up-to-date
+	 *	Assertion: drainage has been called: 
+	 *			   oceanic and downHill are up-to-date
 	 */
 	public void waterFlow() {
 		// import the rainfall and arterial river influx

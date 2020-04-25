@@ -77,7 +77,7 @@ public class Hydrology {
 	
 	/**
 	 * Water flow and level calculation engine
-	 * @param Map (and Mesh) on which we will operate
+	 * @param map (and Mesh) on which we will operate
 	 */
 	public Hydrology(Map map) {
 		this.map = map;

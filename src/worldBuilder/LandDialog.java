@@ -43,8 +43,8 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	private boolean have_selection;		// there is a selected point set
 	private boolean[] selected_points;	// which points are selected
 	
-	private static final int LAND_DEBUG = 2;
-	private static final int ERODE_DEBUG = 3;
+	//private static final int LAND_DEBUG = 2;
+	//private static final int ERODE_DEBUG = 3;
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -243,7 +243,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 					z_max = old_height[i];
 			}
 		double z_mid = (z_min + z_max)/2;
-		double z_radius = z_max - z_mid;
 		double z_mult = multiplier(flatness.getValue());
 		
 		int v = erosion.getValue();

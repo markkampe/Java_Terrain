@@ -23,149 +23,175 @@ public class Parameters {
 	private static final String PROGRAM_NAME = "WorldBuilder";
 	private static final String PROGRAM_VERSION = "0.1";
 	private static final String VERSION_NAME = "(WIP)";
-	public String title = PROGRAM_NAME + " " + PROGRAM_VERSION + " " + VERSION_NAME;
 
 	// default configuration information
+	/** program name/version*/	public String title = PROGRAM_NAME + " " + PROGRAM_VERSION + " " + VERSION_NAME;
+	/** name of this map	*/	public String map_name = "Map001";
+	/** RPGMaker parent map	*/	public String parent_name = null;
+	/** RPGMaker project dir*/	public String project_dir = null;
 	private static final String DEFAULT_CONFIG = "/Templates/worldBuilder.json";
-	public String map_name = "Map001";
-	public String parent_name = null;
-	public String project_dir = null;
-	public LinkedList<String> exportRules;
+
+	/**	selected export rules	*/	public LinkedList<String> exportRules;
 	public String config_directory = "";
 
-	/** operating units ... hard-wired into the code (assumes UTF8)	*/
-	/** distance unit	*/		public static final String unit_xy = "km";
-	/** land area unit	*/		public static final String unit_xy2 = "km\u00B2";
-	/** altitude unit	*/		public static final String unit_z = "m";
-	/** rainfall unit	*/		public static final String unit_r = "cm/y";
-	/** slope unit		*/		public static final String unit_s = "cm/km";
-	/** flow rate unit	*/		public static final String unit_f = "m\u00B3/s";
-	/** velocity unit	*/		public static final String unit_v = "m/s";
-	/** volume unit		*/		public static final String unit_V = "m\u00B3";
-	/** temperature unit*/		public static final String unit_t = "\u00B0C";
-	/** direction unit	*/		public static final String unit_d = "\u00B0";
-	/** screen res unit	*/		public static final String unit_p = "px";
+	// operating units ... hard-wired into the code (assumes UTF-8)
+	/** Unit: distance	*/	public static final String unit_xy = "km";
+	/** Unit: land area	*/	public static final String unit_xy2 = "km\u00B2";
+	/** Unit: altitude	*/	public static final String unit_z = "m";
+	/** Unit: rainfall	*/	public static final String unit_r = "cm/y";
+	/** Unit: slope		*/	public static final String unit_s = "cm/km";
+	/** Unit: flow rate	*/	public static final String unit_f = "m\u00B3/s";
+	/** Unit: velocity	*/	public static final String unit_v = "m/s";
+	/** Unit: volume	*/	public static final String unit_V = "m\u00B3";
+	/** Unit: temperature*/	public static final String unit_t = "\u00B0C";
+	/** Unit: compass dir*/	public static final String unit_d = "\u00B0";
+	/** Unit: screen res */	public static final String unit_p = "px";
 
-	/** map coordinate ranges ... no reason to change	*/
-	/** map: Xmax - Xmin	*/	public static final double x_extent = 1.0;
-	/** map: Ymax - yMin	*/	public static final double y_extent = 1.0;
-	/** map: Zmax - ZMin	*/	public static final double z_extent = 1.0;
+	// map coordinate ranges ... no reason to change
+	/** map: X-range	*/	public static final double x_extent = 1.0;
+	/** map: Y-range	*/	public static final double y_extent = 1.0;
+	/** map: Z-range	*/	public static final double z_extent = 1.0;
 	
-	/** meteorological constants ... not configurable	*/
-	/** temp lapse rate		*/	public double lapse_rate = 0.01;	// degC/M
-	/** avg polar temp		*/	public  double Tmin = -5;			// degC
-	/** avg equitorial temp	*/	public double Tmax = 30;			// degC
+	// parameters for the generation of new meshes
+	/** new mesh initial points		*/	public int points = 4096;
+	/** new mesh smooth iterations	*/	public int improvements = 1;
+	/** new mesh initial dz/dx		*/	public double slope_init = 0.00001;
 
-	/** planetary characteristics (override in config.json)	*/
-	/** planetary radius	*/	public int radius = 6371;			// km
-	/** planetary tilt		*/	public double tilt = 23.5;			// degrees
-	
-	/** limits on world parameters (overide in config.json)	*/
-	/** max world altitude	*/	public int alt_max = 10000;			// m
-	/** max world diameter	*/	public int diameter_max = 5000;		// km
-	/** initial slope		*/	public double slope_init = 0.00001; // dz/dx
+	// planetary parameters ... unlikely to change
+	/** planetary radius (km)		*/	public int radius = 6371;
+	/** planeteary axis tilt (deg)	*/	public double tilt = 23.5;
+	/** mean polar temp (degC)		*/	public  double Tmin = -5;
+	/** mean equitorial temp (degC)	*/	public double Tmax = 30;
 
-	/** range limits on sliders	*/
-	/** MSL slider range		*/	public int msl_range = 1000;	// +/- m
-	/** rain slider	range		*/	public int rain_max = 500;		// cm/y
-	/** mountn wid slider range	*/	public int m_width_divisor = 2; // world/mountain width
-	/** max tiles warn limit	*/	public int tiles_max = 10000;
-	/** max river flow			*/	public int tribute_max = 1000;
-	/** min	height/alt levels	*/	public int levels_min = 5;
-	/** max height/alt levels	*/	public int levels_max = 20;
-	/** exp temp slider range	*/	public int delta_t_max = 15;	// degC
-	/** exp hydro slider range	*/	public int delta_h_max = 100;	// %
-	/** landform alt slider range*/	public int delta_z_max = 1000;	// m
-
-	/** world size slider units	*/
-	/** diam slider unit	*/	public int diam_scale = 100;		// km
-	/** diam slider ticks	*/	public int diam_grain = 500;		// km
-	/** alt slider unit		*/	public int alt_scale = 1000;		// m
-
-	/** default display parameters (override in config.json)	*/
+	// display parameters ... might want to override in config.json
 	private static final int PIXELS = 800; // display height/width
-	/** sceern height		*/	public int height = PIXELS;
-	/** screen width		*/	public int width = PIXELS;
-	/** border width		*/	public int border;
-	/** dialog border		*/	public int dialogBorder;
-	/** descript width		*/	public int descr_width;
-	/** descript height		*/	public int descr_height;
+	/** display sceern height (px)	*/	public int height = PIXELS;
+	/** display screen width (px)	*/	public int width = PIXELS;
+	/** display border width (px)	*/	public int border;
+	/** display dialog border (px)	*/	public int dialogBorder;
+	/** display descript width (px)	*/	public int descr_width;
+	/** display descript height (px)*/	public int descr_height;
 	
-	/** map rendering thresholds	*/
-	/** min stream flux		*/	public double stream_flux = 0.1;	// m^3/s
-	/** min river flux		*/	public double river_flux = 1.0;		// m^3/s
-	/** min artery flux		*/	public double artery_flux = 10.0; 	// m^3/s
-	/** min deep water		*/	public double deep_threshold = 10;	// m
-	/** topo: minor/major	*/	public int topo_major = 5;
-	/** topo: meters/minor	*/	public int topo_minor = 100;		// m
+	/** min stream flux (m^3/s)		*/	public double stream_flux = 0.1;
+	/** min river flux (m^3/s)		*/	public double river_flux = 1.0;
+	/** min artery flux (m^3/s)		*/	public double artery_flux = 10.0;
+	/** min deep water (m)			*/	public double deep_threshold = 10;
+	/** topo meters/minor line		*/	public int topo_minor = 100;
+	/** topo minor lines/major		*/	public int topo_major = 5;
 
-	/** user selected world size/location parameters	*/
-	/** max x/y width		*/	public int xy_range;				// km
-	/** max map altitude	*/	public int z_range;					// m
-	/** max mountain width	*/	public int mountain_max;			// km
-	/** center latitude		*/	public double latitude;				// degrees
-	/** center longitude	*/	public double longitude;			// degrees
-	/** world description	*/	public String description;
+	/** map views to be displayed	*/	public int display_options;
 
-	/** persistent defaults for Edit dialogs	*/
-	/** dflt sea level		*/	public double sea_level = 0;
-	/** dflt x slope		*/	public int dSlope;
-	/** dflt slope axis		*/	public int dDirection;
-	/** dflt mountain diam	*/	public int dDiameter;
-	/** dflt mountain alt	*/	public int dAltitude;
-	/** dflt mountain shape	*/	public int dShape;
-	/** triangular ridge	*/	public static final int CONICAL = 0;
-	/** rounded hill		*/	public static final int SPHERICAL = 4;
-	/** plauteau shape		*/	public static final int CYLINDRICAL = 8;
+	// maximum ranges on sliders ... might want to override in config.json
+	/** world altitude slider range	*/	public int alt_max = 10000;		// m
+	/** world altitude slider unit	*/	public int alt_scale = 1000;	// m
+	/** world diameter slider range	*/	public int diameter_max = 5000;	// km
+	/** world diameter slider unit	*/	public int diam_scale = 100;	// km
+	/** world diameter slider ticks	*/	public int diam_grain = 500;	// km
 
-	/** dflt rainfall		*/	public int dAmount;				// cm/y
-	/** dflt atrerial flux	*/	public int dTribute;			// m^3/s
-	/** dflt expt tile size	*/	public int dTileSize;			// m
+	/** MSL slider range			*/	public int msl_range = 1000;	// +/- m
+
+	/** rain slider	range			*/	public int rain_max = 500;		// cm/y
+
+	/** mountain width slider range	*/	public int m_width_divisor = 2; // world/mountain width
+	/** mountain shape: triangular	*/	public static final int CONICAL = 0;
+	/** mountain shape: rounded		*/	public static final int SPHERICAL = 4;
+	/** mountain shape: plauteau	*/	public static final int CYLINDRICAL = 8;
+
+	/** soil height slider range	*/	public int delta_z_max = 1000;	// m
+
+	/** river flow slider range		*/	public int tribute_max = 1000;
+
+	/** export # tiles warn limit	*/	public int tiles_max = 10000;
+	/** exportmin	height/alt levels	*/	public int levels_min = 5;
+	/** exportmax height/alt levels	*/	public int levels_max = 20;
+	/** export temp slider range	*/	public int delta_t_max = 15;	// degC
+	/** export hydro slider range	*/	public int delta_h_max = 100;	// %
+
+
+	// default values ... automatically updated to last selected value
+	/** default world max width (km)	*/	public int xy_range;
+	/** default world max altitude (m)	*/	public int z_range;
+	/** default world latitude (deg)	*/	public double latitude;
+	/** default world longitude (deg)	*/	public double longitude;
+	/** default world description		*/	public String description;
+
+	/** default map sea level (m)		*/	public double sea_level = 0;
+
+	/** default slope axis (deg)		*/	public int dDirection;
+
+	/** default rainfall amount (cm/y)	*/	public int dAmount;
+
+	/** default mountain diameter		*/	public int dDiameter;
+	/** default mountain altitude		*/	public int dAltitude;
+	/** default mountain shape			*/	public int dShape;
+
+	/** default river flow (m^3/s)x		*/	public int dTribute;
+
+	/** default export tile size (m)	*/	public int dTileSize;
+
+	// RPGMaker export sliders
 	
-	/** RPGMaker export parameters	*/
-	/** marsh threshold		*/	public int dWaterMin;		// m
-	/** deep water threshold*/	public int dWaterMax;		// m
-	/** over hill threshold	*/	public int dHillMin;		// m
-	/** over mntn threshold	*/	public int dHillMax;		// m
-	/** over hill threshold	*/	public int dSlopeMin;		// dz/dx
-	/** over mntn threshold	*/	public int dSlopeMax;		// dz/dx
-	/** outs pit threshold	*/	public int dGroundMin;		// m
-	/** outs hill threshold	*/	public int dGroundMax;		// m
-	/** outs alt levels		*/	public int dAltLevels;
-	/** dflt plant cover %	*/	public int dFloraPct;
-	/** dflt tall grass	%	*/	public int dFloraMin;
-	/** dflt brush %		*/	public int dFloraMax;
-	/** dflt temp offset	*/	public int dDeltaT;	
-	/** dflt hydro offset	*/	public int dDeltaH;
-	/** dflt hydro multiply	*/	public int dTimesH;
-	/** over palette file	*/	public String OW_palette;
-	/** outs palette file	*/	public String Out_palette;
+	/** default export % marsh			*/	public int dWaterMin;
+	/** default export % shallow		*/	public int dWaterMax;
 
-	/** tunable physical process parameters	*/
-	/** min water velocity	*/	public double Vmin = 0.002; // m/s
-	/** deposition velocity	*/	public double Vd = 0.01; 	// (Hjulstrom) maximum velocity (M/s) for silt deposition
-	/** erosion velocity	*/	public double Ve = 0.40; 	// (Hjulstrom) erosion/deposition threshold
-	/** max water velocity	*/	public double Vmax = 3.0;	// m/s
-	/** max suspended soil	*/	public double Smax = 0.10;	// liters of soil peer liter of water
-	/** erosion rate		*/	public double Ce = 0.100;	// how much of possible erosion allowed per point
-	/** deposition rate		*/	public double Cd = 0.100;	// how much of possible deposition allowed per point
-	/** silting rate		*/	public double Cs = 0.003;	// possible silt deposition (m per m3/s of sub-Vd flow)
-	/** spring vs mean flux	*/	public double flood_mult = 2.0;	// how Spring vs average flow
+	/** default export % plant cover	*/	public int dFloraPct;
+	/** default export % tall grass		*/	public int dFloraMin;
+	/** default export % brush			*/	public int dFloraMax;
+
+	/** default export temp offset (degC)	*/	public int dDeltaT;	
+	/** default export hydro plus/minus	(%)	*/	public int dDeltaH;
+	/** default export hydro scaling (x)	*/	public int dTimesH;
+
+	/** default export overworld palette*/	public String OW_palette;
+	/** default overworld % ground	(by height)	*/	public int dHillMin;
+	/** default overworld % hill (by height)	*/	public int dHillMax;
+	/** default overworld % ground (by slope)	*/	public int dSlopeMin;
+	/** default overworld % hill (by slope)		*/	public int dSlopeMax;
+
+	/** default export outsde palette	*/	public String Out_palette;
+	/** default outside altitude levels	*/	public int dAltLevels;
+	/** default outside % pit			*/	public int dGroundMin;
+	/** default outside % ground		*/	public int dGroundMax;
+
+	/*
+	 * these parameters control the absorbtion and evaporation of rain fall
+	 * and the amount of remaining surface water flow.
+	 */
+	/** depth (m) of rain pentration into the soil (or how much water the soil can hold)	*/
+	public double Dp = 0.5;
+	/** transpiration half-time (days), time (at 35C) to evaporate half of the water		*/
+	public double E35C = 100;
+	/** evaporation vs temperature (degC) temperature reduction to halve evaporation rate	*/
+	public double Edeg = 10;
+	/** adiabatic lapse rate (degC/M): used to compute temperature changes associated w/altitude	*/
+	public double lapse_rate = 0.01;
+
+	/*
+	 * these parameters control the rates of erosion, sedimentation, and 
+	 * spring-flood silt deposition.  If you want to tune these (which
+	 * heaven knows they need) study the code in Hydrology.waterFlow
+	 */
+	/** minimum possible water velocity (m/s)		*/	public double Vmin = 0.002;
+	/** maximum possible water velocity (m/s)		*/	public double Vmax = 3.0;
+	/** transition from erosion to deposition (m/s)	*/	public double Ve = 0.40;
+	/** transition from deposition to silt (m/s)	*/	public double Vd = 0.01;
+	/** max soil in moving water (liters/liter)		*/	public double Smax = 0.10;
+	/** spring flood vs mean water flow				*/	public double flood_mult = 2.0;
+	/** of rock this water could erode, what fraction can be eroded per mesh point */
+														public double Ce = 0.100;
+	/** of sediment that could come out of this water, what fraction can deposit per mesh point	*/
+														public double Cd = 0.100;
+	/** in very slow moving water, what is the maximum silt deposition (m) per m^3/s of flow	*/
+														public double Cs = 0.003;
 	
-	/** rain penetration	*/	public double Dp = 0.5; 	// m
-	/** evaporation const	*/	public double Edeg = 10; 	// degC to halve evaporation rate
-	/** transpiration const	*/	public double E35C = 100; 	// transpiration half-time at 35C (days)
-	/** layer thickness		*/	public double sediment = 100; // m
+	/** mountain height (m) above which the soil ceases to be sedimentary but becomes igneous/metamorphic	*/
+	public double sediment = 100;
 
-	/** map generation parameters	*/
-	/** smoothing iterations*/	public int improvements = 1;
-	/** points per mesh		*/	public int points = 4096;
 
-	/** diagnostic options	*/
-	/** verbose/debug level	*/	public int debug_level; 	// level of verbosity
-	/** which rule to trace	*/	public String rule_debug;	// export rule to trace
 
-	/** default map options	*/	public int display_options;
+	/** verbose/debug level	*/	public int debug_level;
+	/** export rule to trace*/	public String rule_debug;
+
 
 	private static Parameters singleton = null;
 
@@ -181,7 +207,6 @@ public class Parameters {
 		z_range = alt_max;
 
 		// default inclination
-		dSlope = 1;
 		dDirection = 0; 	// north/south
 
 		// default mountain size/shape

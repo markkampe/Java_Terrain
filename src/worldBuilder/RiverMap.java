@@ -34,8 +34,6 @@ public class RiverMap {
 		Mesh mesh = map.getMesh();
 		int downHill[] = map.getDownHill();
 		double flux[] = map.getFluxMap();
-		double heightMap[] = map.getHeightMap();
-		double erodeMap[] = map.getErodeMap();
 		
 		// calculate the color curve (blue vs flow)
 		int blue_range = 255 - WATER_DIM;

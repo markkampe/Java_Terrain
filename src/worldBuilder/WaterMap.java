@@ -195,7 +195,9 @@ public class WaterMap {
 					if (outlets[n] != Hydrology.UNKNOWN && outlets[n] > water_level)
 						water_level = outlets[n];
 				}
-				depthMap[i] = (heightMap[i] - erodeMap[i]) - water_level;
+				// this point is dry, even below exit point, it is not u/w
+				double delta_z = (heightMap[i] - erodeMap[i]) - water_level;
+				depthMap[i] = (delta_z > 0) ? delta_z : 0;
 			}
 		}
 		// interpolate those depths into a Cartesian map

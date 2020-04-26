@@ -63,6 +63,9 @@ public class Hydrology {
 	protected static final int UNKNOWN = -666;	// sinkMap: sink point not yet found
 	protected static final int OCEAN = -1;		// sinkMap: drains to ocean
 	protected static final int OFF_MAP = -2;	// sinkMap: drains off map
+	
+	private static final int TOO_BIG = 666;			// an impossibly large number
+	private static final int TOO_SMALL = -666;		// an impossibly negative number
 
 	// a few useful conversion constants
 	private static final double YEAR = 365.25 * 24 * 60 *  60;
@@ -173,10 +176,10 @@ public class Hydrology {
 		/*
 		 * 2. determine the down-hill neighbor of all non-oceanic points
 		 */
-		map.min_slope = 666.0;
-		map.max_slope = -666.0;
-		map.max_height = -666.0;
-		map.min_height = 666.0;
+		map.min_slope = TOO_BIG;
+		map.max_slope = TOO_SMALL;
+		map.max_height = TOO_SMALL;
+		map.min_height = TOO_BIG;
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			if (oceanic[i])			// sub-oceanic points don't count
 				continue;
@@ -439,10 +442,8 @@ public class Hydrology {
 		double[] rainMap = map.getRainMap();
 		double[] incoming = map.getIncoming();
 		double[] soilMap = map.getSoilMap();
-		if (incoming == null && rainMap == null)
-			return;
 		
-		// initialize our output maps
+		// initialize our output maps to no flowing water
 		fluxMap = map.getFluxMap();
 		hydrationMap = map.getHydrationMap();
 		for(int i = 0; i < mesh.vertices.length; i++) {
@@ -453,16 +454,20 @@ public class Hydrology {
 			hydrationMap[i] = oceanic[i] ? heightMap[i] - parms.sea_level : 0.0;
 		}
 		
+		// if no incoming rivers or rain, we are done
+		if (incoming == null && rainMap == null)
+			return;
+		
 		// pick up the erosion parameters
 		double Ve = parms.Ve;		// erosion/deposition threshold
 		double Vmin = parms.Vmin;	// minimum velocity to carry sediment
 		double Smax = parms.Smax;	// maximum sediment per M^3 of water
 		
 		// calculate the incoming water flux for each non-oceanic point
-		map.min_flux = 666.0;
-		map.max_flux = -666.0;
-		map.min_velocity = 666.0;
-		map.max_velocity = -666.0;
+		map.min_flux = TOO_BIG;
+		map.max_flux = TOO_SMALL;
+		map.min_velocity = TOO_BIG;
+		map.max_velocity = TOO_SMALL;
 		for(int i = 0; i < landPoints; i++) {
 			int x = byFlow[i];
 
@@ -580,13 +585,15 @@ public class Hydrology {
 		
 		// we have already updated the in-place flux and hydration maps
 		
-		// if there was no water flow, fix the Map flow parameters
-		if (map.max_flux == -666.0) {
-			map.min_flux = 0;
+		// if there was no water flow, fix the Map min/max values
+		if (map.max_flux == TOO_SMALL)
 			map.max_flux = 0;
+		if (map.min_flux == TOO_BIG)
+			map.min_flux = 0;
+		if (map.min_velocity == TOO_BIG)
 			map.min_velocity = 0;
+		if (map.max_velocity == TOO_SMALL)
 			map.max_velocity = 0;
-		}	
 	}
 	
 	/**

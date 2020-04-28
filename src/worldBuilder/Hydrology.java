@@ -145,12 +145,12 @@ public class Hydrology {
 		
 		// reinitialize the maps we are to create
 		for(int i = 0; i < mesh.vertices.length; i++) {
-			downHill[i] = -1;		// no known down-hill neighbors
-			references[i] = 0;		// no up-hill neighbors
-			sinkMap[i] = UNKNOWN;	// no known sink points
 			oceanic[i] = false;		// no known ocean points
+			downHill[i] = UNKNOWN;	// no known down-hill neighbors
+			slopeMap[i] = 0.0;		// no calculated down-hill slopes
+			sinkMap[i] = UNKNOWN;	// no known sink points
 			outlet[i] = UNKNOWN;	// no points subject to flooding
-			slopeMap[i] = 0.0;		// don't yet know topology
+			references[i] = 0;		// no up-hill neighbors
 		}
 
 		// turn off any previous sink-point debugs
@@ -191,12 +191,6 @@ public class Hydrology {
 			else if (best < map.min_height)
 				map.min_height = best;
 			
-			// downhill from an edge point is always off map
-			if (mesh.vertices[i].neighbors < 3) {
-				downHill[i] = OFF_MAP;
-				continue;
-			}
-			
 			// find the lowest neighbor who is lower than me
 			for( int n = 0; n < mesh.vertices[i].neighbors; n++) {
 				int x = mesh.vertices[i].neighbor[n].index;
@@ -207,19 +201,23 @@ public class Hydrology {
 				}
 			}
 			
+			if (downHill[i] < 0) {	// no down-hill neighbors found
+				if (mesh.vertices[i].neighbors < 3)
+					downHill[i] = OFF_MAP;
+				continue;
+			}
+			
 			// record downHill reference and slope
 			int d = downHill[i];
-			if (d >= 0) {
-				references[d] += 1;
-				double s = slope(d, i);
-				if (s < 0)
-					s = -s;
-				slopeMap[i] = s;
-				if (s > 0 && s < map.min_slope)
-					map.min_slope = s;
-				if (s > map.max_slope)
-					map.max_slope = s;
-			}
+			references[d] += 1;
+			double s = slope(d, i);
+			if (s < 0)
+				s = -s;
+			slopeMap[i] = s;
+			if (s > 0 && s < map.min_slope)
+				map.min_slope = s;
+			if (s > map.max_slope)
+				map.max_slope = s;
 		}
 		
 		/*
@@ -329,8 +327,15 @@ public class Hydrology {
 					}
 					
 					// 3. consider escape point on edge part of the lake
-					if (escapeTo == escapeThru)
+					if (escapeTo == escapeThru) {
 						outlet[escapeTo] = escapeHeight;
+						// if it is an edge point, it drains off map
+						if (mesh.vertices[escapeTo].neighbors < 3 && downHill[escapeTo] >= 0) {
+							int prev = downHill[escapeTo];
+							references[prev] -= 1;
+							downHill[escapeTo] = OFF_MAP;
+						}
+					}
 					
 					// this pass was successful, so try another
 					combined = true;
@@ -491,10 +496,9 @@ public class Hydrology {
 			fluxMap[x] -= lost / YEAR;
 			
 			// figure out what happens to the excess water
+			String msg = null;	// debug message string
 			int d = downHill[x];
 			if (d >= 0) {
-				String msg = null;	// debug message string
-				
 				// my net incoming flows to my downhill neightbor
 				fluxMap[d] += fluxMap[x];
 				
@@ -552,26 +556,26 @@ public class Hydrology {
 						map.max_deposition = -(erodeMap[x] - delta_z);
 				} else
 					msg = null;	// no deposition or erosion
-					
-				// if this point is under water, figure out how deep
-				if (outlet[x] != UNKNOWN)
-					if (heightMap[x] - erodeMap[x] < outlet[x]) {
-						hydrationMap[x] = (heightMap[x] - erodeMap[x]) - outlet[x];
-						if (debug_log != null)
-							msg += String.format("\n\tflood %d (at %.1fMSL) %.1f%s u/w",
-									x, parms.altitude(heightMap[x] - erodeMap[x]),
-									parms.height(-hydrationMap[x]), Parameters.unit_z);
-					} else {	// escape point is trivially under water
-						hydrationMap[x] = -parms.z(EXIT_DEPTH);
-						if (debug_log != null)
-							msg += String.format("\n\tflood exit point %d %.2f%s u/w",
-												x, parms.height(-hydrationMap[x]), Parameters.unit_z);
-					}
-					
-				// debug logging
-				if (debug_log != null && msg != null)
-					debug_log.write(msg + "\n");
 			}
+			
+			// if this point is under water, figure out how deep
+			if (outlet[x] != UNKNOWN)
+				if (heightMap[x] - erodeMap[x] < outlet[x]) {
+					hydrationMap[x] = (heightMap[x] - erodeMap[x]) - outlet[x];
+					if (debug_log != null)
+						msg += String.format("\n\tflood %d (at %.1fMSL) %.1f%s u/w",
+								x, parms.altitude(heightMap[x] - erodeMap[x]),
+								parms.height(-hydrationMap[x]), Parameters.unit_z);
+				} else {	// escape point is trivially under water
+					hydrationMap[x] = -parms.z(EXIT_DEPTH);
+					if (debug_log != null)
+						msg += String.format("\n\tflood exit point %d %.2f%s u/w",
+											x, parms.height(-hydrationMap[x]), Parameters.unit_z);
+				}
+				
+			// debug logging
+			if (debug_log != null && msg != null)
+				debug_log.write(msg + "\n");
 			
 			if (fluxMap[x] > map.max_flux)
 				map.max_flux = fluxMap[x];

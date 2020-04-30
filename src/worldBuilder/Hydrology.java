@@ -1,8 +1,6 @@
 package worldBuilder;
 
 import java.awt.Color;
-import java.io.FileWriter;	// debug log
-import java.io.IOException;	// writes to debug log
 
 /**
  * engine to use topology to compute water placement, flow,

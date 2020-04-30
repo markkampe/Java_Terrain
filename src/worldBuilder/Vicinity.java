@@ -1,24 +1,34 @@
 package worldBuilder;
 /**
- * find and interpolate values from the 3 nearest MeshPoints to any map coordinate
- *    ... used to produce a (dense) Cartesian map from a (sparse) Voronoi mesh
- *
- * Note: we use mesh-indices rather than MeshPoints because the former are
- *	     stable over the life of the mesh.
+ * find and interpolate values from the surrounding MeshPoints to any map
+ *    coordinate ... used to produce a (dense) Cartesian map from a (sparse)
+ *    Voronoi Mesh
  */
 public class Vicinity {
 
 	/** number of MeshPoints that define a Vicinity	*/
-	public static final int NUM_NEIGHBORS = 3;
+	public static final int NUM_NEIGHBORS = 4;
 	/** indices of the (closeness sorted) three closest MeshPoints in this vicinity */
 	public int[] neighbors;
 	/** distances to each of the three closest MeshPoints */
 	public double[] distances;
 	
+	private double x, y;	// center of vicinity
+	
+	// indices into the neighbors array
+	private static final int SE = 0;
+	private static final int SW = 1;
+	private static final int NW = 2;
+	private static final int NE = 3;
+	
 	/**
 	 * create a new (empty) vicinity
+	 * @param x coordinate of vicinity
+	 * @param y coordinate of vicinity
 	 */
-	public Vicinity() {
+	public Vicinity(double x, double y) {
+		this.x = x;
+		this.y = y;
 		neighbors = new int[NUM_NEIGHBORS];
 		distances = new double[NUM_NEIGHBORS];
 		for (int i = 0; i < NUM_NEIGHBORS; i++) {
@@ -28,51 +38,61 @@ public class Vicinity {
 	}
 
 	/**
-	 * test a MeshPoint to see if it is one of the three closest
+	 * test a MeshPoint to see if it is immediately surrounding
 	 * 
-	 * @param index of MeshPoint to be considered
-	 * @param distance from point of interest to this MeshPoint
+	 * @param p - MeshPoint to be considered
 	 */
-	public void consider(int index, double distance) {
-		if (distance >= distances[NUM_NEIGHBORS-1])
-			return;
-
-		// XXX should I rewind this top 3 neighbors loop?
-		if (distance >= distances[1]) {
-			// replace last in list
-			neighbors[2] = index;
-			distances[2] = distance;
-		} else if (distance >= distances[0]) {
-			// replace second in list
-			neighbors[2] = neighbors[1];
-			distances[2] = distances[1];
-			neighbors[1] = index;
-			distances[1] = distance;
-		} else {
-			// replace first in list
-			neighbors[2] = neighbors[1];
-			distances[2] = distances[1];
-			neighbors[1] = neighbors[0];
-			distances[1] = distances[0];
-			neighbors[0] = index;
-			distances[0] = distance;
+	public void consider(MeshPoint p) {
+		// how far is it to this point
+		double dx = p.x - x;
+		double dy = p.y - y;
+		double distance = Math.sqrt((dx*dx) + (dy*dy));
+		
+		// note the closest point in each quadrant
+		if (dx >= 0) {	// point is to the east
+			if (dy >= 0) {
+				if (distance < distances[SE]) {
+					neighbors[SE] = p.index;
+					distances[SE] = distance;
+				}
+			} else {
+				if (distance < distances[NE]) {
+					neighbors[NE] = p.index;
+					distances[NE] = distance;
+				}
+			}
+		} else {	// point is to the west
+			if (dy >= 0) {
+				if (distance < distances[SW]) {
+					neighbors[SW] = p.index;
+					distances[SW] = distance;
+				}
+			} else {
+				if (distance < distances[NW]) {
+					neighbors[NW] = p.index;
+					distances[NW] = distance;
+				}
+			}
 		}
 	}
 	
 	/**
 	 * interpolate a value from those of my three closest MeshPoints
 	 * 
-	 * @param values	values for my three nearest MeshPoints
+	 * @param values array for all MeshPoints
 	 */
 	public double interpolate(double values[]) {
-		double norm = 0;	// distance weighted sum of unit values
-		double sum = 0;		// distance weighted sum of values
-		for(int n = 0; n < NUM_NEIGHBORS; n++) {
-			double dist = distances[n];
-			double v = values[neighbors[n]];
-			sum += v/dist;
-			norm += 1/dist;
-		}
-		return sum / norm;
+		// compute weighted sum of neighboring point values
+		// with each value weighted inversely to its distance
+		double sumValues = 0.0;
+		double sumWeights = 0.0;
+		for(int n = 0; n < NUM_NEIGHBORS; n++)
+			if (neighbors[n] >= 0) {	// may not be in all quadrants
+				double weight = 1/distances[n];
+				sumValues += weight * values[neighbors[n]];
+				sumWeights += weight;
+			}
+
+		return sumValues / sumWeights;			// normalize weights to sum to 1
 	}
 }

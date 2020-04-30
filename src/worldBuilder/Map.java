@@ -166,10 +166,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			double y = (newMesh.vertices[i].y/yScale) + yShift;
 			
 			// find nearest points from the previous map
-			MeshPoint p = new MeshPoint(x,y);
-			Vicinity nearest = new Vicinity();
+			Vicinity nearest = new Vicinity(x,y);
 			for(int j = 0; j < mesh.vertices.length; j++) {
-				nearest.consider(j, p.distance(mesh.vertices[j]));
+				nearest.consider(mesh.vertices[i]);
 			}
 
 			// interpolate values for height, rain, and soil

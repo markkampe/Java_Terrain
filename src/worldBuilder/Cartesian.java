@@ -40,13 +40,10 @@ public class Cartesian {
 			double y = top + (r * dy);
 			for(int c = 0; c < width; c++) {
 				double x = left + (c * dx);
-				MeshPoint m = new MeshPoint(x,y);
-				Vicinity ref = new Vicinity();
+				Vicinity ref = new Vicinity(x, y);
 				cells[r][c] = ref;
-				for(int v = 0; v < mesh.vertices.length; v++) {
-					MeshPoint p = mesh.vertices[v];
-					ref.consider(p.index, p.distance(m));
-				}
+				for(int v = 0; v < mesh.vertices.length; v++)
+					ref.consider(mesh.vertices[v]);
 			}
 		}
 	}

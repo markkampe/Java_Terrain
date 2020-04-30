@@ -12,6 +12,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 		private Parameters parms;
 			
 		private static final int BORDER_WIDTH = 5;
+		private static final Color SELECTED_COLOR = Color.MAGENTA;
+		private static final Color NEIGHBOR_COLOR = Color.BLACK;
 		
 		private static final long serialVersionUID = 1L;
 		
@@ -160,13 +162,22 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			infoOutlet.setText(outlet == Hydrology.UNKNOWN ? "NONE" :
 								String.format("%.1fMSL", parms.altitude(outlet)));
 			
+			// update the point information pop-up
 			pack();
-			
+		
 			// highlight selected point
 			map.highlight(-1, null);
-			map.highlight(point.index, Color.MAGENTA);
-			map.repaint();
+			map.highlight(point.index, SELECTED_COLOR);
 			
+			// find and highlight our neighbors
+			Vicinity vicinity = new Vicinity(map_x, map_y);
+			for(int i = 0; i < map.mesh.vertices.length; i++)
+				vicinity.consider(map.mesh.vertices[i]);
+			for(int i = 0; i < Vicinity.NUM_NEIGHBORS; i++)
+				if (vicinity.neighbors[i] >= 0)
+					map.highlight(vicinity.neighbors[i], NEIGHBOR_COLOR);
+			
+			map.repaint();
 			return(true);
 		}
 		

@@ -106,7 +106,7 @@ public class Hydrology {
 		
 		// see if we are producing an erosion log
 		if (parms.debug_level > HYDRO_DEBUG)
-			debug_log = new DebugLog(DEBUG_LOG_FILE);
+			debug_log = new DebugLog("Erosion", DEBUG_LOG_FILE);
 		else
 			debug_log = null;
 	}
@@ -869,59 +869,6 @@ public class Hydrology {
 					found += 1;
 			if (found != expect)
 				System.err.println("x=" + point + ", expected " + expect + ", found " + found);
-		}
-	}
-	
-	/*
-	 * this class encapsulates writes to a debug log file
-	 * which has (sadly) often been necessary to analyze
-	 * complex anomalous results in erosion and deposition. 
-	 */
-	private class DebugLog {
-		
-		private FileWriter log;
-		private String filename;
-		boolean failed = false;
-		
-		public DebugLog(String filename) {
-			try {
-				log = new FileWriter(filename);
-				this.filename = filename;
-				System.out.println("Erosion tracing enabled to " + filename);
-			} catch (IOException e) {
-				System.err.println("Unable to create log file " + filename);
-				failed = true;
-			}
-		}
-		
-		public void write(String message) {
-			if (!failed)
-				try {
-					log.write(message);
-				} catch (IOException e) {
-					System.err.println("Write error to log file " + filename);
-					failed = true;
-				}
-		}
-		
-		public void flush() {
-			if (!failed)
-				try {
-					log.flush();
-				} catch (IOException e) {
-					System.err.println("Write error to log file " + filename);
-					failed = true;
-				}	
-		}
-		
-		public void close() {
-			if (!failed)
-				try {
-					log.close();
-				} catch (IOException e) {
-					System.err.println("Close error on log file " + filename);
-					failed = true;
-				}	
 		}
 	}
 	

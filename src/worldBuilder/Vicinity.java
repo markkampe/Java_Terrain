@@ -21,34 +21,56 @@ public class Vicinity {
 	 */
 	public Vicinity(Mesh mesh, double x, double y) {
 		neighbors = new int[NUM_NEIGHBORS];
+		for(int i = 0; i < NUM_NEIGHBORS; i++)
+			neighbors[i] = -1;
 		distances = new double[NUM_NEIGHBORS];
+		double sum_distances = 0;
 		int found = 0;
 		
 		// start with the closest MeshPoint to this spot
 		MeshPoint center = new MeshPoint(x,y);
 		MeshPoint start = mesh.choosePoint(x,  y);
 		neighbors[found] = start.index;
-		distances[found++] = center.distance(start);
+		distances[found] = center.distance(start);
+		sum_distances = distances[found];
+		found++;
 		
-		// try to enumerate the enclosing polygon
+		// try to follow a circle of neighboring MeshPoints
 		MeshPoint prev = null;
 		MeshPoint current = start;
+		MeshPoint next = null;
 		while(found < NUM_NEIGHBORS) {
-			MeshPoint next = nextPoint(center, current, prev);
-			if (next == null)
-				break;	// we can go no farther
-			if (next == start)
-				break;	// we have come full circle
+			next = nextPoint(center, current, prev);
+			if (next == start || next == null)
+				break;	// closed polygon or reached dead end
+			
+			// add the next MeshPoint and continue
 			neighbors[found] = next.index;
-			distances[found++] = center.distance(next);
+			distances[found] = center.distance(next);
+			sum_distances += distances[found];
 			prev = current;
 			current = next;
+			found++;
 		}
 		
-		// pad out the remainder of the neighbors array
-		while(found < NUM_NEIGHBORS) {
-			neighbors[found] = -1;
-			distances[found++] = 666;
+		if (next == start) {
+			// FIX point might be outside the polygon
+			return;
+		}
+		
+		/*
+		 * We were unable to close the sides of the polygon.
+		 * This is likely because we are outside the mesh.
+		 * 
+		 * Weak heuristic: discard points that are farther from
+		 * 		the center than the center is from the edge.
+		 */
+		double x_edge = Parameters.x_extent/2 + (x >= 0 ? -x : x);
+		double y_edge = Parameters.y_extent/2 + (y >= 0 ? -y : y);
+		while(found > 2 && 
+			  (distances[found-1] > x_edge || distances[found-1] > y_edge)) {
+			neighbors[found-1] = -1;	// lose this point
+			found -= 1;
 		}
 	}
 	
@@ -64,9 +86,18 @@ public class Vicinity {
 		MeshPoint best = null;
 		double dRdC = 666;
 		
+		/*
+		 * we can enumerate the sides of a polygon by, at each MeshPoint,
+		 * choosing the outgoing path that is most concave to the center.
+		 * I define the most concave path as the one with the lowest
+		 * derivative of radius with respect to circumference.
+		 * 
+		 * This heuristic fails, however, if the center is not within
+		 * one of the Voronoi polygons, because it is outside the mesh.
+		 */
 		double cRadius = center.distance(vertex);
 		for(int n = 0; n < vertex.neighbors; n++)
-			if (vertex.neighbor[n] != previous) {
+			if (vertex.neighbor[n] != previous) {	// ignore incoming path
 				MeshPoint candidate = vertex.neighbor[n];
 				double dRadius = center.distance(candidate) - cRadius;
 				double dCircumference = vertex.distance(candidate);

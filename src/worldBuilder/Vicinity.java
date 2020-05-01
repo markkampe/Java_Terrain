@@ -7,11 +7,13 @@ package worldBuilder;
 public class Vicinity {
 
 	/** max number of MeshPoints that define a Vicinity	*/
-	public static final int NUM_NEIGHBORS = 8;
+	public static final int NUM_NEIGHBORS = 12;
 	/** indices of the MeshPoints surrounding this vicinity */
 	public int[] neighbors;
 	/** distances to each of the three closest MeshPoints */
 	public double[] distances;
+	
+	private Mesh mesh;
 	
 	/**
 	 * create a new (empty) vicinity
@@ -20,11 +22,12 @@ public class Vicinity {
 	 * @param y coordinate of vicinity
 	 */
 	public Vicinity(Mesh mesh, double x, double y) {
+		this.mesh = mesh;
+		
 		neighbors = new int[NUM_NEIGHBORS];
 		for(int i = 0; i < NUM_NEIGHBORS; i++)
 			neighbors[i] = -1;
 		distances = new double[NUM_NEIGHBORS];
-		double sum_distances = 0;
 		int found = 0;
 		
 		// start with the closest MeshPoint to this spot
@@ -32,7 +35,6 @@ public class Vicinity {
 		MeshPoint start = mesh.choosePoint(x,  y);
 		neighbors[found] = start.index;
 		distances[found] = center.distance(start);
-		sum_distances = distances[found];
 		found++;
 		
 		// try to follow a circle of neighboring MeshPoints
@@ -47,28 +49,24 @@ public class Vicinity {
 			// add the next MeshPoint and continue
 			neighbors[found] = next.index;
 			distances[found] = center.distance(next);
-			sum_distances += distances[found];
 			prev = current;
 			current = next;
 			found++;
 		}
 		
-		if (next == start) {
-			// FIX point might be outside the polygon
+		// point successfully enclosed in a polygon
+		if (next == start && !outsideMesh(center))
 			return;
-		}
 		
 		/*
 		 * We were unable to close the sides of the polygon.
 		 * This is likely because we are outside the mesh.
 		 * 
-		 * Weak heuristic: discard points that are farther from
-		 * 		the center than the center is from the edge.
+		 * Weak heuristic: discard all but the closest
+		 * point and its most concave neighbor ... which
+		 * should be adequate for points on the edge.
 		 */
-		double x_edge = Parameters.x_extent/2 + (x >= 0 ? -x : x);
-		double y_edge = Parameters.y_extent/2 + (y >= 0 ? -y : y);
-		while(found > 2 && 
-			  (distances[found-1] > x_edge || distances[found-1] > y_edge)) {
+		while(found > 2) {
 			neighbors[found-1] = -1;	// lose this point
 			found -= 1;
 		}
@@ -93,7 +91,9 @@ public class Vicinity {
 		 * derivative of radius with respect to circumference.
 		 * 
 		 * This heuristic fails, however, if the center is not within
-		 * one of the Voronoi polygons, because it is outside the mesh.
+		 * one of the Voronoi polygons (because it is outside the mesh)
+		 * in which case minimum dR/dC no longer guarantees a minimal
+		 * polygon.
 		 */
 		double cRadius = center.distance(vertex);
 		for(int n = 0; n < vertex.neighbors; n++)
@@ -108,6 +108,44 @@ public class Vicinity {
 			}
 			
 		return best;
+	}
+	
+	/**
+	 * determine whether or not vicinity is outside the Mesh
+	 * @param center MeshPoint for vicinity
+	 * 
+	 * Point-Inside-Polygon is an expensive computation, so 
+	 * I am using a collection of cheap heuristics.
+	 */
+	private boolean outsideMesh(MeshPoint center) {
+		// 1. gather some info about the polygon
+		double mean_radius = 0;
+		int count = 0;
+		double x_min = 666, x_max = -666, y_min = 666, y_max = -666;
+		for (int i = 0; i < NUM_NEIGHBORS; i++)
+			if (neighbors[i] >= 0) {
+				MeshPoint point = mesh.vertices[neighbors[i]];
+				if (point.x < x_min) x_min = point.x;
+				if (point.x > x_max) x_max = point.x;
+				if (point.y < y_min) y_min = point.y;
+				if (point.y > y_max) y_max = point.y;	
+				mean_radius += distances[i];
+				count++;
+			}
+		mean_radius /= count;
+		
+		// 2. is the point completely outside the enclosing square
+		if (center.x < x_min || center.x > x_max || center.y < y_min || center.y > y_max)
+			return true;
+		
+		// 3. mean radius exceeds size of enclosing square
+		if (mean_radius > (x_max - x_min))
+			return true;
+		if (mean_radius > (y_max - y_min))
+			return true;
+
+		// FIX center within the square but outside the polygon
+		return false;
 	}
 	
 	/**

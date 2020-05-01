@@ -6,74 +6,77 @@ package worldBuilder;
  */
 public class Vicinity {
 
-	/** number of MeshPoints that define a Vicinity	*/
-	public static final int NUM_NEIGHBORS = 4;
-	/** indices of the (closeness sorted) three closest MeshPoints in this vicinity */
+	/** max number of MeshPoints that define a Vicinity	*/
+	public static final int NUM_NEIGHBORS = 8;
+	/** indices of the MeshPoints surrounding this vicinity */
 	public int[] neighbors;
 	/** distances to each of the three closest MeshPoints */
 	public double[] distances;
 	
-	private double x, y;	// center of vicinity
-	
-	// indices into the neighbors array
-	private static final int SE = 0;
-	private static final int SW = 1;
-	private static final int NW = 2;
-	private static final int NE = 3;
-	
 	/**
 	 * create a new (empty) vicinity
+	 * @param mesh to be searched
 	 * @param x coordinate of vicinity
 	 * @param y coordinate of vicinity
 	 */
-	public Vicinity(double x, double y) {
-		this.x = x;
-		this.y = y;
+	public Vicinity(Mesh mesh, double x, double y) {
 		neighbors = new int[NUM_NEIGHBORS];
 		distances = new double[NUM_NEIGHBORS];
-		for (int i = 0; i < NUM_NEIGHBORS; i++) {
-			neighbors[i] = -1;
-			distances[i] = 666;
+		int found = 0;
+		
+		// start with the closest MeshPoint to this spot
+		MeshPoint center = new MeshPoint(x,y);
+		MeshPoint start = mesh.choosePoint(x,  y);
+		neighbors[found] = start.index;
+		distances[found++] = center.distance(start);
+		
+		// try to enumerate the enclosing polygon
+		MeshPoint prev = null;
+		MeshPoint current = start;
+		while(found < NUM_NEIGHBORS) {
+			MeshPoint next = nextPoint(center, current, prev);
+			if (next == null)
+				break;	// we can go no farther
+			if (next == start)
+				break;	// we have come full circle
+			neighbors[found] = next.index;
+			distances[found++] = center.distance(next);
+			prev = current;
+			current = next;
+		}
+		
+		// pad out the remainder of the neighbors array
+		while(found < NUM_NEIGHBORS) {
+			neighbors[found] = -1;
+			distances[found++] = 666;
 		}
 	}
-
+	
 	/**
-	 * test a MeshPoint to see if it is immediately surrounding
-	 * 
-	 * @param p - MeshPoint to be considered
+	 * Choose the next point in the enclosing polygon
+	 * @param center MeshPoint we are trying to enclose
+	 * @param vertex MeshPoint of last chosen vertex	
+	 * @param previous MeshPoint of vertex before that
+	 * @return next MeshPoint in polygon
 	 */
-	public void consider(MeshPoint p) {
-		// how far is it to this point
-		double dx = p.x - x;
-		double dy = p.y - y;
-		double distance = Math.sqrt((dx*dx) + (dy*dy));
+	private MeshPoint nextPoint(MeshPoint center, MeshPoint vertex, MeshPoint previous) {
+
+		MeshPoint best = null;
+		double dRdC = 666;
 		
-		// note the closest point in each quadrant
-		if (dx >= 0) {	// point is to the east
-			if (dy >= 0) {
-				if (distance < distances[SE]) {
-					neighbors[SE] = p.index;
-					distances[SE] = distance;
-				}
-			} else {
-				if (distance < distances[NE]) {
-					neighbors[NE] = p.index;
-					distances[NE] = distance;
+		double cRadius = center.distance(vertex);
+		for(int n = 0; n < vertex.neighbors; n++)
+			if (vertex.neighbor[n] != previous) {
+				MeshPoint candidate = vertex.neighbor[n];
+				double dRadius = center.distance(candidate) - cRadius;
+				double dCircumference = vertex.distance(candidate);
+				if (dRadius/dCircumference < dRdC) {
+					best = candidate;
+					dRdC = dRadius/dCircumference;
 				}
 			}
-		} else {	// point is to the west
-			if (dy >= 0) {
-				if (distance < distances[SW]) {
-					neighbors[SW] = p.index;
-					distances[SW] = distance;
-				}
-			} else {
-				if (distance < distances[NW]) {
-					neighbors[NW] = p.index;
-					distances[NW] = distance;
-				}
-			}
-		}
+			
+		return best;
 	}
 	
 	/**

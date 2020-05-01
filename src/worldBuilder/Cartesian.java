@@ -40,10 +40,7 @@ public class Cartesian {
 			double y = top + (r * dy);
 			for(int c = 0; c < width; c++) {
 				double x = left + (c * dx);
-				Vicinity ref = new Vicinity(x, y);
-				cells[r][c] = ref;
-				for(int v = 0; v < mesh.vertices.length; v++)
-					ref.consider(mesh.vertices[v]);
+				cells[r][c] = new Vicinity(mesh, x, y);
 			}
 		}
 	}

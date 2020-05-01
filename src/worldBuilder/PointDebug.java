@@ -30,6 +30,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 		private JLabel infoHydro;
 		private JLabel infoDownhill;
 		private JLabel infoOutlet;
+		private JLabel infoNeighbors;
 		
 		/** instantiate the point information display, register for selection events */
 		public PointDebug(Map map)  {
@@ -57,7 +58,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			infoHydro = new JLabel();
 			infoDownhill = new JLabel();
 			infoOutlet = new JLabel();
-			int fields = 13;
+			infoNeighbors = new JLabel();
+			int fields = 14;
 			
 			JPanel info = new JPanel(new GridLayout(fields,2));
 			info.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
@@ -87,6 +89,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			info.add(infoDownhill);
 			info.add(new JLabel("Outlet:"));
 			info.add(infoOutlet);
+			info.add(new JLabel("Neighbors: "));
+			info.add(infoNeighbors);
 
 			mainPane.add(info,  BorderLayout.CENTER);
 			
@@ -161,22 +165,26 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			double outlet = map.hydro.outlet[point.index];
 			infoOutlet.setText(outlet == Hydrology.UNKNOWN ? "NONE" :
 								String.format("%.1fMSL", parms.altitude(outlet)));
-			
-			// update the point information pop-up
-			pack();
 		
 			// highlight selected point
 			map.highlight(-1, null);
 			map.highlight(point.index, SELECTED_COLOR);
 			
 			// find and highlight our neighbors
-			Vicinity vicinity = new Vicinity(map_x, map_y);
-			for(int i = 0; i < map.mesh.vertices.length; i++)
-				vicinity.consider(map.mesh.vertices[i]);
+			Vicinity vicinity = new Vicinity(map.mesh, map_x, map_y);
+			String neighbors = "";
 			for(int i = 0; i < Vicinity.NUM_NEIGHBORS; i++)
-				if (vicinity.neighbors[i] >= 0)
+				if (vicinity.neighbors[i] >= 0) {
 					map.highlight(vicinity.neighbors[i], NEIGHBOR_COLOR);
+					if (neighbors == "")
+						neighbors = String.format("%d", vicinity.neighbors[i]);
+					else
+						neighbors += String.format(", %d", vicinity.neighbors[i]);
+				}
+			infoNeighbors.setText(neighbors);
 			
+			// update the point information pop-up and display the highlights
+			pack();
 			map.repaint();
 			return(true);
 		}

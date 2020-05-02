@@ -389,7 +389,7 @@ but the results were disappointing:
 <ul>
    <li> Fantasy maps seem to have a wider vertical range than real topographies,
    	so the water would always be moving too fast for any sedimentation to happen.
-	<br>
+	<P>
 	I dealt with this by changing the velocity computation to simply interpolate a 
 	reasonable range of water speeds (0.005m/s - 3m/s) from a wide range of 
 	slopes (1/1000 - 1/1).
@@ -397,23 +397,23 @@ but the results were disappointing:
    <li> The Hjulstrom curves tell us what sized particles are being eroded
         or deposited at a given velocity, but not the rate at which these
 	processes proceed.
-	<br>
-	Based on my experience with other such processes, I said 
+	<P>
+	Based on my experience with other such processes, I asserted 
 	that erosion and deposition were exponential processes,
 	with some fraction of the possible erosion/deposition happening
 	at each mesh point.  The possible erosion was proportional to 
 	the water velocity, and the deposition inversely proportional to 
 	the water velocity.  The fraction of possible erosion/deposition
-	that happens per point is controlled by two tunable parameters:
+	that happens per MeshPoint is controlled by two tunable parameters:
 	<em>Ce</em> and <em>Cd</em>.
    </li>
    <li> Silt is not dug out of the river-bed, but washed off the top 
         of the entire watershed.  Consequently, the amount of silt
 	deposition should greatly exceed the amount of river-bed
 	erosion.
-   	<br>
+   	<P>
 	I dealt with this by making silt deposition a distinct process
-	from the deposition of eroded rock.  I made the simplifying
+	from the deposition of eroded rock, and making the simplifying
 	assumption that sufficently slow moving water always has more 
 	silt to deposit.
    </li>
@@ -423,8 +423,8 @@ I have seen much higher resolution erosion/deposition simulations,
 performed by GPUs on a much denser Cartesian grid.  The results were
 very beautiful, but require many orders of magnitude more computer
 power (to do anything), and lack the (very satisfying) irregularity
-that emerges from points on our Voronoi mesh.
-The erosion/deposition models used by those simulations were even
+that emerges from points on our (very sparse) Voronoi mesh.
+The erosion/deposition models used by those simulations were much
 simpler than mine:
 <UL>
     <li> velocity is a simple function of slope, and the allowable
@@ -436,12 +436,82 @@ simpler than mine:
          beyond what is currently allowed for that water).</li>
 </UL>
 </P>
-
+<P>
+I was impressed by the simplicity of these models, and incorporated
+some of those lessons into the above solutions.  But (O'Leary's insight)
+performing all topographic operations on a (manageably small number of 
+points) Voronoi grid is fundamental to how this program works, and
+moving to an entirely (much finer grained) Cartesian model is a
+different program.
+</P>
 
 <H2>Issues</H2>
+<H3>MeshPoint to Cartesian Conversion</H3>
 <P>
-TO BE CONTINUED
+A <a Href="JavaDoc/worldBuilder/Cartesian.html">Cartesian</a> map
+specifies, for each square in a Cartesian grid, a list of surrounding
+<a Href="JavaDoc/worldBuilder/MeshPoint.html">MeshPoint</a>s and
+their distances from this square.  From this list, we can interpolate
+from a list of per-MeshPoint values to per-Cartesian-square values.
+The interpolation process is trivial (simply the inverse-distance-weighted
+average of the values for the surrounding MeshPoints).
+The hard part is figuring out which MeshPoints are the surrounding ones.
 </P>
+<P>
+The best answer would seem to be those MeshPoints that define the
+Voronoi polygon within which the Cartesian point lies.  The
+<em>Cartesian</em> constructor and <em>nextPoint</em> methods
+attempt to enumerate these points by:
+<ul>
+   <li> starting with the MeshPoint nearest to the desired Cartesian square</li>
+   <li> choosing, at each successive point, the path that seems most likely 
+   to be enclosing the desired polygon.
+	<P>
+	A human would use a simple heuristic (like always turn
+	to the right).  I compute, for each possible (non-reversing) path, 
+	the derivative of radius (distance from the Cartesian center) with 
+	respect to circumference (distance from the previous
+	vertex).  Minimizing this ratio tends to keep us on
+	the most concave path.
+	</li>
+</ul>
+This works reasonably for points that are within the Voronoi mesh.
+But for points outside the edges of the mesh, there is no surrounding
+polygon, so the above works badly.  This results in attempting to 
+interpolate values from (poorly chosen) non-neighbors, giving rise
+to strange altutudes and water bodies near the edges of the map.
+</P>
+<P>
+If we knew that a point was outside of the mesh, we could probably
+interpolate reasonable values by considering only the one or two nearest
+MeshPoints.  But how can we know whether or not a point is outside
+the mesh (or inside a computed polygon)?  The problem of
+<em>point in polygon</em> determination turns out to be a fairly
+expensive one ... and we need to solve it for a very large number
+of points (every time we zoom, sub-region, export, or define a new mesh).
+The <em>Vicnity.outsideMesh</em> function uses a few cheap
+heuristics to recognize more obvious cases ... but there
+are points near non-convex outer borders that are not
+recognized, and therefore still interpolate badly.
+</P>
+The problem is relatively minor, in that it only happens to non-ocean
+points at the outer-most edges of the map ... and is only then noticable
+if there is wide range of altitude and land/water variation among the dozen
+nearest MeshPoints.  Most people will never encounter it, and those who do are
+unlikely to notice it.  But, in the interests of correctness ...
+<ul>
+   <li> If we simply limit the displayed (and exportable) map to
+        be entirely within the Voronoi mesh, this problem ceases
+	to happen.</li>
+   <li> The only thing I wanted from the Voronoi package was the
+   	MeshPoint connections (which drive water flow)
+	... but the Voronoi analysis had actually identified all 
+	of the polygons.  If we kept the polygon definitions
+	and exploited more of the Voronoi package services
+	we might be able to greatly improve the efficiency of
+	finding the surrounding MeshPoints for Cartesian translation,
+	and perhaps solve this problem as well.</li>
+</ul>
 
 <H2>Musings</H2>
 <P>

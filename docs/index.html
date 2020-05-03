@@ -151,8 +151,8 @@ The main-screen menus and controls are put-up and responded to by the main class
 (<a Href="JavaDoc/worldBuilder/WorldBuilder.html">WorldBuilder.java)</a>.
 <br>
 Simple operations like saving updated maps and loading new ones, it handles
-directly.  But display and update operations are handled by one
-of the sub-dialog managers:
+directly.  But display and update operations are handled by creating new
+interactive dialogs in one of the sub-dialog managers:
 <ul>
    <li> <a Href="JavaDoc/worldBuilder/MeshDialog.html">MeshDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/WorldDialog.html">WorldDialog.java</a>,</li>
@@ -192,11 +192,6 @@ When a map is read in (or written out), this is done by
 <br> 
 <em>RPG Maker</em> tile placement rules are read in by 
 <a Href="JavaDoc/worldBuilder/TileRules.html">TileRules.java</a>.
-</P>
-<P>
-Most operations are initiated as a result of widget actions in the main class,
-and most of those result in the creation of a new interactive dialog
-by one of the sub-dialog managers.
 </P>
 
 <a name="drilldowns">
@@ -381,7 +376,8 @@ The most important methods in the
 I started out trying to use real physics for erosion and sedimentation:
 <ul>
    <li> the Manning formula to compute water velocity from slope.</li>
-   <li> suspended concentration studies to estimate how much soil could be carried by water at each speed.
+   <li> suspended concentration studies to estimate how much soil could be carried 
+   	by water at a given speed.
    <li> the Hjulstrom curves to distinguish erosion and deposition ranges.</li>
 </ul>
 </P>
@@ -407,7 +403,7 @@ but the results were disappointing:
 	that happens per MeshPoint is controlled by two tunable parameters:
 	<em>Ce</em> and <em>Cd</em>.
    </li>
-   <li> Silt is not dug out of the river-bed, but washed off the top 
+   <li> Silt has not been dug out of the river-bed, but washed off the top 
         of the entire watershed.  Consequently, the amount of silt
 	deposition should greatly exceed the amount of river-bed
 	erosion.

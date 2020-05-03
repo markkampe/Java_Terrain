@@ -447,13 +447,15 @@ different program.
 A <a Href="JavaDoc/worldBuilder/Cartesian.html">Cartesian</a> map
 specifies, for each square in a Cartesian grid, a list of surrounding
 <a Href="JavaDoc/worldBuilder/MeshPoint.html">MeshPoint</a>s and
-their distances from this square.  From this list, we can interpolate
-from a list of per-MeshPoint values to per-Cartesian-square values.
+their distances from this square.  
+This enables us to interpolate per-Cartesian-square values
+from a list of per-MeshPoint values.
 The interpolation process is trivial (simply the inverse-distance-weighted
 average of the values for the surrounding MeshPoints).
 The hard part is figuring out which MeshPoints are the surrounding ones.
 </P>
 <P>
+The most obvious answer, the nearest N points, turns out to be wrong.
 The best answer would seem to be those MeshPoints that define the
 Voronoi polygon within which the Cartesian point lies.  The
 <em>Cartesian</em> constructor and <em>nextPoint</em> methods
@@ -464,7 +466,9 @@ attempt to enumerate these points by:
    to be enclosing the desired polygon.
 	<P>
 	A human would use a simple heuristic (like always turn
-	to the right).  I compute, for each possible (non-reversing) path, 
+	to the right).
+	<P>
+	I compute, for each possible (non-reversing) path, 
 	the derivative of radius (distance from the Cartesian center) with 
 	respect to circumference (distance from the previous
 	vertex).  Minimizing this ratio tends to keep us on

@@ -114,7 +114,7 @@ class MeshPointHasher {
  * @opt all
  */
 class Vicinity {
-	void consider(int index, double distance) {};
+	Vicinity(Mesh mesh, double x, double y} {};
 	double interpolate(double values[]) {};
 }
 

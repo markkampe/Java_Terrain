@@ -23,6 +23,8 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		private JTextField latitude;
 		private JTextField longitude;
 		private JTextArea description;
+		private JTextField region_name;
+		private JTextField author_name;
 		
 		private static final int minor_choices[] = {1, 5, 10, 50, 100, 500, 1000};
 		private static final int major_choices[] = {5, 10, 20};
@@ -62,6 +64,13 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			lonLabel.setFont(fontLarge);
 			latitude.setEditable(!readOnly);
 			longitude.setEditable(!readOnly);
+			
+			region_name = new JTextField(parms.region_name); 
+			JLabel nameLabel = new JLabel("Region Name");
+			nameLabel.setFont(fontLarge);
+			author_name = new JTextField(parms.author_name);
+			JLabel authLabel = new JLabel("Author's Name");
+			authLabel.setFont(fontLarge);
 		
 			description = new JTextArea(parms.getDescription());
 			description.setRows(parms.descr_height);
@@ -166,6 +175,16 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			ln_panel.add(lonLabel);
 			ln_panel.add(longitude);
 			
+			JPanel n_panel = new JPanel();
+			n_panel.setLayout(new BoxLayout(n_panel, BoxLayout.PAGE_AXIS));
+			n_panel.add(nameLabel);
+			n_panel.add(region_name);
+			
+			JPanel w_panel = new JPanel();
+			w_panel.setLayout(new BoxLayout(w_panel, BoxLayout.PAGE_AXIS));
+			w_panel.add(authLabel);
+			w_panel.add(author_name);
+			
 			JPanel sliders = new JPanel();
 			sliders.setLayout(new GridLayout(2,2));
 			d_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
@@ -184,9 +203,18 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 			inputs.add(lt_panel);
 			inputs.add(ln_panel);
 			
+			JPanel names = new JPanel();
+			names.setLayout(new BoxLayout(names, BoxLayout.LINE_AXIS));
+			n_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
+			w_panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 10));
+			names.add(n_panel);
+			names.add(w_panel);
+			
 			JPanel middle = new JPanel();
 			middle.setLayout(new BoxLayout(middle, BoxLayout.PAGE_AXIS));
 			middle.add(inputs);
+			middle.add(Box.createRigidArea(new Dimension(0,20)));
+			middle.add(names);
 			middle.add(Box.createRigidArea(new Dimension(0,20)));
 			middle.add(dscLabel);
 			middle.add(dsc_panel);
@@ -246,6 +274,8 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 				parms.topo_minor = minor_choices[topo_minor.getValue()];
 				parms.topo_major = major_choices[topo_major.getValue()];
 				parms.setDescription(description.getText());
+				parms.author_name = author_name.getText();
+				parms.region_name = region_name.getText();
 				parms.checkDefaults();	// make sure defaults consistent w/new world size
 				
 				if (parms.debug_level > 0)

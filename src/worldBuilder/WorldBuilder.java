@@ -192,7 +192,7 @@ public class WorldBuilder  extends JFrame
 		fileMenu.add(fileExit);
 		
 		// create our edit menu
-		editWorld = new JMenuItem("map scale/location");
+		editWorld = new JMenuItem("world parameters");
 		editWorld.addActionListener(this);
 		editMountain = new JMenuItem("add mountain(s)");
 		editMountain.addActionListener(this);

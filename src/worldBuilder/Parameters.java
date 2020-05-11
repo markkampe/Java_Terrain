@@ -113,7 +113,9 @@ public class Parameters {
 	/** default world max altitude (m)	*/	public int z_range;
 	/** default world latitude (deg)	*/	public double latitude;
 	/** default world longitude (deg)	*/	public double longitude;
-	/** default world description		*/	public String description;
+	/** world description string		*/	public String description;
+	/** world author name				*/	public String author_name;
+	/** world region name				*/	public String region_name;
 
 	/** default map sea level (m)		*/	public double sea_level = 0;
 
@@ -243,7 +245,9 @@ public class Parameters {
 		dDeltaH = 0;
 		dTimesH = 100;
 		
-		description = "";
+		description = "A Fantasy Landscape";
+		region_name = "NeverWorld";
+		author_name = System.getenv("LOGNAME");
 		descr_height = 4;
 		descr_width = 80;
 	}
@@ -543,8 +547,9 @@ public class Parameters {
 				+ String.format("%.1f", meanSummer()) + unit_t + ", Twinter=" + String.format("%.1f", meanWinter())
 				+ unit_t);
 		System.out.println("   topo maps:   " + topo_minor + unit_z + "/line, " + topo_major + " minors/major");
-		if (description != "")
-			System.out.println("   description: " + getDescription() + "\n");
+		System.out.println("   region:      " + region_name + 
+						   " (" + getDescription() +")" + 
+						   ", author=" + author_name + "\n");
 	}
 
 	/**

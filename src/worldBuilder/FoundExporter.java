@@ -1,6 +1,7 @@
 package worldBuilder;
 
 import java.awt.Color;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -150,20 +151,191 @@ public class FoundExporter implements Exporter {
 	/**
 	 * Export the up-loaded information in selected format
 	 * 
-	 * @param filename - name of output file
+	 * @param dirname - name of output directory
 	 */
-	public boolean writeFile( String filename ) {
-		// strip off suffix and leading directories to get base name
-		int dot = filename.lastIndexOf('.');
-		String mapname = (dot == -1) ? filename : filename.substring(0, dot);
-		int slash = mapname.lastIndexOf('/');
-		if (slash == -1)
-			slash = mapname.lastIndexOf('\\');
-		if (slash != -1)
-			mapname = mapname.substring(slash + 1);
-
-		// TODO implement me
-		return false;
+	public boolean writeFile( String dirname ) {
+		// TODO figure out where to put the output
+		String project_dir_name = "/tmp/Foundation";
+		
+		// make sure the output directories exist
+		File proj_dir = new File(project_dir_name);
+		if (!proj_dir.exists())
+			proj_dir.mkdir();
+		File map_dir = new File(project_dir_name + "/maps");
+		if (!map_dir.exists())
+			map_dir.mkdir();
+		
+		boolean ok = createJsonFile(project_dir_name);
+		
+		ok &= createLuaFile(project_dir_name);
+		
+		ok &= createHeightMap(project_dir_name);
+		
+		ok &= createMaterialMask(project_dir_name);
+		ok &= createRockMap(project_dir_name);
+		ok &= createIronMap(project_dir_name);
+		
+		ok &= createConiferMap(project_dir_name);
+		ok &= createDeciduousMap(project_dir_name);
+		ok &= createBerryMap(project_dir_name);
+		
+		ok &= createFishMap(project_dir_name);
+		
+		if (parms.debug_level > 0)
+			System.out.println("Exported Foundation map " + dirname + " to " + project_dir_name);
+		
+		return ok;
+	}
+	
+	private boolean createJsonFile(String project_dir) {
+		String filename = "mod.json";
+		
+		try {
+			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			output.write("{\n");
+			output.write("    \"Name\": \"" + parms.region_name + "\",\n");
+			output.write("    \"Author\": \"" + parms.author_name + "\",\n");
+			output.write("    \"Description\": \"" + parms.description + "\",\n");
+			output.write("    \"Version\": \"1.0.0\",\n");
+			output.write("    \"MapList\": [\n        {\n");
+			output.write("           \"Name\": \"" + "Custom Map - " + parms.region_name + "\",\n");
+			output.write("           \"Id\": \"" + parms.map_name + "\"\n");
+			output.write("        }\n");
+			output.write("    ]\n");
+			output.write("}\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + filename);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean createLuaFile(String project_dir) {
+		String filename = "mod.lua";
+		try {
+			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			output.write("TODO - write " + filename + "\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + filename);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean createHeightMap(String project_dir) {
+		String filename = "maps/heightmap.png";
+		try {
+			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			output.write("TODO - write " + filename + "\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + filename);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean createMaterialMask(String project_dir) {
+		String filename = "maps/material_mask.png";
+		try {
+			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			output.write("TODO - write " + filename + "\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + filename);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean createRockMap(String project_dir) {
+		String filename = "maps/rock_density.png";
+		try {
+			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			output.write("TODO - write " + filename + "\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + filename);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean createIronMap(String project_dir) {
+		String filename = "maps/iron_density.png";
+		try {
+			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			output.write("TODO - write " + filename + "\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + filename);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean createConiferMap(String project_dir) {
+		String filename = "maps/coniferous_density.png";
+		try {
+			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			output.write("TODO - write " + filename + "\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + filename);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean createDeciduousMap(String project_dir) {
+		String filename = "maps/deciduous_density.png";
+		try {
+			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			output.write("TODO - write " + filename + "\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + filename);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean createBerryMap(String project_dir) {
+		String filename = "maps/berries_density.png";
+		try {
+			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			output.write("TODO - write " + filename + "\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + filename);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean createFishMap(String project_dir) {
+		String filename = "maps/fish_density.png";
+		try {
+			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			output.write("TODO - write " + filename + "\n");
+			output.close();
+		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + filename);
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -194,6 +366,12 @@ public class FoundExporter implements Exporter {
 					}
 			new PreviewMap("Export Preview (terrain)", map);
 		} else if (chosen == WhichMap.FLORAMAP) {
+			Color pMap[][] = new Color[y_points][x_points];
+			for(int i = 0; i < y_points; i++)
+				for(int j = 0; j < x_points; j++) {
+					// TODO water color or the appropriate flora color
+					pMap[i][j] = Color.BLUE;
+				}
 			// TODO IMPLEMENT ME
 			System.out.println("Flora previews not supported for JSON export");
 		}

@@ -210,10 +210,91 @@ public class FoundExporter implements Exporter {
 	}
 	
 	private boolean createLuaFile(String project_dir) {
+		String maps = project_dir + "/maps/";
 		String filename = "mod.lua";
 		try {
 			FileWriter output = new FileWriter(project_dir + "/" + filename);
-			output.write("TODO - write " + filename + "\n");
+			output.write("local mapMod = foundation.createMod();\n");
+			output.write("\n");
+			output.write("mapMod:registerAssetId(\"" + maps + 
+						 "heightmap.png\", \"HEIGHT_MAP\")\n");
+			output.write("mapMod:registerAssetId(\"" + maps + 
+						 "material_mask.png\", \"MATERIAL_MASK\")\n");
+			output.write("mapMod:registerAssetId(\"" + maps + 
+						 "coniferous_density.png\", \"CONIFEROUS_DENSITY_MAP\")\n");
+			output.write("mapMod:registerAssetId(\"" + maps + 
+						 "deciduous_density.png\", \"DECIDUOUS_DENSITY_MAP\")\n");
+			output.write("mapMod:registerAssetId(\"" + maps + 
+						 "berries_density.png\", \"BERRIES_DENSITY_MAP\")\n");
+			output.write("mapMod:registerAssetId(\"" + maps + 
+						 "rock_density.png\", \"ROCK_DENSITY_MAP\")\n");
+			output.write("mapMod:registerAssetId(\"" + maps + 
+						 "iron_density.png\", \"IRON_DENSITY_MAP\")\n");
+			output.write("mapMod:registerAssetId(\"" + maps + 
+						 "fish_density.png\", \"FISH_DENSITY_MAP\")\n");
+			output.write("\n");
+			
+			output.write("-- Register Custom Map\n");
+			output.write("mapMod:register({\n");
+			output.write("        DataType = \"CUSTOM_MAP\",\n");
+			output.write("        Id = \"" + parms.map_name + "\",\n" );
+			output.write("        HeightMap = \"HEIGHT_MAP\",\n" );
+			output.write("        MaterialMask = \"MATERIAL_MASK\",\n" );
+			output.write("        MinHeight = TODO -40,\n" );
+			output.write("        MaxHeight = TODO 95,\n" );
+			
+			output.write("        VillagePathList = {\n");
+			output.write("               TODO\n");
+			output.write("        },\n");
+			
+			String resources[] = { "BERRIES", "ROCK", "IRON", "FISH" };
+			output.write("        SpawnList = {\n");
+			for(int i = 0; i < resources.length; i++) {
+				output.write("                {\n");
+				output.write("                     Prefab = \"PREFAB_RESOURCE_" + resources[i] + "\",\n");
+				output.write("                     Position = { ###, #, ### },\n");
+				output.write("                     Orientation = { 0.0, math.randomf(-180, 180), 0.0 }\n");
+				output.write(i == resources.length - 1 ? 
+							 "                }\n" :
+							 "                },\n");
+			}
+			output.write("        },\n");
+
+			
+			output.write("        Density SpawnList = {\n");
+			output.write("            DensityMap = \"DECIDUOUS_DENSITY_MAP\",\n");
+			output.write("            Density = 0.9,\n");
+			output.write("            PrefabConfigList = {\n");
+			String deciduous[] = { "POPLAR", "OAK", "SYCAMORE", "PINE" };
+			for(int i = 0; i < deciduous.length; i++) {
+				output.write("                {\n");
+				output.write("                    PrefabList = { \"PREFAB_TREE_" + 
+																deciduous[i] + "\" },\n");
+				output.write("                    RandomHeight=#,\n");
+				output.write("                    OffsetSizeRange = {\n");
+				output.write("                        Min = #,\n");
+				output.write("                        Max = #,\n");
+				output.write("                    },\n");
+				output.write("                    OrientationRange = {\n");
+				output.write("                       Min = {0, -180, 0},\n");
+				output.write("                       Max = {0, 180, 0}\n");
+				output.write("                    },\n");
+				output.write("                    ScaleRange = {\n");
+				output.write("                        Min = #,\n");
+				output.write("                        Max = #,\n");
+				output.write("                    },\n");
+				output.write("                    ColorRange = {\n");
+				output.write("                         Min = {0.8, 0.8, 0.8, 1},\n");
+				output.write("                         Max = {1, 1, 1, 1}\n");
+				output.write("                    }\n");
+				output.write(i == deciduous.length - 1 ? 
+						 "                }\n" :
+						 "                },\n");
+			}
+			output.write("        }\n");
+			
+			output.write("})\n");
+			
 			output.close();
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + filename);

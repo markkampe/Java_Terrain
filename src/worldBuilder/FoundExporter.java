@@ -154,6 +154,7 @@ public class FoundExporter implements Exporter {
 	 * @param dirname - name of output directory
 	 */
 	public boolean writeFile( String dirname ) {
+		
 		// make sure the output directories exist
 		File proj_dir = new File(dirname);
 		if (!proj_dir.exists())
@@ -164,7 +165,12 @@ public class FoundExporter implements Exporter {
 		
 		boolean ok = createJsonFile(dirname);
 		
-		ok &= createLuaFile(dirname);
+		LuaWriter lua = new LuaWriter(dirname);
+		lua.fileHeader(-40, 95);	// FIX get min/max altitude
+		lua.villages();
+		lua.resources();
+		lua.trees();
+		lua.close();
 		
 		ok &= createHeightMap(dirname);
 		

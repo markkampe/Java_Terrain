@@ -154,35 +154,32 @@ public class FoundExporter implements Exporter {
 	 * @param dirname - name of output directory
 	 */
 	public boolean writeFile( String dirname ) {
-		// TODO figure out where to put the output
-		String project_dir_name = "/tmp/Foundation";
-		
 		// make sure the output directories exist
-		File proj_dir = new File(project_dir_name);
+		File proj_dir = new File(dirname);
 		if (!proj_dir.exists())
 			proj_dir.mkdir();
-		File map_dir = new File(project_dir_name + "/maps");
+		File map_dir = new File(dirname + "/maps");
 		if (!map_dir.exists())
 			map_dir.mkdir();
 		
-		boolean ok = createJsonFile(project_dir_name);
+		boolean ok = createJsonFile(dirname);
 		
-		ok &= createLuaFile(project_dir_name);
+		ok &= createLuaFile(dirname);
 		
-		ok &= createHeightMap(project_dir_name);
+		ok &= createHeightMap(dirname);
 		
-		ok &= createMaterialMask(project_dir_name);
-		ok &= createRockMap(project_dir_name);
-		ok &= createIronMap(project_dir_name);
+		ok &= createMaterialMask(dirname);
+		ok &= createRockMap(dirname);
+		ok &= createIronMap(dirname);
 		
-		ok &= createConiferMap(project_dir_name);
-		ok &= createDeciduousMap(project_dir_name);
-		ok &= createBerryMap(project_dir_name);
+		ok &= createConiferMap(dirname);
+		ok &= createDeciduousMap(dirname);
+		ok &= createBerryMap(dirname);
 		
-		ok &= createFishMap(project_dir_name);
+		ok &= createFishMap(dirname);
 		
 		if (parms.debug_level > 0)
-			System.out.println("Exported Foundation map " + dirname + " to " + project_dir_name);
+			System.out.println("Exported Foundation map " + parms.map_name + " to " + dirname);
 		
 		return ok;
 	}

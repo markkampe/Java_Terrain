@@ -7,6 +7,7 @@ import java.awt.event.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -181,20 +182,15 @@ public class FoundationExport extends ExportBase implements ActionListener, Chan
 		}
 		
 		if (e.getSource() == accept && selected) {
-			// flush the it out to a file
-			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
-			d.setFile(sel_name.getText()+".json");
-			d.setVisible(true);
-			String export_file = d.getFile();
-			if (export_file != null) {
-				String dir = d.getDirectory();
-				if (dir != null)
-					export_file = dir + export_file;
-				
-				exporter.writeFile(export_file);
-				
-				// make this the new default output file name
+			// create files in a chosen directory
+			JFileChooser d = new JFileChooser();
+			d.setDialogTitle("Export Directory");
+			d.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			d.setAcceptAllFileFilterUsed(false);
+			if (d.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				String dir = d.getSelectedFile().getPath();
 				parms.map_name = sel_name.getText();
+				exporter.writeFile(dir);
 				
 				// discard the window
 				windowClosing((WindowEvent) null);

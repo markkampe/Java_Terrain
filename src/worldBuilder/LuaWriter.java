@@ -18,6 +18,154 @@ public class LuaWriter {
 	private static final int EXPORT_DEBUG = 2;
 	
 	/**
+	 * Most of the items on the map are defined by (x,y,z) positions
+	 */
+	public class Position {
+		public int x, y, z;
+		
+		public Position(int x, int y, int z) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+		
+		public String toString() {
+			return "{ " + x + ", " + y + ", " + z + " }";
+		}
+	}
+	
+	/** 
+	 * Foundation needs to know the coordinates of the 
+	 * entry and exit points for each city/village.
+	 */
+	public class CityInfo {
+		public Position entrance;
+		public Position exit;
+		
+		public CityInfo(Position entrance, Position exit) {
+			this.entrance = entrance;
+			this.exit = exit;
+		}
+		
+		public String toString(String indent) {
+			String ret = indent + "{\n";
+			ret += indent + "    Entrance = " + entrance.toString() + ",\n";
+			ret += indent + "    Exit = " + exit.toString() + "\n";
+			ret += indent + "}";
+			return ret;
+		}
+	}
+	
+	private static String ALL_ORIENTATIONS = "{ 0.0, math.randomf(-180, 180), 0.0 }";
+	/**
+	 * for reasons I don't understand, it also needs to now a 
+	 * reference position for each resource 
+	 * (even tho the map shows the position)
+	 */
+	public class ResourceInfo {
+		public String name;
+		public Position position;
+		
+		public ResourceInfo(String name, Position position) {
+			this.name = name;
+			this.position = position;
+		}
+		
+		/**
+		 * @return SpawnList declaration for this resource
+		 * @param indent (before each line)
+		 * 
+		 * Note: last line will not have a newline, as a comma may be needed
+		 */
+		public String toString(String indent) {
+			String ret = indent + "{\n";
+			ret += indent + "    Prefab = \"PREFAB_RESOURCE_" + name + "\",\n";
+			ret += indent + "    Position = " + position.toString() + ",\n";
+			ret += indent + "    Orientation = " + ALL_ORIENTATIONS + "\n";
+			ret += indent + "}";	// caller must terminate the line
+			return ret;
+		}
+	}
+	
+	public class MapInfo {
+		public String mapName;
+		public String prefabName;
+		public double density;
+		public double weight;
+		public double minOffset;
+		public double maxOffset;
+		public double minScale;
+		public double maxScale;
+		
+		public MapInfo(String mapName, String prefabName,
+						double density, double weight, 
+						double minOffset, double maxOffset, 
+						double minScale, double maxScale) {
+			this.mapName = mapName;
+			this.prefabName = prefabName;
+			this.density = density;
+			this.weight = weight;
+			this.minOffset = minOffset;
+			this.maxOffset = maxOffset;
+			this.minScale = minScale;
+			this.maxScale = maxScale;
+		}
+		
+		/**
+		 * return string representation of 
+		 * @param indent
+		 * @return
+		 */
+		public String toString(String indent) {
+			String plus4 = indent + "    ";
+			String plus8 = plus4 + "    ";
+			String plus12 = plus8 + "    ";
+			String plus16 = plus12 + "    ";
+			
+			String ret = indent + "{\n";
+			ret += plus4 + "DensityMap = \"" + mapName + "\",\n";
+			if (density == 1.0)
+				ret += plus4 + "Density = 1,\n";	// FIX identical to sample
+			else
+				ret += plus4 + String.format("Density = %3.1f,\n", density);
+			ret += plus4 + "PrefabConfigList = {\n";
+			ret += plus8 + "{\n";
+			
+			ret += plus12 + "PrefabList = { \"PREFAB_" + prefabName + "\" },\n";
+			ret += plus12 + String.format("RandomWeight = %3.1f,\n", weight);
+			
+			ret += plus12 + "OffsetSizeRange = {\n";
+			ret += plus16 + String.format("Min = %4.2f,\n", minOffset);
+			if (maxOffset == 1.0)
+				ret += plus16 + "Max = 1\n";
+			else
+				ret += plus16 + String.format("Max = %4.2f\n", maxOffset);
+			ret += plus12 + "},\n";
+			
+			ret += plus12 + "OrientationRange = {\n";
+			ret += plus16 + "Min = { 0, -180, 0},\n";
+			ret += plus16 + "Max = { 0, 180, 0}\n";
+			ret += plus12 + "},\n";
+			
+			ret += plus12 + "ScaleRange = {\n";
+			ret += plus16 + String.format("Min = %4.2f,\n", minScale);
+			ret += plus16 + String.format("Max = %4.2f\n", maxScale);
+			ret += plus12 + "},\n";
+			
+			ret += plus12 + "ColorRange = {\n";
+			ret += plus16 + "Min = { 0.8, 0.8, 0.8, 1 },\n";
+			ret += plus16 + "Max = { 1, 1, 1, 1 }\n";
+			ret += plus12 + "}\n";
+			
+			ret += plus8 + "}\n";
+			ret += plus4 + "}\n";
+			ret += indent + "}";
+			
+			return ret;
+		}
+	}
+	
+	/**
 	 * create a new Foundation exporter
 	 * 
 	 * @param width of the export area (in tiles)
@@ -45,13 +193,20 @@ public class LuaWriter {
 		"ROCK_DENSITY_MAP",			"maps/rock_density.png",
 		"IRON_DENSITY_MAP",			"maps/iron_density.png",
 		"FISH_DENSITY_MAP",			"maps/fish_density.png" };
-
+	
+	/**
+	 * write out a mod.lua file header
+	 *
+	 * @param min_altitude
+	 * @param max_altitude
+	 * @return
+	 */
 	public boolean fileHeader(int min_altitude, int max_altitude) {
 		try {
 			luaFile.write("local mapMod = foundation.createMod();\n");
 			luaFile.write("\n");
 			for(int i = 0; i < maps.length; i += 2) {
-				String line = "mapMod:registerAssetID(\"";
+				String line = "mapMod:registerAssetId(\"";
 				line += maps[i+1];
 				line += "\", \"";
 				line += maps[i];
@@ -75,6 +230,9 @@ public class LuaWriter {
 		return true;
 	}
 	
+	/**
+	 * write out the closing braces and close the file
+	 */
 	public void close() {
 		try {
 			luaFile.write("})\n");
@@ -85,10 +243,16 @@ public class LuaWriter {
 		luaFile = null;
 	}
 	
-	public boolean villages() {
+	public boolean villages(CityInfo[] cities) {
 		try {
-			luaFile.write("        VillagePathList = {\n");
-			luaFile.write("        },\n");
+			String indent = "        ";
+			String indentx2 = "            ";
+			luaFile.write(indent + "VillagePathList = {\n");
+			for(int i = 0; i < cities.length; i++) {
+				luaFile.write(cities[i].toString(indentx2));
+				luaFile.write((i < cities.length-1) ? ",\n" : "\n");
+			}
+			luaFile.write(indent + "},\n");
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + LUA_NAME);
 			return false;
@@ -96,22 +260,18 @@ public class LuaWriter {
 		return true;
 	}
 	
-	private static String resource[] = {"BERRIES", "ROCK", "IRON", "FISH"};
-	private static String ALL_ORIENTATIONS = "Orientation = { 0.0, math.randomf(-180, 180), 0.0 }";
+	
 
-	public boolean resources() {
+	public boolean resources(ResourceInfo[] resource) {
 		try {
-			luaFile.write("        SpawnList = {\n");
+			String indent = "        ";
+			String indentx2 = "            ";
+			luaFile.write(indent + "SpawnList = {\n");
 			for(int i = 0; i < resource.length; i++) {
-				luaFile.write("            {\n");
-				luaFile.write("                Prefab = \"PREFAB_RESOURCE_" +
-							  resource[i] + "\",\n");
-				luaFile.write("                Position = { ???, ???, ??? },\n");
-				luaFile.write("                " + ALL_ORIENTATIONS + "\n");
-				String termination = (i < resource.length-1) ? ",\n" : "\n";
-				luaFile.write("             }" + termination);
+				luaFile.write(resource[i].toString(indentx2));
+				luaFile.write((i < resource.length-1) ? ",\n" : "\n");
 			}
-			luaFile.write("            },\n");
+			luaFile.write(indent + "},\n");
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + LUA_NAME);
 			return false;
@@ -119,24 +279,33 @@ public class LuaWriter {
 		return true;
 	}
 	
-	private static String deciduous[] = {"POPLAR", "OAK", "SYCAMORE", "PINE"};
-	public boolean trees() {
+	public boolean startDensities() {
 		try {
-			luaFile.write("        DensitySpawnList = {\n");
-			luaFile.write("            DensityMap = \"DECIDUOUS_DENSITY_MAP\",\n");
-			luaFile.write("            Density = 0.9\n");
-			luaFile.write("            PrefabConfigList = {\n");
-			for(int i = 0; i < deciduous.length; i++) {
-				luaFile.write("            {\n");
-				luaFile.write("                Prefab = \"PREFAB_RESOURCE_" +
-							  resource[i] + "\",\n");
-				luaFile.write("                Position = { ???, ???, ??? },\n");
-				luaFile.write("                " + ALL_ORIENTATIONS + "\n");
-				String termination = (i < resource.length-1) ? ",\n" : "\n";
-				luaFile.write("             }" + termination);
-			}
-			luaFile.write("        },\n");
+			String indent = "        ";
+			luaFile.write(indent + "DensitySpawnList = {\n");
+		}  catch (IOException e) {
+			System.err.println("Write error while attempting to create " + LUA_NAME);
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean map(MapInfo map, boolean last) {
+		try {
+			String termination = last ? "\n" : ",\n";
+			luaFile.write(map.toString("            ") + termination);
 		} catch (IOException e) {
+			System.err.println("Write error while attempting to create " + LUA_NAME);
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean endDensities() {
+		try {
+			String indent = "        ";
+			luaFile.write(indent + "}\n");
+		}  catch (IOException e) {
 			System.err.println("Write error while attempting to create " + LUA_NAME);
 			return false;
 		}

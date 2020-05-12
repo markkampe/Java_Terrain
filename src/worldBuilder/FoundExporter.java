@@ -166,10 +166,49 @@ public class FoundExporter implements Exporter {
 		boolean ok = createJsonFile(dirname);
 		
 		LuaWriter lua = new LuaWriter(dirname);
-		lua.fileHeader(-40, 95);	// FIX get min/max altitude
-		lua.villages();
-		lua.resources();
-		lua.trees();
+		
+		// FIX get real altitude data, this just copies sample
+		lua.fileHeader(-40, 95);
+		
+		// FIX get real city data, this just copies sample
+		LuaWriter.CityInfo[] villages = new LuaWriter.CityInfo[4];
+		villages[0] = lua.new CityInfo(lua.new Position(15, 0, 350), lua.new Position(15, 0, 530));
+		villages[1] = lua.new CityInfo(lua.new Position(15, 0, 880), lua.new Position(15, 0, 700));
+		villages[2] = lua.new CityInfo(lua.new Position(800, 0, 1009), lua.new Position(250, 0, 1009));
+		villages[3] = lua.new CityInfo(lua.new Position(1009, 0, 750), lua.new Position(1009, 0, 300));
+		lua.villages(villages);
+		
+		// FIX get real resource data, this just copies sample
+		LuaWriter.ResourceInfo[] resources = new LuaWriter.ResourceInfo[4];
+		resources[0] = lua.new ResourceInfo("BERRIES", lua.new Position(940, 0, 424));
+		resources[1] = lua.new ResourceInfo("ROCK", lua.new Position(950, 0, 250));
+		resources[2] = lua.new ResourceInfo("IRON", lua.new Position(610, 0, 940));
+		resources[3] = lua.new ResourceInfo("FISH", lua.new Position(563, 2, 93));
+		lua.resources(resources);
+		
+		lua.startDensities();
+		LuaWriter.MapInfo map;
+		map = lua.new MapInfo("CONIFEROUS_DENSITY_MAP", "TREE_PINE",
+							  0.9, 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.map(map, false);
+		
+		map = lua.new MapInfo("BERRIES_DENSITY_MAP", "RESOURCE_BERRIES",
+				  1, 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.map(map, false);
+		
+		map = lua.new MapInfo("ROCK_DENSITY_MAP", "RESOURCE_ROCK",
+				  1, 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.map(map, false);
+		
+		map = lua.new MapInfo("IRON_DENSITY_MAP", "RESOURCE_IRON",
+				  1, 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.map(map, false);
+		
+		map = lua.new MapInfo("FISH_DENSITY_MAP", "RESOURCE_FISH",
+				  1, 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.map(map, true);
+		
+		lua.endDensities();
 		lua.close();
 		
 		ok &= createHeightMap(dirname);
@@ -195,112 +234,20 @@ public class FoundExporter implements Exporter {
 		
 		try {
 			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			String indent = "    ";
+			String indentx2 = indent + indent;
 			output.write("{\n");
-			output.write("    \"Name\": \"" + parms.region_name + "\",\n");
-			output.write("    \"Author\": \"" + parms.author_name + "\",\n");
-			output.write("    \"Description\": \"" + parms.description + "\",\n");
-			output.write("    \"Version\": \"1.0.0\",\n");
-			output.write("    \"MapList\": [\n        {\n");
-			output.write("           \"Name\": \"" + "Custom Map - " + parms.region_name + "\",\n");
-			output.write("           \"Id\": \"" + parms.map_name + "\"\n");
-			output.write("        }\n");
-			output.write("    ]\n");
+			output.write(indent + "\"Name\": \"" + parms.region_name + "\",\n");
+			output.write(indent + "\"Author\": \"" + parms.author_name + "\",\n");
+			output.write(indent + "\"Description\": \"" + parms.description + "\",\n");
+			output.write(indent + "\"Version\": \"1.0.0\",\n");
+			output.write(indent + "\"MapList\": [\n");
+			output.write(indentx2 + "{\n");
+			output.write(indentx2 + "\"Name\": \"" + "Custom Map - " + parms.region_name + "\",\n");
+			output.write(indentx2 + "\"Id\": \"" + parms.map_name + "\"\n");
+			output.write(indentx2 + "}\n");
+			output.write(indent + "]\n");
 			output.write("}\n");
-			output.close();
-		} catch (IOException e) {
-			System.err.println("Write error while attempting to create " + filename);
-			return false;
-		}
-		
-		return true;
-	}
-	
-	private boolean createLuaFile(String project_dir) {
-		String maps = project_dir + "/maps/";
-		String filename = "mod.lua";
-		try {
-			FileWriter output = new FileWriter(project_dir + "/" + filename);
-			output.write("local mapMod = foundation.createMod();\n");
-			output.write("\n");
-			output.write("mapMod:registerAssetId(\"" + maps + 
-						 "heightmap.png\", \"HEIGHT_MAP\")\n");
-			output.write("mapMod:registerAssetId(\"" + maps + 
-						 "material_mask.png\", \"MATERIAL_MASK\")\n");
-			output.write("mapMod:registerAssetId(\"" + maps + 
-						 "coniferous_density.png\", \"CONIFEROUS_DENSITY_MAP\")\n");
-			output.write("mapMod:registerAssetId(\"" + maps + 
-						 "deciduous_density.png\", \"DECIDUOUS_DENSITY_MAP\")\n");
-			output.write("mapMod:registerAssetId(\"" + maps + 
-						 "berries_density.png\", \"BERRIES_DENSITY_MAP\")\n");
-			output.write("mapMod:registerAssetId(\"" + maps + 
-						 "rock_density.png\", \"ROCK_DENSITY_MAP\")\n");
-			output.write("mapMod:registerAssetId(\"" + maps + 
-						 "iron_density.png\", \"IRON_DENSITY_MAP\")\n");
-			output.write("mapMod:registerAssetId(\"" + maps + 
-						 "fish_density.png\", \"FISH_DENSITY_MAP\")\n");
-			output.write("\n");
-			
-			output.write("-- Register Custom Map\n");
-			output.write("mapMod:register({\n");
-			output.write("        DataType = \"CUSTOM_MAP\",\n");
-			output.write("        Id = \"" + parms.map_name + "\",\n" );
-			output.write("        HeightMap = \"HEIGHT_MAP\",\n" );
-			output.write("        MaterialMask = \"MATERIAL_MASK\",\n" );
-			output.write("        MinHeight = TODO -40,\n" );
-			output.write("        MaxHeight = TODO 95,\n" );
-			
-			output.write("        VillagePathList = {\n");
-			output.write("               TODO\n");
-			output.write("        },\n");
-			
-			String resources[] = { "BERRIES", "ROCK", "IRON", "FISH" };
-			output.write("        SpawnList = {\n");
-			for(int i = 0; i < resources.length; i++) {
-				output.write("                {\n");
-				output.write("                     Prefab = \"PREFAB_RESOURCE_" + resources[i] + "\",\n");
-				output.write("                     Position = { ###, #, ### },\n");
-				output.write("                     Orientation = { 0.0, math.randomf(-180, 180), 0.0 }\n");
-				output.write(i == resources.length - 1 ? 
-							 "                }\n" :
-							 "                },\n");
-			}
-			output.write("        },\n");
-
-			
-			output.write("        Density SpawnList = {\n");
-			output.write("            DensityMap = \"DECIDUOUS_DENSITY_MAP\",\n");
-			output.write("            Density = 0.9,\n");
-			output.write("            PrefabConfigList = {\n");
-			String deciduous[] = { "POPLAR", "OAK", "SYCAMORE", "PINE" };
-			for(int i = 0; i < deciduous.length; i++) {
-				output.write("                {\n");
-				output.write("                    PrefabList = { \"PREFAB_TREE_" + 
-																deciduous[i] + "\" },\n");
-				output.write("                    RandomHeight=#,\n");
-				output.write("                    OffsetSizeRange = {\n");
-				output.write("                        Min = #,\n");
-				output.write("                        Max = #,\n");
-				output.write("                    },\n");
-				output.write("                    OrientationRange = {\n");
-				output.write("                       Min = {0, -180, 0},\n");
-				output.write("                       Max = {0, 180, 0}\n");
-				output.write("                    },\n");
-				output.write("                    ScaleRange = {\n");
-				output.write("                        Min = #,\n");
-				output.write("                        Max = #,\n");
-				output.write("                    },\n");
-				output.write("                    ColorRange = {\n");
-				output.write("                         Min = {0.8, 0.8, 0.8, 1},\n");
-				output.write("                         Max = {1, 1, 1, 1}\n");
-				output.write("                    }\n");
-				output.write(i == deciduous.length - 1 ? 
-						 "                }\n" :
-						 "                },\n");
-			}
-			output.write("        }\n");
-			
-			output.write("})\n");
-			
 			output.close();
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + filename);

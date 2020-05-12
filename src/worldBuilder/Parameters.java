@@ -102,8 +102,8 @@ public class Parameters {
 	/** river flow slider range		*/	public int tribute_max = 1000;
 
 	/** export # tiles warn limit	*/	public int tiles_max = 10000;
-	/** exportmin	height/alt levels	*/	public int levels_min = 5;
-	/** exportmax height/alt levels	*/	public int levels_max = 20;
+	/** export min height/alt levels*/	public int levels_min = 5;
+	/** export max height/alt levels*/	public int levels_max = 20;
 	/** export temp slider range	*/	public int delta_t_max = 15;	// degC
 	/** export hydro slider range	*/	public int delta_h_max = 100;	// %
 
@@ -113,9 +113,9 @@ public class Parameters {
 	/** default world max altitude (m)	*/	public int z_range;
 	/** default world latitude (deg)	*/	public double latitude;
 	/** default world longitude (deg)	*/	public double longitude;
-	/** world description string		*/	public String description;
-	/** world author name				*/	public String author_name;
-	/** world region name				*/	public String region_name;
+	/** world description string		*/	public String description = "(your description)";
+	/** world author name				*/	public String author_name = "(your name)";
+	/** world region name				*/	public String region_name = "(your region)";
 
 	/** default map sea level (m)		*/	public double sea_level = 0;
 
@@ -245,11 +245,11 @@ public class Parameters {
 		dDeltaH = 0;
 		dTimesH = 100;
 		
-		description = "A Fantasy Landscape";
-		region_name = "NeverWorld";
-		author_name = System.getenv("LOGNAME");
 		descr_height = 4;
 		descr_width = 80;
+		
+		// we can take a guess at who the author is
+		author_name = System.getenv("LOGNAME");
 	}
 	
 	/**
@@ -339,6 +339,15 @@ public class Parameters {
 					break;
 				case "map_name":
 					map_name = parser.getString();
+					break;
+				case "description":
+					description = parser.getString();
+					break;
+				case "author_name":
+					author_name = parser.getString();
+					break;
+				case "region_name":
+					region_name = parser.getString();
 					break;
 				}
 				if (inRules) {

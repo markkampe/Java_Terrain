@@ -9,6 +9,10 @@
 	"dialog_delta": 50,
     	"dialog_border": 5
     },
+    "identification": {
+	"region_name": "Never-Never-Land",
+	"description": "where dreams come true"
+    },
     "limits": {
 	"diameter_unit": 10,
 	"diameter_max": 1000,

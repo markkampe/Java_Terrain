@@ -40,11 +40,11 @@ public class LuaWriter {
 	 * Foundation needs to know the coordinates of the 
 	 * entry and exit points for each city/village.
 	 */
-	public class CityInfo {
+	public class EntryPoint {
 		public Position entrance;
 		public Position exit;
 		
-		public CityInfo(Position entrance, Position exit) {
+		public EntryPoint(Position entrance, Position exit) {
 			this.entrance = entrance;
 			this.exit = exit;
 		}
@@ -245,14 +245,14 @@ public class LuaWriter {
 		luaFile = null;
 	}
 	
-	public boolean villages(CityInfo[] cities) {
+	public boolean entrypoints(EntryPoint[] places) {
 		try {
 			String indent = "        ";
 			String indentx2 = "            ";
 			luaFile.write(indent + "VillagePathList = {\n");
-			for(int i = 0; i < cities.length; i++) {
-				luaFile.write(cities[i].toString(indentx2));
-				luaFile.write((i < cities.length-1) ? ",\n" : "\n");
+			for(int i = 0; i < places.length; i++) {
+				luaFile.write(places[i].toString(indentx2));
+				luaFile.write((i < places.length-1) ? ",\n" : "\n");
 			}
 			luaFile.write(indent + "},\n");
 		} catch (IOException e) {

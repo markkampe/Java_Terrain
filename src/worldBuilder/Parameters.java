@@ -693,7 +693,7 @@ public class Parameters {
 	/**
 	 * turn a world height into a map z value
 	 * 
-	 * @param height in megers
+	 * @param height in meters
 	 * @return map delta-z (0.0 - 1.0)
 	 */
 	public double z(double height) {

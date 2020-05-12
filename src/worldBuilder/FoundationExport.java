@@ -42,9 +42,9 @@ public class FoundationExport extends ExportBase implements ActionListener, Chan
 	public FoundationExport(Map map) {
 		super("Foundation", map, 1, Map.Selection.SQUARE);
 		
-		// Foundation exports are always 1024x1024
-		x_points = 1024;
-		y_points = 1024;
+		// 1024x1024 takes forever, so we do 256x256 and interpolate
+		x_points = 256;
+		y_points = 256;
 		
 		// add our controls to those in the base class
 		create_GUI();

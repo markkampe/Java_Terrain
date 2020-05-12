@@ -12,8 +12,8 @@ public class FoundExporter implements Exporter {
 
 	private Parameters parms;
 	
-	private static final int x_points = 1024;	// width of map (in points)
-	private static final int y_points = 1024;	// height of map (in points)
+	private int x_points;			// width of map (in points)
+	private int y_points;			// height of map (in points)
 	
 	private double Tmean;			// mean temperature
 	private double Tsummer;			// mean summer temperature
@@ -24,16 +24,15 @@ public class FoundExporter implements Exporter {
 	private double[][] hydration;	// per point water depth (meters)
 	private double[][] soil;		// per point soil type
 	
+	private boolean needHeight;		// height or erosion has changed
 	private double maxHeight;		// highest discovered altitude
 	private double minHeight;		// lowest discovered altitude
+	private double waterLevel;		// anything below this is u/w
 	private double maxDepth;		// deepest discovered water
 	
 	// brightness constants for preview colors
-	private static final int DIM = 32;
+	private static final int DIM = 16;
 	private static final int BRIGHT = 256 - DIM;
-	private static final int NORMAL = 128;
-	
-	private static final int EXPORT_DEBUG = 2;
 	
 	/**
 	 * create a new Foundation exporter
@@ -42,9 +41,11 @@ public class FoundExporter implements Exporter {
 	 * @param height of the export area ((in tiles)
 	 */
 	public FoundExporter(int width, int height) {
-		if (width != x_points || height != y_points)
-			System.err.println("ERROR: all Foundation exports are 1024x1024");
+		this.x_points = width;
+		this.y_points = height;
 		parms = Parameters.getInstance();
+		
+		this.needHeight = true;
 	}
 
 	/**
@@ -61,7 +62,7 @@ public class FoundExporter implements Exporter {
 	 * @param lon real world longitude of map center
 	 */
 	public void position(double lat, double lon) {
-		// these have no place in Foundation
+		// these have no role in Foundation
 	}
 
 	/**
@@ -82,6 +83,7 @@ public class FoundExporter implements Exporter {
 	 */
 	public void heightMap(double[][] heights) {
 		this.heights = heights;
+		this.needHeight = true;
 	}
 
 	/**
@@ -91,6 +93,7 @@ public class FoundExporter implements Exporter {
 	 */
 	public void erodeMap(double[][] erode) {
 		this.erode = erode;	
+		this.needHeight = true;
 	}
 
 	/**
@@ -98,7 +101,7 @@ public class FoundExporter implements Exporter {
 	 * @param rain	per point depth (in meters) of annual rainfall
 	 */
 	public void rainMap(double[][] rain) {
-		// this.rain = rain;
+		// this is unnecessary for Foundation tile bidding
 	}
 
 	/**
@@ -141,20 +144,26 @@ public class FoundExporter implements Exporter {
 		if (!map_dir.exists())
 			map_dir.mkdir();
 		
+		// mod.json is merely identification information
 		boolean ok = createJsonFile(dirname);
 		
 		LuaWriter lua = new LuaWriter(dirname);
 		
-		// FIX get the altitude range from the map
-		lua.fileHeader(-40, 95);
+		// establish height range and create the header
+		if (this.needHeight)
+			heightRange();
+	
+		int lowest = (int) parms.height(minHeight - waterLevel);
+		int highest = (int) parms.height(maxHeight - waterLevel);
+		lua.fileHeader(lowest, highest);
 		
 		// FIX let user select one or more entry points on the map
-		LuaWriter.CityInfo[] villages = new LuaWriter.CityInfo[4];
-		villages[0] = lua.new CityInfo(lua.new Position(15, 350, 0), lua.new Position(15, 530, 0));
-		villages[1] = lua.new CityInfo(lua.new Position(15, 880, 0), lua.new Position(15, 700, 0));
-		villages[2] = lua.new CityInfo(lua.new Position(800, 1009, 0), lua.new Position(250, 1009, 0));
-		villages[3] = lua.new CityInfo(lua.new Position(1009, 750, 0), lua.new Position(1009, 300, 0));
-		lua.villages(villages);
+		LuaWriter.EntryPoint[] villages = new LuaWriter.EntryPoint[4];
+		villages[0] = lua.new EntryPoint(lua.new Position(15, 350, 0), lua.new Position(15, 530, 0));
+		villages[1] = lua.new EntryPoint(lua.new Position(15, 880, 0), lua.new Position(15, 700, 0));
+		villages[2] = lua.new EntryPoint(lua.new Position(800, 1009, 0), lua.new Position(250, 1009, 0));
+		villages[3] = lua.new EntryPoint(lua.new Position(1009, 750, 0), lua.new Position(1009, 300, 0));
+		lua.entrypoints(villages);
 		
 		/*
 		 * these are discrete resource placements, unnecessary w/density maps
@@ -200,10 +209,10 @@ public class FoundExporter implements Exporter {
 		
 		ok &= createHeightMap(dirname);
 		
-		ok &= createMaterialMask(dirname);
 		ok &= createRockMap(dirname);
 		ok &= createIronMap(dirname);
 		
+		ok &= createMaterialMask(dirname);
 		ok &= createConiferMap(dirname);
 		ok &= createDeciduousMap(dirname);
 		ok &= createBerryMap(dirname);
@@ -216,6 +225,11 @@ public class FoundExporter implements Exporter {
 		return ok;
 	}
 	
+	/**
+	 * create the mod.json file of map identification information
+	 * @param project_dir
+	 * @return boolean - success/failure
+	 */
 	private boolean createJsonFile(String project_dir) {
 		String filename = "mod.json";
 		
@@ -244,6 +258,32 @@ public class FoundExporter implements Exporter {
 		return true;
 	}
 	
+	/**
+	 * examine the height and topology maps to get
+	 * the altitude range
+	 */
+	private void heightRange() {
+		waterLevel = parms.sea_level;
+		maxHeight = -666;
+		minHeight = 666;
+		for(int i = 0; i < y_points; i++)
+			for(int j = 0; j < x_points; j++) {
+				double z = heights[i][j] - erode[i][j];
+				if (z > maxHeight)
+					maxHeight = z;
+				if (z < minHeight)
+					minHeight = z;
+				// FIX deal with above-sea-level lakes
+			}
+		
+		this.needHeight = false;
+	}
+	
+	/**
+	 * create the height map for the exported region
+	 * @param project_dir
+	 * @return boolean - success/failure
+	 */
 	private boolean createHeightMap(String project_dir) {
 		String filename = "maps/heightmap.png";
 		try {
@@ -364,8 +404,9 @@ public class FoundExporter implements Exporter {
 	public void preview(WhichMap chosen, Color colorMap[]) {
 	
 		if (chosen == WhichMap.HEIGHTMAP) {
-			// figure out the altitude to color mapping
-			double aMean = (maxHeight + minHeight)/2;
+			// figure out mapping from altitude to color
+			if (this.needHeight)
+				heightRange();
 			double aScale = BRIGHT - DIM;
 			if (maxHeight > minHeight)
 				aScale /= maxHeight - minHeight;
@@ -373,22 +414,19 @@ public class FoundExporter implements Exporter {
 			// fill in the preview map
 			Color map[][] = new Color[y_points][x_points];
 			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++)
-					if (hydration[i][j] >= 0) {	// land
-						double h = NORMAL + ((heights[i][j] - aMean) * aScale);
-						map[i][j] = new Color((int)h, (int)h, (int)h);
-					} else	{							// water
-						double depth = hydration[i][j]/maxDepth;
-						double h = (1 - depth) * (BRIGHT - DIM);
-						map[i][j] = new Color(0, (int) h, BRIGHT);
-					}
+				for(int j = 0; j < x_points; j++) {
+					double h = (heights[i][j] - erode[i][j]) - minHeight;
+					double b = DIM + (h * aScale);
+					map[i][j] = new Color((int)b, (int)b, (int)b);
+				}
+			
+			// put up the preview
 			new PreviewMap("Export Preview (terrain)", map);
 		} else if (chosen == WhichMap.FLORAMAP) {
 			Color pMap[][] = new Color[y_points][x_points];
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++) {
-					// TODO water color or the appropriate flora color
-					pMap[i][j] = Color.BLUE;
+					pMap[i][j] = Color.BLUE;	// FIX flora
 				}
 			// TODO IMPLEMENT ME
 			System.out.println("Flora previews not supported for JSON export");

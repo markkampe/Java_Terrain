@@ -32,7 +32,7 @@ public class LuaWriter {
 		 * return String representation of Position
 		 */
 		public String toString() {
-			return "{ " + x + ", " + y + ", " + z + " }";
+			return "{ " + x + ", " + z + ", " + y + " }";
 		}
 	}
 	

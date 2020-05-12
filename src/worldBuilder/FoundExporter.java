@@ -19,9 +19,6 @@ public class FoundExporter implements Exporter {
 	private int y_points;			// height of map (in points)
 	private int tile_size;			// tile size (in meters)
 	
-	private double lat;				// latitude
-	private double lon;				// longitude
-	
 	private double Tmean;			// mean temperature
 	private double Tsummer;			// mean summer temperature
 	private double Twinter;			// mean winter temperature
@@ -72,8 +69,7 @@ public class FoundExporter implements Exporter {
 	 * @param lon real world longitude of map center
 	 */
 	public void position(double lat, double lon) {
-		this.lat = lat;
-		this.lon = lon;
+		// these have no place in Foundation
 	}
 
 	/**

@@ -1,6 +1,5 @@
 package worldBuilder;
 
-import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.*;
@@ -183,12 +182,13 @@ public class FoundationExport extends ExportBase implements ActionListener, Chan
 		
 		if (e.getSource() == accept && selected) {
 			// create files in a chosen directory
-			JFileChooser d = new JFileChooser();
+			JFileChooser d = new JFileChooser(parms.export_dir);
 			d.setDialogTitle("Export Directory");
 			d.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			d.setAcceptAllFileFilterUsed(false);
 			if (d.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				String dir = d.getSelectedFile().getPath();
+				parms.export_dir = dir;
 				parms.map_name = sel_name.getText();
 				exporter.writeFile(dir);
 				

@@ -7,6 +7,8 @@ import java.util.Hashtable;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import worldBuilder.Map.Selection;
+
 /**
  * a super-class for exporter dialogs - creates dialogs, handles
  * handles region selection, pumps data to an Exporter
@@ -57,8 +59,9 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	 * @param format ... used to title the dialog
 	 * @param map ... the map from which we are exporting
 	 * @param maxTile ... maximum tile size (meters)
+	 * @param shape ... required export region shape
 	 */
-	public ExportBase(String format, Map map, int maxTile)  {
+	public ExportBase(String format, Map map, int maxTile, Map.Selection shape)  {
 		// pick up references
 		this.map = map;
 		this.parms = Parameters.getInstance();
@@ -192,7 +195,8 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 			});
 		}
 		
-		selected = map.checkSelection(Map.Selection.RECTANGLE);
+		map.selectMode(shape);
+		selected = map.checkSelection(shape);
 		newSelection = false;
 		
 		if (parms.debug_level >= EXPORT_DEBUG)
@@ -402,7 +406,8 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 			// and re-scale per tile size
 			tile_size(Integer.parseInt(sel_t_size.getText()));
 		else
-			tile_size(1);
+			// sub-class is managing x_points/y_points
+			sel_points.setText(x_points + "x" + y_points);
 		
 		selected = true;
 		newSelection = true;

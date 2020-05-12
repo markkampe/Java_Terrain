@@ -40,10 +40,11 @@ public class FoundationExport extends ExportBase implements ActionListener, Chan
 	 * @param map ... Map to be exported
 	 */
 	public FoundationExport(Map map) {
-		super("Foundation", map, 1);
+		super("Foundation", map, 1, Map.Selection.SQUARE);
 		
 		// Foundation exports are always 1024x1024
-		parms.tiles_max = 1024 * 1024;
+		x_points = 1024;
+		y_points = 1024;
 		
 		// add our controls to those in the base class
 		create_GUI();

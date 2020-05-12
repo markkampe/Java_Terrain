@@ -95,7 +95,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private Cartesian map;		// Cartesian translation of Voronoi Mesh
 	
 	/** selection types: points, line, rectangle, ... */
-	public enum Selection {NONE, POINT, POINTS, LINE, RECTANGLE, ANY};
+	public enum Selection {NONE, POINT, POINTS, LINE, RECTANGLE, SQUARE, ANY};
 	private Selection sel_mode;	// What types of selection are enabled
 	private MapListener listener;	// who to call for selection events
 	
@@ -818,6 +818,15 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			sel_y1 = sel_y0 + sel_height;
 			sel_type = Selection.LINE;
 			repaint();
+		} else if (type == Selection.SQUARE && sel_type == Selection.RECTANGLE) {
+			// square the selection
+			int side = (sel_width + sel_height)/2;
+			sel_width = side;
+			sel_height = side;
+			sel_x1 = sel_x0 + sel_width;
+			sel_y1 = sel_y0 + sel_height;
+			sel_type = Selection.SQUARE;
+			repaint();
 		} else if (type == Selection.POINT && sel_type == Selection.RECTANGLE) {
 			// rectangles can also be (crudely) converted to points
 			sel_x0 += sel_width/2;
@@ -871,6 +880,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					    map_width(sel_x1 - sel_x0), map_height(sel_y1 - sel_y0),
 					    true);
 				break;
+			case SQUARE:
 			case RECTANGLE:
 				listener.regionSelected(map_x(sel_x0),  map_y(sel_y0),
 					    map_width(sel_width), map_height(sel_height),
@@ -934,6 +944,24 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			selectPoints(x_start, y_start, e.getX(), e.getY(),
 					(e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 			if (listener != null && !listener.groupSelected(sel_points, false))
+				sel_type = Selection.NONE;
+		} else if (sel_mode == Selection.SQUARE) {
+			// figure out whether selection is taller or wider
+			int x = e.getX();
+			int dx = (x < x_start) ? x_start - x : x - x_start;
+			int y = e.getY();
+			int dy = (y < y_start) ? y_start - y : y - y_start;
+			// square it
+			if (dy > dx)
+				x = (x > x_start) ? x_start + dy : x_start - dy;
+			else
+				y = (y > y_start) ? y_start + dx : y_start - dx;
+			
+			selectRect(x_start, y_start, x, y);
+			if (listener != null &&
+				!listener.regionSelected(map_x(sel_x0),  map_y(sel_y0),
+									    map_width(sel_width), map_height(sel_height),
+									    selected))
 				sel_type = Selection.NONE;
 		} else if (sel_mode == Selection.ANY || sel_mode == Selection.RECTANGLE) {
 			selectRect(x_start, y_start, e.getX(), e.getY());

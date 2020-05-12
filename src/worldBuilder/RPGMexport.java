@@ -84,7 +84,8 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	 */
 	public RPGMexport(String format, Map map) {
 		super("RPGMaker " + format, map, 
-			  format.equals("Outside") ? 1000 : 100000);
+			  format.equals("Outside") ? 1000 : 100000,
+			  Map.Selection.RECTANGLE);
 		this.format = format;
 
 		// figure out which export control widgets we need

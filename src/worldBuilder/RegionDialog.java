@@ -88,7 +88,7 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 		
 		sel_name = new JTextField();
 		sel_name.setText(String.format("MAP%03d", MapIndex.nextID()));
-		JLabel nameLabel = new JLabel("Name of new sub-region", JLabel.CENTER);
+		JLabel nameLabel = new JLabel("Name of new map", JLabel.CENTER);
 		nameLabel.setFont(fontLarge);
 		JPanel namePanel = new JPanel(new GridLayout(2,1));
 		namePanel.add(nameLabel);
@@ -133,8 +133,8 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 		cancel.addActionListener(this);
 		map.addMapListener(this);
 		
-		map.selectMode(Map.Selection.RECTANGLE);
-		selected = map.checkSelection(Map.Selection.RECTANGLE);
+		map.selectMode(Map.Selection.SQUARE);
+		selected = map.checkSelection(Map.Selection.SQUARE);
 	}
 
 	/**

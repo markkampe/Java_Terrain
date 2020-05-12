@@ -96,13 +96,10 @@ public class LuaWriter {
 		public double minScale;
 		public double maxScale;
 		
-		public MapInfo(String mapName, String prefabName,
-						double density, double weight, 
+		public MapInfo(String prefabName, double weight, 
 						double minOffset, double maxOffset, 
 						double minScale, double maxScale) {
-			this.mapName = mapName;
 			this.prefabName = prefabName;
-			this.density = density;
 			this.weight = weight;
 			this.minOffset = minOffset;
 			this.maxOffset = maxOffset;
@@ -119,45 +116,38 @@ public class LuaWriter {
 			String plus4 = indent + "    ";
 			String plus8 = plus4 + "    ";
 			String plus12 = plus8 + "    ";
-			String plus16 = plus12 + "    ";
 			
 			String ret = indent + "{\n";
-			ret += plus4 + "DensityMap = \"" + mapName + "\",\n";
-			if (density == 1.0)
-				ret += plus4 + "Density = 1,\n";	// FIX identical to sample
+			
+			ret += plus4 + "PrefabList = { \"PREFAB_" + prefabName + "\" },\n";
+			if (weight == 1.0 || weight == 8.0)
+				ret += plus4 + String.format("RandomWeight = %d,\n", (int) weight);
 			else
-				ret += plus4 + String.format("Density = %3.1f,\n", density);
-			ret += plus4 + "PrefabConfigList = {\n";
-			ret += plus8 + "{\n";
+				ret += plus4 + String.format("RandomWeight = %3.1f,\n", weight);
 			
-			ret += plus12 + "PrefabList = { \"PREFAB_" + prefabName + "\" },\n";
-			ret += plus12 + String.format("RandomWeight = %3.1f,\n", weight);
-			
-			ret += plus12 + "OffsetSizeRange = {\n";
-			ret += plus16 + String.format("Min = %4.2f,\n", minOffset);
+			ret += plus4 + "OffsetSizeRange = {\n";
+			ret += plus8 + String.format("Min = %4.2f,\n", minOffset);
 			if (maxOffset == 1.0)
-				ret += plus16 + "Max = 1\n";
+				ret += plus8 + "Max = 1\n";
 			else
-				ret += plus16 + String.format("Max = %4.2f\n", maxOffset);
-			ret += plus12 + "},\n";
+				ret += plus8 + String.format("Max = %4.2f\n", maxOffset);
+			ret += plus4 + "},\n";
 			
-			ret += plus12 + "OrientationRange = {\n";
-			ret += plus16 + "Min = { 0, -180, 0},\n";
-			ret += plus16 + "Max = { 0, 180, 0}\n";
-			ret += plus12 + "},\n";
+			ret += plus4 + "OrientationRange = {\n";
+			ret += plus8 + "Min = { 0, -180, 0},\n";
+			ret += plus8 + "Max = { 0, 180, 0}\n";
+			ret += plus4 + "},\n";
 			
-			ret += plus12 + "ScaleRange = {\n";
-			ret += plus16 + String.format("Min = %4.2f,\n", minScale);
-			ret += plus16 + String.format("Max = %4.2f\n", maxScale);
-			ret += plus12 + "},\n";
+			ret += plus4 + "ScaleRange = {\n";
+			ret += plus8 + String.format("Min = %4.2f,\n", minScale);
+			ret += plus8 + String.format("Max = %4.2f\n", maxScale);
+			ret += plus4 + "},\n";
 			
-			ret += plus12 + "ColorRange = {\n";
-			ret += plus16 + "Min = { 0.8, 0.8, 0.8, 1 },\n";
-			ret += plus16 + "Max = { 1, 1, 1, 1 }\n";
-			ret += plus12 + "}\n";
-			
-			ret += plus8 + "}\n";
+			ret += plus4 + "ColorRange = {\n";
+			ret += plus8 + "Min = { 0.8, 0.8, 0.8, 1 },\n";
+			ret += plus8 + "Max = { 1, 1, 1, 1 }\n";
 			ret += plus4 + "}\n";
+			
 			ret += indent + "}";
 			
 			return ret;
@@ -289,10 +279,24 @@ public class LuaWriter {
 		return true;
 	}
 	
-	public boolean map(MapInfo map, boolean last) {
+	public boolean map(String name, double density, MapInfo[] maps, boolean last) {
 		try {
-			String termination = last ? "\n" : ",\n";
-			luaFile.write(map.toString("            ") + termination);
+			String indent = "            ";
+			String plus4 = indent + "    ";
+			String plus8 = plus4 + "    ";
+			luaFile.write(indent + "{\n");
+			luaFile.write(plus4 + "DensityMap = \"" + name + "\",\n");
+			if (density == 1.0)		// FIX - just to make output identical to sample
+				luaFile.write(plus4 + "Density = 1,\n");
+			else
+				luaFile.write(String.format("%sDensity = %3.1f,\n", plus4, density));
+			luaFile.write(plus4 + "PrefabConfigList = {\n");
+			for(int i = 0; i < maps.length; i++) {
+				luaFile.write(maps[i].toString(plus8));
+				luaFile.write((i < maps.length-1) ? ",\n" : "\n");
+			}
+			luaFile.write(plus4 + "}\n");
+			luaFile.write(indent + (last ? "}\n" : "},\n"));
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + LUA_NAME);
 			return false;

@@ -183,26 +183,31 @@ public class FoundExporter implements Exporter {
 		lua.resources(resources);
 		
 		lua.startDensities();
-		LuaWriter.MapInfo map;
-		map = lua.new MapInfo("CONIFEROUS_DENSITY_MAP", "TREE_PINE",
-							  0.9, 0.1, 0.75, 1.0, 0.85, 1.15);
-		lua.map(map, false);
 		
-		map = lua.new MapInfo("BERRIES_DENSITY_MAP", "RESOURCE_BERRIES",
-				  1, 0.1, 0.75, 1.0, 0.85, 1.15);
-		lua.map(map, false);
+		// the first group of trees has four different types
+		LuaWriter.MapInfo maps[] = new LuaWriter.MapInfo[4];
+		maps[0] = lua.new MapInfo("TREE_POPLAR", 8, 0.75, 1.0, 0.85, 1.15);
+		maps[1] = lua.new MapInfo("TREE_OAK", 0.1, 0.9, 1.9, 0.9, 1.9);
+		maps[2] = lua.new MapInfo("TREE_SYCAMORE", 8, 0.75, 1.0, 0.85, 1.15);
+		maps[3] = lua.new MapInfo("TREE_PINE", 1, 0.15, 0.45, 0.7, 1.0);
+		lua.map("DECIDUOUS_DENSITY_MAP", 0.9, maps, false);
 		
-		map = lua.new MapInfo("ROCK_DENSITY_MAP", "RESOURCE_ROCK",
-				  1, 0.1, 0.75, 1.0, 0.85, 1.15);
-		lua.map(map, false);
+		// the resource maps are individual maps
+		maps = new LuaWriter.MapInfo[1];
+		maps[0] = lua.new MapInfo("TREE_PINE", 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.map("CONIFEROUS_DENSITY_MAP", 0.9, maps, false);
 		
-		map = lua.new MapInfo("IRON_DENSITY_MAP", "RESOURCE_IRON",
-				  1, 0.1, 0.75, 1.0, 0.85, 1.15);
-		lua.map(map, false);
+		maps[0] = lua.new MapInfo("RESOURCE_BERRIES", 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.map("BERRIES_DENSITY_MAP", 1, maps, false);
 		
-		map = lua.new MapInfo("FISH_DENSITY_MAP", "RESOURCE_FISH",
-				  1, 0.1, 0.75, 1.0, 0.85, 1.15);
-		lua.map(map, true);
+		maps[0] = lua.new MapInfo("RESOURCE_ROCK", 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.map("ROCK_DENSITY_MAP", 1, maps, false);
+		
+		maps[0] = lua.new MapInfo("RESOURCE_IRON", 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.map("IRON_DENSITY_MAP", 1, maps, false);
+		
+		maps[0] = lua.new MapInfo("RESOURCE_FISH", 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.map("FISH_DENSITY_MAP", 1, maps, true);
 		
 		lua.endDensities();
 		lua.close();

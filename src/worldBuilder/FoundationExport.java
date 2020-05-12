@@ -32,16 +32,18 @@ public class FoundationExport extends ExportBase implements ActionListener, Chan
 	boolean tempChanged = false;	// temperatures have changed
 	private boolean exported = false;
 
-	private static final int EXPORT_DEBUG = 2;
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Register our own action listners (BaseExport dialog is fine)
+	 * Register our own action listeners (BaseExport dialog is fine)
 	 * 
 	 * @param map ... Map to be exported
 	 */
 	public FoundationExport(Map map) {
-		super("Foundation", map);
+		super("Foundation", map, 1);
+		
+		// Foundation exports are always 1024x1024
+		parms.tiles_max = 1024 * 1024;
 		
 		// add our controls to those in the base class
 		create_GUI();

@@ -19,7 +19,7 @@ public class RawExport extends ExportBase implements ActionListener {
 	 * @param map ... Map to be exported
 	 */
 	public RawExport(Map map) {
-		super("Raw JSON", map);
+		super("Raw JSON", map, 100000);
 		
 		// we handle window and button events
 		previewT.addActionListener(this);

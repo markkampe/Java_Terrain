@@ -45,25 +45,30 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	private double x_km, y_km;			// selection box size (in km)
 	
 	// parameters for the tile size selection slider
-	private static final int MAX_TILE_SIZE = 10000;
 	private static final int TICS_PER_DECADE = 9;
 	
-	private static final int EXPORT_DEBUG = 2;
+	protected static final int EXPORT_DEBUG = 2;
 	
 	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * create the initial export selection dialog and register the listeners
 	 * 
-	 * @param format ... perhaps not needed
+	 * @param format ... used to title the dialog
 	 * @param map ... the map from which we are exporting
+	 * @param maxTile ... maximum tile size (meters)
 	 */
-	public ExportBase(String format, Map map)  {
+	public ExportBase(String format, Map map, int maxTile)  {
 		// pick up references
 		this.map = map;
-		// this.format = format;
-		this.parms = Parameters.getInstance();;
+		this.parms = Parameters.getInstance();
 		
+		// sanity check the maximum and default tile sizes
+		while(maxTile > parms.xy_range*100)
+			maxTile /= 10;
+		if (maxTile > 1 && parms.dTileSize >= maxTile)
+			parms.dTileSize = maxTile/10;
+			
 		// create the dialog box
 		int border = parms.dialogBorder;
 		Container mainPane = getContentPane();
@@ -76,7 +81,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		sel_name = new JTextField();
 		sel_name.setText(parms.map_name);
-		JLabel nameLabel = new JLabel("Name of this region", JLabel.CENTER);
+		JLabel nameLabel = new JLabel("Exported Map Name", JLabel.CENTER);
 		nameLabel.setFont(fontLarge);
 		
 		accept = new JButton("EXPORT");
@@ -84,31 +89,31 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		previewT = new JButton("PREVIEW TOPO");
 		previewF = new JButton("PREVIEW FLORA");
 	
-		// the tile size slider is pretty tricky
-		resolution = new JSlider(JSlider.HORIZONTAL, 0, meters_to_slider(MAX_TILE_SIZE), 
-				meters_to_slider(parms.dTileSize));
-		resolution.setMajorTickSpacing(TICS_PER_DECADE);
-		// resolution.setMinorTickSpacing(TICS_Paxis/inclination ER_DECADE/2);
-		resolution.setFont(fontSmall);
-		resolution.setPaintTicks(true);
-		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
-		labels.put(meters_to_slider(1), new JLabel("1"));
-		labels.put(meters_to_slider(10), new JLabel("10"));
-		labels.put(meters_to_slider(100), new JLabel("100"));
-		labels.put(meters_to_slider(1000), new JLabel("1km"));
-		labels.put(meters_to_slider(10000), new JLabel("10km"));
-		resolution.setLabelTable(labels);
-		resolution.setPaintLabels(true);
-		JLabel resolutionLabel = new JLabel("Tile size(m)", JLabel.CENTER);
-		resolutionLabel.setFont(fontLarge);
+		// the (optional loagrithmic) tile size slider is tricky
+		JLabel resolutionLabel = null;
+		if (maxTile > 1) {
+			resolution = new JSlider(JSlider.HORIZONTAL, 0, meters_to_slider(maxTile), 
+					meters_to_slider(parms.dTileSize));
+			resolution.setMajorTickSpacing(TICS_PER_DECADE);
+			resolution.setFont(fontSmall);
+			resolution.setPaintTicks(true);
+			Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
+			for(int sz = 1; sz <= maxTile; sz *= 10)
+				labels.put(meters_to_slider(sz),
+						   new JLabel((sz < 1000) ? String.valueOf(sz) :
+							   						String.valueOf(sz/1000) + "km"));
+			resolution.setLabelTable(labels);
+			resolution.setPaintLabels(true);
+			
+			resolutionLabel = new JLabel("Tile size(m)", JLabel.CENTER);
+			resolutionLabel.setFont(fontLarge);
+		}
 		
 		// create the region description fields
 		sel_center = new JLabel();
 		sel_km = new JLabel();
 		sel_points = new JLabel("Select the area to be exported");
-		sel_t_size = new JTextField();
-		sel_t_size.setText(Integer.toString(parms.dTileSize));
-
+		
 		// NORTH: 4x2 grid of descriptions
 		JPanel descPanel = new JPanel(new GridLayout(4,2));
 		descPanel.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
@@ -118,8 +123,12 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		descPanel.add(sel_km);
 		descPanel.add(new JLabel("Selected area (tiles)"));
 		descPanel.add(sel_points);
-		descPanel.add(new JLabel("Tile Size (m)"));
-		descPanel.add(sel_t_size);
+		if (resolution != null) {
+			sel_t_size = new JTextField();
+			sel_t_size.setText(Integer.toString(parms.dTileSize));
+			descPanel.add(new JLabel("Tile Size (m)"));
+			descPanel.add(sel_t_size);
+		}
 		mainPane.add(descPanel, BorderLayout.NORTH);
 
 		// SOUTH: 3 buttons
@@ -140,15 +149,16 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		namePanel.add(sel_name);
 		namePanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
 		
-		JPanel resPanel = new JPanel();
-		resPanel.setLayout(new BoxLayout(resPanel, BoxLayout.PAGE_AXIS));
-		resPanel.add(resolutionLabel);
-		resPanel.add(resolution);
-
 		JPanel sliders = new JPanel();
 		sliders.setLayout(new BoxLayout(sliders, BoxLayout.LINE_AXIS));
-		resPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
-		sliders.add(resPanel);
+		if (resolution != null) {
+			JPanel resPanel = new JPanel();
+			resPanel.setLayout(new BoxLayout(resPanel, BoxLayout.PAGE_AXIS));
+			resPanel.add(resolutionLabel);
+			resPanel.add(resolution);
+			resPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
+			sliders.add(resPanel);
+		}
 		
 		controls = new JPanel();
 		controls.setLayout(new BoxLayout(controls, BoxLayout.PAGE_AXIS));
@@ -159,23 +169,28 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		// add the super-class action listeners
 		// (in-place to prevent shadowing by sub-class listeners)
 		map.addMapListener(this);
-		sel_t_size.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int meters = Integer.parseInt(sel_t_size.getText());
-				resolution.setValue(meters_to_slider(meters));
-				sel_t_size.setText(Integer.toString(meters));
-				tile_size(meters);
-				newSelection = true;
-			}
-		});
-		resolution.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				int meters = slider_to_meters(resolution.getValue());
-				sel_t_size.setText(Integer.toString(meters));
-				tile_size(meters);
-				newSelection = true;
-			}
-		});
+		
+		// tile size may or may not be changeable
+		if (resolution != null) {
+			sel_t_size.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					int meters = Integer.parseInt(sel_t_size.getText());
+					resolution.setValue(meters_to_slider(meters));
+					sel_t_size.setText(Integer.toString(meters));
+					tile_size(meters);
+					newSelection = true;
+				}
+			});
+
+			resolution.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					int meters = slider_to_meters(resolution.getValue());
+					sel_t_size.setText(Integer.toString(meters));
+					tile_size(meters);
+					newSelection = true;
+				}
+			});
+		}
 		
 		selected = map.checkSelection(Map.Selection.RECTANGLE);
 		newSelection = false;
@@ -217,7 +232,8 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	protected void export(Exporter export) {
 
 		// set (and remember) the tile size
-		int meters = Integer.parseInt(sel_t_size.getText());
+		int meters = (sel_t_size == null) ? 1 : 
+					  Integer.parseInt(sel_t_size.getText());
 		export.tileSize(meters);
 		parms.dTileSize = meters;
 		
@@ -382,8 +398,11 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		y_km = parms.km(box_height);
 		sel_km.setText(String.format("%.1fx%.1f", x_km, y_km));
 
-		// and re-scale per tile size
-		tile_size(Integer.parseInt(sel_t_size.getText()));
+		if (resolution != null)
+			// and re-scale per tile size
+			tile_size(Integer.parseInt(sel_t_size.getText()));
+		else
+			tile_size(1);
 		
 		selected = true;
 		newSelection = true;

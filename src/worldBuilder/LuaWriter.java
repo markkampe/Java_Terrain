@@ -28,6 +28,9 @@ public class LuaWriter {
 			this.z = z;
 		}
 		
+		/**
+		 * return String representation of Position
+		 */
 		public String toString() {
 			return "{ " + x + ", " + y + ", " + z + " }";
 		}
@@ -46,6 +49,11 @@ public class LuaWriter {
 			this.exit = exit;
 		}
 		
+		/**
+		 * return String representation of a City location
+		 * @param indent String to put in front of each line
+		 * @return String
+		 */
 		public String toString(String indent) {
 			String ret = indent + "{\n";
 			ret += indent + "    Entrance = " + entrance.toString() + ",\n";
@@ -53,6 +61,8 @@ public class LuaWriter {
 			ret += indent + "}";
 			return ret;
 		}
+		
+		public String toString() {return toString("");}
 	}
 	
 	private static String ALL_ORIENTATIONS = "{ 0.0, math.randomf(-180, 180), 0.0 }";
@@ -84,6 +94,8 @@ public class LuaWriter {
 			ret += indent + "}";	// caller must terminate the line
 			return ret;
 		}
+		
+		public String toString() {return toString("");}
 	}
 	
 	public class MapInfo {
@@ -151,6 +163,8 @@ public class LuaWriter {
 			
 			return ret;
 		}
+		
+		public String toString() {return toString("");}
 	}
 	
 	/**

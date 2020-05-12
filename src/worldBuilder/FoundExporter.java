@@ -11,20 +11,15 @@ import java.io.IOException;
 public class FoundExporter implements Exporter {	
 
 	private Parameters parms;
-	private static final String soilTypes[] = {
-			"sedimentary", "metamorphic", "igneous", "alluvial"
-	};
 	
-	private int x_points;			// width of map (in points)
-	private int y_points;			// height of map (in points)
-	private int tile_size;			// tile size (in meters)
+	private static final int x_points = 1024;	// width of map (in points)
+	private static final int y_points = 1024;	// height of map (in points)
 	
 	private double Tmean;			// mean temperature
 	private double Tsummer;			// mean summer temperature
 	private double Twinter;			// mean winter temperature
 	
 	private double[][] heights;		// per point height (meters)
-	private double[][] rain;		// per point rainfall (meters)
 	private double[][] erode;		// per point erosion (meters)
 	private double[][] hydration;	// per point water depth (meters)
 	private double[][] soil;		// per point soil type
@@ -47,12 +42,9 @@ public class FoundExporter implements Exporter {
 	 * @param height of the export area ((in tiles)
 	 */
 	public FoundExporter(int width, int height) {
-		this.x_points = width;
-		this.y_points = height;
+		if (width != x_points || height != y_points)
+			System.err.println("ERROR: all Foundation exports are 1024x1024");
 		parms = Parameters.getInstance();
-		
-		if (parms.debug_level >= EXPORT_DEBUG)
-			System.out.println("new Foundation exporter (" + height + "x" + width + ")");
 	}
 
 	/**
@@ -60,7 +52,7 @@ public class FoundExporter implements Exporter {
 	 * @param meters real-world width of a tile
 	 */
 	public void tileSize(int meters) {
-		this.tile_size = meters;
+		// Foundation tile size is fixed at 1 meter
 	}
 
 	/**
@@ -90,17 +82,6 @@ public class FoundExporter implements Exporter {
 	 */
 	public void heightMap(double[][] heights) {
 		this.heights = heights;
-		
-		// note the max and min heights
-		maxHeight = 0;
-		minHeight = 666;
-		for(int i = 0; i < heights.length; i++)
-			for(int j = 0; j < heights[0].length; j++) {
-				if (heights[i][j] > maxHeight)
-					maxHeight = heights[i][j];
-				if (heights[i][j] < minHeight)
-					minHeight = heights[i][j];
-			}
 	}
 
 	/**
@@ -117,7 +98,7 @@ public class FoundExporter implements Exporter {
 	 * @param rain	per point depth (in meters) of annual rainfall
 	 */
 	public void rainMap(double[][] rain) {
-		this.rain = rain;
+		// this.rain = rain;
 	}
 
 	/**
@@ -134,14 +115,15 @@ public class FoundExporter implements Exporter {
 	 */
 	public void waterMap(double[][] hydration) {
 		this.hydration = hydration;
+	}
+	
+	/**
+	 * Up-load the flora assignments for every tile
+	 * @param flora assignments per point
+	 * @param names of flora classes
+	 */
+	public void floraMap(int[][] flora, String[] names) {
 		
-		// note the max and min heights
-		maxDepth = 0;
-		for (int i = 0; i < hydration.length; i++)
-			for (int j = 0; j < hydration[0].length; j++) {
-				if (hydration[i][j] < maxDepth)
-					maxDepth = hydration[i][j];
-			}
 	}
 
 	/**
@@ -163,24 +145,26 @@ public class FoundExporter implements Exporter {
 		
 		LuaWriter lua = new LuaWriter(dirname);
 		
-		// FIX get real altitude data, this just copies sample
+		// FIX get the altitude range from the map
 		lua.fileHeader(-40, 95);
 		
-		// FIX get real city data, this just copies sample
+		// FIX let user select one or more entry points on the map
 		LuaWriter.CityInfo[] villages = new LuaWriter.CityInfo[4];
-		villages[0] = lua.new CityInfo(lua.new Position(15, 0, 350), lua.new Position(15, 0, 530));
-		villages[1] = lua.new CityInfo(lua.new Position(15, 0, 880), lua.new Position(15, 0, 700));
-		villages[2] = lua.new CityInfo(lua.new Position(800, 0, 1009), lua.new Position(250, 0, 1009));
-		villages[3] = lua.new CityInfo(lua.new Position(1009, 0, 750), lua.new Position(1009, 0, 300));
+		villages[0] = lua.new CityInfo(lua.new Position(15, 350, 0), lua.new Position(15, 530, 0));
+		villages[1] = lua.new CityInfo(lua.new Position(15, 880, 0), lua.new Position(15, 700, 0));
+		villages[2] = lua.new CityInfo(lua.new Position(800, 1009, 0), lua.new Position(250, 1009, 0));
+		villages[3] = lua.new CityInfo(lua.new Position(1009, 750, 0), lua.new Position(1009, 300, 0));
 		lua.villages(villages);
 		
-		// FIX get real resource data, this just copies sample
+		/*
+		 * these are discrete resource placements, unnecessary w/density maps
 		LuaWriter.ResourceInfo[] resources = new LuaWriter.ResourceInfo[4];
 		resources[0] = lua.new ResourceInfo("BERRIES", lua.new Position(940, 0, 424));
 		resources[1] = lua.new ResourceInfo("ROCK", lua.new Position(950, 0, 250));
 		resources[2] = lua.new ResourceInfo("IRON", lua.new Position(610, 0, 940));
 		resources[3] = lua.new ResourceInfo("FISH", lua.new Position(563, 2, 93));
 		lua.resources(resources);
+		*/
 		
 		lua.startDensities();
 		
@@ -190,11 +174,13 @@ public class FoundExporter implements Exporter {
 		maps[1] = lua.new MapInfo("TREE_OAK", 0.1, 0.9, 1.9, 0.9, 1.9);
 		maps[2] = lua.new MapInfo("TREE_SYCAMORE", 8, 0.75, 1.0, 0.85, 1.15);
 		maps[3] = lua.new MapInfo("TREE_PINE", 1, 0.15, 0.45, 0.7, 1.0);
+		// FIX add a deciduous density slider
 		lua.map("DECIDUOUS_DENSITY_MAP", 0.9, maps, false);
 		
 		// the resource maps are individual maps
 		maps = new LuaWriter.MapInfo[1];
 		maps[0] = lua.new MapInfo("TREE_PINE", 0.1, 0.75, 1.0, 0.85, 1.15);
+		// FIX add a coniferous density slider
 		lua.map("CONIFEROUS_DENSITY_MAP", 0.9, maps, false);
 		
 		maps[0] = lua.new MapInfo("RESOURCE_BERRIES", 0.1, 0.75, 1.0, 0.85, 1.15);

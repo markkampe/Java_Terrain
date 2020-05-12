@@ -115,7 +115,6 @@ public class LuaWriter {
 		public String toString(String indent) {
 			String plus4 = indent + "    ";
 			String plus8 = plus4 + "    ";
-			String plus12 = plus8 + "    ";
 			
 			String ret = indent + "{\n";
 			

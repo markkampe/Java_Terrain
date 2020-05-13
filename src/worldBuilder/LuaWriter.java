@@ -187,8 +187,8 @@ public class LuaWriter {
 	}
 
 	private static String maps[] = {
-		"HEIGHT_MAP",				"maps/heightmap.png",
-		"MATERIAL_MASK",			"maps/material_mask.png",
+		"HEIGHT_MAP",				"maps/heightmap.png",		// TODO heightmap_xxx.png?
+		"MATERIAL_MASK",			"maps/material_mask.png",	// TODO material_mask_xxx.png?
 		"CONIFEROUS_DENSITY_MAP",	"maps/coniferous_density.png",
 		"DECIDUOUS_DENSITY_MAP",	"maps/deciduous_density.png",
 		"BERRIES_DENSITY_MAP",		"maps/berries_density.png",
@@ -232,6 +232,14 @@ public class LuaWriter {
 		return true;
 	}
 	
+	public void comment(String text) {
+		try {
+			luaFile.write(text);
+		} catch (IOException e) {
+			System.err.println("Write error adding comment to " + LUA_NAME);
+		}
+	}
+	
 	/**
 	 * write out the closing braces and close the file
 	 */
@@ -263,7 +271,10 @@ public class LuaWriter {
 	}
 	
 	
-
+	/*
+	 * The SpawnList is for explicit resource placement, but
+	 * we are achieving this with resource density maps ...
+	 * making the SpawnList is unnecessary
 	public boolean resources(ResourceInfo[] resource) {
 		try {
 			String indent = "        ";
@@ -280,6 +291,7 @@ public class LuaWriter {
 		}
 		return true;
 	}
+	*/
 	
 	public boolean startDensities() {
 		try {

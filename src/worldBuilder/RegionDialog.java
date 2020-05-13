@@ -155,7 +155,6 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 				dy = dx;
 			else
 				dx = dy;
-		// FIX: update map for squared selection
 		
 		// describe the selected area
 		x_km = parms.km(dx);

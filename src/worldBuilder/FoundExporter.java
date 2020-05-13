@@ -1,9 +1,12 @@
 package worldBuilder;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 /**
  * Exporter to render a Cartesian map w/JSON descriptions of each point.
@@ -11,6 +14,9 @@ import java.io.IOException;
 public class FoundExporter implements Exporter {	
 
 	private Parameters parms;
+	
+	private static final int IN_SIZE = 256;
+	private static final int OUT_SIZE = 1024;
 	
 	private int x_points;			// width of map (in points)
 	private int y_points;			// height of map (in points)
@@ -30,9 +36,10 @@ public class FoundExporter implements Exporter {
 	private double waterLevel;		// anything below this is u/w
 	private double maxDepth;		// deepest discovered water
 	
-	// brightness constants for preview colors
+	// brightness constants for image colors
 	private static final int DIM = 16;
 	private static final int BRIGHT = 256 - DIM;
+	private static final int FULL_WHITE = 65535;
 	
 	/**
 	 * create a new Foundation exporter
@@ -41,10 +48,13 @@ public class FoundExporter implements Exporter {
 	 * @param height of the export area ((in tiles)
 	 */
 	public FoundExporter(int width, int height) {
+		if (width != IN_SIZE || height != IN_SIZE) {
+			System.err.println("ERROR: Foundation requires 256x256 export");
+			return;
+		}
 		this.x_points = width;
 		this.y_points = height;
 		parms = Parameters.getInstance();
-		
 		this.needHeight = true;
 	}
 
@@ -166,14 +176,14 @@ public class FoundExporter implements Exporter {
 		lua.entrypoints(villages);
 		
 		/*
-		 * these are discrete resource placements, unnecessary w/density maps
-		LuaWriter.ResourceInfo[] resources = new LuaWriter.ResourceInfo[4];
-		resources[0] = lua.new ResourceInfo("BERRIES", lua.new Position(940, 0, 424));
-		resources[1] = lua.new ResourceInfo("ROCK", lua.new Position(950, 0, 250));
-		resources[2] = lua.new ResourceInfo("IRON", lua.new Position(610, 0, 940));
-		resources[3] = lua.new ResourceInfo("FISH", lua.new Position(563, 2, 93));
-		lua.resources(resources);
-		*/
+		 * discrete resource placements are unnecessary w/density maps
+		 * LuaWriter.ResourceInfo[] resources = new LuaWriter.ResourceInfo[4];
+		 * resources[0] = lua.new ResourceInfo("BERRIES", lua.new Position(940, 0, 424));
+		 * resources[1] = lua.new ResourceInfo("ROCK", lua.new Position(950, 0, 250));
+		 * resources[2] = lua.new ResourceInfo("IRON", lua.new Position(610, 0, 940));
+		 * resources[3] = lua.new ResourceInfo("FISH", lua.new Position(563, 2, 93));
+		 * lua.resources(resources);
+		 */
 		
 		lua.startDensities();
 		
@@ -284,18 +294,65 @@ public class FoundExporter implements Exporter {
 	 * @param project_dir
 	 * @return boolean - success/failure
 	 */
-	private boolean createHeightMap(String project_dir) {
-		String filename = "maps/heightmap.png";
+	private boolean createHeightMap(String project_dir) {		
+		// figure out altitude-to-intensity mapping
+		double aScale = FULL_WHITE;
+		if (maxHeight > minHeight)
+			aScale /= maxHeight - minHeight;
+		
+		// create a height grey-scale image, converting 256x256 to 1024x1024
+		BufferedImage img = new BufferedImage(IN_SIZE, IN_SIZE, 
+											 BufferedImage.TYPE_USHORT_GRAY);
+		for(int y = 0; y < y_points; y++)
+			for(int x = 0; x < x_points; x++) {
+				double h = (heights[y][x] - erode[y][x]) - minHeight;
+				double b = h * aScale;
+				img.setRGB(x, y, (int)b);
+			}
+		
+		// interpolate the intervening rows and columns
+		//dither(img);
+		
+		// write it out as a .png
+		String filename = project_dir + "/maps/heightmap.png";
+		File f = new File(filename);
 		try {
-			FileWriter output = new FileWriter(project_dir + "/" + filename);
-			output.write("TODO - write " + filename + "\n");
-			output.close();
+			if (!ImageIO.write(img, "PNG", f)) {
+				System.err.println("ImageIO error while attempting to create " + filename);
+				return false;
+			}
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
-		
 		return true;
+	}
+	
+	/*
+	 * interpolate the missing values in a sparse (256x256) filling
+	 * of a 1024x1024 image.
+	 * @param img - 1/16 filled BufferedImage
+	 */
+	private void dither(BufferedImage img) {
+		// interpolate the intervening rows
+		for(int y = 0; y < OUT_SIZE; y += 4)
+			for(int x = 0; x < OUT_SIZE; x += 4) {
+				int first = img.getRGB(x, y);
+				int last = (y >= OUT_SIZE-4) ? first : img.getRGB(x, y+4);
+				img.setRGB(x, y+1, (last + (3*first))/4);
+				img.setRGB(x, y+2, (first + last)/2);
+				img.setRGB(x, y+3, (first + (3*last))/4);
+			}
+	
+		// interpolate the intervening columns
+		for(int y = 0; y < OUT_SIZE; y++)
+			for(int x = 0; x < OUT_SIZE; x += 4) {
+				int first = img.getRGB(x, y);
+				int last = (x >= OUT_SIZE-4) ? first : img.getRGB(x+4, y);
+				img.setRGB(x+1, y, first);
+				img.setRGB(x+2, y, first);
+				img.setRGB(x+3, y, first);
+			}	
 	}
 	
 	private boolean createMaterialMask(String project_dir) {

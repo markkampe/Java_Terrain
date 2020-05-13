@@ -126,12 +126,9 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		descPanel.add(sel_km);
 		descPanel.add(new JLabel("Selected area (tiles)"));
 		descPanel.add(sel_points);
-		if (resolution != null) {
-			sel_t_size = new JTextField();
-			sel_t_size.setText(Integer.toString(parms.dTileSize));
-			descPanel.add(new JLabel("Tile Size (m)"));
-			descPanel.add(sel_t_size);
-		}
+		sel_t_size = new JTextField();
+		descPanel.add(new JLabel("Tile Size (m)"));
+		descPanel.add(sel_t_size);
 		mainPane.add(descPanel, BorderLayout.NORTH);
 
 		// SOUTH: 3 buttons
@@ -162,6 +159,12 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 			resPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
 			sliders.add(resPanel);
 		}
+		
+		// tile size may be input or display only
+		if (resolution != null)
+			sel_t_size.setText(Integer.toString(parms.dTileSize));
+		else
+			sel_t_size.setEditable(false);
 		
 		controls = new JPanel();
 		controls.setLayout(new BoxLayout(controls, BoxLayout.PAGE_AXIS));
@@ -236,8 +239,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	protected void export(Exporter export) {
 
 		// set (and remember) the tile size
-		int meters = (sel_t_size == null) ? 1 : 
-					  Integer.parseInt(sel_t_size.getText());
+		int meters = Integer.parseInt(sel_t_size.getText());
 		export.tileSize(meters);
 		parms.dTileSize = meters;
 		
@@ -403,11 +405,14 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		sel_km.setText(String.format("%.1fx%.1f", x_km, y_km));
 
 		if (resolution != null)
-			// and re-scale per tile size
+			// x_points/y_points is a function of tile size
 			tile_size(Integer.parseInt(sel_t_size.getText()));
-		else
-			// sub-class is managing x_points/y_points
+		else {
+			// tile size is a function of x_points/y_points
 			sel_points.setText(x_points + "x" + y_points);
+			int tile_size = (int) (x_km * 1000 / x_points);
+			sel_t_size.setText(String.valueOf(tile_size));
+		}
 		
 		selected = true;
 		newSelection = true;

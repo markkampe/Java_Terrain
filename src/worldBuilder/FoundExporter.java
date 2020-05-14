@@ -305,8 +305,9 @@ public class FoundExporter implements Exporter {
 	 */
 	private boolean createHeightMap(String project_dir) {
 
-		// translate the altitudes into grea-scale colors
+		// smooth the altitudes and translate to gray-scale
 		heightRange();
+		Cartesian.smooth(altitudes);
 		int[][] grayscale = Cartesian.encode(altitudes, 0, FULL_WHITE);
 		
 		// create an appropriately sized gray-scale image

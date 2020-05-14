@@ -42,16 +42,13 @@ public class FoundationExport extends ExportBase implements ActionListener, Chan
 	public FoundationExport(Map map) {
 		super("Foundation", map, 1, Map.Selection.SQUARE);
 		
-		// 1024x1024 takes forever, so we do 256x256 and interpolate
-		x_points = 256;
-		y_points = 256;
+		// 1024x1024 is slow and noisy, start small and interpolate
+		x_points = 128;
+		y_points = 128;
 		
 		// add our controls to those in the base class
 		create_GUI();
 		setVisible(true);
-		
-		if (parms.debug_level >= EXPORT_DEBUG)
-			System.out.println("new Foundation Export");
 	}
 	
 	/**
@@ -180,6 +177,12 @@ public class FoundationExport extends ExportBase implements ActionListener, Chan
 		}
 		if (!exported) {
 			export(exporter);
+			
+			// FIX implement entry/exit point selection
+			exporter.entryPoint(  2,  84,   2,  62);	// bogus value for testing
+			exporter.entryPoint(  2,  18,   2,  40);	// bogus value for testing
+			exporter.entryPoint(100,   2,  31,   2);	// bogus value for testing
+			exporter.entryPoint(126,  34, 126,  90);	// bogus value for testing
 			exported = true;
 		}
 		

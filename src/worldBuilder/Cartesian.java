@@ -102,4 +102,55 @@ public class Cartesian {
 				
 		return encoded;
 	}
+	
+	/** 1D, radius=3, normalized Gaussian kernel		*/
+	private static final double[] kernel = 
+		{0.03663, 0.11128, 0.21675, 0.27068, 0.21675, 0.011128, 0.03663};
+	
+	/**
+	 * perform Gaussian Blurr on a (potentially noisy) array
+	 * @param array - 2D array of doubles
+	 * @param radius - radius for smoothing
+	 * 
+	 * The Cartesian translation process can yield discontinuities 
+	 * when neighboring tiles have different sets of closest MeshPoints.
+	 * In most cases, these are inconsequential, but they need to be
+	 * cleaned up for high-resolution altitude maps.
+	 * 
+	 * Because of associatitivy of the Gaussian function,
+	 * we can do this in O(n) time:
+	 *    1. do a 1D blur of each row
+	 *    2. do a 1D blur of each column
+	 */
+	public static void smooth(double[][] array) {
+		final int diameter = 7;
+		final int offset = -diameter/2;
+		
+		// get a copy array to use for the summing
+		int height = array.length;
+		int width = array[0].length;
+		double[][] copy = new double[height][width];
+		
+		// blur the rows from the original into a copy
+		for(int y = 0; y < height; y++)
+			for(int x = 0; x < width; x++) {
+				double sum = 0.0;
+				for(int i = 0; i < diameter; i++) {
+					// FIX - cheat the edge cases
+					sum += kernel[i] * array[y][x + i - offset];
+				}
+				copy[y][x] = sum;
+			}
+		
+		// blur the columns from the copy back to the original
+		for(int y = 0; y < height; y++)
+			for(int x = 0; x < width; x++) {
+				double sum = 0.0;
+				for(int i = 0; i < diameter; i++) {
+					// FIX - cheat the edge cases
+					sum += kernel[i] * copy[y + i - offset][x];
+				}
+				array[y][x] = sum;
+			}
+	}
 }

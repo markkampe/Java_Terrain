@@ -201,9 +201,6 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		map.selectMode(shape);
 		selected = map.checkSelection(shape);
 		newSelection = false;
-		
-		if (parms.debug_level >= EXPORT_DEBUG)
-			System.out.println("new Export Base(" + format + ")");
 	}
 	
 	/**

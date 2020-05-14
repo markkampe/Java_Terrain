@@ -295,11 +295,6 @@ public class FoundExporter implements Exporter {
 					if (alt < lowest)
 						lowest = alt;
 				}
-			
-			if (parms.debug_level >= EXPORT_DEBUG)
-				System.out.println(String.format(
-									"    Export height range: %.1f-%.1f (m MSL)",
-									lowest, highest));
 		}
 	}
 	
@@ -309,11 +304,10 @@ public class FoundExporter implements Exporter {
 	 * @return boolean - success/failure
 	 */
 	private boolean createHeightMap(String project_dir) {
-		// figure out altitude-to-intensity mapping
+
+		// translate the altitudes into grea-scale colors
 		heightRange();
-		double aScale = FULL_WHITE;
-		if (highest > lowest)
-			aScale /= highest - lowest;
+		int[][] grayscale = Cartesian.encode(altitudes, 0, FULL_WHITE);
 		
 		// create an appropriately sized gray-scale image
 		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
@@ -335,8 +329,7 @@ public class FoundExporter implements Exporter {
 			for(int x = 0; x < XY_POINTS; x += scale) {
 				// fill in image point that corresponds to altitude point
 				int x_in = x/scale;
-				double bright = (altitudes[y_in][x_in] - lowest) * aScale;
-				img.setRGB(x, y, (int) bright);
+				img.setRGB(x, y, grayscale[y_in][x_in]);
 			}
 		}
 		
@@ -356,10 +349,12 @@ public class FoundExporter implements Exporter {
 			return false;
 		}
 		
-		if (parms.debug_level >= EXPORT_DEBUG)
-			System.out.println(String.format(
-								"Exported (%dx%d)x%d gray-scale height map %s",
-								x_points, y_points, scale, filename));
+		if (parms.debug_level < EXPORT_DEBUG)
+			return true;
+		
+		System.out.println(String.format(
+							"Exported (%dx%d)x%d gray-scale height map %s",
+							x_points, y_points, scale, filename));
 		return true;
 	}
 	
@@ -376,9 +371,10 @@ public class FoundExporter implements Exporter {
 			for( int x = 0; x < width; x += sparseness) {
 				// TODO real 2D interpolation
 				int value = img.getRGB(x, y);
-				for(int i = 1; i < sparseness; i++)
-					for(int j = 1; j < sparseness; j++)
-						img.setRGB(x+j, y+i, value);
+				for(int i = 0; i < sparseness; i++)
+					for(int j = 0; j < sparseness; j++)
+						if (i != 0 || j != 0)
+							img.setRGB(x+j, y+i, value);
 			}
 	}
 	
@@ -532,20 +528,17 @@ public class FoundExporter implements Exporter {
 		if (chosen == WhichMap.HEIGHTMAP) {
 			// figure out mapping from altitude to color
 			heightRange();
-			double aScale = BRIGHT - DIM;
-			if (highest > lowest)
-				aScale /= highest - lowest;
+			int[][] grayscale = Cartesian.encode(altitudes, DIM, BRIGHT);
 			
 			// fill in the preview map
 			Color map[][] = new Color[y_points][x_points];
 			for(int y = 0; y < y_points; y++)
 				for(int x = 0; x < x_points; x++) {
-					if (hydration[y][x] < 0) {	// water depth
+					if (hydration[y][x] < 0)	// water depth
 						map[y][x] = Color.BLUE;
-					} else {	// show altitude
-						double h = altitudes[y][x] - lowest;
-						double b = DIM + (h * aScale);
-						map[y][x] = new Color((int)b, (int)b, (int)b);
+					else {	// show altitude
+						int bright = grayscale[y][x];
+						map[y][x] = new Color(bright, bright, bright);
 					}
 				}
 			new PreviewMap("Export Preview (height map)", map);

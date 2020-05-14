@@ -12,6 +12,8 @@ public class Cartesian {
 	public int height;
 	/** the three nearest MeshPoints to every tile in our map	*/
 	private Vicinity cells[][];
+	
+	private static final int ENCODE_DEBUG = 3;
 
 	/**
 	 * create a new Cartesian map
@@ -62,5 +64,42 @@ public class Cartesian {
 		return result;
 	}
 	
-	
+	/**
+	 * interpret a 2D array of doubles into ranges in an integer value
+	 * 			 (typically used to translate altitudes to colors
+	 * @param array - 2D array of doubles
+	 * @param minValue - minimum value of output range
+	 * @param maxValue - maximum value of output range
+	 * @return 2D array of integers representing re-encoded values
+	 */
+	public static int[][] encode(double[][] array, int minValue, int maxValue) {
+		int height = array.length;
+		int width = array[0].length;
+		
+		// 1. find the minimum and maximum values in the input array
+		double lowest = 666666;
+		double highest = -666666;
+		for(int y = 0; y < height; y++)
+			for(int x = 0; x < width; x++) {
+				if (array[y][x] > highest)
+					highest = array[y][x];
+				if (array[y][x] < lowest)
+					lowest = array[y][x];
+			}
+		
+		// 2. calculate the range translation factors
+		double scale = maxValue - minValue;
+		if (highest > lowest)
+			scale /= (highest - lowest);
+		
+		// 3. create a new array with translated values
+		int[][] encoded = new int[height][width];
+		for(int y = 0; y < height; y++)
+			for(int x = 0; x < width; x++) {
+				double v = (array[y][x] - lowest) * scale;
+				encoded[y][x] = (int) v;
+			}
+				
+		return encoded;
+	}
 }

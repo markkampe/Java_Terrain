@@ -15,31 +15,35 @@ public class FoundExporter implements Exporter {
 
 	private Parameters parms;
 	
-	private static final int IN_SIZE = 256;
-	private static final int OUT_SIZE = 1024;
-	
+	// input from ExportBase
 	private int x_points;			// width of map (in points)
 	private int y_points;			// height of map (in points)
-	
-	private double Tmean;			// mean temperature
-	private double Tsummer;			// mean summer temperature
-	private double Twinter;			// mean winter temperature
 	
 	private double[][] heights;		// per point height (meters)
 	private double[][] erode;		// per point erosion (meters)
 	private double[][] hydration;	// per point water depth (meters)
 	private double[][] soil;		// per point soil type
 	
-	private boolean needHeight;		// height or erosion has changed
-	private double maxHeight;		// highest discovered altitude
-	private double minHeight;		// lowest discovered altitude
-	private double waterLevel;		// anything below this is u/w
-	private double maxDepth;		// deepest discovered water
+	private double dDecid = 0.9;	// FIX add deciduous desity slider
+	private double dConif = 0.9;	// FIX add coniferous density slider
 	
-	// brightness constants for image colors
+	// calculated information for our output
+	private static final int XY_POINTS = 1024;	// Foundation map size
+	
+	private double[][] altitudes;	// height+erosion, in meters
+	private double highest;			// max altitude (meters MSL)
+	private double lowest;			// min altitude (meters MSL)
+	
+	private int[][] ports;			// entry and exit points
+	private int num_ports;			// number reported
+	private static final int MAX_PORTS = 4;
+	
+	// color ranges for use in output maps
 	private static final int DIM = 16;
 	private static final int BRIGHT = 256 - DIM;
 	private static final int FULL_WHITE = 65535;
+	
+	private static final int EXPORT_DEBUG = 2;
 	
 	/**
 	 * create a new Foundation exporter
@@ -48,52 +52,22 @@ public class FoundExporter implements Exporter {
 	 * @param height of the export area ((in tiles)
 	 */
 	public FoundExporter(int width, int height) {
-		if (width != IN_SIZE || height != IN_SIZE) {
-			System.err.println("ERROR: Foundation requires 256x256 export");
-			return;
-		}
 		this.x_points = width;
 		this.y_points = height;
 		parms = Parameters.getInstance();
-		this.needHeight = true;
+		
+		if (parms.debug_level >= EXPORT_DEBUG)
+			System.out.println(String.format("Foundation Exporter (%dx%d)->(%dx%d)",
+											width, height, XY_POINTS, XY_POINTS));
 	}
-
-	/**
-	 * Set the size of a single tile
-	 * @param meters real-world width of a tile
-	 */
-	public void tileSize(int meters) {
-		// Foundation tile size is fixed at 1 meter
-	}
-
-	/**
-	 * Set the lat/lon of the region being exported
-	 * @param lat real world latitude of map center
-	 * @param lon real world longitude of map center
-	 */
-	public void position(double lat, double lon) {
-		// these have no role in Foundation
-	}
-
-	/**
-	 * Set seasonal temperature range for region being exported
-	 * @param meanTemp	mean (all year) temperature
-	 * @param meanSummer	mean (summer) temperature
-	 * @param meanWinter	mean (winter) temperature
-	 */
-	public void temps(double meanTemp, double meanSummer, double meanWinter) {
-		this.Tmean = meanTemp;
-		this.Tsummer = meanSummer;
-		this.Twinter = meanWinter;
-	}
-
+	
 	/**
 	 * Up-load the altitude of every tile
 	 * @param heights	height (in meters) of every point
 	 */
 	public void heightMap(double[][] heights) {
 		this.heights = heights;
-		this.needHeight = true;
+		this.altitudes = null;
 	}
 
 	/**
@@ -103,15 +77,7 @@ public class FoundExporter implements Exporter {
 	 */
 	public void erodeMap(double[][] erode) {
 		this.erode = erode;	
-		this.needHeight = true;
-	}
-
-	/**
-	 * Up-load the annual rainfall for every tile
-	 * @param rain	per point depth (in meters) of annual rainfall
-	 */
-	public void rainMap(double[][] rain) {
-		// this is unnecessary for Foundation tile bidding
+		this.altitudes = null;
 	}
 
 	/**
@@ -140,6 +106,29 @@ public class FoundExporter implements Exporter {
 	}
 
 	/**
+	 * entry/exit points (for explorers)
+	 * 
+	 * @param x_in	(x_points, relative to top-left)
+	 * @param y_in	(y_points, relative to top-left)
+	 * @param x_out	(x_points, relative to top-left)
+	 * @param y_out	(y_points, relative to top-left)
+	 * 
+	 * Note: Foundation coordinates relative to bottom-left
+	 */
+	public void entryPoint(int x_in, int y_in, int x_out, int y_out) {
+		if (num_ports == 0)
+			ports = new int[MAX_PORTS][4];
+		
+		if (num_ports < MAX_PORTS) {
+			ports[num_ports][0] = x_in * XY_POINTS / x_points;
+			ports[num_ports][1] = (y_points - y_in) * XY_POINTS / y_points;
+			ports[num_ports][2] = x_out * XY_POINTS / x_points;
+			ports[num_ports][3] = (y_points - y_out) * XY_POINTS / y_points;
+			num_ports += 1;
+		}
+	}
+	
+	/**
 	 * Export the up-loaded information in selected format
 	 * 
 	 * @param dirname - name of output directory
@@ -160,20 +149,17 @@ public class FoundExporter implements Exporter {
 		LuaWriter lua = new LuaWriter(dirname);
 		
 		// establish height range and create the header
-		if (this.needHeight)
-			heightRange();
-	
-		int lowest = (int) parms.height(minHeight - waterLevel);
-		int highest = (int) parms.height(maxHeight - waterLevel);
-		lua.fileHeader(lowest, highest);
+		heightRange();
+		lua.fileHeader((int) lowest, (int) highest);
 		
-		// FIX let user select one or more entry points on the map
-		LuaWriter.EntryPoint[] villages = new LuaWriter.EntryPoint[4];
-		villages[0] = lua.new EntryPoint(lua.new Position(15, 350, 0), lua.new Position(15, 530, 0));
-		villages[1] = lua.new EntryPoint(lua.new Position(15, 880, 0), lua.new Position(15, 700, 0));
-		villages[2] = lua.new EntryPoint(lua.new Position(800, 1009, 0), lua.new Position(250, 1009, 0));
-		villages[3] = lua.new EntryPoint(lua.new Position(1009, 750, 0), lua.new Position(1009, 300, 0));
-		lua.entrypoints(villages);
+		// report our entry and exit points
+		if (num_ports > 0) {
+			LuaWriter.EntryPoint[] entries = new LuaWriter.EntryPoint[num_ports];
+			for (int i = 0; i < num_ports; i++)
+				entries[i] = lua.new EntryPoint(lua.new Position(ports[i][0], ports[i][1], 0), 
+				    							lua.new Position(ports[i][2], ports[i][3], 0));
+			lua.entrypoints(entries);
+		}
 		
 		/*
 		 * discrete resource placements are unnecessary w/density maps
@@ -185,33 +171,49 @@ public class FoundExporter implements Exporter {
 		 * lua.resources(resources);
 		 */
 		
+		/*
+		 * the DensitySpawnList describes, for each density map, 
+		 * the type of resource covered by that map, and its
+		 * placement parameters.  The program will then automatically
+		 * spawn resource instances, in the density-map-indicated
+		 * locations, with the below-specified parameters.
+		 */
 		lua.startDensities();
+		String indent = "            ";
 		
-		// the first group of trees has four different types
+		lua.comment(indent + "-- Create forest of Deciduous trees and a few pine\n");
 		LuaWriter.MapInfo maps[] = new LuaWriter.MapInfo[4];
-		maps[0] = lua.new MapInfo("TREE_POPLAR", 8, 0.75, 1.0, 0.85, 1.15);
-		maps[1] = lua.new MapInfo("TREE_OAK", 0.1, 0.9, 1.9, 0.9, 1.9);
-		maps[2] = lua.new MapInfo("TREE_SYCAMORE", 8, 0.75, 1.0, 0.85, 1.15);
-		maps[3] = lua.new MapInfo("TREE_PINE", 1, 0.15, 0.45, 0.7, 1.0);
-		// FIX add a deciduous density slider
-		lua.map("DECIDUOUS_DENSITY_MAP", 0.9, maps, false);
+								// tree			weight	offset		scale
+		maps[0] = lua.new MapInfo("TREE_POPLAR", 8, 	0.75, 1.0,	0.85, 1.15);
+		maps[1] = lua.new MapInfo("TREE_OAK",	0.1,	0.9, 1.9,	0.9, 1.9);
+		maps[2] = lua.new MapInfo("TREE_SYCAMORE", 8,	0.75, 1.0,	0.85, 1.15);
+		maps[3] = lua.new MapInfo("TREE_PINE",	1,		0.15, 0.45,	0.7, 1.0);
+		lua.map("DECIDUOUS_DENSITY_MAP", dDecid, maps, false);
 		
-		// the resource maps are individual maps
+		lua.comment(indent + "-- Create forest of Pine Trees\n");
 		maps = new LuaWriter.MapInfo[1];
-		maps[0] = lua.new MapInfo("TREE_PINE", 0.1, 0.75, 1.0, 0.85, 1.15);
-		// FIX add a coniferous density slider
-		lua.map("CONIFEROUS_DENSITY_MAP", 0.9, maps, false);
+								// tree			weight	offset		scale
+		maps[0] = lua.new MapInfo("TREE_PINE",	0.1,	0.75, 1.0,	0.85, 1.15);
+		lua.map("CONIFEROUS_DENSITY_MAP", dConif, maps, false);
 		
-		maps[0] = lua.new MapInfo("RESOURCE_BERRIES", 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.comment(indent + "-- Create forest of berry bushes\n");
+								// resource			weight	offset		scale
+		maps[0] = lua.new MapInfo("RESOURCE_BERRIES", 0.1,	0.75, 1.0,	0.85, 1.15);
 		lua.map("BERRIES_DENSITY_MAP", 1, maps, false);
 		
-		maps[0] = lua.new MapInfo("RESOURCE_ROCK", 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.comment(indent + "-- Create rock outcrops - stone resource\n");
+								// resource			weight	offset		scale
+		maps[0] = lua.new MapInfo("RESOURCE_ROCK",	0.1,	0.75, 1.0,	0.85, 1.15);
 		lua.map("ROCK_DENSITY_MAP", 1, maps, false);
 		
-		maps[0] = lua.new MapInfo("RESOURCE_IRON", 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.comment(indent + "-- Create iron deposits\n");
+								// resource			weight	offset		scale
+		maps[0] = lua.new MapInfo("RESOURCE_IRON",	0.1,	0.75, 1.0,	0.85, 1.15);
 		lua.map("IRON_DENSITY_MAP", 1, maps, false);
 		
-		maps[0] = lua.new MapInfo("RESOURCE_FISH", 0.1, 0.75, 1.0, 0.85, 1.15);
+		lua.comment(indent + "-- Create fish shoals\n");
+								// resource			weight	offset		scale
+		maps[0] = lua.new MapInfo("RESOURCE_FISH",	0.1,	0.75, 1.0,	0.85, 1.15);
 		lua.map("FISH_DENSITY_MAP", 1, maps, true);
 		
 		lua.endDensities();
@@ -241,10 +243,10 @@ public class FoundExporter implements Exporter {
 	 * @return boolean - success/failure
 	 */
 	private boolean createJsonFile(String project_dir) {
-		String filename = "mod.json";
+		String filename = project_dir + "/" + "mod.json";
 		
 		try {
-			FileWriter output = new FileWriter(project_dir + "/" + filename);
+			FileWriter output = new FileWriter(filename);
 			String indent = "    ";
 			String indentx2 = indent + indent;
 			output.write("{\n");
@@ -265,28 +267,40 @@ public class FoundExporter implements Exporter {
 			return false;
 		}
 		
+		if (parms.debug_level >= EXPORT_DEBUG)
+			System.out.println("Created Foundation export description: " + filename);
+			
 		return true;
 	}
 	
 	/**
-	 * examine the height and topology maps to get
-	 * the altitude range
+	 * process the (map coordinates) height and erosion maps
+	 * to create an array of (per x/y_point) altitudes (in meters) 
+	 * 
+	 * TODO heightRange cannot deal with above-sea-level lakes/rivers
 	 */
 	private void heightRange() {
-		waterLevel = parms.sea_level;
-		maxHeight = -666;
-		minHeight = 666;
-		for(int i = 0; i < y_points; i++)
-			for(int j = 0; j < x_points; j++) {
-				double z = heights[i][j] - erode[i][j];
-				if (z > maxHeight)
-					maxHeight = z;
-				if (z < minHeight)
-					minHeight = z;
-				// FIX deal with above-sea-level lakes
-			}
-		
-		this.needHeight = false;
+		if (altitudes == null) {	// if it does not already exist
+			altitudes = new double[y_points][x_points];
+			
+			// so we can find the highest and lowest points
+			highest = -666666;
+			lowest = 666666;
+			for(int y = 0; y < y_points; y++)
+				for(int x = 0; x < x_points; x++) {
+					double alt = parms.altitude(heights[y][x] - erode[y][x]);
+					altitudes[y][x] = alt;
+					if (alt > highest)
+						highest = alt;
+					if (alt < lowest)
+						lowest = alt;
+				}
+			
+			if (parms.debug_level >= EXPORT_DEBUG)
+				System.out.println(String.format(
+									"    Export height range: %.1f-%.1f (m MSL)",
+									lowest, highest));
+		}
 	}
 	
 	/**
@@ -294,24 +308,40 @@ public class FoundExporter implements Exporter {
 	 * @param project_dir
 	 * @return boolean - success/failure
 	 */
-	private boolean createHeightMap(String project_dir) {		
+	private boolean createHeightMap(String project_dir) {
 		// figure out altitude-to-intensity mapping
+		heightRange();
 		double aScale = FULL_WHITE;
-		if (maxHeight > minHeight)
-			aScale /= maxHeight - minHeight;
+		if (highest > lowest)
+			aScale /= highest - lowest;
 		
-		// create a height grey-scale image, converting 256x256 to 1024x1024
-		BufferedImage img = new BufferedImage(IN_SIZE, IN_SIZE, 
+		// create an appropriately sized gray-scale image
+		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
 											 BufferedImage.TYPE_USHORT_GRAY);
-		for(int y = 0; y < y_points; y++)
-			for(int x = 0; x < x_points; x++) {
-				double h = (heights[y][x] - erode[y][x]) - minHeight;
-				double b = h * aScale;
-				img.setRGB(x, y, (int)b);
-			}
 		
-		// interpolate the intervening rows and columns
-		//dither(img);
+		/*
+		 * we chose a relatively low resolution map from ExportBase because
+		 *  (a) Cartesian exports are very per-tile expensive
+		 *  (b) This is high-resolution color and Cartesian exports,
+		 *      while interpolated, are not smooth.
+		 * So we attempt to do a smoothing interpolation as we up-scale
+		 * the altitude map to Foundations 1024x1024 format.
+		 */
+		int scale = XY_POINTS/x_points;
+		
+		// step 1: sparsely fill the inflated image
+		for(int y = 0; y < XY_POINTS; y += scale) {
+			int y_in = y/scale;
+			for(int x = 0; x < XY_POINTS; x += scale) {
+				// fill in image point that corresponds to altitude point
+				int x_in = x/scale;
+				double bright = (altitudes[y_in][x_in] - lowest) * aScale;
+				img.setRGB(x, y, (int) bright);
+			}
+		}
+		
+		// fill in the missing points
+		interpolate(img, scale);
 		
 		// write it out as a .png
 		String filename = project_dir + "/maps/heightmap.png";
@@ -325,131 +355,170 @@ public class FoundExporter implements Exporter {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
+		
+		if (parms.debug_level >= EXPORT_DEBUG)
+			System.out.println(String.format(
+								"Exported (%dx%d)x%d gray-scale height map %s",
+								x_points, y_points, scale, filename));
 		return true;
 	}
 	
-	/*
-	 * interpolate the missing values in a sparse (256x256) filling
-	 * of a 1024x1024 image.
-	 * @param img - 1/16 filled BufferedImage
+	/**
+	 * interpolate the missing points in a sparsely populated image
+	 * @param img ... image to be completed
+	 * @param sparseness ... current granularity (every n'th)
 	 */
-	private void dither(BufferedImage img) {
-		// interpolate the intervening rows
-		for(int y = 0; y < OUT_SIZE; y += 4)
-			for(int x = 0; x < OUT_SIZE; x += 4) {
-				int first = img.getRGB(x, y);
-				int last = (y >= OUT_SIZE-4) ? first : img.getRGB(x, y+4);
-				img.setRGB(x, y+1, (last + (3*first))/4);
-				img.setRGB(x, y+2, (first + last)/2);
-				img.setRGB(x, y+3, (first + (3*last))/4);
+	private void interpolate(BufferedImage img, int sparseness) {
+		int height = img.getHeight();
+		int width = img.getWidth();
+		
+		for(int y = 0; y < height; y += sparseness)
+			for( int x = 0; x < width; x += sparseness) {
+				// TODO real 2D interpolation
+				int value = img.getRGB(x, y);
+				for(int i = 1; i < sparseness; i++)
+					for(int j = 1; j < sparseness; j++)
+						img.setRGB(x+j, y+i, value);
 			}
-	
-		// interpolate the intervening columns
-		for(int y = 0; y < OUT_SIZE; y++)
-			for(int x = 0; x < OUT_SIZE; x += 4) {
-				int first = img.getRGB(x, y);
-				int last = (x >= OUT_SIZE-4) ? first : img.getRGB(x+4, y);
-				img.setRGB(x+1, y, first);
-				img.setRGB(x+2, y, first);
-				img.setRGB(x+3, y, first);
-			}	
 	}
 	
 	private boolean createMaterialMask(String project_dir) {
-		String filename = "maps/material_mask.png";
+		// create an appropriately sized RGB image
+		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
+											 BufferedImage.TYPE_INT_RGB);
+		
+		// write it out as a .png
+		String filename = project_dir + "/maps/material_mask.png";
+		File f = new File(filename);
 		try {
-			FileWriter output = new FileWriter(project_dir + "/" + filename);
-			output.write("TODO - write " + filename + "\n");
-			output.close();
+			if (!ImageIO.write(img, "PNG", f)) {
+				System.err.println("ImageIO error while attempting to create " + filename);
+				return false;
+			}
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
-		
 		return true;
 	}
 	
 	private boolean createRockMap(String project_dir) {
-		String filename = "maps/rock_density.png";
+		// create an appropriately sized gray-scale image
+		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
+											 BufferedImage.TYPE_USHORT_GRAY);
+		
+		// write it out as a .png
+		String filename = project_dir + "/maps/rock_density.png";
+		File f = new File(filename);
 		try {
-			FileWriter output = new FileWriter(project_dir + "/" + filename);
-			output.write("TODO - write " + filename + "\n");
-			output.close();
+			if (!ImageIO.write(img, "PNG", f)) {
+				System.err.println("ImageIO error while attempting to create " + filename);
+				return false;
+			}
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
-		
 		return true;
 	}
 	
 	private boolean createIronMap(String project_dir) {
-		String filename = "maps/iron_density.png";
+		// create an appropriately sized gray-scale image
+		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
+											 BufferedImage.TYPE_USHORT_GRAY);
+		
+		// write it out as a .png
+		String filename = project_dir + "/maps/iron_density.png";
+		File f = new File(filename);
 		try {
-			FileWriter output = new FileWriter(project_dir + "/" + filename);
-			output.write("TODO - write " + filename + "\n");
-			output.close();
+			if (!ImageIO.write(img, "PNG", f)) {
+				System.err.println("ImageIO error while attempting to create " + filename);
+				return false;
+			}
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
-		
 		return true;
 	}
 	
 	private boolean createConiferMap(String project_dir) {
-		String filename = "maps/coniferous_density.png";
+		// create an appropriately sized gray-scale image
+		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
+											 BufferedImage.TYPE_USHORT_GRAY);
+		
+		// write it out as a .png
+		String filename = project_dir + "/maps/coniferous_density.png";
+		File f = new File(filename);
 		try {
-			FileWriter output = new FileWriter(project_dir + "/" + filename);
-			output.write("TODO - write " + filename + "\n");
-			output.close();
+			if (!ImageIO.write(img, "PNG", f)) {
+				System.err.println("ImageIO error while attempting to create " + filename);
+				return false;
+			}
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
-		
 		return true;
 	}
 	
 	private boolean createDeciduousMap(String project_dir) {
-		String filename = "maps/deciduous_density.png";
+		// create an appropriately sized gray-scale image
+		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
+											 BufferedImage.TYPE_USHORT_GRAY);
+		
+		// write it out as a .png
+		String filename = project_dir + "/maps/deciduous_density.png";
+		File f = new File(filename);
 		try {
-			FileWriter output = new FileWriter(project_dir + "/" + filename);
-			output.write("TODO - write " + filename + "\n");
-			output.close();
+			if (!ImageIO.write(img, "PNG", f)) {
+				System.err.println("ImageIO error while attempting to create " + filename);
+				return false;
+			}
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
-		
 		return true;
 	}
 	
 	private boolean createBerryMap(String project_dir) {
-		String filename = "maps/berries_density.png";
+		// create an appropriately sized gray-scale image
+		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
+											 BufferedImage.TYPE_USHORT_GRAY);
+		
+		// write it out as a .png
+		String filename = project_dir + "/maps/berries_density.png";
+		File f = new File(filename);
 		try {
-			FileWriter output = new FileWriter(project_dir + "/" + filename);
-			output.write("TODO - write " + filename + "\n");
-			output.close();
+			if (!ImageIO.write(img, "PNG", f)) {
+				System.err.println("ImageIO error while attempting to create " + filename);
+				return false;
+			}
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
-		
 		return true;
 	}
 	
 	private boolean createFishMap(String project_dir) {
-		String filename = "maps/fish_density.png";
+		// create an appropriately sized gray-scale image
+		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
+											 BufferedImage.TYPE_USHORT_GRAY);
+		
+		// write it out as a .png
+		String filename = project_dir + "/maps/fish_density.png";
+		File f = new File(filename);
 		try {
-			FileWriter output = new FileWriter(project_dir + "/" + filename);
-			output.write("TODO - write " + filename + "\n");
-			output.close();
+			if (!ImageIO.write(img, "PNG", f)) {
+				System.err.println("ImageIO error while attempting to create " + filename);
+				return false;
+			}
 		} catch (IOException e) {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
-		
 		return true;
 	}
 	
@@ -462,31 +531,37 @@ public class FoundExporter implements Exporter {
 	
 		if (chosen == WhichMap.HEIGHTMAP) {
 			// figure out mapping from altitude to color
-			if (this.needHeight)
-				heightRange();
+			heightRange();
 			double aScale = BRIGHT - DIM;
-			if (maxHeight > minHeight)
-				aScale /= maxHeight - minHeight;
+			if (highest > lowest)
+				aScale /= highest - lowest;
 			
 			// fill in the preview map
 			Color map[][] = new Color[y_points][x_points];
-			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++) {
-					double h = (heights[i][j] - erode[i][j]) - minHeight;
-					double b = DIM + (h * aScale);
-					map[i][j] = new Color((int)b, (int)b, (int)b);
+			for(int y = 0; y < y_points; y++)
+				for(int x = 0; x < x_points; x++) {
+					if (hydration[y][x] < 0) {	// water depth
+						map[y][x] = Color.BLUE;
+					} else {	// show altitude
+						double h = altitudes[y][x] - lowest;
+						double b = DIM + (h * aScale);
+						map[y][x] = new Color((int)b, (int)b, (int)b);
+					}
 				}
-			
-			// put up the preview
-			new PreviewMap("Export Preview (terrain)", map);
+			new PreviewMap("Export Preview (height map)", map);
 		} else if (chosen == WhichMap.FLORAMAP) {
 			Color pMap[][] = new Color[y_points][x_points];
-			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++) {
-					pMap[i][j] = Color.BLUE;	// FIX flora
+			for(int y = 0; y < y_points; y++)
+				for(int x = 0; x < x_points; x++) {
+					pMap[y][x] = Color.GREEN;	// FIX flora
 				}
-			// TODO IMPLEMENT ME
-			System.out.println("Flora previews not supported for JSON export");
+			new PreviewMap("Export Preview (trees/bushes/grass)", pMap);
 		}
 	}
+
+	// perfunctory set methods for information we don't use
+	public void tileSize(int meters) {}
+	public void position(double lat, double lon) {}
+	public void temps(double meanTemp, double meanSummer, double meanWinter) {}
+	public void rainMap(double[][] rain) {}
 }

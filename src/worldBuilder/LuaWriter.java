@@ -10,6 +10,7 @@ import java.io.IOException;
 public class LuaWriter {
 
 	private FileWriter luaFile;
+	private String lua_filename;
 	private Parameters parms;
 
 	private static final String LUA_NAME = "mod.lua";
@@ -175,13 +176,11 @@ public class LuaWriter {
 	 */
 	public LuaWriter(String dirname) {
 		parms = Parameters.getInstance();
+		lua_filename = dirname + "/" + LUA_NAME;
 		try {
-			luaFile = new FileWriter(dirname + "/" + LUA_NAME);
-			if (parms.debug_level >= EXPORT_DEBUG)
-				System.out.println("Exportingd Foundation description " + 
-									LUA_NAME + " to " + dirname);
+			luaFile = new FileWriter(lua_filename);
 		} catch(IOException e) {
-			System.err.println("Write error while attempting to create " + LUA_NAME);
+			System.err.println("Write error while attempting to create " + lua_filename);
 			luaFile = null;
 		}
 	}
@@ -226,9 +225,10 @@ public class LuaWriter {
 			luaFile.write("        MinHeight = " + min_altitude + ",\n" );
 			luaFile.write("        MaxHeight = " + max_altitude + ",\n" );
 		} catch (IOException e) {
-			System.err.println("Write error while attempting to create " + LUA_NAME);
+			System.err.println("Write error while writing header to " + lua_filename);
 			return false;
 		}
+	
 		return true;
 	}
 	
@@ -236,7 +236,7 @@ public class LuaWriter {
 		try {
 			luaFile.write(text);
 		} catch (IOException e) {
-			System.err.println("Write error adding comment to " + LUA_NAME);
+			System.err.println("Write error adding comment to " + lua_filename);
 		}
 	}
 	
@@ -248,8 +248,11 @@ public class LuaWriter {
 			luaFile.write("})\n");
 			luaFile.close();
 		} catch(IOException e) {
-			System.err.println("Write error while attempting to finish " + LUA_NAME);
+			System.err.println("Write error while attempting to finish " + lua_filename);
 		}
+		
+		if (parms.debug_level >= EXPORT_DEBUG)
+			System.out.println("Created Foundation configuration file: " + lua_filename);
 		luaFile = null;
 	}
 	
@@ -264,7 +267,7 @@ public class LuaWriter {
 			}
 			luaFile.write(indent + "},\n");
 		} catch (IOException e) {
-			System.err.println("Write error while attempting to create " + LUA_NAME);
+			System.err.println("Write error while adding entrances/exits to " + lua_filename);
 			return false;
 		}
 		return true;
@@ -298,7 +301,7 @@ public class LuaWriter {
 			String indent = "        ";
 			luaFile.write(indent + "DensitySpawnList = {\n");
 		}  catch (IOException e) {
-			System.err.println("Write error while attempting to create " + LUA_NAME);
+			System.err.println("Write error while adding DensitySpawNlist to " + lua_filename);
 			return false;
 		}
 		return true;
@@ -323,7 +326,7 @@ public class LuaWriter {
 			luaFile.write(plus4 + "}\n");
 			luaFile.write(indent + (last ? "}\n" : "},\n"));
 		} catch (IOException e) {
-			System.err.println("Write error while attempting to create " + LUA_NAME);
+			System.err.println("Write error while adding spawn info to " + lua_filename);
 			return false;
 		}
 		return true;
@@ -334,7 +337,7 @@ public class LuaWriter {
 			String indent = "        ";
 			luaFile.write(indent + "}\n");
 		}  catch (IOException e) {
-			System.err.println("Write error while attempting to create " + LUA_NAME);
+			System.err.println("Write error while finishing DensitySpawnList in " + lua_filename);
 			return false;
 		}
 		return true;

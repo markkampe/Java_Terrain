@@ -124,7 +124,7 @@ public class Cartesian {
 	 */
 	public static void smooth(double[][] array) {
 		final int diameter = 7;
-		final int offset = -diameter/2;
+		final int offset = diameter/2;
 		
 		// get a copy array to use for the summing
 		int height = array.length;
@@ -136,8 +136,9 @@ public class Cartesian {
 			for(int x = 0; x < width; x++) {
 				double sum = 0.0;
 				for(int i = 0; i < diameter; i++) {
-					// FIX - cheat the edge cases
-					sum += kernel[i] * array[y][x + i - offset];
+					int xx = x + i - offset;
+					sum += kernel[i] * ((xx < 0 || xx >= width) ?
+										array[y][x] : array[y][xx]);
 				}
 				copy[y][x] = sum;
 			}
@@ -147,8 +148,9 @@ public class Cartesian {
 			for(int x = 0; x < width; x++) {
 				double sum = 0.0;
 				for(int i = 0; i < diameter; i++) {
-					// FIX - cheat the edge cases
-					sum += kernel[i] * copy[y + i - offset][x];
+					int yy = y + i - offset;
+					sum += kernel[i] * ((yy < 0 || yy >= height) ?
+										array[y][x] : array[yy][x]);
 				}
 				array[y][x] = sum;
 			}

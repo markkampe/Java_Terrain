@@ -1259,6 +1259,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			g.setColor(SELECT_COLOR);
 			g.drawOval(sel_x0, sel_y0, sel_radius, sel_radius);
 			break;
+		case SQUARE:
 		case RECTANGLE:
 			g.setColor(SELECT_COLOR);
 			g.drawRect(sel_x0, sel_y0, sel_width, sel_height);

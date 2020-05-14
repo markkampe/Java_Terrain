@@ -7,8 +7,6 @@ import java.util.Hashtable;
 import javax.swing.*;
 import javax.swing.event.*;
 
-import worldBuilder.Map.Selection;
-
 /**
  * a super-class for exporter dialogs - creates dialogs, handles
  * handles region selection, pumps data to an Exporter

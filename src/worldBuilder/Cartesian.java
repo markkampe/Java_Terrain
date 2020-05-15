@@ -103,8 +103,18 @@ public class Cartesian {
 		return encoded;
 	}
 	
-	/** 1D, radius=3, normalized Gaussian kernel		*/
+	/** 
+	 * Gaussian Blur is a very popular technique for removing noise
+	 * from images.  It recomputes the value of each point as a 
+	 * weighted average of the values of all of the points within
+	 * a specified radius, where the weights fall off as a Gaussian
+	 * distribution.
+	 * 
+	 * This a (very well known) one-dimensional Gaussian kernel,
+	 * for a radius of 3, normalized to sum to 1.0.
+	 */
 	private static final double[] kernel = 
+		//  x-3     x-2      x-1    center     x+1      x+2       x+3
 		{0.03663, 0.11128, 0.21675, 0.27068, 0.21675, 0.011128, 0.03663};
 	
 	/**
@@ -117,13 +127,14 @@ public class Cartesian {
 	 * In most cases, these are inconsequential, but they need to be
 	 * cleaned up for high-resolution altitude maps.
 	 * 
-	 * Because of associatitivy of the Gaussian function,
-	 * we can do this in O(n) time:
-	 *    1. do a 1D blur of each row
-	 *    2. do a 1D blur of each column
+	 * A 2D Gaussian Kernel is merely the product of a pair of 1D kernels,
+	 * but (because multiplication is associative) we can get the same
+	 * result in (O(n) time) by applying the 1D kernel twice:
+	 *    1. recompute each point as the average of its horizontal neighbors
+	 *    2. recompute each point as the average of its vertical neighbors
 	 */
 	public static void smooth(double[][] array) {
-		final int diameter = 7;
+		final int diameter = kernel.length;
 		final int offset = diameter/2;
 		
 		// get a copy array to use for the summing
@@ -150,7 +161,7 @@ public class Cartesian {
 				for(int i = 0; i < diameter; i++) {
 					int yy = y + i - offset;
 					sum += kernel[i] * ((yy < 0 || yy >= height) ?
-										array[y][x] : array[yy][x]);
+										copy[y][x] : copy[yy][x]);
 				}
 				array[y][x] = sum;
 			}

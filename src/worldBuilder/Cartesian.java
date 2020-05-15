@@ -10,7 +10,7 @@ public class Cartesian {
 	public int width;
 	/** number of tile rows in this map */
 	public int height;
-	/** the three nearest MeshPoints to every tile in our map	*/
+	/** the nearest MeshPoints to every tile in our map	*/
 	private Vicinity cells[][];
 	
 	private static final int ENCODE_DEBUG = 3;

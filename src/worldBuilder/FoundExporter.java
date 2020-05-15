@@ -134,7 +134,6 @@ public class FoundExporter implements Exporter {
 	 * @param dirname - name of output directory
 	 */
 	public boolean writeFile( String dirname ) {
-		
 		// make sure the output directories exist
 		File proj_dir = new File(dirname);
 		if (!proj_dir.exists())
@@ -324,18 +323,30 @@ public class FoundExporter implements Exporter {
 		 */
 		int scale = XY_POINTS/x_points;
 		
-		// step 1: sparsely fill the inflated image
 		for(int y = 0; y < XY_POINTS; y += scale) {
 			int y_in = y/scale;
 			for(int x = 0; x < XY_POINTS; x += scale) {
-				// fill in image point that corresponds to altitude point
 				int x_in = x/scale;
-				img.setRGB(x, y, grayscale[y_in][x_in]);
+	
+				// get values for the four bordering corners
+				int ul = grayscale[y_in][x_in];
+				boolean x_ok = x_in < x_points - 1;
+				boolean y_ok = y_in < y_points - 1;
+				int ur = x_ok ? grayscale[y_in][x_in+1] : ul;
+				int ll = y_ok ? grayscale[y_in+1][x_in] : ul;
+				int lr = (x_ok && y_ok) ? grayscale[y_in+1][x_in+1] : ul;
+				
+				// two-dimensional interpolation for all points between them
+				for(int i = 0; i < scale; i++)
+					for(int j = 0; j < scale; j++) {
+						int sum = ul * (scale - i) * (scale - j);
+						sum += ll * i * (scale - j);
+						sum += ur * j * (scale - i);
+						sum += lr * i * j;
+						img.setRGB(x+j, y+i, sum/(scale * scale));
+					}
 			}
 		}
-		
-		// fill in the missing points
-		interpolate(img, scale);
 		
 		// write it out as a .png
 		String filename = project_dir + "/maps/heightmap.png";
@@ -357,26 +368,6 @@ public class FoundExporter implements Exporter {
 							"Exported (%dx%d)x%d gray-scale height map %s",
 							x_points, y_points, scale, filename));
 		return true;
-	}
-	
-	/**
-	 * interpolate the missing points in a sparsely populated image
-	 * @param img ... image to be completed
-	 * @param sparseness ... current granularity (every n'th)
-	 */
-	private void interpolate(BufferedImage img, int sparseness) {
-		int height = img.getHeight();
-		int width = img.getWidth();
-		
-		for(int y = 0; y < height; y += sparseness)
-			for( int x = 0; x < width; x += sparseness) {
-				// TODO real 2D interpolation
-				int value = img.getRGB(x, y);
-				for(int i = 0; i < sparseness; i++)
-					for(int j = 0; j < sparseness; j++)
-						if (i != 0 || j != 0)
-							img.setRGB(x+j, y+i, value);
-			}
 	}
 	
 	private boolean createMaterialMask(String project_dir) {

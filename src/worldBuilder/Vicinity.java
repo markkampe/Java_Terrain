@@ -2,7 +2,32 @@ package worldBuilder;
 /**
  * find and interpolate values from the surrounding MeshPoints to any map
  *    coordinate ... used to produce a (dense) Cartesian map from a (sparse)
- *    Voronoi Mesh
+ *    Voronoi Mesh.
+ *    
+ * TODO: polygon lake boundaries result in altitude discontinuities
+ *
+ * This problem has arisen from two conflicting goals
+ * 
+ * 	 1.	Topographically correct lake boundaries:
+ * 
+ * 		Lake escape points are MeshPoints, which means that land/water
+ * 		transitions should occur sharply at those MeshPoints.  Cartesian
+ *      water-level interpolation among the nearest points, however,
+ *      resulted in water at altitude-inappropriate points in the map.
+ *      
+ *      I fixed this by defining the neighbors (for interpolation purposes) as
+ * 		the MeshPoints of the concavely-surrounding Voronoi polygon.
+ * 
+ *   2. Topographically continuous altitude maps:
+ *   
+ *		The above change enabled sharp transitions (between land and water)
+ *		at polygon boundaries.  But it also resulted in discontinuities in
+ *		interpolated altitudes for points on opposite sides of a polygon
+ *		boundary.  These discontinuities are generally only a problem for
+ *		high-resolution altitude maps ... such as those used for Foundation.
+ *
+ * I am thinking that the solution may be to go back to proximity-based
+ * Vicinities, and find a different solution for surface water.	
  */
 public class Vicinity {
 
@@ -149,7 +174,7 @@ public class Vicinity {
 	}
 	
 	/**
-	 * interpolate a value from those of my three closest MeshPoints
+	 * interpolate a value from those of my surrounding MeshPoints
 	 * 
 	 * @param values array for all MeshPoints
 	 */

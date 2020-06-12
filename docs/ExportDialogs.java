@@ -129,6 +129,43 @@ class TileRule {
 	double bid(double alt, double hydro, double winter, double summer, double soil, double slope, double direction) {};
 }
 
+/**
+ * @opt all
+ * @depend - - - FoundExporter
+ */
+class FoundationExport extends ExportBase implements ActionListener, ChangeListener {
+	FoundationExport(Map map) {};
+}
+
+/**
+ * @opt all
+ * @depend - - - LuaWriter
+ */
+class FoundExporter implements Exporter {
+	FoundExporter(int width, int height) {};
+	void entryPoint(int x_in, int y_in, int x_out, int y_out) {};
+}
+
+/**
+ * @opt all
+ */
+class LuaWriter {
+	class EntryPoint {}
+	class MapInfo {
+		MapInfo(String prefabName, double weight, double minOffset, double maxOffset,
+			    double minScale, double maxScale) {};
+		String toString(int indent) {};
+	}
+	LuaWriter(String dirname) {};
+	boolean fileHeader(int min_altitude, int max_altitude) {};
+	boolean comment(String text) {};
+	void close() {};
+	boolean entryPoints(EntryPoint[] places) {};
+	boolean startDensities() {};
+	boolean map(String name, double density, MapInfo[] maps, boolean last) {};
+	boolean endDensities() {};
+}
+
 /** @opt all */
 class PreviewMap {
 	PreviewMap(String name, Color array[][]) {};
@@ -165,6 +202,8 @@ class Map extends JPanel implements MouseListener, MouseMotionListener {
  */
 class Cartesian {
 	double[][] interpolate(double[] meshValues) {};
+	static int[][] encode(double[][] array, int minValue, int maxValue) {};
+	static void smooth(double[][] array) {};
 }
 
 

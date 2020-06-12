@@ -133,20 +133,32 @@ and a common
 <a Href="JavaDoc/worldBuilder/ExportBase.html">export orchestrater</a>
 creates a series of 2D per-tile maps which it pushes to the
 output-format-specific implementations.
-The simplest of these,
-<a Href="JavaDoc/worldBuilder/RawExport.html">RawExport.java</a>
-and 
-<a Href="JavaDoc/worldBuilder/JsonExporter.html">JsonExporter.java</a>,
-simply create a collection of per-point attribute descriptions.
-More interesting is
-<a Href="JavaDoc/worldBuilder/RPGMexport.html">RPGMexport.java</a>,
-which uses tile placement rules (managed by
-<a Href="JavaDoc/worldBuilder/TileRule.html">TileRule.java</a> and
-<a Href="JavaDoc/worldBuilder/TileRules.html">TileRules.java</a>)
-to drive a very <em>RPG-Maker</em>-savvy
-<a Href="JavaDoc/worldBuilder/RPGMTiler.html">RPGMTiler.java</a>
-to reproduce the map in tiles, and cause the (<em>RPG Maker map</em>) output to be written by
-<a Href="JavaDoc/worldBuilder/RPGMwriter.html">RPGMwriter.java</a>.
+<ul>
+	<li> The simplest of these,
+	<a Href="JavaDoc/worldBuilder/RawExport.html">RawExport.java</a>
+	and 
+	<a Href="JavaDoc/worldBuilder/JsonExporter.html">JsonExporter.java</a>,
+	simply create a collection of per-point attribute descriptions.
+	</li>
+
+	<li> More interesting is
+	<a Href="JavaDoc/worldBuilder/RPGMexport.html">RPGMexport.java</a>,
+	which uses tile placement rules (managed by
+	<a Href="JavaDoc/worldBuilder/TileRule.html">TileRule.java</a> and
+	<a Href="JavaDoc/worldBuilder/TileRules.html">TileRules.java</a>)
+	to drive a very <em>RPG-Maker</em>-savvy
+	<a Href="JavaDoc/worldBuilder/RPGMTiler.html">RPGMTiler.java</a>
+	to reproduce the map in tiles, and cause the (<em>RPG Maker map</em>) output to be written by
+	<a Href="JavaDoc/worldBuilder/RPGMwriter.html">RPGMwriter.java</a>.
+	</li>
+
+	<li> Another interesting Exporter is
+	<a Href="JavaDoc/worldBuilder/FoundExporter.html">FoundExporter.java</a>,
+	which creates the appropriate altitude and resource bit-maps, and uses
+	<a Href="JavaDoc/worldBuilder/LuaWriter.html">LuaWriter.java</a> to 
+	create the index that describes them.
+	</li>
+</ul>
 </P>
 <P>
 The main-screen menus and controls are put-up and responded to by the main class
@@ -313,7 +325,8 @@ When the call is made to repaint the map, <tt>Map.PaintComponent</tt> will:
 <ol type="1">
 	<li>decide on the dimensions of the (to be updated) map.</li>
 	<li>create a <em>Cartesian</em> interpolation matrix to compute
-	    the values at every pixel from the nearest three <em>MeshPoints</em>.</li>
+	    the values at every pixel from the nearest/surrounding
+	    <em>MeshPoints</em>.</li>
 	<li>go through the display-enabled attributes, using the 
 	    appropriate map-rendering class
 	    (e.g. <tt>AltitudeMap</tt> or <tt>RiverMap</tt>) to compute
@@ -325,8 +338,8 @@ When the call is made to repaint the map, <tt>Map.PaintComponent</tt> will:
 </P>
 <H3>Export Classes</H3>
 <P>
-The final class diagram shows the <em>Export</em> related classes
-(that handle both raw JSON and <em>RPG Maker</em> maps).
+The final class diagram shows the <em>Export</em> related classes.
+(that handle raw JSON, <em>RPG Maker</em>, and <em>Foundation</em> maps).
 </P>
 <a name="UML_export"></a>
 <img src="ExportDialogs.png" width="1200">
@@ -457,11 +470,17 @@ average of the values for the surrounding MeshPoints).
 The hard part is figuring out which MeshPoints are the surrounding ones.
 </P>
 <P>
-The most obvious answer, the nearest N points, turns out to be wrong.
-The best answer would seem to be those MeshPoints that define the
-Voronoi polygon within which the Cartesian point lies.  The
-<em>Cartesian</em> constructor and <em>nextPoint</em> methods
-attempt to enumerate these points by:
+The most obvious answer, the nearest N points, works well for
+(relatively continuous) functions like altitude and rain-fall,
+but poorly for lake boundaries (which are a discontinous
+function of altitude).  For these, a better result is obtained
+by using those MeshPoints that define the Voronoi polygon within 
+which the Cartesian point lies.
+</P>
+FIXME - WE NEED BOTH
+<P>
+The <em>Cartesian</em> constructor and <em>nextPoint</em> methods
+attempt to enumerate the surrounding points by:
 <ul>
    <li> starting with the MeshPoint nearest to the desired Cartesian square</li>
    <li> choosing, at each successive point, the path that seems most likely 

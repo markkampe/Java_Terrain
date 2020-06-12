@@ -120,7 +120,6 @@ public class Cartesian {
 	/**
 	 * perform Gaussian Blurr on a (potentially noisy) array
 	 * @param array - 2D array of doubles
-	 * @param radius - radius for smoothing
 	 * 
 	 * The Cartesian translation process can yield discontinuities 
 	 * when neighboring tiles have different sets of closest MeshPoints.

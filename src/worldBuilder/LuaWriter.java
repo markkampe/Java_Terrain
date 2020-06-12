@@ -171,8 +171,7 @@ public class LuaWriter {
 	/**
 	 * create a new Foundation exporter
 	 * 
-	 * @param width of the export area (in tiles)
-	 * @param height of the export area ((in tiles)
+	 * @param dirname of directory into which maps should be written
 	 */
 	public LuaWriter(String dirname) {
 		parms = Parameters.getInstance();

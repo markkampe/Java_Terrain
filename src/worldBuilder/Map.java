@@ -92,7 +92,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double hydrationMap[];	// soil hydration
 	private double incoming[];	// incoming water from off-map
 	private int downHill[];		// down-hill neighbor
-	private Cartesian map;		// Cartesian translation of Voronoi Mesh
+	
+	private Cartesian poly_map;	// interpolation based on surrounding polygon
+	// private Cartesian prox_map;	// interpolation based on nearest neighbors
 	
 	/** selection types: points, line, rectangle, ... */
 	public enum Selection {NONE, POINT, POINTS, LINE, RECTANGLE, SQUARE, ANY};
@@ -166,7 +168,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			double y = (newMesh.vertices[i].y/yScale) + yShift;
 			
 			// find nearest points from the previous map
-			Vicinity nearest = new Vicinity(mesh, x, y);
+			Vicinity nearest = new Polygon(mesh, x, y);
 
 			// interpolate values for height, rain, and soil
 			h[i] = nearest.interpolate(heightMap);
@@ -565,7 +567,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public void setMesh(Mesh mesh) {
 		this.mesh = mesh;	
 		if (mesh != null) {
-			this.map = new Cartesian(mesh, x_min, y_min, x_max, y_max, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
+			this.poly_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
+							getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, true);
+			// this.prox_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, false);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
 			this.downHill = new int[mesh.vertices.length];
@@ -577,7 +581,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.incoming = new double[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
 		} else {
-			this.map = null;
+			this.poly_map = null;
+			// this.prox_map = null;
 			this.heightMap = null;
 			this.rainMap = null;
 			this.downHill = null;
@@ -693,8 +698,13 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	
 	/**
 	 * return MeshPoint to Cartesian translation matrix
+	 * param polygon ... surrounding polygon (vs nearest)
 	 */
-	public Cartesian getCartesian() {return map;}
+	public Cartesian getCartesian(/* boolean polygon */) {
+		/* if (!polygon)
+			return prox_map; */
+		return poly_map;
+	}
 	
 	/**
 	 * enable/disable display elements
@@ -1130,7 +1140,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		y_min = (y1 >= y0) ? y0 : y1;
 		x_max = (x1 >= x0) ? x1 : x0;
 		y_max = (y1 >= y0) ? y1: y0;
-		map = new Cartesian(mesh, x_min, y_min, x_max, y_max, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL);
+		poly_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
+				getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, true);
+		// prox_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, false);
 		repaint();
 		
 		if (parms.debug_level >= MAP_DEBUG)
@@ -1161,8 +1173,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			setBackground(Color.GRAY);
 		
 		// make sure the Cartesian translation is up-to-date
-		if (map.height != height/TOPO_CELL || map.width != width/TOPO_CELL)
-			map = new Cartesian(mesh, x_min, y_min, x_max, y_max, width/TOPO_CELL, height/TOPO_CELL);
+		if (poly_map.height != height/TOPO_CELL || poly_map.width != width/TOPO_CELL) {
+			poly_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
+								width/TOPO_CELL, height/TOPO_CELL, true);
+			// prox_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, width/TOPO_CELL, height/TOPO_CELL, false);
+		}
 		
 		// start by rendering backgrounds (rain or altitude)
 		if ((display & SHOW_RAIN) != 0) {

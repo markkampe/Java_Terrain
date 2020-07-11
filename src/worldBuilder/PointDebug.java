@@ -171,7 +171,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			map.highlight(point.index, SELECTED_COLOR);
 			
 			// find and highlight our neighbors
-			Vicinity vicinity = new Vicinity(map.mesh, map_x, map_y);
+			Vicinity vicinity = new Polygon(map.mesh, map_x, map_y);
 			String neighbors = "";
 			for(int i = 0; i < Vicinity.NUM_NEIGHBORS; i++)
 				if (vicinity.neighbors[i] >= 0) {

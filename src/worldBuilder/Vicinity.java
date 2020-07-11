@@ -3,8 +3,8 @@ package worldBuilder;
  * find and interpolate values from the surrounding MeshPoints to any map
  *    coordinate ... used to produce a (dense) Cartesian map from a (sparse)
  *    Voronoi Mesh.
- *    
- * HISTORY:
+ */   
+/* HISTORY:
  *  I started out with the nearest neighbors, but that resulted in
  *  very poor lake boundaries.  I fixed this by defining a Vicinity
  *  as the points in the surrounding polygon, but that resulted in 

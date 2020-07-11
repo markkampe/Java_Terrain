@@ -117,6 +117,8 @@ class Vicinity {
 	Vicinity(Mesh mesh, double x, double y) {};
 	double interpolate(double values[]) {};
 }
+class Proxcimity extends Vicinity {}
+class Polygon extends Vicinity {}
 
 class Parameters {}
 /** @hidden */

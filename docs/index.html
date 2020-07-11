@@ -121,7 +121,10 @@ There are several different map renderers, one for each major attribute:
 The mapping from a (sparse and irregular) Voronoi mesh to a 
 (dense and continuous) 2D map is greatly facilitated by the
 <a Href="JavaDoc/worldBuilder/Cartesian.html">Cartesian.java</a>
-interpolation service.
+interpolation of values from surrounding <em>MeshPoints</em>
+as chosen by
+<a Href="JavaDoc/worldBuilder/Vicinity.html">Vicinity.java</a>.
+
 The overall orchestration of creating a display from all of these
 independent layers is managed by (the largest and most important class in the program)
 <a Href="JavaDoc/worldBuilder/Map.html">Map.java</a>.
@@ -475,11 +478,37 @@ The most obvious answer, the nearest N points, works well for
 but poorly for lake boundaries (which are a discontinous
 function of altitude).  For these, a better result is obtained
 by using those MeshPoints that define the Voronoi polygon within 
-which the Cartesian point lies.
+which the Cartesian point lies.  But, sadly, values inferred
+from the enclosing polygon experience significant discontinuities
+at the polygon boundaries.  I finally decided to:
+<ul>
+   <li>Make
+       <a Href="JavaDoc/worldBuilder/Vicinity.html">Vicinity</a> a 
+       super-class that implements interpolation but does not
+       actually decide which the neighboring <em>MeshPoint</em>s are.</li>
+   <li>Create a
+       <a Href="JavaDoc/worldBuilder/Proxcimity.html">Proxcimity</a>
+       sub-class that attempts to find the nearest surrounding
+       <em>MeshPoint</em>s to the North-East, North-West, 
+       South-East, and South-West.</li>
+   <li>Create a
+       <a Href="JavaDoc/worldBuilder/Polygon.html">Polygon</a>
+       sub-class that attempts to enumerate the <em>MeshPoint</em>s
+       that define the enclosing Voronoi polygon.</li>
+   <li>Update the <em>Cartesian</em> constructor to take a final
+       parameter specifying whether the interpolations should be
+       done using a <em>Proxcimity</em> or <em>Polygon</em>
+       <em>Vicinity</em>.
+</ul>
+People who care about the difference (e.g. the <em>Foundation</em>
+exporter which creates high resolution altitude maps) allocate
+two distinct <em>Cartesian</em>s and decide which to use 
+based on the output details being rendered
+(e.g. <em>Polygon</em> for lakes and <em>Proxcimity</em>
+for everything else).
 </P>
-FIXME - WE NEED BOTH
 <P>
-The <em>Cartesian</em> constructor and <em>nextPoint</em> methods
+The <em>Polygon</em> constructor and <em>nextPoint</em> methods
 attempt to enumerate the surrounding points by:
 <ul>
    <li> starting with the MeshPoint nearest to the desired Cartesian square</li>

@@ -24,8 +24,11 @@ public class Cartesian {
 	 * @param bottom ... bottom edge of mapped area
 	 * @param width ... width of desired array
 	 * @param height ... height of desired array
+	 * @param polygon ... enclosing polygon (vs nearest)
 	 */
-	public Cartesian(Mesh mesh, double left, double top, double right, double bottom, int width, int height) {	
+	public Cartesian(Mesh mesh, 
+					double left, double top, double right, double bottom, 
+					int width, int height, boolean polygon) {	
 		// note the key parameters
 		this.height = height;
 		this.width = width;
@@ -42,7 +45,8 @@ public class Cartesian {
 			double y = top + (r * dy);
 			for(int c = 0; c < width; c++) {
 				double x = left + (c * dx);
-				cells[r][c] = new Vicinity(mesh, x, y);
+				cells[r][c] = polygon ? new Polygon(mesh, x, y) : 
+										new Proxcimity(mesh, x, y);
 			}
 		}
 	}

@@ -246,8 +246,15 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		export.position(lat, lon);
 	
 		// get Cartesian interpolations of tile characteristics
-		Cartesian cart = new Cartesian(map.getMesh(), box_x, box_y, box_x+box_width, box_y+box_height, x_points, y_points);
-		
+		//    cart is the four surrounding MeshPoints (smooth interpolation)
+		Cartesian cart = new Cartesian(map.getMesh(), 
+										box_x, box_y, box_x+box_width, box_y+box_height,
+										x_points, y_points, false);
+		//    poly is the surrounding Voronoi polygon (for lake shores)
+		Cartesian poly = new Cartesian(map.getMesh(), 
+				box_x, box_y, box_x+box_width, box_y+box_height,
+				x_points, y_points, true);
+	
 		// TODO lose gratuitous interpolates
 		//		only need to redo these if the region changes
 		//		this might save a lot of time, and might enable
@@ -256,7 +263,8 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		export.erodeMap(cart.interpolate(map.getErodeMap()));
 		export.rainMap(cart.interpolate(map.getRainMap()));
 		export.soilMap(cart.interpolate(map.getSoilMap()));
-		double hydration[][] = cart.interpolate(map.getHydrationMap());
+		
+		double hydration[][] = poly.interpolate(map.getHydrationMap());
 		add_rivers(hydration, meters);	// add rivers to hydration map
 		export.waterMap(hydration);
 	}

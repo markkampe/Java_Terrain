@@ -13,7 +13,7 @@ public class Cartesian {
 	/** the nearest MeshPoints to every tile in our map	*/
 	private Vicinity cells[][];
 	
-	private static final int ENCODE_DEBUG = 3;
+	// private static final int ENCODE_DEBUG = 3;
 
 	/**
 	 * create a new Cartesian map

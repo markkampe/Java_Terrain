@@ -274,15 +274,13 @@ public class FoundExporter implements Exporter {
 	
 	/**
 	 * process the (map coordinates) height and erosion maps
-	 * to create an array of (per x/y_point) altitudes (in meters) 
-	 * 
-	 * TODO heightRange cannot deal with above-sea-level lakes/rivers
+	 * to create an array of (per x/y_point) altitudes (in meters MSL) 
 	 */
 	private void heightRange() {
 		if (altitudes == null) {	// if it does not already exist
 			altitudes = new double[y_points][x_points];
 			
-			// so we can find the highest and lowest points
+			// 1. convert all Z heights to Meters MSL
 			highest = -666666;
 			lowest = 666666;
 			for(int y = 0; y < y_points; y++)
@@ -293,6 +291,17 @@ public class FoundExporter implements Exporter {
 						highest = alt;
 					if (alt < lowest)
 						lowest = alt;
+				}
+
+			// 2. ensure that all u/w points have negative altitude
+			for(int y = 0; y < y_points; y++)
+				for(int x = 0; x < x_points; x++) {
+					// dry and sub-oceanic points are already OK
+					if (altitudes[y][x] < 0 || hydration[y][x] > 0)
+						continue;
+					// move that point to -depth MSL
+					double depth = parms.height(hydration[y][x]);
+					altitudes[y][x] = depth > lowest ? depth : lowest;
 				}
 		}
 	}

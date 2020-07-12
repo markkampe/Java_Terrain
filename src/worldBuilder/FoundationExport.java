@@ -31,6 +31,13 @@ public class FoundationExport extends ExportBase implements ActionListener, Chan
 	boolean hydroChanged = false;	// hydration has changed
 	boolean tempChanged = false;	// temperatures have changed
 	private boolean exported = false;
+	
+	/*
+	 * All Foundation maps are 1024x1024, but that is slow and noisy.
+	 * Since it will all be interpolated anyway, I export a lower
+	 * resolution and expand it in FoundExporter..
+	 */
+	private static final int EXPORT_SIZE = 256;
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,8 +50,8 @@ public class FoundationExport extends ExportBase implements ActionListener, Chan
 		super("Foundation", map, 1, Map.Selection.SQUARE);
 		
 		// 1024x1024 is slow and noisy, start small and interpolate
-		x_points = 128;
-		y_points = 128;
+		x_points = EXPORT_SIZE;
+		y_points = EXPORT_SIZE;
 		
 		// add our controls to those in the base class
 		create_GUI();

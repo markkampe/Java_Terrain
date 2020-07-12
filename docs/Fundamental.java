@@ -8,7 +8,7 @@ class JFrame {}
 class JPanel {}
 
 /**
- * @opt constructor
+ * @opt constructors
  * @opt attributes
  * @opt operations
  * @opt types
@@ -39,14 +39,14 @@ class RegionDialog  implements MapListener, ActionListener, WindowListener {
 }
 
 /**
- * @opt constructor
+ * @opt constructors
  * @opt attributes
  * @opt operations
  * @opt types
  * @opt enumconstants
  * @composed - Has - Mesh
  * @depend - - - Parameters
- * @depend - - - Vicinity
+ * @depend - - - Cartesian
  */
 class Map extends JPanel {
 	Mesh mesh;
@@ -80,7 +80,7 @@ class Map extends JPanel {
 }
 
 /**
- * @opt constructor
+ * @opt constructors
  * @opt attributes
  * @opt operations
  * @opt types
@@ -101,13 +101,26 @@ class MeshPoint {
 }
 
 /**
- * @opt constructor
+ * @opt constructors
  * @opt operations
  * @opt types
  */
 class MeshPointHasher {
 	MeshPointHasher(int vax_vertices, double x_extent, double y_extent) {};
 	MeshPoint findPoint(double x, double y) {};
+}
+
+/**
+ * @opt constructors
+ * @opt operations
+ * @opt types
+ * @composed - Has - Vicinity
+ */
+class Cartesian {
+	Cartesian(Mesh mesh, double left, double top, double right, double bottom, int width, int height, boolean polygon){};
+	double[][] interpolate(double[] meshValues) {};
+	static int[][] encode(double[][] array, int minValue, int maxValue) {};
+	static void smooth(double[][] array) {};
 }
 
 /**

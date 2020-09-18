@@ -59,11 +59,9 @@ $(PACKAGE).jar: bin/worldBuilder/*.class
 	cp -R bin/worldBuilder $(WORK)/$(BINARIES)
 	cp -R bin/Templates $(WORK)/$(BINARIES)
 	cp -R bin/images $(WORK)/$(BINARIES)
-	#
 	# copy in the non-standard libraries we need
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/OpenVoronoi.jar
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/javax.json-1.0.2.jar
-
 	jar --create --file worldBuilder.jar --manifest packaging/manifest \
 		-C $(WORK)/$(BINARIES) worldBuilder \
 		-C $(WORK)/$(BINARIES) Templates \

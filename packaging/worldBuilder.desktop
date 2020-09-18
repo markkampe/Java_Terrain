@@ -4,6 +4,6 @@ Type=Application
 Name=worldBuilder
 Comment="RPG Map Builder"
 Exec=worldBuilder
-Icon=/usr/share/worldBuilder/icons/builder64.png
+Icon=/usr/share/worldBuilder/icons/builder-32.png
 Terminal=false
 Categories=Game

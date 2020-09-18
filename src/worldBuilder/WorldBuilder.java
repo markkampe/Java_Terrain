@@ -91,11 +91,11 @@ public class WorldBuilder  extends JFrame
 	private static Parameters parms;						// global program parameters
 	
 	private static final String[] ICON_IMAGES = {
-			"/images/builder-16.png",
-			"/images/builder-32.png",
-			"/images/builder-64.png",
-			"/images/builder-96.png",
-			"/images/builder-128.png"
+			"/icons/builder-16.png",
+			"/icons/builder-32.png",
+			"/icons/builder-64.png",
+			"/icons/builder-96.png",
+			"/icons/builder-128.png"
 	};
 
 	private static final String SWITCH_CHAR = "-";			// command line switches

@@ -16,7 +16,7 @@ debian:	$(PACKAGE).jar control
 	mkdir -p $(WORK)/debian/DEBIAN
 	mkdir -p $(WORK)/debian/usr/bin
 	mkdir -p $(WORK)/debian/usr/share/applications
-	mkdir -p $(WORK)/debian/usr/share/$(PACKAGE)/images
+	mkdir -p $(WORK)/debian/usr/share/$(PACKAGE)/icons
 	chmod -R 755 $(WORK)
 	#
 	# copy in the CLI
@@ -32,9 +32,9 @@ debian:	$(PACKAGE).jar control
 	chmod 644 $(WORK)/debian/usr/share/applications/worldBuilder.desktop
 	#
 	# copy in the icons
-	chmod 755 $(WORK)/debian/usr/share/$(PACKAGE)/images
-	cp bin/images/*.png $(WORK)/debian/usr/share/$(PACKAGE)/images
-	chmod 644 $(WORK)/debian/usr/share/$(PACKAGE)/images/*.png
+	chmod 755 $(WORK)/debian/usr/share/$(PACKAGE)/icons
+	cp bin/icons/*.png $(WORK)/debian/usr/share/$(PACKAGE)/icons
+	chmod 644 $(WORK)/debian/usr/share/$(PACKAGE)/icons/*.png
 	#
 	# finish and copy in the package configuration
 	echo -n "Installed-Size: " >> control
@@ -58,14 +58,14 @@ $(PACKAGE).jar: bin/worldBuilder/*.class
 	# copy in our classes and resources
 	cp -R bin/worldBuilder $(WORK)/$(BINARIES)
 	cp -R bin/Templates $(WORK)/$(BINARIES)
-	cp -R bin/images $(WORK)/$(BINARIES)
+	cp -R bin/icons $(WORK)/$(BINARIES)
 	# copy in the non-standard libraries we need
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/OpenVoronoi.jar
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/javax.json-1.0.2.jar
 	jar --create --file worldBuilder.jar --manifest packaging/manifest \
 		-C $(WORK)/$(BINARIES) worldBuilder \
 		-C $(WORK)/$(BINARIES) Templates \
-		-C $(WORK)/$(BINARIES) images \
+		-C $(WORK)/$(BINARIES) icons \
 		-C $(WORK)/$(BINARIES) javax \
 		-C $(WORK)/$(BINARIES) ags \
 		-C $(WORK)/$(BINARIES) org

@@ -2,9 +2,8 @@
 Encoding=UTF-8
 Type=Application
 Name=worldBuilder
-Comment=RPG Map Builder
+Comment="RPG Map Builder"
 Exec=worldBuilder
 Icon=/usr/share/worldBuilder/images/builder64.png
 Terminal=false
-Type=Application
 Categories=Game

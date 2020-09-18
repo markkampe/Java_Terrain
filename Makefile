@@ -4,7 +4,7 @@
 PACKAGE=worldBuilder
 BINARIES=bin
 LIBRARIES=lib
-WORK=/tmp/new_debian
+WORK=/tmp/WB_temp
 VERSION=$(shell grep "PROGRAM_VERSION =" src/worldBuilder/Parameters.java | cut -d\" -f2 )
 
 debian:	$(PACKAGE).jar control
@@ -50,11 +50,27 @@ debian:	$(PACKAGE).jar control
 	mv $(WORK)/debian.deb $(PACKAGE)-$(VERSION).deb
 	sudo rm -rf $(WORK)
 
-$(PACKAGE).jar:
+$(PACKAGE).jar: bin/worldBuilder/*.class
+	# create an empty working directory
+	rm -rf $(WORK)/$(BINARIES)
+	mkdir -p $(WORK)/$(BINARIES)
+	#
+	# copy in our classes and resources
+	cp -R bin/worldBuilder $(WORK)/$(BINARIES)
+	cp -R bin/Templates $(WORK)/$(BINARIES)
+	cp -R bin/images $(WORK)/$(BINARIES)
+	#
+	# copy in the non-standard libraries we need
+	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/OpenVoronoi.jar
+	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/javax.json-1.0.2.jar
+
 	jar --create --file worldBuilder.jar --manifest packaging/manifest \
-		-C $(BINARIES) worldBuilder \
-		-C $(BINARIES) Templates \
-		-C $(BINARIES) images
+		-C $(WORK)/$(BINARIES) worldBuilder \
+		-C $(WORK)/$(BINARIES) Templates \
+		-C $(WORK)/$(BINARIES) images \
+		-C $(WORK)/$(BINARIES) javax \
+		-C $(WORK)/$(BINARIES) ags \
+		-C $(WORK)/$(BINARIES) org
 
 control:
 	echo "Package: $(PACKAGE)" 	> $@

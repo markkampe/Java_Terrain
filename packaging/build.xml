@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="worldBuilder" default="default" basedir=".">
+    <import file="nbproject/build-impl.xml"/>
+
+<property environment="env" />
+
+<taskdef name="bundleapp"
+         classname="com.oracle.appbundler.AppBundlerTask"
+         classpath="lib/appbundler-1.0ea.jar" />
+
+<target name="worldBuilder">
+    <bundleapp outputdirectory="dist"
+        name="worldBuilder"
+        displayname="World Builder"
+        identifier="worldBuilder.worldBuilder"
+        mainclassname="worldBuilder.worldBuilder">
+        <runtime dir="${env.JAVA_HOME}" />
+        <classpath file="dist/worldBuilder.jar" />
+    </bundleapp>
+</target>
+
+</project>

@@ -50,6 +50,15 @@ debian:	$(PACKAGE).jar control
 	mv $(WORK)/debian.deb $(PACKAGE)-$(VERSION).deb
 	sudo rm -rf $(WORK)
 
+$(PACKAGE).App:	$(PACKAGE).jar
+	# bundle the App, icon
+	echo MacOS App package creation not yet supported
+	exit 1
+
+$(PACKAGE).wnx: $(PACKAGE).jar
+	echo Windows package creation not yet supported
+	exit 1
+
 $(PACKAGE).jar: bin/worldBuilder/*.class
 	# create an empty working directory
 	rm -rf $(WORK)/$(BINARIES)

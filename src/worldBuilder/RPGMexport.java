@@ -72,6 +72,12 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	private static final int MIN_MID_SHADE = 128; // medium grey
 	private static final int MIN_HIGH_SHADE = 160; // light grey
 	private static final int SHADE_RANGE = 64; // total range (per TerrainType)
+	
+	// indices into the tileRules list
+	private static final int OW_TILES = 0;
+	private static final int OW_FLORA = 1;
+	private static final int OUT_TILES = 2;
+	private static final int OUT_FLORA = 3;
 
 	private static final int EXPORT_DEBUG = 2;
 	
@@ -124,9 +130,11 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	private void create_GUI() {
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
+		boolean overworld = this.format.equals("Overworld");
 
 		if (need_palette) { // create palette selector in main panel
-			palette = new JTextField(this.format + ".json");
+			String rulesFile = parms.exportRules.get(overworld ? OW_TILES : OUT_TILES);
+			palette = new JTextField(rulesFile);
 			JLabel pTitle = new JLabel("Tile Palette", JLabel.CENTER);
 			choosePalette = new JButton("Browse");
 			pTitle.setFont(fontLarge);
@@ -270,7 +278,8 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			locals.add(new JLabel("     "));
 		
 		if (need_flora_p) {	// create flora palette selector
-			flora_palette = new JTextField(this.format + "_flora" + ".json");
+			String rulesFile = parms.exportRules.get(overworld ? OW_FLORA : OUT_FLORA);
+			flora_palette = new JTextField(rulesFile);
 			JLabel fTitle = new JLabel("Flora Palette", JLabel.CENTER);
 			chooseFlora = new JButton("Browse");
 			fTitle.setFont(fontLarge);

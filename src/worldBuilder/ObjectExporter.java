@@ -248,13 +248,13 @@ public class ObjectExporter implements Exporter {
 	public void preview(WhichMap chosen, Color colorMap[]) {
 
 		if (chosen == WhichMap.HEIGHTMAP) {
-			// figure out the altitude to color mapping
+			// figure out the (range scaled) altitude to color mapping
 			double aMean = (maxHeight + minHeight)/2;
 			double aScale = BRIGHT - DIM;
 			if (maxHeight > minHeight)
 				aScale /= maxHeight - minHeight;
 
-			// fill in the preview map
+			// fill in the preview map with altitudes or water
 			Color map[][] = new Color[y_points][x_points];
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)

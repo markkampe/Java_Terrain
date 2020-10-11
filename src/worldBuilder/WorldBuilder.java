@@ -55,6 +55,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem exportRaw;
 	private JMenuItem exportRpgmOverworld;
 	private JMenuItem exportRpgmOutside;
+	private JMenuItem exportObject;
 	private JMenuItem exportFoundation;
 	private JMenuItem fileExit;
 	private JMenuItem editWorld;
@@ -169,12 +170,15 @@ public class WorldBuilder  extends JFrame
 		exportRpgmOutside.addActionListener(this);	
 		exportFoundation = new JMenuItem("Foundation");
 		exportFoundation.addActionListener(this);
+		exportObject = new JMenuItem("Object(WIP)");
+		exportObject.addActionListener(this);
 		JMenu fileExport = new JMenu("Export");
 		JMenu exportRPGM = new JMenu("RPGMaker");
 		exportRPGM.add(exportRpgmOverworld);
 		exportRPGM.add(exportRpgmOutside);
 		fileExport.add(exportRPGM);
 		fileExport.add(exportFoundation);
+		fileExport.add(exportObject);
 		fileExport.add(exportRaw);
 		
 		fileExit = new JMenuItem("Exit");
@@ -457,6 +461,13 @@ public class WorldBuilder  extends JFrame
 				twoDialogError();
 			else {
 				placeDialog(new FoundationExport(map), false);
+				activeDialog = true;
+			} 
+		} else if (o == exportObject) { 
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new ObjectExport(map), false);
 				activeDialog = true;
 			} 
 		} else if (o == fileExit) {

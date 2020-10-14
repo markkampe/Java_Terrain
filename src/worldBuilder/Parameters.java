@@ -156,6 +156,8 @@ public class Parameters {
 	/** default outside altitude levels	*/	public int dAltLevels;
 	/** default outside % pit			*/	public int dGroundMin;
 	/** default outside % ground		*/	public int dGroundMax;
+	
+	/** default export overlay objects	*/	public String overlay_objects;
 
 	/*
 	 * these parameters control the absorbtion and evaporation of rain fall
@@ -351,6 +353,9 @@ public class Parameters {
 				case "region_name":
 					region_name = parser.getString();
 					break;
+				case "objects":
+					overlay_objects = parser.getString();
+					break;
 				}
 				if (inRules) {
 					exportRules.add(parser.getString());
@@ -531,7 +536,10 @@ public class Parameters {
 			for (ListIterator<String> it = exportRules.listIterator(); it.hasNext();) {
 				System.out.println("               rule file: " + it.next());
 			}
+			if (overlay_objects != null)
+				System.out.println("               overlays:  " + overlay_objects);
 			System.out.println("   warnings:   tiles=" + tiles_max);
+
 			System.out.println("   verbosity:  " + debug_level);
 		}
 	}

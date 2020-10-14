@@ -56,10 +56,11 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	 * 
 	 * @param format ... used to title the dialog
 	 * @param map ... the map from which we are exporting
+	 * @param minTile ... minimum tile size (meters)
 	 * @param maxTile ... maximum tile size (meters)
 	 * @param shape ... required export region shape
 	 */
-	public ExportBase(String format, Map map, int maxTile, Map.Selection shape)  {
+	public ExportBase(String format, Map map, int minTile, int maxTile, Map.Selection shape)  {
 		// pick up references
 		this.map = map;
 		this.parms = Parameters.getInstance();
@@ -92,8 +93,8 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	
 		// the (optional loagrithmic) tile size slider is tricky
 		JLabel resolutionLabel = null;
-		if (maxTile > 1) {
-			resolution = new JSlider(JSlider.HORIZONTAL, 0, meters_to_slider(maxTile), 
+		if (maxTile > minTile) {
+			resolution = new JSlider(JSlider.HORIZONTAL, meters_to_slider(minTile), meters_to_slider(maxTile), 
 					meters_to_slider(parms.dTileSize));
 			resolution.setMajorTickSpacing(TICS_PER_DECADE);
 			resolution.setFont(fontSmall);

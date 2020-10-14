@@ -5,7 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * Exporter to render a Cartesian map w/mountains, forrests etc as objects
+ * Exporter to render a simple Cartesian map with mountains, forests, etc
+ * overlayed (as discrete objects) on top of it.
  */
 public class ObjectExporter implements Exporter {	
 

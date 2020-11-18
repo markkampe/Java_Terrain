@@ -50,6 +50,9 @@ debian:	$(PACKAGE).jar control
 	mv $(WORK)/debian.deb $(PACKAGE)-$(VERSION).deb
 	sudo rm -rf $(WORK)
 
+clean:
+	rm -f $(PACKAGE).jar $(PACKAGE)-$(VERSION).deb
+
 $(PACKAGE).App:	$(PACKAGE).jar
 	# bundle the App, icon
 	echo MacOS App package creation not yet supported

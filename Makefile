@@ -57,12 +57,6 @@ debian:	$(PACKAGE).jar control
 	mv $(WORK)/debian.deb $(PACKAGE)-$(VERSION).deb
 	sudo rm -rf $(WORK)
 
-# this didn't look too difficult, but I don't have a MAC to test on
-$(PACKAGE).App:	$(PACKAGE).jar
-	# bundle the App, icon
-	echo MacOS App package creation not yet supported
-	exit 1
-
 # packaging Java applications for Windows looked very commplicated
 $(PACKAGE).wnx: $(PACKAGE).jar
 	echo Windows package creation not yet supported
@@ -148,5 +142,17 @@ rpmspec:
 	@echo "%changelog"			>> $@
 	@echo "first MacOS package"		>> $@
 
+# this didn't look too difficult, but I don't have a MAC to test on
+$(PACKAGE).App:	$(PACKAGE).jar
+	@echo "ERROR: MacOS App package creation not yet supported"
+	# bundle the App, icon
+	# bundle the JRE with the App Package
+	@echo ... MAYBE ant worldBuilder
+	@echo ... MAYBE codesign -s \"Sagredo Software Application:NameFromCertificate\" $@
+	exit 1
+
+clobber: clean
+	rm -f $(PACKAGE).jar control rpmspec
+
 clean:
-	rm -f $(PACKAGE).jar $(PACKAGE)-$(VERSION).deb $(PACKAGE).rpm
+	rm -f $(PACKAGE)-$(VERSION).deb $(PACKAGE).rpm $(PACKAGE).App $(PACKAGE).wnx

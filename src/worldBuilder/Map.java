@@ -90,6 +90,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double fluxMap[];	// Water flow through each point
 	private double erodeMap[];	// erosion/deposition
 	private double hydrationMap[];	// soil hydration
+	private double depthMap[];	// height above/below water
 	private double incoming[];	// incoming water from off-map
 	private int downHill[];		// down-hill neighbor
 	
@@ -423,8 +424,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		parms.checkDefaults();	// Make sure defaults are consistent w/new world size
 		
 		// initialize the Hydrology engine
-		hydro.drainage();
-		hydro.waterFlow();
+		recompute();
 		
 		if (parms.debug_level > 0) {
 			parms.worldParms();
@@ -610,8 +610,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public double[] setHeightMap(double newHeight[]) {
 		double old[] = heightMap; 
 		heightMap = newHeight; 
-		hydro.drainage();
-		hydro.waterFlow();
+		recompute();
 		repaint();
 		return old;
 	}
@@ -622,6 +621,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public void recompute() {
 		hydro.drainage();
 		hydro.waterFlow();
+		waterDepth();
 	}
 
 	/**
@@ -637,6 +637,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		double old[] = rainMap; 
 		rainMap = newRain; 
 		hydro.waterFlow();
+		waterDepth();
 		repaint();
 		return old;
 	}
@@ -653,7 +654,39 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public void setIncoming(double[] new_map) {
 		incoming = new_map;
 		hydro.waterFlow();
+		waterDepth();
 		repaint(); }
+	
+	/**
+	 * update the depthMap based on the updated drainage and flux
+	 * 
+	 *	The hydrationMap cannot be used for interpolation, because 
+	 * 	positive values are saturation and negative values are depth.
+	 * 	The depthMap is distances above or below water, which can be
+	 *	interpolated to locate lake boundaries.
+	 */
+	private void waterDepth() {
+		depthMap = new double[hydrationMap.length];
+		double[] outlets = hydro.outlet;
+
+		// for every mesh point
+		for(int i = 0; i < hydrationMap.length; i++) {
+		    if (hydrationMap[i] < 0)
+		    	// use the depth under water
+		    	depthMap[i] = parms.height(hydrationMap[i]);
+		    else {
+		    	// find height above nearest highest outlet
+		    	double water_level = parms.sea_level;
+		    	for(int j = 0; j < mesh.vertices[i].neighbors; j++) {
+		    		int n = mesh.vertices[i].neighbor[j].index;
+		    		if (outlets[n] != Hydrology.UNKNOWN && outlets[n] > water_level)
+		    			water_level = outlets[n];
+		    	}
+		    	double delta_z = (heightMap[i] - erodeMap[i]) - water_level;
+		    	depthMap[i] = (delta_z > 0) ? delta_z : 0;
+		    }
+		}
+	}
 	
 	/**
 	 * return map of soil type for the current mesh
@@ -695,6 +728,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * return array of soil hydration for each mesh point
 	 */
 	public double [] getHydrationMap() { return hydrationMap; }
+	
+	/**
+	 * return array of above/below water heights
+	 */
+	public double[] getDepthMap() { return depthMap; }
 	
 	/**
 	 * return MeshPoint to Cartesian translation matrix

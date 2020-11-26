@@ -46,7 +46,7 @@ public class WaterMap {
 		int w = width/cellWidth;
 		
 		// interpolate per-cell water depth from the mesh
-		waterMap = submergence();
+		waterMap = map.getCartesian().interpolate(map.getDepthMap());
 		
 		/*
 		 * We paint blue any point that is under water, and
@@ -172,35 +172,5 @@ public class WaterMap {
 		
 		// if asked for wet points, complement the mask
 		return dry ? dry_neighbors : dry_neighbors ^ ALL;
-	}
-	
-	/**
-	 * @return	Cartesian water depth map
-	 */
-	double[][] submergence() {
-		double[] hydrationMap = map.getHydrationMap();
-		double[] heightMap = map.getHeightMap();
-		double[] erodeMap = map.getErodeMap();
-		double[] outlets = map.hydro.outlet;
-		double[] depthMap = new double[hydrationMap.length];
-		
-		// label the depth of all under-water and exit points
-		for(int i = 0; i < hydrationMap.length; i++) {
-			if (hydrationMap[i] < 0)	// point known to be u/w
-				depthMap[i] = parms.height(hydrationMap[i]);
-			else {	// altitude above highest neighboring outlet
-				double water_level = parms.sea_level;
-				for(int j = 0; j < map.mesh.vertices[i].neighbors; j++) {
-					int n = map.mesh.vertices[i].neighbor[j].index;
-					if (outlets[n] != Hydrology.UNKNOWN && outlets[n] > water_level)
-						water_level = outlets[n];
-				}
-				// this point is dry, even below exit point, it is not u/w
-				double delta_z = (heightMap[i] - erodeMap[i]) - water_level;
-				depthMap[i] = (delta_z > 0) ? delta_z : 0;
-			}
-		}
-		// interpolate those depths into a Cartesian map
-		return map.getCartesian().interpolate(depthMap);
 	}
 }

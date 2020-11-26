@@ -29,7 +29,7 @@ public class ObjectExporter implements Exporter {
 	private double[][] heights;		// per point height (meters)
 	// private double[][] rain;		// per point rainfall (meters)
 	private double[][] erode;		// per point erosion (meters)
-	private double[][] hydration;	// per point water depth (meters)
+	private double[][] waterDepth;	// per point water depth (meters)
 	// private double[][] soil;		// per point soil type
 
 	private double maxHeight;		// highest discovered altitude
@@ -135,17 +135,17 @@ public class ObjectExporter implements Exporter {
 
 	/**
 	 * Up-load the surface-water-depth for every tile
-	 * @param hydration - per point depth of water
+	 * @param depths - per point depth of water
 	 */
-	public void waterMap(double[][] hydration) {
-		this.hydration = hydration;
+	public void waterMap(double[][] depths) {
+		this.waterDepth = depths;
 
 		// note the max and min heights
 		maxDepth = 0;
-		for (int i = 0; i < hydration.length; i++)
-			for (int j = 0; j < hydration[0].length; j++) {
-				if (hydration[i][j] < maxDepth)
-					maxDepth = hydration[i][j];
+		for (int i = 0; i < depths.length; i++)
+			for (int j = 0; j < depths[0].length; j++) {
+				if (depths[i][j] < maxDepth)
+					maxDepth = depths[i][j];
 			}
 	}
 
@@ -215,11 +215,10 @@ public class ObjectExporter implements Exporter {
 					output.write(NEW_POINT);
 					double z = heights[r][c]-erode[r][c];
 					output.write(String.format(FORMAT_Z, "z", z));
-					double hydro = hydration[r][c];
-					if (hydro < 0) {
-						// FIX implement water depth as Z value
+					double depth = waterDepth[r][c];
+					if (depth < 0) {
 						output.write(COMMA);
-						output.write(String.format(FORMAT_Z, "u/w", hydro));
+						output.write(String.format(FORMAT_Z, "u/w", parms.z(-depth)));
 					}
 					output.write(" }");
 				}
@@ -260,11 +259,11 @@ public class ObjectExporter implements Exporter {
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
 					// FIX topo preview water
-					if (hydration[i][j] >= 0) {	// land
+					if (waterDepth[i][j] >= 0) {	// land
 						double h = NORMAL + ((heights[i][j] - aMean) * aScale);
 						map[i][j] = new Color((int)h, (int)h, (int)h);
 					} else	{							// water
-						double depth = hydration[i][j]/maxDepth;
+						double depth = waterDepth[i][j]/maxDepth;
 						double h = (1 - depth) * (BRIGHT - DIM);
 						map[i][j] = new Color(0, (int) h, BRIGHT);
 					}

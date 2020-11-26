@@ -662,7 +662,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * 
 	 *	The hydrationMap cannot be used for interpolation, because 
 	 * 	positive values are saturation and negative values are depth.
-	 * 	The depthMap is distances above or below water, which can be
+	 * 	The depthMap is distances(M) above or below water, which can be
 	 *	interpolated to locate lake boundaries.
 	 */
 	private void waterDepth() {
@@ -683,7 +683,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		    			water_level = outlets[n];
 		    	}
 		    	double delta_z = (heightMap[i] - erodeMap[i]) - water_level;
-		    	depthMap[i] = (delta_z > 0) ? delta_z : 0;
+		    	depthMap[i] = (delta_z > 0) ? parms.height(delta_z) : 0;
 		    }
 		}
 	}

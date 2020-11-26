@@ -265,9 +265,9 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		export.rainMap(cart.interpolate(map.getRainMap()));
 		export.soilMap(cart.interpolate(map.getSoilMap()));
 		
-		double hydration[][] = poly.interpolate(map.getHydrationMap());
-		add_rivers(hydration, meters);	// add rivers to hydration map
-		export.waterMap(hydration);
+		double depth[][] = poly.interpolate(map.getDepthMap());
+		add_rivers(depth, meters);	// add rivers to depth map
+		export.waterMap(depth);
 	}
 	
 	/**

@@ -41,6 +41,21 @@ public class ObjectExporter implements Exporter {
 	private static final int BRIGHT = 256 - DIM;
 	private static final int NORMAL = 128;
 
+	private class Overlay {
+		public int row;
+		public int col;
+		public int height;
+		public int width;
+		public String tileName;
+		
+		public Overlay(int r, int c, int h, int w, String name) {
+			row = r;
+			col = c;
+			height = h;
+			width = w;
+			tileName = name;
+		}
+	}
 
 	private static final int EXPORT_DEBUG = 2;
 
@@ -149,6 +164,13 @@ public class ObjectExporter implements Exporter {
 			}
 	}
 
+	private Overlay[] getOverlays() {
+		Overlay[] overlays = new Overlay[3];
+		overlays[0] = new Overlay(1, 1, 2, 2, "2x2 hill");
+		overlays[1] = new Overlay(3, 3, 1, 2, "1x2 hill");
+		overlays[2] = new Overlay(5, 5, 3, 3, "3x3 mountain");
+		return overlays;
+	}
 	/**
 	 * Export the up-loaded information in selected format
 	 * 
@@ -224,8 +246,39 @@ public class ObjectExporter implements Exporter {
 				}
 			}
 			output.write(NEWLINE);
-			output.write("]\n");	// end of points
-			output.write( "}\n");	// end of grid
+			output.write("]");	// end of points
+			
+			// write out the overlaid objects
+			Overlay[] overlays = getOverlays();
+			if (overlays != null && overlays.length > 0) {
+				output.write(",");
+				output.write(NEWLINE);
+				output.write(String.format(FORMAT_A, "overlays"));
+				first = true;
+				for(int i = 0; i < overlays.length; i++) {
+					if (first)
+						first = false;
+					else
+						output.write(",");
+					output.write(NEW_POINT);
+					output.write(String.format(FORMAT_D, "x", overlays[i].col));
+					output.write(COMMA);
+					output.write(String.format(FORMAT_D, "y", overlays[i].row));
+					output.write(COMMA);
+					output.write(String.format(FORMAT_S, "tile", overlays[i].tileName));
+					output.write(COMMA);
+					output.write(String.format(FORMAT_D, "dx", overlays[i].width));
+					output.write(COMMA);
+					output.write(String.format(FORMAT_D, "dy", overlays[i].height));
+					output.write(" }");
+				}
+				output.write(NEWLINE);
+				output.write("]");	// end of overlays
+			}
+			
+			// and close out the grid
+			output.write("\n");
+			output.write( "}\n");
 			output.close();
 
 			if (parms.debug_level > 0) {

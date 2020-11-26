@@ -43,6 +43,8 @@ public class ObjectExport extends ExportBase implements ActionListener {
 
 		// we need a list of overlay objects w/heights and footprints
 		palette = new JTextField(parms.overlay_objects);
+		if (parms.overlay_objects != null)
+			palette.setText(parms.overlay_objects);
 		JLabel pTitle = new JLabel("Overlay Objects", JLabel.CENTER);
 		pTitle.setFont(fontLarge);
 		choosePalette = new JButton("Browse");
@@ -80,9 +82,23 @@ public class ObjectExport extends ExportBase implements ActionListener {
 			return;
 		}
 		
+		if (e.getSource() == choosePalette) {
+			FileDialog d = new FileDialog(this, "Overlay Object Definitions", FileDialog.LOAD);
+			d.setFile(palette.getText());
+			d.setVisible(true);
+			String palette_file = d.getFile();
+			if (palette_file != null) {
+				String dir = d.getDirectory();
+				if (dir != null)
+					palette_file = dir + palette_file;
+				palette.setText(palette_file);
+			}
+			return;
+		}
+		
 		// make sure we have an exporter ready
 		if (exporter == null || newSelection) {
-			exporter = new ObjectExporter(x_points, y_points);
+			exporter = new ObjectExporter(palette.getText(), x_points, y_points);
 			exported = false;
 			newSelection = false;
 		}
@@ -110,18 +126,6 @@ public class ObjectExport extends ExportBase implements ActionListener {
 				// discard the window
 				windowClosing((WindowEvent) null);
 			}
-		} else if (e.getSource() == choosePalette) {
-			FileDialog d = new FileDialog(this, "Overlay Object Definitions", FileDialog.LOAD);
-			d.setFile(palette.getText());
-			d.setVisible(true);
-			String palette_file = d.getFile();
-			if (palette_file != null) {
-				String dir = d.getDirectory();
-				if (dir != null)
-					palette_file = dir + palette_file;
-				palette.setText(palette_file);
-			}
-			return;
 		} else if (e.getSource() == previewT && selected) {
 			exporter.preview(Exporter.WhichMap.HEIGHTMAP, null);
 		} else if (e.getSource() == previewF && selected) {

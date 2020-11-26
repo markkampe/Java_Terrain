@@ -3,6 +3,8 @@ package worldBuilder;
 import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  * Exporter to render a simple Cartesian map with mountains, forests, etc
@@ -31,6 +33,7 @@ public class ObjectExporter implements Exporter {
 	private double[][] erode;		// per point erosion (meters)
 	private double[][] waterDepth;	// per point water depth (meters)
 	// private double[][] soil;		// per point soil type
+	private OverlayObjects objSet;	// defined overlay objects
 
 	private double maxHeight;		// highest discovered altitude
 	private double minHeight;		// lowest discovered altitude
@@ -41,35 +44,23 @@ public class ObjectExporter implements Exporter {
 	private static final int BRIGHT = 256 - DIM;
 	private static final int NORMAL = 128;
 
-	private class Overlay {
-		public int row;
-		public int col;
-		public int height;
-		public int width;
-		public String tileName;
-		
-		public Overlay(int r, int c, int h, int w, String name) {
-			row = r;
-			col = c;
-			height = h;
-			width = w;
-			tileName = name;
-		}
-	}
-
 	private static final int EXPORT_DEBUG = 2;
 
 	/**
 	 * create a new Raw JSON exporter
 	 * 
+	 * @param obj_palette name of OverlayObjects definition file
 	 * @param width of the export area (in tiles)
 	 * @param height of the export area ((in tiles)
 	 */
-	public ObjectExporter(int width, int height) {
+	public ObjectExporter(String obj_palette, int width, int height) {
 		this.x_points = width;
 		this.y_points = height;
 		parms = Parameters.getInstance();
 
+		if (obj_palette != null && !obj_palette.equals(""))
+			objSet = new OverlayObjects(obj_palette);
+			
 		if (parms.debug_level >= EXPORT_DEBUG)
 			System.out.println("new Object exporter (" + height + "x" + width + ")");
 	}
@@ -163,14 +154,37 @@ public class ObjectExporter implements Exporter {
 					maxDepth = depths[i][j];
 			}
 	}
-
-	private Overlay[] getOverlays() {
-		Overlay[] overlays = new Overlay[3];
-		overlays[0] = new Overlay(1, 1, 2, 2, "2x2 hill");
-		overlays[1] = new Overlay(3, 3, 1, 2, "1x2 hill");
-		overlays[2] = new Overlay(5, 5, 3, 3, "3x3 mountain");
-		return overlays;
+	
+	/**
+	 * one object to be overlayed on our export grid
+	 */
+	private class Overlay {
+		public int row;		// Y coordinate (tile offset)
+		public int col;		// X coordinate (tile offset)
+		OverlayObject obj;	// associated Overlay Object
+		
+		public Overlay(OverlayObject obj, int col, int row) {
+			this.obj = obj;
+			this.row = row;
+			this.col = col;
+		}
 	}
+
+	/**
+	 * try to find places for OverlayObjects on our map
+	 */
+	public LinkedList<Overlay> overlays;	// all overlaid objects
+	void chooseOverlays() {
+		// FIX implement overlay object discovery
+		overlays = new LinkedList<Overlay>();
+		int count = 0;
+		for( ListIterator<OverlayObject> it = objSet.objects.listIterator(); it.hasNext();) {
+			OverlayObject o = it.next();
+			overlays.add(new Overlay(o, count, count));
+			count++;
+		}
+	}
+	
 	/**
 	 * Export the up-loaded information in selected format
 	 * 
@@ -249,28 +263,32 @@ public class ObjectExporter implements Exporter {
 			output.write("]");	// end of points
 			
 			// write out the overlaid objects
-			Overlay[] overlays = getOverlays();
-			if (overlays != null && overlays.length > 0) {
+			chooseOverlays();
+			int overlay_count = 0;
+			if (overlays != null && overlays.size() > 0) {
 				output.write(",");
 				output.write(NEWLINE);
 				output.write(String.format(FORMAT_A, "overlays"));
 				first = true;
-				for(int i = 0; i < overlays.length; i++) {
+				for( ListIterator<Overlay> it = overlays.listIterator(); it.hasNext();) {
+					Overlay o = it.next();
 					if (first)
 						first = false;
 					else
 						output.write(",");
 					output.write(NEW_POINT);
-					output.write(String.format(FORMAT_D, "x", overlays[i].col));
+					output.write(String.format(FORMAT_D, "x", o.col));
 					output.write(COMMA);
-					output.write(String.format(FORMAT_D, "y", overlays[i].row));
+					output.write(String.format(FORMAT_D, "y", o.row));
 					output.write(COMMA);
-					output.write(String.format(FORMAT_S, "tile", overlays[i].tileName));
+					output.write(String.format(FORMAT_S, "tile", o.obj.name));
 					output.write(COMMA);
-					output.write(String.format(FORMAT_D, "dx", overlays[i].width));
+					output.write(String.format(FORMAT_D, "dx", o.obj.width));
 					output.write(COMMA);
-					output.write(String.format(FORMAT_D, "dy", overlays[i].height));
+					output.write(String.format(FORMAT_D, "dy", o.obj.height));
 					output.write(" }");
+					
+					overlay_count++;
 				}
 				output.write(NEWLINE);
 				output.write("]");	// end of overlays
@@ -282,9 +300,12 @@ public class ObjectExporter implements Exporter {
 			output.close();
 
 			if (parms.debug_level > 0) {
-				System.out.println("Exported(OBJECT(WIP)) "  + x_points + "x" + y_points + " " + tile_size
-						+ "M tiles from <" + String.format("%9.6f", lat) + "," + String.format("%9.6f", lon)
-						+ "> to file " + filename);
+				System.out.println("Exported(OBJECT(WIP)) "  + 
+						x_points + "x" + y_points + " " + 
+						tile_size + "M tiles" +
+						" plus " + overlay_count + " overlay objects" +
+						" from <" + String.format("%9.6f", lat) + "," + String.format("%9.6f", lon) +
+						"> to file " + filename);
 			}
 			return true;
 		} catch (IOException e) {

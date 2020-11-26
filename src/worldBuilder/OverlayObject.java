@@ -6,7 +6,7 @@ class OverlayObject {
 	public int width;	// width (in tiles)
 
 	// attributes of tile definitions
-	public int group;	// minimum height group
+	public int altitude;// minimum height (%z)
 	public int slope;	// minimum slope (%)
 	
 	/**
@@ -19,7 +19,7 @@ class OverlayObject {
 		this.name = name;
 		this.height = height;
 		this.width = width;
-		this.group = 0;
+		this.altitude = 0;
 		this.slope = 0;
 	}
 	
@@ -31,7 +31,7 @@ class OverlayObject {
 	public void dump(String prefix) {
 		System.out.print(prefix + name);
 		System.out.print(":\t" + height + "x" + width);
-		System.out.print(", group=" + group);
+		System.out.print(", altitude=" + altitude + "%");
 		System.out.print(", slope=" + slope + "%");
 		System.out.print("\n");
 	}

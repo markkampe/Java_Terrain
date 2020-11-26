@@ -9,7 +9,7 @@ import java.awt.Graphics;
 public class WaterMap {
 
 	private Map map;
-	private Parameters parms;
+	// private Parameters parms;
 	
 	double[][] waterMap;	// + = above water, - = below water
 	
@@ -30,7 +30,7 @@ public class WaterMap {
 	 */
 	public WaterMap(Map map) {
 		this.map = map;
-		this.parms = Parameters.getInstance();
+		// this.parms = Parameters.getInstance();
 	}
 	
 	/**

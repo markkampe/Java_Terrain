@@ -22,7 +22,7 @@ public class FoundExporter implements Exporter {
 	private double[][] heights;		// per point height (meters)
 	private double[][] erode;		// per point erosion (meters)
 	private double[][] hydration;	// per point water depth (meters)
-	private double[][] soil;		// per point soil type
+	// private double[][] soil;		// per point soil type
 	
 	private double dDecid = 0.9;	// FIX add deciduous desity slider
 	private double dConif = 0.9;	// FIX add coniferous density slider
@@ -85,7 +85,7 @@ public class FoundExporter implements Exporter {
 	 * @param soil - per point soil type
 	 */
 	public void soilMap(double[][] soil) {
-		this.soil = soil;
+		// this.soil = soil;
 	}
 
 	/**

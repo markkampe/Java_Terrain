@@ -31,7 +31,6 @@ public class OverlayObjects {
 	public OverlayObjects(String objFile) {
 		objects = new LinkedList<OverlayObject>();
 	
-		Parameters parms = Parameters.getInstance();
 		BufferedReader r;
 		JsonParser parser;
 		String filename;
@@ -50,7 +49,7 @@ public class OverlayObjects {
 		}
 		
 		// parsing state variables
-		String thisKey = "", thisObject = "", thisValue = "";
+		String thisKey = "";
 		boolean inList = false;
 		
 		// accumulated object attributes
@@ -67,9 +66,6 @@ public class OverlayObjects {
 				break;
 				
 			case START_OBJECT:
-				if (thisKey != "") {
-					thisObject = thisKey;
-				}
 				break;
 				
 			case END_OBJECT:
@@ -79,7 +75,7 @@ public class OverlayObjects {
 				if (!thisName.equals("") && thisHeight != NO_VALUE && thisWidth != NO_VALUE) {
 					OverlayObject newObj = new OverlayObject(thisName, thisHeight, thisWidth);
 					if (thisAlt != NO_VALUE)
-						newObj.group = thisAlt;
+						newObj.altitude = thisAlt;
 					if (thisSlope != NO_VALUE)
 						newObj.slope = thisSlope;
 					objects.add(newObj);

@@ -38,7 +38,7 @@ public class ObjectExport extends ExportBase implements ActionListener {
 		super("Object Overlay", map, MIN_TILE, MAX_TILE, Map.Selection.RECTANGLE);
 		
 		// additional widgets for overlay export
-		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
+		// Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 
 		// we need a list of overlay objects w/heights and footprints

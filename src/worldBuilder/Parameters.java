@@ -84,7 +84,7 @@ public class Parameters {
 	/** map views to be displayed	*/	public int display_options;
 
 	// maximum ranges on sliders ... might want to override in config.json
-	/** world altitude slider range	*/	public int alt_max = 10000;		// m
+	/** world altitude slider range	*/	public int alt_max = 5000;		// m
 	/** world altitude slider unit	*/	public int alt_scale = 1000;	// m
 	/** world diameter slider range	*/	public int diameter_max = 5000;	// km
 	/** world diameter slider unit	*/	public int diam_scale = 100;	// km

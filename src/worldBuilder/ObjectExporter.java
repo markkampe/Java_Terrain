@@ -178,7 +178,7 @@ public class ObjectExporter implements Exporter {
 		// FIX implement overlay object discovery
 		overlays = new LinkedList<Overlay>();
 		int count = 0;
-		for( ListIterator<OverlayObject> it = objSet.objects.listIterator(); it.hasNext();) {
+		for( ListIterator<OverlayObject> it = objSet.listIterator(); it.hasNext();) {
 			OverlayObject o = it.next();
 			overlays.add(new Overlay(o, count, count));
 			count++;

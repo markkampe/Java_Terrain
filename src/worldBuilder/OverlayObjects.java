@@ -22,7 +22,7 @@ public class OverlayObjects {
 	public String setName;
 	
 	/** list of accumulated objects	*/
-	public LinkedList<OverlayObject> objects;
+	private LinkedList<OverlayObject> objects;
 	
 	/**
 	 * open and process an list of overlay objects
@@ -148,5 +148,16 @@ public class OverlayObjects {
 			for (ListIterator<OverlayObject> it = objects.listIterator(); it.hasNext(); )
 				 it.next().dump("    ");
 		}
+	}
+	
+	/*
+	 * size and iterator functions for the accumulated objects
+	 */
+	public ListIterator<OverlayObject> listIterator() {
+		return objects.listIterator();
+	}
+	
+	public int size() {
+		return objects.size();
 	}
 }

@@ -1,7 +1,7 @@
 { "Test Overlays": [
-	{ "name": "hill", "height": 2, "width": 2, "altitude": 5, "slope": 5 },
-	{ "name": "large hill", "height": 4, "width": 4, "altitude": 10, "slope": 10 },
-	{ "name": "mountain", "height": 4, "width": 4, "altitude": 25, "slope": 10 },
-	{ "name": "massif", "height": 6, "width": 6, "altitude": 50, "slope": 25 }
+	{ "name": "peak",	"height": 6, "width": 6, "z_min": 30, "z_max": 100 },
+	{ "name": "mountain",	"height": 4, "width": 4, "z_min": 15, "z_max":  30 },
+	{ "name": "hill",	"height": 4, "width": 4, "z_min":  5, "z_max":  30 },
+	{ "name": "knoll",	"height": 2, "width": 2, "z_min":  1, "z_max":   5 }
    ]
 }

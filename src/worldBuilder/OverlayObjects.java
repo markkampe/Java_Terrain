@@ -55,7 +55,7 @@ public class OverlayObjects {
 		// accumulated object attributes
 		String thisName = "";
 		int thisHeight = NO_VALUE, thisWidth = NO_VALUE, 
-			thisAlt = NO_VALUE, thisSlope = NO_VALUE;
+			thisZmin = NO_VALUE, thisZmax = NO_VALUE;
 		
 		parser = Json.createParser(r);
 		while (parser.hasNext()) {
@@ -74,10 +74,10 @@ public class OverlayObjects {
 				
 				if (!thisName.equals("") && thisHeight != NO_VALUE && thisWidth != NO_VALUE) {
 					OverlayObject newObj = new OverlayObject(thisName, thisHeight, thisWidth);
-					if (thisAlt != NO_VALUE)
-						newObj.altitude = thisAlt;
-					if (thisSlope != NO_VALUE)
-						newObj.slope = thisSlope;
+					if (thisZmin != NO_VALUE)
+						newObj.z_min = thisZmin;
+					if (thisZmax != NO_VALUE)
+						newObj.z_max = thisZmax;
 					objects.add(newObj);
 				} else {
 					System.err.println("Error: missing object attributes");
@@ -86,8 +86,8 @@ public class OverlayObjects {
 				
 				thisHeight = NO_VALUE;
 				thisWidth = NO_VALUE;
-				thisAlt = NO_VALUE;
-				thisSlope = NO_VALUE;
+				thisZmin = NO_VALUE;
+				thisZmax = NO_VALUE;
 				thisName = "";
 				break;
 				
@@ -123,12 +123,12 @@ public class OverlayObjects {
 					thisWidth = parser.getInt();
 					thisKey = "";
 					break;
-				case "altitude":
-					thisAlt = parser.getInt();
+				case "z_min":
+					thisZmin = parser.getInt();
 					thisKey = "";
 					break;
-				case "slope":
-					thisSlope = parser.getInt();
+				case "z_max":
+					thisZmax = parser.getInt();
 					thisKey = "";
 					break;
 				}

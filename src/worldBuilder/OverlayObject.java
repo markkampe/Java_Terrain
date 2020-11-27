@@ -6,8 +6,8 @@ class OverlayObject {
 	public int width;	// width (in tiles)
 
 	// attributes of tile definitions
-	public int altitude;// minimum height (%z)
-	public int slope;	// minimum slope (%)
+	public int z_min;	// minimum altitude (%z)
+	public int z_max;	// maximum altitude (%z)
 	
 	/**
 	 * define a new OverlayObject
@@ -19,8 +19,8 @@ class OverlayObject {
 		this.name = name;
 		this.height = height;
 		this.width = width;
-		this.altitude = 0;
-		this.slope = 0;
+		this.z_min = 0;
+		this.z_max = 100;
 	}
 	
 	/**
@@ -30,9 +30,8 @@ class OverlayObject {
 	 */
 	public void dump(String prefix) {
 		System.out.print(prefix + name);
-		System.out.print(":\t" + height + "x" + width);
-		System.out.print(", altitude=" + altitude + "%");
-		System.out.print(", slope=" + slope + "%");
+		System.out.print("(" + height + "x" + width + ")");
+		System.out.print(", z=" + z_min + "-" + z_max + "%");
 		System.out.print("\n");
 	}
 }

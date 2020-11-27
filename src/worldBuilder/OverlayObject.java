@@ -1,5 +1,7 @@
 package worldBuilder;
 
+import java.awt.image.BufferedImage;
+
 class OverlayObject {
 	public String name;	// tile name
 	public int height;	// height (in tiles)
@@ -8,6 +10,7 @@ class OverlayObject {
 	// attributes of tile definitions
 	public int z_min;	// minimum altitude (%z)
 	public int z_max;	// maximum altitude (%z)
+	public BufferedImage icon;	// preview icon;
 	
 	/**
 	 * define a new OverlayObject

@@ -53,7 +53,7 @@ public class OverlayObjects {
 		boolean inList = false;
 		
 		// accumulated object attributes
-		String thisName = "";
+		String thisName = "", thisIcon = "";
 		int thisHeight = NO_VALUE, thisWidth = NO_VALUE, 
 			thisZmin = NO_VALUE, thisZmax = NO_VALUE;
 		
@@ -78,6 +78,9 @@ public class OverlayObjects {
 						newObj.z_min = thisZmin;
 					if (thisZmax != NO_VALUE)
 						newObj.z_max = thisZmax;
+					if (thisIcon != "") {
+						newObj.icon = null;	// FIX open icon file and ImageIO.read the file
+					}
 					objects.add(newObj);
 				} else {
 					System.err.println("Error: missing object attributes");
@@ -89,6 +92,7 @@ public class OverlayObjects {
 				thisZmin = NO_VALUE;
 				thisZmax = NO_VALUE;
 				thisName = "";
+				thisIcon = "";
 				break;
 				
 			case START_ARRAY:
@@ -109,6 +113,9 @@ public class OverlayObjects {
 					break;
 				case "name":
 					thisName = parser.getString();
+					break;
+				case "icon":
+					thisIcon = parser.getString();
 					break;
 				}
 				thisKey = "";

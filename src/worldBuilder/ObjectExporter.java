@@ -175,22 +175,45 @@ public class ObjectExporter implements Exporter {
 	 */
 	public LinkedList<Overlay> overlays;	// all overlaid objects
 	void chooseOverlays() {
-		// FIX implement overlay object discovery
+		boolean[][] taken = new boolean[y_points][x_points];
 		overlays = new LinkedList<Overlay>();
-		int count = 0;
+		
+		// give each Overlay Object a shot at every tile
 		for( ListIterator<OverlayObject> it = objSet.listIterator(); it.hasNext();) {
 			OverlayObject o = it.next();
-			overlays.add(new Overlay(o, count, count));
-			count++;
+			for(int y = 0; y < y_points - o.height; y++)
+				for(int x = 0; x < x_points - o.width; x++) {
+					// see if every square within meets object requirements
+					boolean ok = true;
+					for(int i = 0; ok && i < o.height; i++)
+						for(int j = 0; ok && j < o.width; j++) {
+							double z = 100 * (heights[y+i][x+j] - erode[y+i][x+j]);
+							if (taken[y+i][x+j] || z < o.z_min || z >= o.z_max)
+								ok = false;
+						}
+				
+					if (ok) {
+						overlays.add(new Overlay(o, y, x));
+						for(int i = 0; ok && i < o.height; i++)
+							for(int j = 0; ok && j < o.width; j++)
+								taken[y+i][x+j] = true;
+					}
+				}
+			
 		}
 	}
-	
+
 	/**
 	 * Export the up-loaded information in selected format
 	 * 
 	 * @param filename - name of output file
 	 */
 	public boolean writeFile( String filename ) {
+		
+		// make sure we have an overlay list
+		if (overlays == null)
+			chooseOverlays();
+		
 		// strip off suffix and leading directories to get base name
 		int dot = filename.lastIndexOf('.');
 		String mapname = (dot == -1) ? filename : filename.substring(0, dot);
@@ -263,9 +286,8 @@ public class ObjectExporter implements Exporter {
 			output.write("]");	// end of points
 			
 			// write out the overlaid objects
-			chooseOverlays();
 			int overlay_count = 0;
-			if (overlays != null && overlays.size() > 0) {
+			if (overlays.size() > 0) {
 				output.write(",");
 				output.write(NEWLINE);
 				output.write(String.format(FORMAT_A, "overlays"));
@@ -322,6 +344,10 @@ public class ObjectExporter implements Exporter {
 	public void preview(WhichMap chosen, Color colorMap[]) {
 
 		if (chosen == WhichMap.HEIGHTMAP) {
+			// make sure we have an overlay list
+			if (overlays == null)
+				chooseOverlays();
+			
 			// figure out the (range scaled) altitude to color mapping
 			double aMean = (maxHeight + minHeight)/2;
 			double aScale = BRIGHT - DIM;
@@ -332,7 +358,6 @@ public class ObjectExporter implements Exporter {
 			Color map[][] = new Color[y_points][x_points];
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
-					// FIX topo preview water
 					if (waterDepth[i][j] >= 0) {	// land
 						double h = NORMAL + ((heights[i][j] - aMean) * aScale);
 						map[i][j] = new Color((int)h, (int)h, (int)h);

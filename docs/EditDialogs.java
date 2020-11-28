@@ -86,6 +86,8 @@ class Map implements MouseListener, MouseMotionListener {
 	double[] getFluxMap() {};
 	double[] getErodeMap() {};
 	double[] getHydrationMap() {};
+	double[] getDepthMap() {};
+	void waterDepth() {};
 	int[] getdownHill() {};
 	int getErosion() {};
 	int setErosion(int cycles) {};

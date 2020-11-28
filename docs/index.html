@@ -155,12 +155,23 @@ output-format-specific implementations.
 	<a Href="JavaDoc/worldBuilder/RPGMwriter.html">RPGMwriter.java</a>.
 	</li>
 
-	<li> Another interesting Exporter is
+	<li> Another Exporter is
 	<a Href="JavaDoc/worldBuilder/FoundExporter.html">FoundExporter.java</a>,
 	which creates the appropriate altitude and resource bit-maps, and uses
 	<a Href="JavaDoc/worldBuilder/LuaWriter.html">LuaWriter.java</a> to 
 	create the index that describes them.
 	</li>
+
+	<li> Another Exporter is
+	<a Href="JavaDoc/worldBuilder/ObjectExporter.html">ObjectExporter.java</a>,
+	which uses
+	<a Href="JavaDoc/worldBuilder/ObjectExport.html">ObjectExport.java</a> to 
+	examine the topography and choose hill/mountain tiles, and then 
+	outputs a simple json description of per-tile altitudes
+	and water depth, followed by a list of larger (e.g. hill/mountain) tiles
+	to be overlayed on that simple map.
+	</li>
+	
 </ul>
 </P>
 <P>
@@ -342,7 +353,7 @@ When the call is made to repaint the map, <tt>Map.PaintComponent</tt> will:
 <H3>Export Classes</H3>
 <P>
 The final class diagram shows the <em>Export</em> related classes.
-(that handle raw JSON, <em>RPG Maker</em>, and <em>Foundation</em> maps).
+(that handle raw JSON, <em>RPG Maker</em>, <em>Object</em> and <em>Foundation</em> maps).
 </P>
 <a name="UML_export"></a>
 <img src="ExportDialogs.png" width="1200">

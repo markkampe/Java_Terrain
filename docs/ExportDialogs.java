@@ -21,7 +21,7 @@ interface Exporter {
 	void erodeMap(double[][] erode) {};
 	void rainMap(double[][] rain) {};
 	void soilMap(double[][] soil) {};
-	void waterMap(double[][] hydration) {};
+	void waterMap(double[][] depths) {};
 	boolean writeFile(String filename) {};
 	enum WhichMap {};
 	void preview(WhichMap chosen, Color colorMap[]) {};
@@ -127,6 +127,22 @@ class TileRule {
 	TileRule(String name, int tile_set, int level, int base) {};
 	double range_bid(double value, double min, double max) {};
 	double bid(double alt, double hydro, double winter, double summer, double soil, double slope, double direction) {};
+}
+
+/**
+ * @opt all
+ * @depend - - - Objectxporter
+ */
+class ObjectExport extends ExportBase implements ActionListener, ChangeListener {
+	ObjectExport(Map map) {};
+}
+
+/**
+ * @opt all
+ */
+class ObjectExporter implements Exporter {
+	ObjectExporter(String obj_palette, int width, int height) {};
+	void chooseOverlays(){};
 }
 
 /**

@@ -18,8 +18,8 @@ public class OverlayObjects {
 	private static final String DEFAULT_CONFIG = "/Templates";
 	private static final int NO_VALUE = 666666;
 	
-	/** name of this set of objects	*/
-	public String setName;
+	/** name of this set of objects	*/	public String setName;
+	/** (preview) width of a tile	*/	public int tileSize;
 	
 	/** list of accumulated objects	*/
 	private LinkedList<OverlayObject> objects;
@@ -138,6 +138,10 @@ public class OverlayObjects {
 					thisZmax = parser.getInt();
 					thisKey = "";
 					break;
+				case "tile_size":
+					tileSize = parser.getInt();
+					thisKey = "";
+					break;
 				}
 				thisKey = "";
 				break;
@@ -150,7 +154,9 @@ public class OverlayObjects {
 		int level = Parameters.getInstance().debug_level;
 		if (level > 0)
 			System.out.println("OverlayObjects (" + setName + 
-					"): read " + objects.size() + " descriptions from " + filename);
+					"): read " + objects.size() + 
+					" (tile_size=" + tileSize + ")" +
+					" descriptions from " + filename);
 		if (level > 2) {
 			for (ListIterator<OverlayObject> it = objects.listIterator(); it.hasNext(); )
 				 it.next().dump("    ");

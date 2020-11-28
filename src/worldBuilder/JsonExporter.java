@@ -277,7 +277,7 @@ public class JsonExporter implements Exporter {
 						double h = (1 - depth) * (BRIGHT - DIM);
 						map[i][j] = new Color(0, (int) h, BRIGHT);
 					}
-			new PreviewMap("Export Preview (terrain)", map);
+			new PreviewMap("Export Preview (terrain)", map, 0);
 		} else if (chosen == WhichMap.FLORAMAP) {
 			System.out.println("Flora previews not supported for JSON export");
 		}

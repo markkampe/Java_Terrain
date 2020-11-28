@@ -161,7 +161,7 @@ public class RPGMTiler implements Exporter {
 				for(int j = 0; j < x_points; j++) {
 					pMap[i][j] = colormap[levels[i][j]];
 				}
-			new PreviewMap("Export Preview (terrain)", pMap);
+			new PreviewMap("Export Preview (terrain)", pMap, 0);
 		} else if (chosen == WhichMap.FLORAMAP) {
 			Color pMap[][] = new Color[y_points][x_points];
 			for(int i = 0; i < y_points; i++)
@@ -170,7 +170,7 @@ public class RPGMTiler implements Exporter {
 					pMap[i][j] = (terrain <= TerrainType.PASSABLE_WATER) ? Color.BLUE : 
 									colormap[floraTypes[i][j]];
 				}
-			new PreviewMap("Export Preview (flora)", pMap);
+			new PreviewMap("Export Preview (flora)", pMap, 0);
 		}
 	}
 	

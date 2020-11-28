@@ -366,7 +366,7 @@ public class ObjectExporter implements Exporter {
 						double h = (1 - depth) * (BRIGHT - DIM);
 						map[i][j] = new Color(0, (int) h, BRIGHT);
 					}
-			new PreviewMap("Export Preview (terrain)", map);
+			new PreviewMap("Export Preview (terrain)", map, objSet.tileSize);
 		} else if (chosen == WhichMap.FLORAMAP) {
 			// fill in the preview map
 			Color map[][] = new Color[y_points][x_points];
@@ -375,7 +375,7 @@ public class ObjectExporter implements Exporter {
 					// FIX: implement flora preview
 					map[i][j] = new Color(NORMAL, NORMAL, NORMAL);
 				}
-			new PreviewMap("Export Preview (flora)", map);
+			new PreviewMap("Export Preview (flora)", map, objSet.tileSize);
 		}
 	}
 }

@@ -542,14 +542,14 @@ public class FoundExporter implements Exporter {
 						map[y][x] = new Color(bright, bright, bright);
 					}
 				}
-			new PreviewMap("Export Preview (height map)", map);
+			new PreviewMap("Export Preview (height map)", map, 0);
 		} else if (chosen == WhichMap.FLORAMAP) {
 			Color pMap[][] = new Color[y_points][x_points];
 			for(int y = 0; y < y_points; y++)
 				for(int x = 0; x < x_points; x++) {
 					pMap[y][x] = Color.GREEN;	// FIX flora
 				}
-			new PreviewMap("Export Preview (trees/bushes/grass)", pMap);
+			new PreviewMap("Export Preview (trees/bushes/grass)", pMap, 0);
 		}
 	}
 

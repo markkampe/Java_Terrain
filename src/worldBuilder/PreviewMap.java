@@ -24,17 +24,21 @@ public class PreviewMap extends JPanel {
 	 * instantiate a preview map JFrame
 	 * @param name to be displayed at the top of map
 	 * @param array (2D) of Colors to be displayed
+	 * @param size (in pixels) of a tile (1->default)
 	 */
-	public PreviewMap(String name, Color array[][]) {
+	public PreviewMap(String name, Color array[][], int size) {
 		
 		// get the dimensions of the provided map
 		height=array.length;
 		width = array[0].length;
 		
 		// figure out how many pixels we want per tile
-		size = 1;
-		while( size * width < MIN_PIXELS || size * height < MIN_PIXELS)
-			size++;
+		if (size <= 1) {
+			size = 1;
+			while( size * width < MIN_PIXELS || size * height < MIN_PIXELS)
+				size++;
+		}
+		this.size = size;
 		
 		// create the window
 		JFrame frame = new JFrame(name);

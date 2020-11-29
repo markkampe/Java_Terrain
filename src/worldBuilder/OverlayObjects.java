@@ -1,13 +1,16 @@
 package worldBuilder;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import javax.imageio.ImageIO;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
@@ -16,6 +19,7 @@ import javax.json.stream.JsonParser;
  */
 public class OverlayObjects {
 	private static final String DEFAULT_CONFIG = "/Templates";
+	private static final String DEFAULT_ICONS = "/icons";
 	private static final int NO_VALUE = 666666;
 	
 	/** name of this set of objects	*/	public String setName;
@@ -43,14 +47,15 @@ public class OverlayObjects {
 			try {
 				r = new BufferedReader(new FileReader(filename));
 			} catch (FileNotFoundException e) {
-				System.out.println("ERROR: unable to open tile rules file " + filename);
+				System.out.println("ERROR: unable to open Overlay Objects file " + filename);
 				return;
 			}
 		}
 		
-		// parsing state variables
+		// parsing state information
 		String thisKey = "";
 		boolean inList = false;
+		int tile_number = 0;
 		
 		// accumulated object attributes
 		String thisName = "", thisIcon = "";
@@ -72,6 +77,8 @@ public class OverlayObjects {
 				if (!inList)
 					break;
 				
+				tile_number++;
+				
 				if (!thisName.equals("") && thisHeight != NO_VALUE && thisWidth != NO_VALUE) {
 					OverlayObject newObj = new OverlayObject(thisName, thisHeight, thisWidth);
 					if (thisZmin != NO_VALUE)
@@ -79,12 +86,31 @@ public class OverlayObjects {
 					if (thisZmax != NO_VALUE)
 						newObj.z_max = thisZmax;
 					if (thisIcon != "") {
-						newObj.icon = null;	// FIX open icon file and ImageIO.read the file
+						String icon_file = thisIcon;
+						try {
+							if (thisIcon.charAt(0) != '/') {
+								icon_file = DEFAULT_ICONS + "/" + thisIcon;
+								InputStream s = getClass().getResourceAsStream(icon_file);
+								if (s != null)
+									newObj.icon = ImageIO.read(s);
+								else
+									throw new IOException("nonesuch");
+							} else
+								newObj.icon = ImageIO.read(new File(icon_file));
+							objects.add(newObj);
+						} catch (IOException x) {
+							System.err.println("ERROR: unable to read icon file " + icon_file);
+						}
 					}
-					objects.add(newObj);
 				} else {
-					System.err.println("Error: missing object attributes");
-					// FIX - better diagnostics
+					// complain about the missing information
+					String prefix = filename + " tile #" + tile_number + ": ";
+					if (thisName.equals(""))
+						System.err.println(prefix + "tile w/no name");
+					if (thisHeight == NO_VALUE)
+						System.err.println(prefix + "tile w/no height");
+					if (thisWidth == NO_VALUE)
+						System.err.println(prefix + "tile w/no width");
 				}
 				
 				thisHeight = NO_VALUE;

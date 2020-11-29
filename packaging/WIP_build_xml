@@ -1,3 +1,5 @@
+# this file is based on an example for Mac Java packaging
+# ... which I have never attempted
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="worldBuilder" default="default" basedir=".">
     <import file="nbproject/build-impl.xml"/>

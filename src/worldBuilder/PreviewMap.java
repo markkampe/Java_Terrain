@@ -1,10 +1,14 @@
 package worldBuilder;
 
 import javax.swing.JPanel;
+
 import javax.swing.JFrame;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  * generic (small) preview map generator
@@ -15,6 +19,20 @@ public class PreviewMap extends JPanel {
 	private int height;		// height (Tiles)
 	private int width;		// width (tiles)
 	private int size;		// pixels per tile
+	
+	/** icons to be overlayed on top of Preview map	*/
+	private class Icon {
+		int row;			// y coordinate of upper-left corner
+		int col;			// x coordinate of upper-left corner
+		BufferedImage image; // icon image
+		
+		public Icon(int row, int col, BufferedImage image) {
+			this.row = row;
+			this.col = col;
+			this.image = image;
+		}
+	}
+	LinkedList<Icon> icons;
 	
 	private static final int MIN_PIXELS = 400;
 	
@@ -52,13 +70,33 @@ public class PreviewMap extends JPanel {
 	}
 	
 	/**
+	 * overlay an icon on the Preview Map
+	 * @param row	(tile) row number
+	 * @param col	(tile) column number
+	 * @param icon	icon image
+	 */
+	public void addIcon(int row, int col, BufferedImage icon) {
+		if (icons == null)
+			icons = new LinkedList<Icon>();
+		
+		icons.add(new Icon(row * size, col * size, icon));
+	}
+	
+	/**
 	 * repaint the built-up map
 	 */
 	public void paint (Graphics g) {
+		// draw rectangles for each tile
 		for(int x = 0; x < width * size; x += size)
 			for(int y = 0; y < height * size; y += size) {
 				g.setColor(colormap[y/size][x/size]);
 				g.fillRect(x, y, size, size);
 			}
+		
+		// see if we have been given any icons to overlay
+		for( ListIterator<Icon> it = icons.listIterator(); it.hasNext();) {
+			Icon i = it.next();
+			g.drawImage(i.image,  i.col,  i.row,  null);
+		}
 	}
 }

@@ -163,7 +163,7 @@ public class ObjectExporter implements Exporter {
 		public int col;		// X coordinate (tile offset)
 		OverlayObject obj;	// associated Overlay Object
 		
-		public Overlay(OverlayObject obj, int col, int row) {
+		public Overlay(OverlayObject obj, int row, int col) {
 			this.obj = obj;
 			this.row = row;
 			this.col = col;
@@ -187,8 +187,13 @@ public class ObjectExporter implements Exporter {
 					boolean ok = true;
 					for(int i = 0; ok && i < o.height; i++)
 						for(int j = 0; ok && j < o.width; j++) {
+							// convert the Z altitude into a Z percentage
 							double z = 100 * (heights[y+i][x+j] - erode[y+i][x+j]);
-							if (taken[y+i][x+j] || z < o.z_min || z >= o.z_max)
+							if (taken[y+i][x+j])
+								ok = false;
+							else if (waterDepth[y+i][x+j] < 0)
+								ok = false;
+							else if (z < o.z_min || z >= o.z_max)
 								ok = false;
 						}
 				
@@ -366,7 +371,14 @@ public class ObjectExporter implements Exporter {
 						double h = (1 - depth) * (BRIGHT - DIM);
 						map[i][j] = new Color(0, (int) h, BRIGHT);
 					}
-			new PreviewMap("Export Preview (terrain)", map, objSet.tileSize);
+			
+			// add any overlayed icons
+			PreviewMap preview = new PreviewMap("Export Preview (terrain)", map, objSet.tileSize);
+			if (overlays != null && overlays.size() > 0)
+				for( ListIterator<Overlay> it = overlays.listIterator(); it.hasNext();) {
+					Overlay o = it.next();
+					preview.addIcon(o.row, o.col, o.obj.icon);
+				}
 		} else if (chosen == WhichMap.FLORAMAP) {
 			// fill in the preview map
 			Color map[][] = new Color[y_points][x_points];

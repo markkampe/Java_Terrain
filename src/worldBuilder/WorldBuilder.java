@@ -64,6 +64,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem editSlope;
 	private JMenuItem editRiver;
 	private JMenuItem editRain;
+	private JMenuItem editFlora;
 	private JMenuItem editCity;
 	private JMenuItem editRoads;
 	private JMenuItem viewPoints;
@@ -74,6 +75,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem viewHydration;
 	private JMenuItem viewErode;
 	private JMenuItem viewSoil;
+	private JMenuItem viewFlora;
 	private JMenuItem viewZoom;
 	private JMenuItem viewDebug;
 	private JMenuItem helpInfo;
@@ -208,6 +210,8 @@ public class WorldBuilder  extends JFrame
 		editRain.addActionListener(this);
 		editRiver = new JMenuItem("add arterial river");
 		editRiver.addActionListener(this);
+		editFlora = new JMenuItem("flora placement");
+		editFlora.addActionListener(this);
 		editCity = new JMenuItem("add city");
 		editCity.addActionListener(this);
 		editCity.setEnabled(false);	// SOMEDAY implement city creation
@@ -221,6 +225,7 @@ public class WorldBuilder  extends JFrame
 		editMenu.add(editLand);
 		editMenu.add(editRiver);
 		editMenu.add(editRain);
+		editMenu.add(editFlora);
 		editMenu.add(new JSeparator());
 		editMenu.add(editCity);
 		editMenu.add(editRoads);
@@ -242,6 +247,8 @@ public class WorldBuilder  extends JFrame
 		viewErode.addActionListener(this);
 		viewSoil = new JMenuItem("Soil");
 		viewSoil.addActionListener(this);
+		viewFlora = new JMenuItem("Flora");
+		viewFlora.addActionListener(this);
 		viewZoom = new JMenuItem("Zoom");
 		viewZoom.addActionListener(this);
 		viewDebug = new JMenuItem("Point Details");
@@ -255,6 +262,7 @@ public class WorldBuilder  extends JFrame
 		viewMenu.add(viewHydration);
 		viewMenu.add(viewErode);
 		viewMenu.add(viewSoil);
+		viewMenu.add(viewFlora);
 		viewMenu.add(viewZoom);
 		viewMenu.add(new JSeparator());
 		viewMenu.add(viewDebug);
@@ -504,10 +512,17 @@ public class WorldBuilder  extends JFrame
 				placeDialog(new RiverDialog(map), false);
 				activeDialog = true;
 			}
+		} else if (o == editFlora) {
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new FloraDialog(map), false);
+				activeDialog = true;
+			}
 		} else if (o == editCity) {
-			System.out.println("implement edit:City");
+			System.err.println("implement edit:City");
 		} else if (o == editRoads) {
-			System.out.println("implement edit:Roads");
+			System.err.println("implement edit:Roads");
 		}
 		
 		// view menu toggles individual views on and off
@@ -527,6 +542,8 @@ public class WorldBuilder  extends JFrame
 			parms.display_options = map.setDisplay(Map.SHOW_ERODE, (parms.display_options & Map.SHOW_ERODE) == 0);
 		else if (o == viewSoil)
 			parms.display_options = map.setDisplay(Map.SHOW_SOIL, (parms.display_options & Map.SHOW_SOIL) == 0);
+		else if (o == viewFlora)
+			parms.display_options = map.setDisplay(Map.SHOW_FLORA, (parms.display_options & Map.SHOW_FLORA) == 0);
 		else if (o == viewZoom)	{
 			if (activeDialog)
 				twoDialogError();
@@ -588,6 +605,7 @@ public class WorldBuilder  extends JFrame
 		viewHydration.setText( (opts & Map.SHOW_HYDRO) != 0 ? "~hydration" : "Hydration");
 		viewErode.setText( (opts & Map.SHOW_ERODE) != 0 ? "~erosion" : "Erosion");
 		viewSoil.setText( (opts & Map.SHOW_SOIL) != 0 ? "~soil" : "Soil");
+		viewFlora.setText( (opts & Map.SHOW_FLORA) != 0 ? "~flora" : "Flora");
 	}
 	
 	/**

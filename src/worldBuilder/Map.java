@@ -33,7 +33,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 */
 
 	/** options for enabled display types	*/
-	public static final int SHOW_ALL = 0xff,
+	public static final int SHOW_ALL = 0x1ff,
 							SHOW_POINTS = 0x01,
 							SHOW_MESH = 0x02,
 							SHOW_TOPO = 0x04,
@@ -41,7 +41,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 							SHOW_WATER = 0x10,
 							SHOW_ERODE = 0x20,
 							SHOW_SOIL = 0x40,
-							SHOW_HYDRO = 0x80;
+							SHOW_HYDRO = 0x80,
+							SHOW_FLORA = 0x100;
 	private int display;		// bitmask for enabled SHOWs
 	
 	/** defined soil types	*/
@@ -1249,6 +1250,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			r.paint(g, width, height);
 			WaterMap w = new WaterMap(this);
 			w.paint(g, width, height, TOPO_CELL);		
+		}
+		
+		if ((display & SHOW_FLORA) != 0) {
+			FloraMap r = new FloraMap(this);
+			r.paint(g, width, height);
 		}
 				
 		// see if we are rendering the mesh (debugging, put it on top)

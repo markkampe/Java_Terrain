@@ -16,6 +16,7 @@
 	  "class": "Tree",
 	  "terrain": "highlands",
 	  "alt": { "min": 1000, "max": 2500 },
+	  "temp": { "max": 15 },
 	  "hydro": { "min": 0.15 },
 	  "vigor": 32,
 	  "range": "flexible",

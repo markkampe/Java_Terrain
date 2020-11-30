@@ -94,9 +94,26 @@ public class PreviewMap extends JPanel {
 			}
 		
 		// see if we have been given any icons to overlay
+		if (icons == null)
+			return;
+		
+		g.setColor(Color.BLACK);
 		for( ListIterator<Icon> it = icons.listIterator(); it.hasNext();) {
 			Icon i = it.next();
-			g.drawImage(i.image,  i.col,  i.row,  null);
+			
+			// get the array of pixels
+			int height = i.image.getHeight();
+			int width = i.image.getWidth();
+			int[] pixels = new int[width*height];
+			i.image.getRaster().getPixels(0, 0, width, height, pixels);
+			
+			// paint only the black pixels
+			for(int y = 0; y < height; y++) {
+				for(int x = 0; x < width; x++) {
+					if (pixels[(y * width) + x] == 0)
+						g.drawLine(i.col + x, i.row + y, i.col + x, i.row + y);
+				}
+			}
 		}
 	}
 }

@@ -727,6 +727,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		return old;
 	}
 	
+	/**
+	 * update the mapping from flora types to preview colors
+	 * @param newColors
+	 */
 	public void setFloraColors(Color[] newColors) {
 		floraColors = newColors;
 	}
@@ -760,6 +764,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * return array of above/below water heights
 	 */
 	public double[] getDepthMap() { return depthMap; }
+	
+	/**
+	 * return map from flora types into preview colors
+	 */
+	public Color[] getFloraColors() { return floraColors; }
 	
 	/**
 	 * return MeshPoint to Cartesian translation matrix

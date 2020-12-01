@@ -84,6 +84,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	
 	public Hydrology hydro;		// hydrology calculator for current map
 	
+	public Color floraColors[];	// display color for each flora type
+	
 	// per MeshPoint information
 	private double heightMap[]; // Height of each mesh point
 	private double soilMap[];	// Soil type of each mesh point
@@ -93,8 +95,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double hydrationMap[];	// soil hydration
 	private double depthMap[];	// height above/below water
 	private double incoming[];	// incoming water from off-map
+	private double floraMap[];	// assigned flora type
 	private int downHill[];		// down-hill neighbor
-	
+
 	private Cartesian poly_map;	// interpolation based on surrounding polygon
 	// private Cartesian prox_map;	// interpolation based on nearest neighbors
 	
@@ -578,6 +581,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
 			this.hydrationMap = new double[mesh.vertices.length];
+			this.floraMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
 			this.hydro = new Hydrology(this);
@@ -591,6 +595,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.erodeMap = null;
 			this.soilMap = null;
 			this.hydrationMap = null;
+			this.floraMap = null;
 			this.incoming = null;
 			this.highLights = null;
 			this.hydro = null;
@@ -695,7 +700,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public double [] getSoilMap() {return soilMap;}
 
 	/**
-	 * update the soil map for the current mesth
+	 * update the soil map for the current mesh
 	 * @param newSoil new set of soil types
 	 */
 	public double[] setSoilMap(double[] newSoil) {
@@ -703,6 +708,27 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		soilMap = newSoil;
 		repaint();
 		return old;
+	}
+	
+	/**
+	 * return map of flora types for the current mesh
+	 */
+	public double[] getFloraMap() { return floraMap; }
+	
+	/**
+	 * update the flora map for the current mesh
+	 * @param newFlora new set of flora types
+	 * @return previous flora map
+	 */
+	public double[] setFloraMap(double[] newFlora) {
+		double[] old = floraMap;
+		floraMap = newFlora;
+		repaint();
+		return old;
+	}
+	
+	public void setFloraColors(Color[] newColors) {
+		floraColors = newColors;
 	}
 	
 	/*
@@ -1238,6 +1264,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			s.paint(g, width, height, TOPO_CELL);
 		}
 		
+		// see if we are rendering plant cover
+		if ((display & SHOW_FLORA) != 0) {
+			FloraMap r = new FloraMap(this);
+			r.paint(g, width, height, TOPO_CELL);
+		}
+			
 		// see if we are rendering topographic lines
 		if ((display & SHOW_TOPO) != 0) {
 			TopoMap t = new TopoMap(this);
@@ -1252,11 +1284,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			w.paint(g, width, height, TOPO_CELL);		
 		}
 		
-		if ((display & SHOW_FLORA) != 0) {
-			FloraMap r = new FloraMap(this);
-			r.paint(g, width, height);
-		}
-				
 		// see if we are rendering the mesh (debugging, put it on top)
 		if ((display & SHOW_MESH) != 0) {
 			g.setColor(MESH_COLOR);

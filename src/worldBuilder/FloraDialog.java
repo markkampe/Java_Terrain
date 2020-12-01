@@ -15,10 +15,14 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	private Map map;
 	private Parameters parms;
 	
+	private double floraMap[];		// per mesh-point plant types
+	private double prevMap[];		// saved map
+	private Color floraColors[];	// type to flora map
+	
 	private JButton accept;			// accept these updates
 	private JButton cancel;			// cancel dialog, no updates
 	private JTextField flora_palette;	// flora placement rules
-	private JButton chooseFlora;	// browse for flora placemen trules
+	private JButton chooseFlora;	// browse for flora placemen trulesnewColors
 	
 	private JSlider flora_pct;		// fraction of area to be covered
 	private RangeSlider flora_3;	// grass/brush/tree distribution
@@ -27,10 +31,9 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	private JSlider goose_hydro2;	// goose hydration multiplier
 	
 	private boolean selected;		// a region has been selected
-	private boolean flora_changed;	// flora distribution has changed
-	private boolean hydro_changed;	// hydration has changed
-	private boolean temp_changed;	// temperature has changed
-	
+	private double x0, y0;			// upper left hand corner
+	private double width, height;	// selected area size (in pixels)
+
 	private final boolean goose_t = false;
 	private final boolean goose_h1 = false;
 	private final boolean goose_h2 = false;
@@ -44,6 +47,12 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		// pick up references
 		this.map = map;
 		this.parms = Parameters.getInstance();
+		
+		// save and copy the incoming flora map
+		prevMap = map.getFloraMap();
+		floraMap = new double[prevMap.length];
+		for(int i = 0; i < floraMap.length; i++)
+			floraMap[i] = prevMap[i];
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -146,7 +155,13 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			goose_hydro1.setFont(fontSmall);
 			goose_hydro1.setPaintTicks(true);
 			goose_hydro1.setPaintLabels(true);
-			fTitle = new JLabel("Hydration plus/minus (percentage)");
+			fTitle = new JLabel("Hydration plus/minus (percentag// save and copy the incoming flora map\n" + 
+					"		prevMap = map.getFloraMap();\n" + 
+					"		System.err.println(\"prevMap.length = \" + prevMap.length);\n" + 
+					"		floraMap = new double[prevMap.length];\n" + 
+					"		for(int i = 0; i < floraMap.length; i++)\n" + 
+					"			floraMap[i] = prevMap[i];\n" + 
+					"		System.err.println(\"floraMap.length = \" + floraMap.length);e)");
 			fTitle.setFont(fontSmall);
 	
 			locals.add(new JLabel("    "));
@@ -171,7 +186,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			locals.add(fTitle);
 			goose_hydro2.addChangeListener(this);
 		}
-
+		
 		// put all the sliders in the middle of the pane
 		mainPane.add(locals);
 		
@@ -198,6 +213,29 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		map.selectMode(Map.Selection.SQUARE);
 		selected = map.checkSelection(Map.Selection.SQUARE);
 	}
+	
+	/**
+	 * re-determine the plant coverage of each mesh point
+	 */
+	void placeFlora() {
+		floraColors = new Color[2];
+		floraColors[0] = Color.BLACK;
+		floraColors[1] = Color.GREEN;
+		
+		MeshPoint[] points = map.mesh.vertices;
+		for(int i = 0; i < floraMap.length; i++) {
+			// make sure it is in selected area
+			if (points[i].x < x0 || points[i].x >= x0+width ||
+				points[i].y < y0 || points[i].y >= y0+height)
+				continue;
+			floraMap[i] = ((i%2) == 1) ? 1 : 0;
+			System.out.println("   " + i + "<-" + floraMap[i]);
+		}
+		
+		map.setFloraColors(floraColors);
+		map.setFloraMap(floraMap);
+		map.repaint();
+	}
 
 	/**
 	 * called whenever a region selection changes
@@ -212,6 +250,11 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	public boolean regionSelected(double mx0, double my0, 
 								  double dx, double dy, boolean complete) {		
 		selected = complete;
+		x0 = mx0;
+		y0 = my0;
+		width = dx;
+		height = dy;
+		placeFlora();
 		return true;
 	}
 
@@ -221,22 +264,19 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	public void stateChanged(ChangeEvent e) {
 		Object source = e.getSource();
 		
-		if (source == flora_pct || source == flora_3)
-			flora_changed = true;
-		else if (source == goose_hydro1 || source == goose_hydro2) {
-			hydro_changed = true;
-			flora_changed = true;
-		} else if (source == goose_temp) {
-			temp_changed = true;
-			flora_changed = true;
-		}
+		if ((source == flora_pct || source == flora_3) && selected)
+			placeFlora();
+		else if ((source == goose_hydro1 || source == goose_hydro2) && selected)
+			placeFlora();
+		else if ((source == goose_temp) && selected)
+			placeFlora();
 	}
 	
 	/**
 	 * unregister our map listener and close the dialog
 	 */
 	private void cancelDialog() {
-		map.selectMode(Map.Selection.NONE);
+		map.selectMode(Map.Selection.ANY);
 		map.removeMapListener(this);
 		this.dispose();
 		WorldBuilder.activeDialog = false;
@@ -254,7 +294,6 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			// FIX accept the updated flora
 			if (parms.debug_level > 0)
 				System.out.println("LOG FLORAL CHANGES");
 		} else if (e.getSource() == chooseFlora) {
@@ -269,6 +308,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 				flora_palette.setText(palette_file);
 			}
 		} else if (e.getSource() == cancel) {
+			map.setFloraMap(prevMap);
 			cancelDialog();
 		}
 	}

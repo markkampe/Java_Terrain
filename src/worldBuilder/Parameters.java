@@ -333,6 +333,8 @@ public class Parameters {
 				case "hydro":
 					display_options |= Map.SHOW_HYDRO;
 					break;
+				case "flora":
+					display_options |= Map.SHOW_FLORA;
 				}
 				break;
 

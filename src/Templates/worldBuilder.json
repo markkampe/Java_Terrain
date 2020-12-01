@@ -61,7 +61,8 @@
 	"water": true,
     	"erosion": false,
 	"soil": false,
-	"hydro": false
+	"hydro": false,
+	"flora": false
     },
     "export": {
     	"map_name": "Map001",

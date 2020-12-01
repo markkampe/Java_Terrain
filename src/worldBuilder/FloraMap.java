@@ -9,15 +9,12 @@ import java.awt.Graphics;
 public class FloraMap {
 	private Map map;		// mesh to which we correspond
 
-	private Parameters parms;
-	
 	/**
 	 * instantiate a river and water-body map renderer
 	 * @param map	to be rendered
 	 */
 	public FloraMap(Map map) {
 		this.map = map;
-		this.parms = Parameters.getInstance();
 	}
 	
 	/**
@@ -26,8 +23,29 @@ public class FloraMap {
 	 * @param g Graphics context
 	 * @param width of the display map
 	 * @param height of the display map
+	 * @param, width (in pixels) of a single cell
 	 */
-	public void paint(Graphics g, int width, int height) {
-		Mesh mesh = map.getMesh();
+	public void paint(Graphics g, int width, int height, int cellWidth) {
+		int h = height/cellWidth;
+		int w = width/cellWidth;
+		
+		// interpolate the plant types
+		Cartesian cart = map.getCartesian();
+		double flora[][] = cart.interpolate(map.getFloraMap());
+		
+		// look up the type to color mapping
+		Color[] colors = map.floraColors;
+		if (colors == null)
+			return;
+		
+		// use flora types to generate background colors
+		for(int r = 0; r < h; r++)
+			for(int c = 0; c < w; c++) {
+				int f = (int) flora[r][c];	// round down flora type
+				if (f > 0) {
+					g.setColor(colors[f]);
+					g.fillRect(c * cellWidth,  r * cellWidth, cellWidth, cellWidth);
+				}
+			}
 	}
 }

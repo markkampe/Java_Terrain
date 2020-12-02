@@ -403,7 +403,14 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		if (e.getSource() == accept && selected) {
 			// remember the chosen flora palette
 			parms.flora_config = flora_palette.getText();
-			// report what we wound up doing
+			
+			// make these updates official
+			for(int i = 0; i < floraMap.length; i++)
+				prevFlora[i] = floraMap[i];
+			for(int i = 0; i < floraColors.length; i++)
+				prevColors[i] = floraColors[i];
+			
+			// report the changes
 			if (parms.debug_level > 0) {
 				System.out.println("Flora Placement (" + FloraRule.ruleset + "):");
 				int number = 1;
@@ -413,6 +420,11 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 					number++;
 				}
 			}
+			
+			// re-zero the placement counts
+			for(int i = 0; i < placed.length; i++)
+				placed[i] = 0;
+			
 		} else if (e.getSource() == chooseFlora) {
 			FileDialog d = new FileDialog(this, "Floral Palette", FileDialog.LOAD);
 			d.setFile(flora_palette.getText());

@@ -158,6 +158,7 @@ public class Parameters {
 	/** default outside % ground		*/	public int dGroundMax;
 	
 	/** default export overlay objects	*/	public String overlay_objects;
+	/** default flora configuration 	*/	public String flora_config;
 
 	/*
 	 * these parameters control the absorbtion and evaporation of rain fall
@@ -357,6 +358,9 @@ public class Parameters {
 					break;
 				case "objects":
 					overlay_objects = parser.getString();
+					break;
+				case "flora":
+					flora_config = parser.getString();
 					break;
 				}
 				if (inRules) {

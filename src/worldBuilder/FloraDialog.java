@@ -12,9 +12,7 @@ import javax.swing.event.ChangeListener;
  * Dialog to enable the creation a consistent map of a sub-region of the current world.
  */
 public class FloraDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {	
-	private final String FLORA_RULES = "flora.json";	// FIX make FLORA_RULES a parameter w/default
 	private static final int MAX_TYPES = 20;	// max number of flora subtypes
-	private static String[] floraClasses = { "Tree", "Brush", "Grass" };
 	private boolean haveFloraTypes = false;
 	
 	private Map map;
@@ -102,8 +100,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		locals.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
 		
 		// flora rules selection field
-		String rulesFile = FLORA_RULES;	// FIX make a parameter
-		flora_palette = new JTextField(rulesFile);
+		flora_palette = new JTextField(parms.flora_config);
 		JLabel fTitle = new JLabel("Flora Palette", JLabel.CENTER);
 		chooseFlora = new JButton("Browse");
 		fTitle.setFont(fontLarge);
@@ -281,7 +278,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		
 		// make sure we have rules
 		if (!haveFloraTypes) {
-			FloraRule.loadFlora(FLORA_RULES);
+			FloraRule.loadFlora(flora_palette.getText());
 			haveFloraTypes = true;
 		}	
 		
@@ -362,7 +359,8 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		y0 = my0;
 		width = dx;
 		height = dy;
-		placeFlora();
+		if (complete)
+			placeFlora();
 		return true;
 	}
 
@@ -403,6 +401,9 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
+			// remember the chosen flora palette
+			parms.flora_config = flora_palette.getText();
+			// report what we wound up doing
 			if (parms.debug_level > 0) {
 				System.out.println("Flora Placement (" + FloraRule.ruleset + "):");
 				int number = 1;

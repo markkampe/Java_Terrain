@@ -68,6 +68,7 @@
     	"map_name": "Map001",
     	"rules": [ "Overworld.json", "Overworld_flora.json", 
 		   "Outside.json", "Outside_flora.json" ],
-	"objects": "Overlay_objects.json"
+	"objects": "Overlay_objects.json",
+    	"flora":   "flora.json"
     }
 }

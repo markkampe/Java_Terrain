@@ -310,6 +310,14 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		double Twinter = parms.meanWinter();
 		double Tsummer = parms.meanSummer();
 		
+		// factor in the temp/hydration gooseing
+		if (goose_t) {
+			Twinter += goose_temp.getValue();
+			Tsummer += goose_temp.getValue();
+		}
+		double plus = goose_h1 ? goose_hydro1.getValue() : 0.0;
+		double scale = goose_h2 ? goose_hydro2.getValue() : 100.0;
+		
 		// let every sub-class bid on each selected mesh point
 		for(int i = 0; i < floraMap.length; i++) {
 			// make sure it is in selected area
@@ -320,9 +328,9 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			// gather per-point bidding attributes
 			int alt = (int) parms.altitude(heightMap[i] - erodeMap[i]);
 			double lapse = alt * parms.lapse_rate;
-			double hydro = hydroMap[i];
 			double soil = soilMap[i];
-			
+			double hydro = ((hydroMap[i] * scale)/100) + plus;
+
 			// find the first sub-class that bids on it
 			for(int r = 0; r < numRules; r++) {
 				double bid = bidders[r].bid(alt, hydro, Twinter - lapse, Tsummer - lapse, soil);

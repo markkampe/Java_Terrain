@@ -325,6 +325,10 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 				points[i].y < y0 || points[i].y >= y0+height)
 				continue;
 			
+			// make sure it is above water
+			if (hydroMap[i] < 0)
+				continue;
+			
 			// gather per-point bidding attributes
 			int alt = (int) parms.altitude(heightMap[i] - erodeMap[i]);
 			double lapse = alt * parms.lapse_rate;

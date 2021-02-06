@@ -3,7 +3,7 @@ package worldBuilder;
 import java.io.FileWriter;
 import java.io.IOException;
 
-/*
+/**
  * this class encapsulates writes to a debug log file
  * which has (sadly) often been necessary to analyze
  * complex anomalous results in erosion and deposition. 

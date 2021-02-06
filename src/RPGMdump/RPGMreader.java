@@ -7,7 +7,9 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 
 public class RPGMreader {
-	
+	/**
+	 *	read an RPGM map into a set of per-level Cartesian arrays of tile #s
+	 */
 	private int height;
 	private int width;
 	private int tilesetID;

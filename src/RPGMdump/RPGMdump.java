@@ -7,6 +7,14 @@ import java.io.PrintStream;
 import javax.swing.JFrame;
 
 public class RPGMdump extends JFrame {
+	/**
+	 * load an RPGM map file, and output it in a neater form (six arrays,
+	 * each printed one row per line, with a fixed width per row
+	 *
+	 * These values all flow together in an RPGM map, which makes it 
+	 * extremely difficult to find the tile at a particular level, row
+	 * and column.
+	 */
 	
 	private static final long serialVersionUID = 1L;
 	public String filename;

@@ -7,7 +7,17 @@ import java.io.PrintStream;
 import javax.swing.JFrame;
 
 public class Tester extends JFrame {
-	
+	/**
+	 * This program reads in a Raw JSON worldBuilder export, and then prints:
+	 *   - its basic (location, size) attributes
+	 *	 - a grid of per-point altitudes
+	 *   - a grid of per-point slopes
+	 *   - a grid of per point face (compas) directions
+	 *   - a grid of per-point rainfall
+	 *   - a grid of per-point hydration
+	 *   - a grid of per-point soil-type
+	 *	 - a grid of per-point mean (Spring) temperatures
+	 */
 	private static final long serialVersionUID = 1L;
 	public String filename;
 	private static PrintStream output = System.out;

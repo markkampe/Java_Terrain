@@ -7,7 +7,12 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 
 /**
- * this class uses a streaming JSON parser to avoid
+ * This class reads the raw JSON output of a worldBuilder map, into
+ * a collection of basic (location, scale and temperature) attributes
+ * and a set of (per Cartesion point) altitude, rainfall, hydration
+ * and soil type arrays.
+ *
+ * This class uses a streaming JSON parser to avoid
  * the huge memory footprint associated with complete
  * object parsing for large numbers of points.
  */

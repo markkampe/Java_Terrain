@@ -4,17 +4,16 @@ maps and exporting (parts of) them in formats consumable by various FRPGs.
 
 ## WorldBuilder.java (the main program)
 ```
-   java worldBuilder.jar [-v] [-d#] [-c config] [-p project-dir] map-file
+   java -jar worldBuilder.jar [-v] [-c config] [-d level] [-p project-dir] map-file
 
-      -v ...       vebose (debug=1) output
-      -d level ... set debug level (0-4)
-      -c file .... override default parameter configuration file
-      -p dir ..... default directory for exported output
+      -v       ... vebose (debug=1) output
+      -c file  ... override default parameter configuration file
+      -d level ... set debug level (0-3)
+      -p dir   ... default directory for exported output
 ```
 
 ## U/I: classes with which a user interacts
 	
-
    * WorldDialog.java ... world map location and scale
    * MountainDialog.java ... create mountains and valleys
    * RainDialog.java ... adjust rainfall
@@ -23,17 +22,17 @@ maps and exporting (parts of) them in formats consumable by various FRPGs.
    * SlopeDialog.java ... adjust the continental slope
    * FloraDialog.javak ... plant distributions
 
-   * MeshDialog.java	... load or create a new Mesh
-   * RegionDialog.java	... create a (higher resolution) sub-region map
-   * ZoomDialog.java	... zoom in on a sub-region
+   * MeshDialog.java ... load or create a new Mesh
+   * RegionDialog.java ... create a (higher resolution) sub-region map
+   * ZoomDialog.java ... zoom in on a sub-region
 
-   * ExportBase.java	... superclass for all export dialogs
-   * MapListener.java	... call-back for point/rectangular selections
-   * PointDebug.java	... pop-up for info about one MeshPoint
+   * ExportBase.java ... superclass for all export dialogs
+   * MapListener.java ... call-back for point/rectangular selections
+   * PointDebug.java ... pop-up for info about one MeshPoint
 
 ## Internal representations and engines
 
-   * Parameters.java	... default parameter values
+   * Parameters.java ... default parameter values
 
    * MeshPoint.java ... one point in the mesh
    * MeshPointHasher.java ... map coordinates into a MeshPoint

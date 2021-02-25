@@ -77,9 +77,8 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		// get and copy the type to preview color map
 		floraColors = new Color[MAX_TYPES];
 		prevColors = map.getFloraColors();
-		if (prevColors != null)
-			for(int i = 0; i < floraColors.length; i++)
-				floraColors[i] = prevColors[i];
+		for(int i = 0; i < floraColors.length; i++)
+			floraColors[i] = (prevColors == null) ? Color.BLACK : prevColors[i];
 		
 		// initial placement counts
 		placed = new int[MAX_TYPES];
@@ -304,6 +303,15 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			bidders[numRules++] = r;
 			floraColors[numRules] = r.previewColor;
 		}
+		/*
+		 * for each rule, for each point
+		 * 	 accumulate a list of (sorted) bids
+		 * 
+		 * for the next highest bid who's class has not yet met quota
+		 * 	 award that point to that bidder and update the quotas
+		 * 
+		 * see if I can use vigor to bias bidding towards one class/sub-class
+		 */
 		Bidder bidder = new Bidder(numRules);	// bid manager
 		
 		// get the sea-level temperature range
@@ -419,6 +427,8 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			// make these updates official
 			for(int i = 0; i < floraMap.length; i++)
 				prevFlora[i] = floraMap[i];
+			if (prevColors == null)
+				prevColors = new Color[MAX_TYPES];
 			for(int i = 0; i < floraColors.length; i++)
 				prevColors[i] = floraColors[i];
 			

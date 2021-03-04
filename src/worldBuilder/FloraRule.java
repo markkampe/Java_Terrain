@@ -44,6 +44,9 @@ public class FloraRule {
 	/** how high should this rule bid	*/
 	public int vigor;
 	
+	/** when in the sequence of bids does this go	*/
+	public int order;
+	
 	/** what color should this render as in previews	*/
 	public Color previewColor;
 	
@@ -80,6 +83,7 @@ public class FloraRule {
 		flexRange = false;
 		taperedBid = false;
 		vigor = 16;
+		order = 9;
 	}
 	
 	// load and iterate over Flora type rules
@@ -123,6 +127,7 @@ public class FloraRule {
 		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
 		int red = NO_VALUE, blue = NO_VALUE, green = NO_VALUE;	
 		int vigor = NO_VALUE;
+		int order = NO_VALUE;
 
 		boolean flexRange = false;
 		boolean taperedBid = false;
@@ -183,6 +188,8 @@ public class FloraRule {
 						thisRule.maxSoil = sMax;
 					if (vigor != NO_VALUE)
 						thisRule.vigor = vigor;
+					if (order != NO_VALUE)
+						thisRule.order = order;
 					if (red != NO_VALUE)
 						thisRule.previewColor = new Color(red, blue, green);
 					thisRule.flexRange = flexRange;
@@ -196,7 +203,8 @@ public class FloraRule {
 					tMin = NO_VALUE; tMax = NO_VALUE;
 					flexRange = false;
 					taperedBid = false;
-					vigor= NO_VALUE;
+					vigor = NO_VALUE;
+					order = NO_VALUE;
 					red = NO_VALUE; green = NO_VALUE; blue = NO_VALUE;
 					name = "";
 				} else
@@ -270,6 +278,10 @@ public class FloraRule {
 				switch (thisKey) {
 				case "vigor":
 					vigor = parser.getInt();
+					thisKey = "";
+					break;
+				case "order":
+					order = parser.getInt();
 					thisKey = "";
 					break;
 				case "min":
@@ -355,6 +367,7 @@ public class FloraRule {
 								previewColor.getGreen() + "," +
 								previewColor.getBlue());
 		System.out.println(prefix + "      " + "vigor:   " + vigor);
+		System.out.println(prefix + "      " + "order:   " + order);
 	}
 	
 	/**

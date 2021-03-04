@@ -1,5 +1,6 @@
 # Compiled class file
 *.class
+worldBuilder.jar
 
 # Log file
 *.log
@@ -20,6 +21,9 @@
 # Javadoc output
 /docs/*.png
 /docs/JavaDoc
+
+# sample files
+Foundation
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*

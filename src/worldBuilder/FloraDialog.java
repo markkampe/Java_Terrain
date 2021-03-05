@@ -12,7 +12,13 @@ import javax.swing.event.ChangeListener;
  * Dialog to enable the creation a consistent map of a sub-region of the current world.
  */
 public class FloraDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {	
-	private static final int MAX_TYPES = 20;	// max number of flora subtypes
+	// flora types and sub-types
+	private static final int FLORA_NONE = 0;
+	private static final int FLORA_GRASS = 1;
+	private static final int FLORA_BRUSH = 2;
+	private static final int FLORA_TREE = 3;
+	private static final int MAX_TYPES = 4;		// number of flora classes
+	private static final int MAX_SUBTYPES = 20;	// max number flora sub-classes
 	private boolean haveFloraTypes = false;
 	
 	private Map map;
@@ -21,7 +27,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	// attribute maps
 	private double floraMap[];		// per mesh-point plant types
 	private double prevFlora[];		// saved flora Map
-	private Color floraColors[];	// type to preview color map
+	private Color floraColors[];	// type to preview color map	private static final int MAX_SUBTYPES = 20;	// max number of flora subtypes
 	private Color prevColors[];		// saved type to preview color map
 	private double hydroMap[];		// per mesh-point hydration
 	private double prevHydro[];		// saved hydro map
@@ -56,7 +62,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	/**
 	 * instantiate the widgets and register the listeners
 	 */
-	public FloraDialog(Map map)  {
+	public FloraDialog(Map map)  {			PointBid thisBid;
 		// pick up references
 		this.map = map;
 		this.parms = Parameters.getInstance();
@@ -75,13 +81,13 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		}
 		
 		// get and copy the type to preview color map
-		floraColors = new Color[MAX_TYPES];
+		floraColors = new Color[MAX_SUBTYPES];
 		prevColors = map.getFloraColors();
 		for(int i = 0; i < floraColors.length; i++)
 			floraColors[i] = (prevColors == null) ? Color.BLACK : prevColors[i];
 		
-		// initial placement counts
-		placed = new int[MAX_TYPES];
+		// initial placement counts	private static final int MAX_SUBTYPES = 20;	// max number of flora subtypes
+		placed = new int[MAX_SUBTYPES];
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -168,7 +174,6 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			goose_temp.setPaintLabels(true);
 			JLabel lTitle = new JLabel("Temperature Adjustment (deg C)");
 			lTitle.setFont(fontSmall);
-	
 			locals.add(new JLabel("    "));
 			locals.add(goose_temp);
 			locals.add(lTitle);
@@ -268,89 +273,156 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	}
 	
 	/**
+	 * record of winning bids
+	 */
+	private class PointBid {
+		int	rule;		// number of the winning rule
+		int classNum;	// of the winning bid
+		int index;		// index of the point for which this bid was made
+		double bid;		// amount of this bid
+		PointBid next;	// next bid in the list
+		
+		PointBid(int index, int ruleNum, double bid, int classNum) {
+			this.index = index;
+			this.rule = ruleNum;
+			this.bid = bid;
+			this.classNum = classNum;
+			this.next = null;
+		}
+	}
+	
+	/**
 	 * re-determine the plant coverage of each selected mesh point
 	 */
 	private int[] placeFlora() {
 		// allocate an array for the sub-type colors
-		floraColors = new Color[MAX_TYPES];
+		floraColors = new Color[MAX_SUBTYPES];
 		floraColors[0] = Color.BLACK;
 		
 		// make sure we have rules
 		if (!haveFloraTypes) {
-			FloraRule.loadFlora(flora_palette.getText());
+			ResourceRule.loadRules(flora_palette.getText());
 			haveFloraTypes = true;
 		}	
 		
-		// figure out how many points we have to populate
+		// count and initialize the points to be populated
 		int point_count = 0;
 		MeshPoint[] points = map.mesh.vertices;
 		for(int i = 0; i < floraMap.length; i++)
 			if (points[i].x >= x0 && points[i].x < x0+width &&
-				points[i].y >= y0 && points[i].y < y0+height)
+				points[i].y >= y0 && points[i].y < y0+height) {
+				floraMap[i] = FLORA_NONE;
 				point_count++;
+			}
 
-		// figure out the per-class quotas
-		int quotas[] = new int[3];
-		quotas[0] = (point_count * (100 - flora_3.getUpperValue()))/100;
-		quotas[2] = (point_count * flora_3.getValue())/100;
-		quotas[1] = point_count = (quotas[0] + quotas[2]);
+		// figure out the per-class quotas (in MeshPoints)
+		int quotas[] = new int[MAX_TYPES];
+		point_count = (point_count * flora_pct.getValue())/100;
+		quotas[FLORA_GRASS] = (point_count * (100 - flora_3.getUpperValue()))/100;
+		quotas[FLORA_TREE] = (point_count * flora_3.getValue())/100;
+		quotas[FLORA_BRUSH] = point_count = (quotas[0] + quotas[2]);
+		int counts[] = new int[MAX_TYPES];
 		
-		// get the list of flora sub-types
-		FloraRule bidders[] = new FloraRule[MAX_TYPES];
+		// get the list of the bidding sub-types
+		ResourceRule bidders[] = new ResourceRule[MAX_SUBTYPES];
 		int numRules = 0;
-		for( ListIterator<FloraRule> it = FloraRule.iterator(); it.hasNext();) {
-			FloraRule r = it.next();
+		int first = 666;
+		int last = -666;
+		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
+			ResourceRule r = it.next();
 			bidders[numRules++] = r;
 			floraColors[numRules] = r.previewColor;
+			if (r.order < first)
+				first = r.order;
+			if (r.order > last)
+				last = r.order;
 		}
-		/*
-		 * for each rule, for each point
-		 * 	 accumulate a list of (sorted) bids
-		 * 
-		 * for the next highest bid who's class has not yet met quota
-		 * 	 award that point to that bidder and update the quotas
-		 * 
-		 * see if I can use vigor to bias bidding towards one class/sub-class
-		 */
-		Bidder bidder = new Bidder(numRules);	// bid manager
 		
-		// get the sea-level temperature range
-		double Twinter = parms.meanWinter();
-		double Tsummer = parms.meanSummer();
-		
-		// factor in the temp/hydration gooseing
-		if (goose_t) {
-			Twinter += goose_temp.getValue();
-			Tsummer += goose_temp.getValue();
-		}
-		double plus = goose_h1 ? goose_hydro1.getValue() : 0.0;
-		double scale = goose_h2 ? goose_hydro2.getValue() : 100.0;
-		
-		// let every sub-class bid on each selected mesh point
-		for(int i = 0; i < floraMap.length; i++) {
-			// make sure it is in selected area
-			if (points[i].x < x0 || points[i].x >= x0+width ||
-				points[i].y < y0 || points[i].y >= y0+height)
-				continue;
-			
-			// make sure it is above water
-			if (hydroMap[i] < 0)
-				continue;
-			
-			// gather per-point bidding attributes
-			int alt = (int) parms.altitude(heightMap[i] - erodeMap[i]);
-			double lapse = alt * parms.lapse_rate;
-			double soil = soilMap[i];
-			double hydro = ((hydroMap[i] * scale)/100) + plus;
-
-			// find the first sub-class that bids on it
-			for(int r = 0; r < numRules; r++) {
-				double bid = bidders[r].bid(alt, hydro, Twinter - lapse, Tsummer - lapse, soil);
-				if (bid > 0) {
-					floraMap[i] = r + 1;
-					placed[r+1]++;
-					break;
+		// sub-types bid for mesh points in specified order
+		for(int order = first; order <= last; order++) {
+			// collect bids for every point in the range
+			PointBid thisBid;
+			PointBid winners = null;
+			for(int i = 0; i < floraMap.length; i++) {
+				// make sure it is in selected area
+				if (points[i].x < x0 || points[i].x >= x0+width ||
+					points[i].y < y0 || points[i].y >= y0+height)
+					continue;
+				
+				// make sure it is not yet occupied
+				if (floraMap[i] != FLORA_NONE)
+					continue;
+				
+				// make sure it is above water
+				if (hydroMap[i] < 0)
+					continue;
+				
+				// gather bidding attributes for this point
+				int alt = (int) parms.altitude(heightMap[i] - erodeMap[i]);
+				double lapse = alt * parms.lapse_rate;
+				double soil = soilMap[i];
+				
+				// figure out the (potentially goosed) temperature
+				double Twinter = parms.meanWinter();
+				double Tsummer = parms.meanSummer();
+				if (goose_t) {
+					Twinter += goose_temp.getValue();
+					Tsummer += goose_temp.getValue();
 				}
+				
+				// figure out the (potentially goosed) hydration
+				double plus = goose_h1 ? goose_hydro1.getValue() : 0.0;
+				double scale = goose_h2 ? goose_hydro2.getValue() : 100.0;
+				double hydro = ((hydroMap[i] * scale)/100) + plus;
+				
+				// collect all bids (within this order) for this point
+				double high_bid = -666.0;
+				int winner = -1;
+				for(int r = 0; r < numRules; r++) {
+					if (bidders[r].order != order)
+						continue;	// not eligible to bid this round
+					double bid = bidders[r].bid(alt, hydro, Twinter - lapse, Tsummer - lapse, soil);
+					if (bid <= 0)
+						continue;	// doesn't want this point
+					if (bid > high_bid) {
+						high_bid = bid;
+						winner = r;
+					}
+				}
+				
+				// add the winner to our list of winning bids
+				if (winner >= 0) {
+					int floraClass = FLORA_NONE;
+					if (bidders[winner].className.equals("Tree")) floraClass = FLORA_TREE;
+					if (bidders[winner].className.equals("Brush")) floraClass = FLORA_BRUSH;
+					if (bidders[winner].className.equals("Grass")) floraClass = FLORA_GRASS;
+					thisBid = new PointBid(i, winner+1, high_bid, floraClass);
+					
+					if (winners == null)
+						winners = thisBid;		// first bid
+					else if (winners.bid < thisBid.bid) {
+						thisBid.next = winners;	// highest bid
+						winners = thisBid;
+					} else {					// insert it after the last bigger-than-this
+						PointBid prev = winners;
+						while(prev.next != null && prev.next.bid > thisBid.bid)
+							prev = prev.next;
+						thisBid.next = prev.next;
+						prev.next = thisBid;
+					}
+				}
+			}
+			
+			// award tiles in bid-order
+			thisBid = winners;
+			while(thisBid != null) {
+				// point must not yet be awarded, bidder must be under quota
+				if (floraMap[thisBid.index] == 0 &&
+					counts[thisBid.classNum] < quotas[thisBid.classNum]) {
+					floraMap[thisBid.index] = thisBid.rule;
+					counts[thisBid.classNum] += 1;
+				}
+				thisBid = thisBid.next;
 			}
 		}
 	
@@ -428,16 +500,16 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			for(int i = 0; i < floraMap.length; i++)
 				prevFlora[i] = floraMap[i];
 			if (prevColors == null)
-				prevColors = new Color[MAX_TYPES];
+				prevColors = new Color[MAX_SUBTYPES];
 			for(int i = 0; i < floraColors.length; i++)
 				prevColors[i] = floraColors[i];
 			
 			// report the changes
 			if (parms.debug_level > 0) {
-				System.out.println("Flora Placement (" + FloraRule.ruleset + "):");
+				System.out.println("Flora Placement (" + ResourceRule.ruleset + "):");
 				int number = 1;
-				for( ListIterator<FloraRule> it = FloraRule.iterator(); it.hasNext();) {
-					FloraRule r = it.next();
+				for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
+					ResourceRule r = it.next();
 					System.out.println("    " + r.className + "." + r.ruleName + ":\t" + placed[number]);
 					number++;
 				}

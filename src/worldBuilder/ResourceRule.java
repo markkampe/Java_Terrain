@@ -16,14 +16,14 @@ import javax.json.stream.JsonParser;
 /**
  * parameters and bids for a single Flora sub-type
  */
-public class FloraRule {
+public class ResourceRule {
 	private static final String DEFAULT_CONFIG = "/Templates";
 	private static final int NO_VALUE = 666666;
 	private static final int RULE_DEBUG = 2;
 	
 	/** list of all ingested rules	*/
 	public static String ruleset;
-	private static LinkedList<FloraRule> rules;
+	private static LinkedList<ResourceRule> rules;
 	
 	/** name of this rule and its class	*/
 	public String ruleName, className;
@@ -40,7 +40,6 @@ public class FloraRule {
 	public boolean flexRange;
 	/** taper bids as we move away from mid-range	*/
 	public boolean taperedBid;
-	
 	/** how high should this rule bid	*/
 	public int vigor;
 	
@@ -63,7 +62,7 @@ public class FloraRule {
 	 * create a new subtype
 	 * @param name of this subtype
 	 */
-	public FloraRule(String name) {
+	public ResourceRule(String name) {
 		this.ruleName = name;
 		this.debug = false;
 		previewColor = null;
@@ -88,14 +87,14 @@ public class FloraRule {
 	
 	// load and iterate over Flora type rules
 	public static int size() { return rules.size(); }
-	public static ListIterator<FloraRule> iterator() { return rules.listIterator(); }
+	public static ListIterator<ResourceRule> iterator() { return rules.listIterator(); }
 	
 	/**
 	 * load in Flora sub-type definitions
 	 * @param file name of file to be read
 	 */
-	public static void loadFlora(String file) {
-		rules = new LinkedList<FloraRule>();
+	public static void loadRules(String file) {
+		rules = new LinkedList<ResourceRule>();
 		
 		Parameters parms = Parameters.getInstance();
 		BufferedReader r;
@@ -103,7 +102,7 @@ public class FloraRule {
 		String filename;
 		if (file.charAt(0) != '/') {
 			filename = DEFAULT_CONFIG + "/" + file;
-			InputStream s = FloraRule.class.getResourceAsStream(filename);
+			InputStream s = ResourceRule.class.getResourceAsStream(filename);
 			r = new BufferedReader(new InputStreamReader(s));
 		} else {
 			filename = file;
@@ -116,7 +115,7 @@ public class FloraRule {
 		}
 		
 		// parsing state variables
-		FloraRule thisRule = null;
+		ResourceRule thisRule = null;
 		String name = "", thisKey = "", thisObject = "", thisValue = "";
 		boolean inRules = false;
 		
@@ -161,7 +160,7 @@ public class FloraRule {
 						break;
 					
 					// create a new rule
-					thisRule = new FloraRule(name);
+					thisRule = new ResourceRule(name);
 					
 					// copy in all of the values we got
 					if (className != null)
@@ -338,7 +337,7 @@ public class FloraRule {
 		// see if we have been asked for debug output
 		if (parms.debug_level >= RULE_DEBUG) {
 			System.out.println("Flora rules (" + ruleset + ") from " + filename + ":");
-			for(ListIterator<FloraRule> it = iterator(); it.hasNext(); ) {
+			for(ListIterator<ResourceRule> it = iterator(); it.hasNext(); ) {
 				it.next().dump("    ");
 			}
 		}

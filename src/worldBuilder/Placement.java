@@ -148,8 +148,8 @@ public class Placement {
 
 				// add the winner to our list of winning bids
 				if (winner >= 0) {
-					int type = NONE;	// FIX
-					int subtype = NONE;	// FIX	
+					int type = bidders[winner].type;
+					int subtype = bidders[winner].subtype;
 					thisBid = new PointBid(i, type, subtype, high_bid);
 
 					if (winners == null)

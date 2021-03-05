@@ -28,6 +28,9 @@ public class ResourceRule {
 	/** name of this rule and its class	*/
 	public String ruleName, className;
 
+	/** numeric class and sub-class	*/
+	public int type, subtype;
+
 	/** Altitude ranges for this rule	*/
 	public int minAltitude, maxAltitude;
 	/** Hydration and water-depth ranges for this rule	*/

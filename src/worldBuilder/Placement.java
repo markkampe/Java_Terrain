@@ -68,19 +68,19 @@ public class Placement {
 	}
 
 	/**
-	 * record of a winning bid (from a type.subtype for a MeshPoint
+	 * record of a winning bid (from a id(type) for a MeshPoint
 	 */
 	private class PointBid {
-		int	type;		// resource type
-		int subtype;	// resource sub-type
+		int	type;		// resource type (meaningful to its class)
+		int id;			// resource id
 		int index;		// index of the point for which this bid was made
 		double bid;		// amount of this bid
 		PointBid next;	// next bid in the list
 
-		PointBid(int index, int type, int subtype, double bid) {
+		PointBid(int index, int type, int id, double bid) {
 			this.index = index;
 			this.type = type;
-			this.subtype = subtype;
+			this.id = id;
 			this.bid = bid;
 			this.next = null;
 		}
@@ -149,8 +149,8 @@ public class Placement {
 				// add the winner to our list of winning bids
 				if (winner >= 0) {
 					int type = bidders[winner].type;
-					int subtype = bidders[winner].subtype;
-					thisBid = new PointBid(i, type, subtype, high_bid);
+					int id = bidders[winner].id;
+					thisBid = new PointBid(i, type, id, high_bid);
 
 					if (winners == null)
 						winners = thisBid;		// first bid
@@ -173,7 +173,7 @@ public class Placement {
 				// point must not yet be awarded, bidder must be under quota
 				if (resources[thisBid.index] == 0 &&
 						counts[thisBid.type] < quotas[thisBid.type]) {
-					resources[thisBid.index] = thisBid.subtype;
+					resources[thisBid.index] = thisBid.id;
 					counts[thisBid.type] += 1;
 				}
 				thisBid = thisBid.next;

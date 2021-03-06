@@ -28,8 +28,8 @@ public class ResourceRule {
 	/** name of this rule and its class	*/
 	public String ruleName, className;
 
-	/** numeric class and sub-class	*/
-	public int type, subtype;
+	/** numeric class, and ID*/
+	public int type, id;
 
 	/** Altitude ranges for this rule	*/
 	public int minAltitude, maxAltitude;
@@ -46,7 +46,7 @@ public class ResourceRule {
 	/** how high should this rule bid	*/
 	public int vigor;
 	
-	/** when in the sequence of bids does this go	*/
+	/** when, in the sequence of bids, does this go	*/
 	public int order;
 	
 	/** what color should this render as in previews	*/
@@ -68,10 +68,13 @@ public class ResourceRule {
 	public ResourceRule(String name) {
 		this.ruleName = name;
 		this.debug = false;
-		previewColor = null;
+		previewColor = null;// no previews
+		className = null;	// no default class
+		type = 0;			// no default type
+		id = 0;				// no default ID
+		order = 9;			// end of the line
 		
 		// default values will meet any terrestrial conditions
-		className = null;
 		minAltitude = -parms.alt_max;
 		maxAltitude = parms.alt_max;
 		minDepth = 0;
@@ -85,7 +88,6 @@ public class ResourceRule {
 		flexRange = false;
 		taperedBid = false;
 		vigor = 16;
-		order = 9;
 	}
 	
 	// load and iterate over Flora type rules
@@ -122,6 +124,7 @@ public class ResourceRule {
 		String name = "", thisKey = "", thisObject = "", thisValue = "";
 		boolean inRules = false;
 		
+		int	   type = NO_VALUE,   id = NO_VALUE;	// resource class and ID
 		int    aMin = NO_VALUE, aMax = NO_VALUE;	// altitude
 		double dMin = NO_VALUE, dMax = NO_VALUE;	// depth
 		double hMin = NO_VALUE, hMax = NO_VALUE;	// hydration
@@ -168,6 +171,10 @@ public class ResourceRule {
 					// copy in all of the values we got
 					if (className != null)
 						thisRule.className = className;
+					if (type != NO_VALUE)
+						thisRule.type = type;
+					if (id != NO_VALUE)
+						thisRule.id = id;
 					if (aMin != NO_VALUE)
 						thisRule.minAltitude = aMin;
 					if (hMin != NO_VALUE)
@@ -199,6 +206,7 @@ public class ResourceRule {
 					rules.add(thisRule);
 					
 					// now reset all System.out.println("read string for key " + thisKey);the parameters for the next rule
+					type = NO_VALUE;
 					aMin = NO_VALUE; aMax = NO_VALUE;
 					dMin = NO_VALUE; dMax = NO_VALUE;
 					hMin = NO_VALUE; hMax = NO_VALUE;
@@ -278,6 +286,14 @@ public class ResourceRule {
 				}
 				
 				switch (thisKey) {
+				case "type":
+					type = parser.getInt();
+					thisKey = "";
+					break;
+				case "id":
+					id = parser.getInt();
+					thisKey = "";
+					break;
 				case "vigor":
 					vigor = parser.getInt();
 					thisKey = "";
@@ -355,7 +371,7 @@ public class ResourceRule {
 		System.out.print(prefix + "subtype: " + ruleName);
 		System.out.println("");
 		if (className != null)
-			System.out.println(prefix + "      " + "class:   " + className);
+			System.out.println(prefix + "      " + "class:   " + className + "(" + type + "," + id + ")");
 		System.out.println(prefix + "      " + "alt:     " + minAltitude + "-" + maxAltitude);
 		System.out.println(prefix + "      " + "depth:   " + (int) minDepth + "-" + (int) maxDepth);
 		System.out.println(prefix + "      " + "hydro:   " + String.format("%.1f", minHydro) + "-" + String.format("%.1f", maxHydro));

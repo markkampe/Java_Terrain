@@ -38,6 +38,10 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 
 	private static final int NONE = 0;
 	private static final int MAX_TYPES = 10;
+	
+	private static final int RSRC_STONE = 1;	// sand-stone, granite, etc
+	private static final int RSRC_METAL = 2;	// copper, iron, etc
+	private static final int RSRC_PRECIOUS = 3;	// gold, silver, etc
 
 	private static final long serialVersionUID = 1L;
 	
@@ -177,9 +181,9 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		// figure out the per-class quotas (in MeshPoints)
 		int quotas[] = new int[MAX_TYPES];
 		point_count = (point_count * mineral_pct.getValue())/100;
-		quotas[1] = (point_count * (100 - minerals_3.getUpperValue()))/100;
-		quotas[2] = (point_count * minerals_3.getValue())/100;
-		quotas[3] = point_count - (quotas[1] + quotas[2]);
+		quotas[RSRC_PRECIOUS] = (point_count * (100 - minerals_3.getUpperValue()))/100;
+		quotas[RSRC_STONE] = (point_count * minerals_3.getValue())/100;
+		quotas[RSRC_METAL] = point_count - (quotas[1] + quotas[2]);
 		
 		// assign flora types for each MeshPoint
 		classCounts = placer.update(x0, y0, height, width, quotas);
@@ -253,13 +257,13 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			// report the changes
 			if (parms.debug_level > 0) {
 				System.out.println("Mineral Placement (" + ResourceRule.ruleset + 
-								   "): G/B/T = " + classCounts[0] + 
-								   "/" + classCounts[1] +
-								   "/" + classCounts[2]);
+								   "): S/M/P = " + classCounts[RSRC_STONE] + 
+								   "/" + classCounts[RSRC_METAL] +
+								   "/" + classCounts[RSRC_PRECIOUS]);
 			}
 			
 		} else if (e.getSource() == chooseRocks) {
-			FileDialog d = new FileDialog(this, "Floral Palette", FileDialog.LOAD);
+			FileDialog d = new FileDialog(this, "Mineral Palette", FileDialog.LOAD);
 			d.setFile(rock_palette.getText());
 			d.setVisible(true);
 			String palette_file = d.getFile();
@@ -268,6 +272,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 				if (dir != null)
 					palette_file = dir + palette_file;
 				rock_palette.setText(palette_file);
+				placer = null;
 			}
 			placer = null;
 		} else if (e.getSource() == cancel) {

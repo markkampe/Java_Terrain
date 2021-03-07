@@ -356,7 +356,7 @@ public class ResourceRule {
 		
 		// see if we have been asked for debug output
 		if (parms.debug_level >= RULE_DEBUG) {
-			System.out.println("Flora rules (" + ruleset + ") from " + filename + ":");
+			System.out.println("Resource rules (" + ruleset + ") from " + filename + ":");
 			for(ListIterator<ResourceRule> it = iterator(); it.hasNext(); ) {
 				it.next().dump("    ");
 			}
@@ -365,7 +365,7 @@ public class ResourceRule {
 	
 	
 	/**
-	 * dump out a Flora sub-type (for debugging)
+	 * dump out a Rule (for debugging)
 	 * @param prefix ... leading blanks
 	 */
 	public void dump( String prefix ) {

@@ -65,6 +65,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem editRiver;
 	private JMenuItem editRain;
 	private JMenuItem editFlora;
+	private JMenuItem editRocks;
 	private JMenuItem editCity;
 	private JMenuItem editRoads;
 	private JMenuItem viewPoints;
@@ -210,14 +211,17 @@ public class WorldBuilder  extends JFrame
 		editRain.addActionListener(this);
 		editRiver = new JMenuItem("add arterial river");
 		editRiver.addActionListener(this);
-		editFlora = new JMenuItem("flora placement");
+		editFlora = new JMenuItem("flora distribution");
 		editFlora.addActionListener(this);
+		editRocks = new JMenuItem("mineral distribution");
+		editRocks.addActionListener(this);
+		editRocks.setEnabled(false);	// SOMEDAY implement minerals
 		editCity = new JMenuItem("add city");
 		editCity.addActionListener(this);
 		editCity.setEnabled(false);	// SOMEDAY implement city creation
 		editRoads = new JMenuItem("draw roads");
 		editRoads.addActionListener(this);
-		editRoads.setEnabled(false);	// SOMEDAY implement city creation
+		editRoads.setEnabled(false);	// SOMEDAY implement roads
 		JMenu editMenu = new JMenu("Edit");
 		editMenu.add(editWorld);
 		editMenu.add(editSlope);
@@ -226,6 +230,7 @@ public class WorldBuilder  extends JFrame
 		editMenu.add(editRiver);
 		editMenu.add(editRain);
 		editMenu.add(editFlora);
+		editMenu.add(editRocks);
 		editMenu.add(new JSeparator());
 		editMenu.add(editCity);
 		editMenu.add(editRoads);
@@ -516,9 +521,12 @@ public class WorldBuilder  extends JFrame
 			if (activeDialog)
 				twoDialogError();
 			else {
+				parms.display_options = map.setDisplay(Map.SHOW_FLORA, true);
 				placeDialog(new FloraDialog(map), false);
 				activeDialog = true;
 			}
+		} else if (o == editRocks) {
+			System.err.println("implement edit:Minerals");
 		} else if (o == editCity) {
 			System.err.println("implement edit:City");
 		} else if (o == editRoads) {

@@ -24,7 +24,7 @@
 	  "vigor": 32,
 	  "range": "flexible",
 	  "bid": "tapered",
-	  "order": 2,
+	  "order": 1,
 	  "color": [0,102,51]
 	},
 	{ "name": "Palm",
@@ -37,7 +37,7 @@
 	  "vigor": 32,
 	  "range": "flexible",
 	  "bid": "tapered",
-	  "order": 2,
+	  "order": 1,
 	  "color": [102,204,0]
 	},
 

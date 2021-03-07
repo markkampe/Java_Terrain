@@ -215,7 +215,6 @@ public class WorldBuilder  extends JFrame
 		editFlora.addActionListener(this);
 		editRocks = new JMenuItem("mineral distribution");
 		editRocks.addActionListener(this);
-		editRocks.setEnabled(false);	// SOMEDAY implement minerals
 		editCity = new JMenuItem("add city");
 		editCity.addActionListener(this);
 		editCity.setEnabled(false);	// SOMEDAY implement city creation
@@ -526,7 +525,13 @@ public class WorldBuilder  extends JFrame
 				activeDialog = true;
 			}
 		} else if (o == editRocks) {
-			System.err.println("implement edit:Minerals");
+			if (activeDialog)
+				twoDialogError();
+			else {
+				parms.display_options = map.setDisplay(Map.SHOW_SOIL, true);
+				placeDialog(new MineralDialog(map), false);
+				activeDialog = true;
+			}
 		} else if (o == editCity) {
 			System.err.println("implement edit:City");
 		} else if (o == editRoads) {

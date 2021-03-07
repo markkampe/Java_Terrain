@@ -730,6 +730,21 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
+	 * return ID-> mineral preview color map
+	 */
+	public Color[] getRockColors() {
+		return rockColors;
+	}
+	
+	/**
+	 * update the mapping from rock types to preview colors
+	 * @param newColors
+	 */
+	public void setRockColors(Color[] newColors) {
+		rockColors = newColors;
+	}
+	
+	/**
 	 * return map of flora types for the current mesh
 	 */
 	public double[] getFloraMap() { return floraMap; }

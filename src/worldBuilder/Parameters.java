@@ -141,6 +141,10 @@ public class Parameters {
 	/** default export % plant cover	*/	public int dFloraPct;
 	/** default export % tall grass		*/	public int dFloraMin;
 	/** default export % brush			*/	public int dFloraMax;
+	
+	/** default export % mineral deps	*/	public int dRockPct;
+	/** default export % structural		*/	public int dRockMin;
+	/** default export % metal			*/	public int dRockMax;
 
 	/** default export temp offset (degC)	*/	public int dDeltaT;	
 	/** default export hydro plus/minus	(%)	*/	public int dDeltaH;
@@ -246,6 +250,11 @@ public class Parameters {
 		dFloraPct = 50;
 		dFloraMin = 40;
 		dFloraMax = 70;
+		// default mineral distributions
+		dRockPct = 10;
+		dRockMin = 70;
+		dRockMax = 95;
+		
 		// default temp and hydration offsets
 		dDeltaT = 0;
 		dDeltaH = 0;

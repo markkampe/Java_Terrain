@@ -11,6 +11,7 @@ import java.util.ListIterator;
  */
 public class Placement {
 	private static final int MAX_RULES = 20;
+	private static final int MAX_ID = 100;
 	private static final int NONE = 0;
 	
 	private Parameters parms;
@@ -28,6 +29,8 @@ public class Placement {
 	private int lastPass;		// highest numbered bidding pass
 
 	private Color colorMap[];	// per-rule preview colors
+	
+	private static final int PLACEMENT_DEBUG = 2;
 
 
 	/**
@@ -52,19 +55,26 @@ public class Placement {
 		// build up a list of rules that will be bidding
 		ResourceRule.loadRules(rulesFile);
 		bidders = new ResourceRule[MAX_RULES];
-		colorMap = new Color[MAX_RULES+1];
+		colorMap = new Color[MAX_ID+1];
 		numRules = 0;
 		firstPass = 666;
 		lastPass = -666;
 		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
 			ResourceRule r = it.next();
 			bidders[numRules++] = r;
-			colorMap[numRules] = r.previewColor;
+			colorMap[r.id] = r.previewColor;
 			if (r.order < firstPass)
 				firstPass = r.order;
 			if (r.order > lastPass)
 				lastPass = r.order;
 		}
+	}
+	
+	/**
+	 * @return id->preview Color map
+	 */
+	public Color[] previewColors() {
+		return colorMap;
 	}
 
 	/**
@@ -94,20 +104,40 @@ public class Placement {
 	 * @param height ... height of selected region
 	 * @param width ... width of selected region
 	 * @param quotas ... per class quotas (in MeshPoints)
+	 * 
+	 * @return array of (per-class) point placements
 	 */
-	public void update(double x0, double y0, double height, double width, int quotas[]) {
+	public int[] update(double x0, double y0, double height, double width, int quotas[]) {
 
 		int counts[] = new int[MAX_RULES];	// allocated points (vs quotas)
 		
 		// initialize the points to be populated
 		for(int i = 0; i < points.length; i++)
 			if (points[i].x >= x0 && points[i].x < x0+width &&
-			points[i].y >= y0 && points[i].y < y0+height) {
+				points[i].y >= y0 && points[i].y < y0+height) {
 				resources[i] = NONE;
 			}
 
 		// sub-types bid for mesh points in specified order
 		for(int pass = firstPass; pass <= lastPass; pass++) {
+			// see if there are any under-quota rules in this class
+			String eligible = null;
+			for(int r = 0; r < numRules; r++) {
+				if (bidders[r].className.equals("Brush")) {
+					System.out.println("looking at Brush, pass=" + pass + ", order=" + bidders[r].order + ", quota=" + quotas[bidders[r].type]);
+				}
+				if (bidders[r].order != pass)
+					continue;
+				if (counts[bidders[r].type] >= quotas[bidders[r].type])
+					continue;
+				if (eligible == null)
+					eligible = bidders[r].ruleName;
+				else
+					eligible = eligible + "," + bidders[r].ruleName;
+			}
+			if (eligible == null)
+				continue;
+				
 			// collect bids for every point in the range
 			PointBid thisBid;
 			PointBid winners = null;
@@ -168,17 +198,21 @@ public class Placement {
 			}
 
 			// award tiles in bid-order
+			int placed = 0;
 			thisBid = winners;
 			while(thisBid != null) {
 				// point must not yet be awarded, bidder must be under quota
-				if (resources[thisBid.index] == 0 &&
-						counts[thisBid.type] < quotas[thisBid.type]) {
+				if (resources[thisBid.index] == NONE && counts[thisBid.type] < quotas[thisBid.type]) {
 					resources[thisBid.index] = thisBid.id;
 					counts[thisBid.type] += 1;
+					placed += 1;
 				}
 				thisBid = thisBid.next;
 			}
+			
+			if (parms.debug_level >= PLACEMENT_DEBUG)
+				System.out.println("... pass " + pass + " placed " + placed + " from " + eligible);
 		}
-
+		return counts;
 	}
 }

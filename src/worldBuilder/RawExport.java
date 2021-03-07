@@ -23,7 +23,7 @@ public class RawExport extends ExportBase implements ActionListener {
 		
 		// we handle window and button events
 		previewT.addActionListener(this);
-		previewF.setEnabled(false);		// no Flora in raw json
+		previewF.addActionListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		addWindowListener(this);

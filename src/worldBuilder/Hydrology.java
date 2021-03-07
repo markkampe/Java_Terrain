@@ -445,6 +445,7 @@ public class Hydrology {
 		double[] rainMap = map.getRainMap();
 		double[] incoming = map.getIncoming();
 		double[] soilMap = map.getSoilMap();
+		final int ALLUVIAL = map.getSoilType("Alluvial");
 		
 		// initialize our output maps to no flowing water
 		fluxMap = map.getFluxMap();
@@ -478,7 +479,7 @@ public class Hydrology {
 			fluxMap[x] += incoming[x] + (rain_to_flow * rainMap[x]);
 
 			// compute the soil absorbtion and evaporative loss
-			int soilType = erodeMap[x] < 0 ? Map.ALLUVIAL : (int) soilMap[x];
+			int soilType = erodeMap[x] < 0 ? ALLUVIAL : (int) soilMap[x];
 			double absorbed = saturation[soilType] * parms.Dp * area;
 			double lost = absorbed * evaporation();
 			

@@ -36,6 +36,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private int d_max;				// diameter: full scale
 	private int a_max;				// altitude: full scale
 	
+	private final int IGNEOUS;
+	private final int METAMORPHIC;
+	private final int SEDIMENTARY;
+	
 	/**
 	 * a LandForm is a macro for a collection of (size, shape) mountain parameters
 	 */
@@ -75,6 +79,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		this.map = map;
 		this.oldHeight = map.getHeightMap();
 		this.parms = Parameters.getInstance();
+		IGNEOUS = map.getSoilType("Igneous");
+		METAMORPHIC = map.getSoilType("Metamorphic");
+		SEDIMENTARY = map.getSoilType("Sedimentary");
 
 		// copy the current height map
 		this.newHeight = new double[oldHeight.length];
@@ -471,17 +478,17 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// see if the user has chosen a composition
 		int composition = -1;
 		if (igneous.isSelected())
-			composition = Map.IGNEOUS;
+			composition = IGNEOUS;
 		else if (metamorphic.isSelected())
-			composition = Map.METAMORPHIC;
+			composition = METAMORPHIC;
 		else if (sedimentary.isSelected())
-			composition = Map.SEDIMENTARY;
+			composition = SEDIMENTARY;
 		
 		// how many mountains can we create
 		if (mountains < 2) {
 			// one mountain goes in the center (likely volcanic)
 			if (composition < 0)
-			composition = (shape1 <= (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? Map.IGNEOUS : Map.METAMORPHIC;
+			composition = (shape1 <= (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? IGNEOUS : METAMORPHIC;
 			placeMountain(map, (x_start + x_end)/2, (y_start + y_end)/2,
 						  d1/2, z, shape1, composition);
 			String form;
@@ -492,20 +499,20 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			else
 				form = "mountain";
 			placed = "Placed " + parms.km(d1) + Parameters.unit_xy + " wide, " +
-					alt + Parameters.unit_z + " " + Map.soil_names[composition] + " " + 
+					alt + Parameters.unit_z + " " + map.rockNames[composition] + " " + 
 					form + " at <" +
 					String.format(POS_FMT, parms.latitude((x_start+x_end)/2)) + "," +
 					String.format(POS_FMT, parms.longitude((y_start + y_end)/2)) + 
 					"> shape=" + shape1 + "/" + Parameters.CYLINDRICAL + "\n";
 		} else {
 			if (composition < 0)
-				composition = (alt > 0) ? Map.METAMORPHIC : Map.SEDIMENTARY;
+				composition = (alt > 0) ? METAMORPHIC : SEDIMENTARY;
 			placeRidge(map, x_start, y_start, x_end, y_end, d1/2, d2/2, z, 
 					   shape1, shape2, composition);
 			String form = (alt > 0) ? "ridge" : "trench";
 			placed = "Placed " + parms.km(d1+d2)/2 + Parameters.unit_xy + " wide, " +
 					alt + Parameters.unit_z + " " +
-					Map.soil_names[composition] + " " + form + " from <" +
+					map.rockNames[composition] + " " + form + " from <" +
 					String.format(POS_FMT, parms.latitude(x_start)) + "," + 
 					String.format(POS_FMT, parms.longitude(y_start)) + "> to <" +
 					String.format(POS_FMT, parms.latitude(x_end)) + "," + 

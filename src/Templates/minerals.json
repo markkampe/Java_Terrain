@@ -1,0 +1,21 @@
+{ 
+  "Default Minerals": [
+	{ "//": "basic soil types" },
+	{ "name": "Sedimentary", 
+	  "id": 1,
+	  "color": [255,255,0]
+	},
+	{ "name": "Metamorphic", 
+	  "id": 2,
+	  "color": [128,128,128]
+	},
+	{ "name": "Igneous", 
+	  "id": 3,
+	  "color": [64,64,64]
+	},
+	{ "name": "Alluvial", 
+	  "id": 4,
+	  "color": [0,255,0]
+    	}
+    ]
+}

@@ -13,6 +13,8 @@ public class SoilMap {
 	private static final int DIM = 128;
 	private static final int BRITE = 255;
 	
+	private static int ALLUVIAL;
+	
 	private Map map;
 	private boolean show_soil;
 	private boolean show_hydro;
@@ -27,6 +29,7 @@ public class SoilMap {
 		this.map = map;
 		this.show_soil = show_soil;
 		this.show_hydro = show_hydro;
+		ALLUVIAL = map.getSoilType("Alluvial");
 	}
 
 	/**
@@ -48,38 +51,22 @@ public class SoilMap {
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			
 			// use soil type/hydration to generate background colors
+			Color[] previewColors = map.rockColors;
 			for(int r = 0; r < h; r++)
 				for(int c = 0; c < w; c++) {
 					if (hArray[r][c] < 0)	// ignore under water
 						continue;
 					int s = (int) sArray[r][c];	// soil type
 					if (eArray[r][c] < 0)		// negative erosion is alluvial
-						s = Map.ALLUVIAL;
-					
+						s = ALLUVIAL;
 					double hydration = 0.5;		// how saturated is the soil
 					if (show_hydro)
 						hydration = hArray[r][c] / Hydrology.saturation[s];
 					int shade = (int) Map.linear(DIM, BRITE, hydration);
 					Color color = new Color(0, 0, 0);
-					if (show_soil) {
-						switch(s) {
-						case Map.IGNEOUS:		// shades of dark grey
-							shade = (int) Map.linear(DARK, DIM, hydration);
-							color = new Color(shade, shade, shade);
-							break;
-						case Map.METAMORPHIC:	// shades of light grey
-							color = new Color(shade, shade, shade);
-							break;
-						case Map.SEDIMENTARY:	// shades of bright yellow
-							color = new Color(shade, shade, 0);
-							break;
-						case Map.ALLUVIAL:		// shades of bright green
-							color = new Color(0, shade, 0);
-							break;
-						default:				// no soil?
-							continue;
-						}
-					} else if (show_hydro)		// shades of light blue
+					if (show_soil)
+						color = previewColors[s];
+					else if (show_hydro)		// shades of light blue
 						color = new Color(0, shade, shade);
 					else						// nothing to see
 						continue;

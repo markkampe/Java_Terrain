@@ -66,6 +66,7 @@ public class ResourceRule {
 	 * @param name of this subtype
 	 */
 	public ResourceRule(String name) {
+		
 		this.ruleName = name;
 		this.debug = false;
 		previewColor = null;// no previews
@@ -84,7 +85,7 @@ public class ResourceRule {
 		minTemp = -60;
 		maxTemp = 70;
 		minSoil = 0;
-		maxSoil = Map.ALLUVIAL + 1;
+		maxSoil = 9;	// FIX, how many legal soil types are there
 		flexRange = false;
 		taperedBid = false;
 		vigor = 16;

@@ -347,7 +347,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 			
 			double s = soilType();
 			if (s >= 0)
-				descr += ", soil=" + Map.soil_names[(int)s];
+				descr += ", soil=" + map.rockNames[(int)s];
 			
 			int v = altitude.getValue();
 			if (v != 0)
@@ -462,13 +462,13 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	private double soilType() {
 		if (igneous.isSelected())
-			return(Map.IGNEOUS);
+			return(map.getSoilType("Igneous"));
 		if (metamorphic.isSelected())
-			return(Map.METAMORPHIC);
+			return(map.getSoilType("Metamorphic"));
 		if (alluvial.isSelected())
-			return Map.ALLUVIAL;
+			return map.getSoilType("Alluvial");
 		if (sedimentary.isSelected())
-			return Map.SEDIMENTARY;
+			return map.getSoilType("Sedimentary");
 		return -1;
 	}
 	

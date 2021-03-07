@@ -45,17 +45,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 							SHOW_FLORA = 0x100;
 	private int display;		// bitmask for enabled SHOWs
 	
-	/** defined soil types	*/
-	public static final int SEDIMENTARY = 0,
-							METAMORPHIC = 1,
-							IGNEOUS = 2,
-							ALLUVIAL = 3;
-
-	/** names of defined soil types	*/
-	public static final String soil_names[] = {
-			"Sedimentary", "Metamorphic", "Igneous", "Alluvial"
-	};
-	
 	// map size (in pixels)
 	private static final int MIN_WIDTH = 400;	// min screen width
 	private static final int MIN_HEIGHT = 400;	// min screen height
@@ -85,8 +74,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public Hydrology hydro;		// hydrology calculator for current map
 	
 	public Color floraColors[];	// display color for each flora type
+	public Color rockColors[];	// display color for each mineral type
 	public String floraNames[];	// import/export name for each flora type
-	
+	public String rockNames[];	// import/export name for each mineral type
+
 	// per MeshPoint information
 	private double heightMap[]; // Height of each mesh point
 	private double soilMap[];	// Soil type of each mesh point
@@ -229,6 +220,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		Placement p = new Placement(parms.flora_rules, null, null);
 		floraColors = p.previewColors();
 		floraNames = p.resourceNames();
+		p = new Placement(parms.mineral_rules, null, null);
+		rockColors = p.previewColors();
+		rockNames = p.resourceNames();
 		
 		// read in the underlying mesh
 		Mesh m = new Mesh();
@@ -292,16 +286,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 						break;
 						
 					case "soil":
-						String s = parser.getString();
-						for(int i = 0; i < Map.soil_names.length; i++)
-							if (s.equals(Map.soil_names[i])) {
-								soil = i;
-								break;
-							}
+						soil = getSoilType(parser.getString());
 						break;
 						
 					case "flora":
-						s = parser.getString();
+						String s = parser.getString();
 						for(int i = 0; i < floraNames.length; i++)
 						if (floraNames[i] != null && s.equals(floraNames[i])) {
 							flora = i;
@@ -571,7 +560,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			output.write(String.format(", \"z\": %.9f", heightMap[x]));
 		output.write(String.format(", \"rain\": \"%.1f%s\"", rainMap[x], Parameters.unit_r));
 		if (soilMap[x] != 0)
-			output.write(String.format(", \"soil\": \"%s\"", Map.soil_names[(int) Math.round(soilMap[x])]));
+			output.write(String.format(", \"soil\": \"%s\"", rockNames[(int) Math.round(soilMap[x])]));
 		if (floraMap[x] != 0)
 			output.write(String.format(", \"flora\": \"%s\"", floraNames[(int) Math.round(floraMap[x])]));
 		if (incoming[x] != 0)
@@ -728,6 +717,16 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		soilMap = newSoil;
 		repaint();
 		return old;
+	}
+	
+	/**
+	 * return type ID of a specified mineral/soil name
+	 */
+	public int getSoilType(String name) {
+		for(int i = 0; i < rockNames.length; i++)
+			if (rockNames[i] != null && name.equals(rockNames[i]))
+				return i;
+		return 0;
 	}
 	
 	/**

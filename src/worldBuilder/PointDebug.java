@@ -146,8 +146,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			infoSuspended.setText(String.format("%f%s", susp, Parameters.unit_f));
 			
 			double soilMap[] = map.getSoilMap();
-			desc = erodeMap[point.index] < 0 ? Map.soil_names[Map.ALLUVIAL] + "/" : "";
-			infoSoil.setText(desc + Map.soil_names[(int) soilMap[point.index]]);
+			desc = erodeMap[point.index] < 0 ? map.getSoilType("Alluvial") + "/" : "";
+			infoSoil.setText(desc + map.rockNames[(int) soilMap[point.index]]);
 			
 			double hydroMap[] = map.getHydrationMap();
 			h = hydroMap[point.index];

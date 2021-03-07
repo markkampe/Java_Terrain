@@ -10,9 +10,6 @@ import java.io.IOException;
 public class JsonExporter implements Exporter {	
 
 	private Parameters parms;
-	private static final String soilTypes[] = {
-			"sedimentary", "metamorphic", "igneous", "alluvial"
-	};
 	
 	private int x_points;			// width of map (in points)
 	private int y_points;			// height of map (in points)
@@ -34,6 +31,8 @@ public class JsonExporter implements Exporter {
 	private double maxHeight;		// highest discovered altitude
 	private double minHeight;		// lowest discovered altitude
 	private double maxDepth;		// deepest discovered water
+	
+	static final int ALLUVIAL = 4;	// FIX
 	
 	// brightness constants for preview colors
 	private static final int DIM = 32;
@@ -229,8 +228,9 @@ public class JsonExporter implements Exporter {
 					output.write(COMMA);
 					
 					int st = (int) Math.round(soil[r][c]);
+					// FIX - should be string, but don't have map
 					output.write(String.format(FORMAT_S, "soil", 
-							soilTypes[erode[r][c] < 0 ? Map.ALLUVIAL : st]));
+							soil[erode[r][c] < 0 ? ALLUVIAL : st]));
 					output.write(" }");
 				}
 			}

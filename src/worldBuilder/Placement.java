@@ -123,9 +123,6 @@ public class Placement {
 			// see if there are any under-quota rules in this class
 			String eligible = null;
 			for(int r = 0; r < numRules; r++) {
-				if (bidders[r].className.equals("Brush")) {
-					System.out.println("looking at Brush, pass=" + pass + ", order=" + bidders[r].order + ", quota=" + quotas[bidders[r].type]);
-				}
 				if (bidders[r].order != pass)
 					continue;
 				if (counts[bidders[r].type] >= quotas[bidders[r].type])
@@ -167,6 +164,9 @@ public class Placement {
 				for(int r = 0; r < numRules; r++) {
 					if (bidders[r].order != pass)
 						continue;	// not eligible to bid this round
+					if (counts[bidders[r].type] >= quotas[bidders[r].type])
+						continue;	// already at quota
+					
 					double bid = bidders[r].bid(alt, hydro, Twinter - lapse, Tsummer - lapse, soil);
 					if (bid <= 0)
 						continue;	// doesn't want this point

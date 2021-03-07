@@ -29,6 +29,7 @@ public class Placement {
 	private int lastPass;		// highest numbered bidding pass
 
 	private Color colorMap[];	// per-rule preview colors
+	private String nameMap[];	// per-rule resource names
 	
 	private static final int PLACEMENT_DEBUG = 2;
 
@@ -36,26 +37,20 @@ public class Placement {
 	/**
 	 * instantiate a new Placement engine
 	 * 
+	 * 	note that a Placement engine can be instantiated without a Map
+	 * 		 simply to load name<->resource ID mapping
+	 * 
 	 * @param rulesFile ... file of resource bidding rules
-	 * @param Map ... Map
-	 * @param resources ... array of per MeshPoint values
+	 * @param Map ... Map (can be null)
+	 * @param resources ... array of per MeshPoint values (can be null)
 	 */
 	public Placement(String rulesFile, Map map, double resources[]) {
 	
-		parms = Parameters.getInstance();
-	
-		// save map info
-		this.points = map.mesh.vertices;
-		this.hydroMap = map.getHydrationMap();
-		this.heightMap = map.getHeightMap();
-		this.erodeMap = map.getErodeMap();
-		this.soilMap = map.getSoilMap();
-		this.resources = resources;
-		
-		// build up a list of rules that will be bidding
+		// build up a list of ResourceRules
 		ResourceRule.loadRules(rulesFile);
 		bidders = new ResourceRule[MAX_RULES];
 		colorMap = new Color[MAX_ID+1];
+		nameMap = new String[MAX_ID+1];
 		numRules = 0;
 		firstPass = 666;
 		lastPass = -666;
@@ -63,11 +58,23 @@ public class Placement {
 			ResourceRule r = it.next();
 			bidders[numRules++] = r;
 			colorMap[r.id] = r.previewColor;
+			nameMap[r.id] = r.ruleName;
 			if (r.order < firstPass)
 				firstPass = r.order;
 			if (r.order > lastPass)
 				lastPass = r.order;
 		}
+		
+		// if we were passed a map, save its tables
+		if (map != null) {
+			this.points = map.mesh.vertices;
+			this.hydroMap = map.getHydrationMap();
+			this.heightMap = map.getHeightMap();
+			this.erodeMap = map.getErodeMap();
+			this.soilMap = map.getSoilMap();
+		}
+		this.resources = resources;
+		parms = Parameters.getInstance();
 	}
 	
 	/**
@@ -75,6 +82,23 @@ public class Placement {
 	 */
 	public Color[] previewColors() {
 		return colorMap;
+	}
+	
+	/**
+	 * @return id->name map
+	 */
+	public String[] resourceNames() {
+		return nameMap;
+	}
+	
+	/**
+	 * @return ID associated with a resource name
+	 */
+	public int resourceID(String name) {
+		for(int i = 0; i < nameMap.length; i++)
+			if (nameMap[i] != null && name.equals(nameMap[i]))
+				return i;
+		return NONE;
 	}
 
 	/**

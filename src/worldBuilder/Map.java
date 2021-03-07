@@ -85,6 +85,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public Hydrology hydro;		// hydrology calculator for current map
 	
 	public Color floraColors[];	// display color for each flora type
+	public String floraNames[];	// import/export name for each flora type
 	
 	// per MeshPoint information
 	private double heightMap[]; // Height of each mesh point
@@ -224,7 +225,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * @param filename - of input file
 	 */
 	public void read(String filename) {
-		// start by reading in the underlying mesh
+		// get resource name/color maps
+		Placement p = new Placement(parms.flora_rules, null, null);
+		floraColors = p.previewColors();
+		floraNames = p.resourceNames();
+		
+		// read in the underlying mesh
 		Mesh m = new Mesh();
 		m.read(filename);
 		setMesh(m);
@@ -254,6 +260,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		double z = 0;
 		double rain = 0;
 		int soil = 0;
+		int flora = 0;
 		double influx = 0;
 		isSubRegion = false;
 		
@@ -291,6 +298,15 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 								soil = i;
 								break;
 							}
+						break;
+						
+					case "flora":
+						s = parser.getString();
+						for(int i = 0; i < floraNames.length; i++)
+						if (floraNames[i] != null && s.equals(floraNames[i])) {
+							flora = i;
+							break;
+						}
 						break;
 						
 					case "rain":
@@ -393,6 +409,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				if (inPoints) {
 					heightMap[points] = z;
 					soilMap[points] = soil;
+					floraMap[points] = flora;
 					rainMap[points] = rain;
 					incoming[points] = influx;
 					points++;
@@ -411,6 +428,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				if (inPoints) {
 					influx = 0;
 					soil = 0;
+					flora = 0;
 					rain = 0;
 					z = 0.0;
 				}
@@ -554,6 +572,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		output.write(String.format(", \"rain\": \"%.1f%s\"", rainMap[x], Parameters.unit_r));
 		if (soilMap[x] != 0)
 			output.write(String.format(", \"soil\": \"%s\"", Map.soil_names[(int) Math.round(soilMap[x])]));
+		if (floraMap[x] != 0)
+			output.write(String.format(", \"flora\": \"%s\"", floraNames[(int) Math.round(floraMap[x])]));
 		if (incoming[x] != 0)
 			output.write(String.format(", \"influx\": \"%.2f%s\"", incoming[x], Parameters.unit_f));
 		output.write(" }");

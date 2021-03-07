@@ -449,7 +449,12 @@ public class ResourceRule {
 			v = range_bid(hydro, minHydro, maxHydro);
 			if (v <= 0)
 				justification += "+hydro";
+		} else {
+			v = range_bid(-hydro, minDepth, maxDepth);
+			if (maxDepth == 0 || v <= 0)
+				justification += "+depth";
 		}
+		score += v;
 		
 		v = range_bid((winter+summer)/2, minTemp, maxTemp);
 		if (v <= 0)

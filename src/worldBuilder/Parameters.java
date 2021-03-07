@@ -158,7 +158,8 @@ public class Parameters {
 	/** default outside % ground		*/	public int dGroundMax;
 	
 	/** default export overlay objects	*/	public String overlay_objects;
-	/** default flora configuration 	*/	public String flora_config;
+	/** default flora configuration 	*/	public String flora_rules;
+	/** default mineral resources		*/	public String mineral_rules;
 
 	/*
 	 * these parameters control the absorbtion and evaporation of rain fall
@@ -360,7 +361,10 @@ public class Parameters {
 					overlay_objects = parser.getString();
 					break;
 				case "flora":
-					flora_config = parser.getString();
+					flora_rules = parser.getString();
+					break;
+				case "minerals":
+					mineral_rules = parser.getString();
 					break;
 				}
 				if (inRules) {
@@ -538,6 +542,9 @@ public class Parameters {
 			System.out.println("               initial slope=" + String.format("%.6f", slope_init) + unit_s);
 			System.out.println("               sedimentary layer=" + String.format("%.0f%s", sediment, unit_z));
 			System.out.println("               watershed=" + tribute_max + " " + unit_f);
+			System.out.println("   resource placement:");
+			System.out.println("               flora rules:   " + flora_rules);
+			System.out.println("               mineral rules: " + mineral_rules);
 			System.out.println("   export:     name=" + map_name);
 			for (ListIterator<String> it = exportRules.listIterator(); it.hasNext();) {
 				System.out.println("               rule file: " + it.next());

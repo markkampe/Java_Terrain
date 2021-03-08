@@ -45,7 +45,7 @@ public class TopoMap {
 		int w = width / cellWidth;
 
 		// interpolate Z values from the latest mesh
-		Cartesian cart = map.getCartesian(Cartesian.NEIGHBORS);
+		Cartesian cart = map.getCartesian(Cartesian.vicinity.NEIGHBORS);
 		double zArray[][] = cart.interpolate(map.getHeightMap());
 		double eArray[][] = cart.interpolate(map.getErodeMap());
 		

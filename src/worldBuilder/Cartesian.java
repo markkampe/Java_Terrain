@@ -14,9 +14,11 @@ public class Cartesian {
 	private Vicinity cells[][];
 	
 	/** types of vicinities				*/
-	public static final int NEAREST = 0;	// the one nearest MeshPoint
-	public static final int NEIGHBORS = 0;	// the the 3-4 nearest MeshPoints
-	public static final int POLYGON = 0;	// the surrounding polygon
+	public enum vicinity {
+		NEAREST,	// the one nearest MeshPoint
+		NEIGHBORS,	// the the 3-4 nearest MeshPoints
+		POLYGON		// the surrounding polygon
+	}
 	
 	// private static final int ENCODE_DEBUG = 3;
 
@@ -33,7 +35,7 @@ public class Cartesian {
 	 */
 	public Cartesian(Mesh mesh, 
 					double left, double top, double right, double bottom, 
-					int width, int height, int type) {	
+					int width, int height, vicinity type) {	
 		// note the key parameters
 		this.height = height;
 		this.width = width;
@@ -50,9 +52,9 @@ public class Cartesian {
 			double y = top + (r * dy);
 			for(int c = 0; c < width; c++) {
 				double x = left + (c * dx);
-				if (type == NEIGHBORS)
+				if (type == vicinity.NEIGHBORS)
 					cells[r][c] = new Proxcimity(mesh, x, y);
-				else if (type == POLYGON)
+				else if (type == vicinity.POLYGON)
 					cells[r][c] = new Proxcimity(mesh, x, y);
 				else
 					cells[r][c] = new Nearest(mesh, x, y);

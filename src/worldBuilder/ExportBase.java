@@ -250,11 +250,11 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		//    cart is the four surrounding MeshPoints (smooth interpolation)
 		Cartesian cart = new Cartesian(map.getMesh(), 
 										box_x, box_y, box_x+box_width, box_y+box_height,
-										x_points, y_points, Cartesian.NEIGHBORS);
+										x_points, y_points, Cartesian.vicinity.NEIGHBORS);
 		//    poly is the surrounding Voronoi polygon (for lake shores)
 		Cartesian poly = new Cartesian(map.getMesh(), 
 				box_x, box_y, box_x+box_width, box_y+box_height,
-				x_points, y_points, Cartesian.POLYGON);
+				x_points, y_points, Cartesian.vicinity.POLYGON);
 	
 		// TODO lose gratuitous interpolates
 		//		only need to redo these if the region changes

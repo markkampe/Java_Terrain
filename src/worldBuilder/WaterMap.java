@@ -46,7 +46,7 @@ public class WaterMap {
 		int w = width/cellWidth;
 		
 		// interpolate per-cell water depth from the mesh
-		waterMap = map.getCartesian(Cartesian.POLYGON).interpolate(map.getDepthMap());
+		waterMap = map.getCartesian(Cartesian.vicinity.POLYGON).interpolate(map.getDepthMap());
 		
 		/*
 		 * We paint blue any point that is under water, and

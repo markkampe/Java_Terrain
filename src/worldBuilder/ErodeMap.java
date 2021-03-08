@@ -43,7 +43,7 @@ public class ErodeMap {
 		double max_deposition = map.max_deposition;
 		
 		// interpolate erosion values from the latest mesh
-		Cartesian cart = map.getCartesian(Cartesian.NEIGHBORS);
+		Cartesian cart = map.getCartesian(Cartesian.vicinity.NEIGHBORS);
 		double eArray[][] = cart.interpolate(map.getErodeMap());
 		
 		// render each cell according to its erosion/deposition

@@ -45,9 +45,9 @@ public class SoilMap {
 			int w = width/cellWidth;
 			
 			// interpolate values from the latest mesh
-			Cartesian cart = map.getCartesian(Cartesian.NEAREST);
+			Cartesian cart = map.getCartesian(Cartesian.vicinity.NEAREST);
 			double sArray[][] = cart.interpolate(map.getSoilMap());
-			cart = map.getCartesian(Cartesian.NEIGHBORS);
+			cart = map.getCartesian(Cartesian.vicinity.NEIGHBORS);
 			double hArray[][] = cart.interpolate(map.getHydrationMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			

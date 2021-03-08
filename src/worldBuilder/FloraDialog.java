@@ -324,11 +324,10 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			// report the changes
 			if (parms.debug_level > 0) {
 				System.out.println("Flora Placement (" + ResourceRule.ruleset + 
-								   "): G/B/T = " + classCounts[FLORA_GRASS] + 
+								   "): Grass/Brush/Trees = " + classCounts[FLORA_GRASS] + 
 								   "/" + classCounts[FLORA_BRUSH] +
 								   "/" + classCounts[FLORA_TREE]);
 			}
-			
 		} else if (e.getSource() == chooseFlora) {
 			FileDialog d = new FileDialog(this, "Floral Palette", FileDialog.LOAD);
 			d.setFile(flora_palette.getText());
@@ -339,8 +338,8 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 				if (dir != null)
 					palette_file = dir + palette_file;
 				flora_palette.setText(palette_file);
+				placer = null;
 			}
-			placer = null;
 		} else if (e.getSource() == cancel) {
 			map.setFloraColors(prevColors);
 			map.setFloraMap(prevFlora);

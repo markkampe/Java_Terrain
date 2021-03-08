@@ -39,7 +39,7 @@ public class RainMap {
 		int w = width / cellWidth;
 
 		// interpolate Z values from the latest mesh
-		double rArray[][] = map.getCartesian(Cartesian.NEIGHBORS).interpolate(map.getRainMap());
+		double rArray[][] = map.getCartesian(Cartesian.vicinity.NEIGHBORS).interpolate(map.getRainMap());
 
 		// use height to generate background colors
 		for (int r = 0; r < h; r++)

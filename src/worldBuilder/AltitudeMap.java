@@ -3,6 +3,8 @@ package worldBuilder;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import worldBuilder.Cartesian.vicinity;
+
 /**
  * a class to render the world mesh as a 2D brightness-for-altitude image
  */
@@ -37,7 +39,7 @@ public class AltitudeMap {
 			int w = width/cellWidth;
 			
 			// interpolate Z values from the latest mesh
-			Cartesian cart = map.getCartesian(Cartesian.NEIGHBORS);
+			Cartesian cart = map.getCartesian(vicinity.NEIGHBORS);
 			double zArray[][] = cart.interpolate(map.getHeightMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			double hArray[][] = cart.interpolate(map.getHydrationMap());

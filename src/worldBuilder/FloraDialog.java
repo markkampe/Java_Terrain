@@ -42,6 +42,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	
 	// selected region info
 	private boolean selected;		// a region has been selected
+	private boolean changes_made;	// we have displayed updates
 	private double x0, y0;			// upper left hand corner
 	private double width, height;	// selected area size (in pixels)
 
@@ -214,6 +215,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		setVisible(true);
 		
 		// get region selection input
+		changes_made = false;
 		map.addMapListener(this);	
 		map.selectMode(Map.Selection.RECTANGLE);
 		selected = map.checkSelection(Map.Selection.RECTANGLE);
@@ -250,6 +252,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		map.setFloraColors(placer.previewColors());
 		map.setFloraMap(floraMap);
 		map.repaint();
+		changes_made = true;
 	}
 
 	/**
@@ -263,7 +266,13 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	 * @return	boolean	(should selection continue)
 	 */
 	public boolean regionSelected(double mx0, double my0, 
-								  double dx, double dy, boolean complete) {		
+								  double dx, double dy, boolean complete) {	
+		// undo any uncommitted placements
+		if (changes_made) {
+			for(int i = 0; i < floraMap.length; i++)
+				floraMap[i] = prevFlora[i];
+			changes_made = false;
+		}
 		selected = complete;
 		x0 = mx0;
 		y0 = my0;

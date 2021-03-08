@@ -35,6 +35,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	private boolean selected;		// a region has been selected
 	private double x0, y0;			// upper left hand corner
 	private double width, height;	// selected area size (in pixels)
+	private boolean changes_made;	// we have displayed updates
 
 	private static final int NONE = 0;
 	private static final int MAX_TYPES = 10;
@@ -156,6 +157,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		setVisible(true);
 		
 		// get region selection input
+		changes_made = false;
 		map.addMapListener(this);	
 		map.selectMode(Map.Selection.RECTANGLE);
 		selected = map.checkSelection(Map.Selection.RECTANGLE);
@@ -192,6 +194,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		map.setRockColors(placer.previewColors());
 		map.setSoilMap(soilMap);
 		map.repaint();
+		changes_made = true;
 	}
 
 	/**
@@ -206,6 +209,12 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	 */
 	public boolean regionSelected(double mx0, double my0, 
 								  double dx, double dy, boolean complete) {		
+		if (changes_made) {
+			// undo any uncommitted placements
+			for(int i = 0; i < soilMap.length; i++)
+				soilMap[i] = prevSoil[i];
+			changes_made = false;
+		}
 		selected = complete;
 		x0 = mx0;
 		y0 = my0;
@@ -257,11 +266,10 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			// report the changes
 			if (parms.debug_level > 0) {
 				System.out.println("Mineral Placement (" + ResourceRule.ruleset + 
-								   "): S/M/P = " + classCounts[RSRC_STONE] + 
+								   "): Stone/Metal/Precious = " + classCounts[RSRC_STONE] + 
 								   "/" + classCounts[RSRC_METAL] +
 								   "/" + classCounts[RSRC_PRECIOUS]);
 			}
-			
 		} else if (e.getSource() == chooseRocks) {
 			FileDialog d = new FileDialog(this, "Mineral Palette", FileDialog.LOAD);
 			d.setFile(rock_palette.getText());

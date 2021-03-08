@@ -215,8 +215,8 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		
 		// get region selection input
 		map.addMapListener(this);	
-		map.selectMode(Map.Selection.SQUARE);
-		selected = map.checkSelection(Map.Selection.SQUARE);
+		map.selectMode(Map.Selection.RECTANGLE);
+		selected = map.checkSelection(Map.Selection.RECTANGLE);
 	}
 	
 	/**

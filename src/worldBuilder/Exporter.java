@@ -59,6 +59,12 @@ public interface Exporter {
 	void waterMap(double[][] hydration);
 	
 	/**
+	 * Up-load the surface-water-depth for every tile
+	 * @param hydration - per point depth of water
+	 */
+	void floraMap(double[][] flora);
+	
+	/**
 	 * Export the up-loaded information in selected format
 	 * 
 	 * @param outputFile - name of output file

@@ -131,6 +131,13 @@ public class JsonExporter implements Exporter {
 	}
 
 	/**
+	 * Up-load the flora type for every tile
+	 * @param flora - per point flora type
+	 */
+	public void floraMap(double[][] flora) {
+	}
+
+	/**
 	 * Up-load the surface-water-depth for every tile
 	 * @param hydration - per point depth of water
 	 */

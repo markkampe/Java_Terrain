@@ -22,6 +22,7 @@ public class FoundExporter implements Exporter {
 	private double[][] heights;		// per point height (meters)
 	private double[][] erode;		// per point erosion (meters)
 	private double[][] hydration;	// per point water depth (meters)
+	private double[][] flora;		// per point plant IDs
 	// private double[][] soil;		// per point soil type
 	
 	private double dDecid = 0.9;	// FIX add deciduous desity slider
@@ -99,10 +100,9 @@ public class FoundExporter implements Exporter {
 	/**
 	 * Up-load the flora assignments for every tile
 	 * @param flora assignments per point
-	 * @param names of flora classes
 	 */
-	public void floraMap(int[][] flora, String[] names) {
-		
+	public void floraMap(double[][] flora) {
+		this.flora = flora;
 	}
 
 	/**
@@ -547,7 +547,7 @@ public class FoundExporter implements Exporter {
 			Color pMap[][] = new Color[y_points][x_points];
 			for(int y = 0; y < y_points; y++)
 				for(int x = 0; x < x_points; x++) {
-					pMap[y][x] = Color.GREEN;	// FIX flora
+					pMap[y][x] = colorMap[(int)flora[x][y]];
 				}
 			new PreviewMap("Export Preview (trees/bushes/grass)", pMap, 0);
 		}

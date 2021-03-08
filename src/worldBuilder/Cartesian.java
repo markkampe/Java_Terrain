@@ -13,6 +13,11 @@ public class Cartesian {
 	/** the nearest MeshPoints to every tile in our map	*/
 	private Vicinity cells[][];
 	
+	/** types of vicinities				*/
+	public static final int NEAREST = 0;	// the one nearest MeshPoint
+	public static final int NEIGHBORS = 0;	// the the 3-4 nearest MeshPoints
+	public static final int POLYGON = 0;	// the surrounding polygon
+	
 	// private static final int ENCODE_DEBUG = 3;
 
 	/**
@@ -24,11 +29,11 @@ public class Cartesian {
 	 * @param bottom ... bottom edge of mapped area
 	 * @param width ... width of desired array
 	 * @param height ... height of desired array
-	 * @param polygon ... enclosing polygon (vs nearest)
+	 * @param type ... type of vicinity (NEAREST, NEIGHBORS, POLYGON)
 	 */
 	public Cartesian(Mesh mesh, 
 					double left, double top, double right, double bottom, 
-					int width, int height, boolean polygon) {	
+					int width, int height, int type) {	
 		// note the key parameters
 		this.height = height;
 		this.width = width;
@@ -45,8 +50,12 @@ public class Cartesian {
 			double y = top + (r * dy);
 			for(int c = 0; c < width; c++) {
 				double x = left + (c * dx);
-				cells[r][c] = polygon ? new Polygon(mesh, x, y) : 
-										new Proxcimity(mesh, x, y);
+				if (type == NEIGHBORS)
+					cells[r][c] = new Proxcimity(mesh, x, y);
+				else if (type == POLYGON)
+					cells[r][c] = new Proxcimity(mesh, x, y);
+				else
+					cells[r][c] = new Nearest(mesh, x, y);
 			}
 		}
 	}

@@ -30,7 +30,7 @@ public class FloraMap {
 		int w = width/cellWidth;
 		
 		// interpolate the plant types
-		Cartesian cart = map.getCartesian();
+		Cartesian cart = map.getCartesian(Cartesian.NEAREST);
 		double flora[][] = cart.interpolate(map.getFloraMap());
 		
 		// look up the type to color mapping

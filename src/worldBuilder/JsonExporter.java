@@ -27,6 +27,7 @@ public class JsonExporter implements Exporter {
 	private double[][] erode;		// per point erosion (meters)
 	private double[][] hydration;	// per point water depth (meters)
 	private double[][] soil;		// per point soil type
+	private double[][] flora;		// per point flora type
 	
 	private double maxHeight;		// highest discovered altitude
 	private double minHeight;		// lowest discovered altitude
@@ -135,6 +136,7 @@ public class JsonExporter implements Exporter {
 	 * @param flora - per point flora type
 	 */
 	public void floraMap(double[][] flora) {
+		this.flora = flora;
 	}
 
 	/**
@@ -265,28 +267,30 @@ public class JsonExporter implements Exporter {
 	 */
 	public void preview(WhichMap chosen, Color colorMap[]) {
 	
-		if (chosen == WhichMap.HEIGHTMAP) {
-			// figure out the altitude to color mapping
-			double aMean = (maxHeight + minHeight)/2;
-			double aScale = BRIGHT - DIM;
-			if (maxHeight > minHeight)
-				aScale /= maxHeight - minHeight;
-			
-			// fill in the preview map
-			Color map[][] = new Color[y_points][x_points];
-			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++)
-					if (hydration[i][j] >= 0) {	// land
-						double h = NORMAL + ((heights[i][j] - aMean) * aScale);
+		// figure out the altitude to color mapping
+		double aMean = (maxHeight + minHeight)/2;
+		double aScale = BRIGHT - DIM;
+		if (maxHeight > minHeight)
+			aScale /= maxHeight - minHeight;
+		
+		// fill in preview from the per-point attributes
+		Color map[][] = new Color[y_points][x_points];
+		for(int i = 0; i < y_points; i++)
+			for(int j = 0; j < x_points; j++)
+				if (hydration[i][j] >= 0) {	// land
+					double h = NORMAL + ((heights[i][j] - aMean) * aScale);
+					if (chosen == WhichMap.FLORAMAP && flora[i][j] > 0)
+						map[i][j] = colorMap[(int) flora[i][j]];
+					else	// altitudes
 						map[i][j] = new Color((int)h, (int)h, (int)h);
-					} else	{							// water
-						double depth = hydration[i][j]/maxDepth;
-						double h = (1 - depth) * (BRIGHT - DIM);
-						map[i][j] = new Color(0, (int) h, BRIGHT);
-					}
-			new PreviewMap("Export Preview (terrain)", map, 0);
-		} else if (chosen == WhichMap.FLORAMAP) {
-			System.out.println("Flora previews not supported for JSON export");
-		}
+				} else	{							// water
+					double depth = hydration[i][j]/maxDepth;
+					double h = (1 - depth) * (BRIGHT - DIM);
+					map[i][j] = new Color(0, (int) h, BRIGHT);
+				}
+		
+		new PreviewMap("Export Preview (" +
+						(chosen == WhichMap.FLORAMAP ? "flora" : "terrain") +
+						")", map, 0);
 	}
 }

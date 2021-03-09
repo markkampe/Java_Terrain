@@ -8,6 +8,8 @@ import java.awt.event.*;
  */
 public class RawExport extends ExportBase implements ActionListener {
 	
+	private Map map;
+
 	private static final long serialVersionUID = 1L;
 	
 	private JsonExporter exporter = null;
@@ -20,6 +22,7 @@ public class RawExport extends ExportBase implements ActionListener {
 	 */
 	public RawExport(Map map) {
 		super("Raw JSON", map, 1, 100000, Map.Selection.RECTANGLE);
+		this.map = map;
 		
 		// we handle window and button events
 		previewT.addActionListener(this);
@@ -75,7 +78,7 @@ public class RawExport extends ExportBase implements ActionListener {
 		} else if (e.getSource() == previewT && selected) {
 			exporter.preview(Exporter.WhichMap.HEIGHTMAP, null);
 		} else if (e.getSource() == previewF && selected) {
-			exporter.preview(Exporter.WhichMap.FLORAMAP, null);
+			exporter.preview(Exporter.WhichMap.FLORAMAP, map.getFloraColors());
 		}
 	}
 }

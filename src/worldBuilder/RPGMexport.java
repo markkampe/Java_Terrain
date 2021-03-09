@@ -519,6 +519,11 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			floraChanged = false;
 		}
 		
+		if (e.getSource() == previewF && selected) {
+			tiler.preview(Exporter.WhichMap.FLORAMAP, colorFlora);
+			return;
+		}
+		
 		if (e.getSource() == accept && selected) {
 			// get the output file name
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
@@ -570,8 +575,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 					parms.dTimesH = goose_hydro2.getValue();
 				}
 			}
-		} else if (e.getSource() == previewF && selected) {
-			tiler.preview(Exporter.WhichMap.FLORAMAP, colorFlora);
 		}
 	}
 
@@ -766,18 +769,24 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	 */
 	private void floraMap() {
 		
-		RPGMFlora flora = new RPGMFlora(tiler, flora_palette.getText());
-		
-		// set-up the quotas and names
-		String[] floraClasses = {"Tree", "Brush", "Grass" };
-		int quotas[] = new int[3];
-		int total = (tiler.y_points * tiler.x_points * flora_pct.getValue()) / 100;
-		quotas[0] = (total * (100 - flora_3.getUpperValue())) / 100;	// trees
-		quotas[2] = (total * flora_3.getValue()) / 100;				// grasses
-		quotas[1] = total - (quotas[0] + quotas[2]);
-		
-		// assign flora type to every tile
-		tiler.floraMap(flora.getFlora(floraClasses, quotas), flora.getFloraNames());
-		colorFlora = flora.getFloraColors();
+		if (format.equals("Outside")) {
+			// we have to re-do bidding for each tile
+			RPGMFlora flora = new RPGMFlora(tiler, flora_palette.getText());
+			
+			// set-up the quotas and names
+			String[] floraClasses = {"Tree", "Brush", "Grass" };
+			int quotas[] = new int[3];
+			int total = (tiler.y_points * tiler.x_points * flora_pct.getValue()) / 100;
+			quotas[0] = (total * (100 - flora_3.getUpperValue())) / 100;	// trees
+			quotas[2] = (total * flora_3.getValue()) / 100;				// grasses
+			quotas[1] = total - (quotas[0] + quotas[2]);
+			
+			// assign flora type to every tile
+			tiler.rpgmFloraMap(flora.getFlora(floraClasses, quotas), flora.getFloraNames());
+			colorFlora = flora.getFloraColors();
+		} else {
+			// ExportBase has already up-loaded per-tile flora
+			colorFlora = map.getFloraColors();
+		}
 	}
 }

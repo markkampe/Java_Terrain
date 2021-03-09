@@ -526,31 +526,27 @@ public class FoundExporter implements Exporter {
 	 */
 	public void preview(WhichMap chosen, Color colorMap[]) {
 	
-		if (chosen == WhichMap.HEIGHTMAP) {
-			// figure out mapping from altitude to color
-			heightRange();
-			int[][] grayscale = Cartesian.encode(altitudes, DIM, BRIGHT);
-			
-			// fill in the preview map
-			Color map[][] = new Color[y_points][x_points];
-			for(int y = 0; y < y_points; y++)
-				for(int x = 0; x < x_points; x++) {
-					if (hydration[y][x] < 0)	// water depth
-						map[y][x] = Color.BLUE;
-					else {	// show altitude
-						int bright = grayscale[y][x];
+		// figure out mapping from altitude to color
+		heightRange();
+		int[][] grayscale = Cartesian.encode(altitudes, DIM, BRIGHT);
+		
+		// fill in the preview map
+		Color map[][] = new Color[y_points][x_points];
+		for(int y = 0; y < y_points; y++)
+			for(int x = 0; x < x_points; x++) {
+				if (hydration[y][x] < 0)	// water depth
+					map[y][x] = Color.BLUE;
+				else {	// show altitude
+					int bright = grayscale[y][x];
+					if (chosen == WhichMap.FLORAMAP && flora[y][x] > 0)
+						map[y][x] = colorMap[(int) flora[y][x]];
+					else
 						map[y][x] = new Color(bright, bright, bright);
-					}
 				}
-			new PreviewMap("Export Preview (height map)", map, 0);
-		} else if (chosen == WhichMap.FLORAMAP) {
-			Color pMap[][] = new Color[y_points][x_points];
-			for(int y = 0; y < y_points; y++)
-				for(int x = 0; x < x_points; x++) {
-					pMap[y][x] = colorMap[(int)flora[x][y]];
-				}
-			new PreviewMap("Export Preview (trees/bushes/grass)", pMap, 0);
-		}
+			}
+		new PreviewMap("Export Preview (" +
+					   (chosen == WhichMap.FLORAMAP ? "flora" : "terrain") +
+					   ")", map, 0);
 	}
 
 	// perfunctory set methods for information we don't use

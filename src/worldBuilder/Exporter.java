@@ -49,8 +49,9 @@ public interface Exporter {
 	/**
 	 * Up-load the soil type for every tile
 	 * @param soil - per point soil type
+	 * @param names - per-type name strings
 	 */
-	void soilMap(double[][] soil);
+	void soilMap(double[][] soil, String[] names);
 	
 	/**
 	 * Up-load the surface-water-depth for every tile
@@ -60,9 +61,10 @@ public interface Exporter {
 	
 	/**
 	 * Up-load the surface-water-depth for every tile
-	 * @param hydration - per point depth of water
+	 * @param flora - per point flora types
+	 * @param names - per-type name strings
 	 */
-	void floraMap(double[][] flora);
+	void floraMap(double[][] flora, String[] names);
 	
 	/**
 	 * Export the up-loaded information in selected format

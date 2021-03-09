@@ -259,7 +259,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		export.heightMap(cart.interpolate(map.getHeightMap()));
 		export.erodeMap(cart.interpolate(map.getErodeMap()));
 		export.rainMap(cart.interpolate(map.getRainMap()));
-		export.soilMap(cart.interpolate(map.getSoilMap()));
+		export.soilMap(cart.interpolate(map.getSoilMap()), map.rockNames);
 		
 		// poly is the surrounding Voronoi polygon (for lake shores)
 		Cartesian poly = new Cartesian(map.getMesh(), 
@@ -274,7 +274,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 				box_x, box_y, box_x+box_width, box_y+box_height,
 				x_points, y_points, Cartesian.vicinity.NEAREST);
 		double flora[][] =  nearest.interpolate(map.getFloraMap());
-		export.floraMap(flora);
+		export.floraMap(flora, map.floraNames);
 	}
 	
 	/**

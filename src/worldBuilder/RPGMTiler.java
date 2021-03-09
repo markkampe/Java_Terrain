@@ -155,23 +155,25 @@ public class RPGMTiler implements Exporter {
 	 * generate an export preview, mapping levels to colors
 	 */
 	public void preview(WhichMap chosen, Color colormap[]) {
-		if (chosen == WhichMap.HEIGHTMAP) {
-			Color pMap[][] = new Color[y_points][x_points];
-			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++) {
-					pMap[i][j] = colormap[levels[i][j]];
+		// fill in preview from the per-point attributes
+		Color map[][] = new Color[y_points][x_points];
+		for(int i = 0; i < y_points; i++)
+			for(int j = 0; j < x_points; j++) {
+				int l = levels[i][j];
+				if (chosen == WhichMap.FLORAMAP) {
+					if (typeMap[l] <= TerrainType.PASSABLE_WATER)
+						map[i][j] = Color.BLUE;
+					else {
+						int flora = floraTypes[i][j];
+						map[i][j] = (flora <= 0) ? Color.GRAY : colormap[flora];
+					}
+				} else {
+					map[i][j] = colormap[l];
 				}
-			new PreviewMap("Export Preview (terrain)", pMap, 0);
-		} else if (chosen == WhichMap.FLORAMAP) {
-			Color pMap[][] = new Color[y_points][x_points];
-			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++) {
-					int terrain = typeMap[levels[i][j]];
-					pMap[i][j] = (terrain <= TerrainType.PASSABLE_WATER) ? Color.BLUE : 
-									colormap[floraTypes[i][j]];
-				}
-			new PreviewMap("Export Preview (flora)", pMap, 0);
-		}
+			}
+		new PreviewMap("Export Preview (" +
+						(chosen == WhichMap.FLORAMAP ? "flora" : "terrain") +
+						")", map, 0);
 	}
 	
 	/**
@@ -583,8 +585,9 @@ public class RPGMTiler implements Exporter {
 	/**
 	 * Up-load the soil type for every tile
 	 * @param soil - per point soil type
+	 * @param names - per type name strings
 	 */
-	public void soilMap(double[][] soil) {
+	public void soilMap(double[][] soil, String[] names) {
 		this.soil = soil;
 	}
 
@@ -597,11 +600,25 @@ public class RPGMTiler implements Exporter {
 	}
 	
 	/**
+	 * Up-load the flora type for every tile
+	 * @param flora - per point flora type
+	 * @param names - per type name strings
+	 */
+	public void floraMap(double[][] flora, String[] names) {
+		this.floraTypes = new int[flora.length][flora[0].length];
+		for(int y = 0; y < flora.length; y++)
+			for(int x = 0; x < flora[0].length; x++)
+				floraTypes[y][x] = (int) flora[y][x];
+		
+		this.floraNames = names;
+	}
+	
+	/**
 	 * Up-load the flora assignments for every tile
 	 * @param flora assignments per point
 	 * @param names of flora classes
 	 */
-	public void floraMap(int[][] flora, String[] names) {
+	public void rpgmFloraMap(int[][] flora, String[] names) {
 		this.floraTypes = flora;
 		this.floraNames = names;
 	}

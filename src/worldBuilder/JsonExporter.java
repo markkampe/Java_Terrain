@@ -28,6 +28,8 @@ public class JsonExporter implements Exporter {
 	private double[][] hydration;	// per point water depth (meters)
 	private double[][] soil;		// per point soil type
 	private double[][] flora;		// per point flora type
+	private String[] floraNames;	// per flora type names
+	private String[] rockNames;		// per soil type names
 	
 	private double maxHeight;		// highest discovered altitude
 	private double minHeight;		// lowest discovered altitude
@@ -126,17 +128,21 @@ public class JsonExporter implements Exporter {
 	/**
 	 * Up-load the soil type for every tile
 	 * @param soil - per point soil type
+	 * @param names - per type name strings
 	 */
-	public void soilMap(double[][] soil) {
+	public void soilMap(double[][] soil, String[] names) {
 		this.soil = soil;
+		this.rockNames = names;
 	}
 
 	/**
 	 * Up-load the flora type for every tile
 	 * @param flora - per point flora type
+	 * @param names - per type name strings
 	 */
-	public void floraMap(double[][] flora) {
+	public void floraMap(double[][] flora, String[] names) {
 		this.flora = flora;
+		this.floraNames = names;
 	}
 
 	/**
@@ -237,9 +243,16 @@ public class JsonExporter implements Exporter {
 					output.write(COMMA);
 					
 					int st = (int) Math.round(soil[r][c]);
-					// FIX - should be string, but don't have map
 					output.write(String.format(FORMAT_S, "soil", 
-							soil[erode[r][c] < 0 ? ALLUVIAL : st]));
+							erode[r][c] < 0 ? "Alluvial" : rockNames[st]));
+
+					int f = (int) flora[r][c];
+					if (f > 0) {
+						output.write(COMMA);
+						output.write(String.format(FORMAT_S, "flora", floraNames[f]));
+					}
+						
+
 					output.write(" }");
 				}
 			}

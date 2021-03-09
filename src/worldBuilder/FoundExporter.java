@@ -84,9 +84,11 @@ public class FoundExporter implements Exporter {
 	/**
 	 * Up-load the soil type for every tile
 	 * @param soil - per point soil type
+	 * @param names - per type name strings
 	 */
-	public void soilMap(double[][] soil) {
+	public void soilMap(double[][] soil, String[] names) {
 		// this.soil = soil;
+		// this.rockNames = names;
 	}
 
 	/**
@@ -100,9 +102,11 @@ public class FoundExporter implements Exporter {
 	/**
 	 * Up-load the flora assignments for every tile
 	 * @param flora assignments per point
+	 * @param names - per type name strings
 	 */
-	public void floraMap(double[][] flora) {
+	public void floraMap(double[][] flora, String[] names) {
 		this.flora = flora;
+		// this.floraNames = names;
 	}
 
 	/**

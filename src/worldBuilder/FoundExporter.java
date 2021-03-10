@@ -23,7 +23,9 @@ public class FoundExporter implements Exporter {
 	private double[][] erode;		// per point erosion (meters)
 	private double[][] hydration;	// per point water depth (meters)
 	private double[][] flora;		// per point plant IDs
-	// private double[][] soil;		// per point soil type
+	private String[] floraNames;	// per type name strings
+	private double[][] soil;		// per point soil type
+	private String[] rockNames;		// per type name strings
 	
 	private double dDecid = 0.9;	// FIX add deciduous desity slider
 	private double dConif = 0.9;	// FIX add coniferous density slider
@@ -38,6 +40,16 @@ public class FoundExporter implements Exporter {
 	private int[][] ports;			// entry and exit points
 	private int num_ports;			// number reported
 	private static final int MAX_PORTS = 4;
+	
+	// list of resource bitmaps to be created
+	private static String resource_maps[] = {
+			"coniferous",
+			"deciduous",
+			"berries",
+			"rock",
+			"iron",
+			"fish"
+	};
 	
 	// color ranges for use in output maps
 	private static final int DIM = 16;
@@ -87,8 +99,8 @@ public class FoundExporter implements Exporter {
 	 * @param names - per type name strings
 	 */
 	public void soilMap(double[][] soil, String[] names) {
-		// this.soil = soil;
-		// this.rockNames = names;
+		this.soil = soil;
+		this.rockNames = names;
 	}
 
 	/**
@@ -98,7 +110,7 @@ public class FoundExporter implements Exporter {
 	public void waterMap(double[][] hydration) {
 		this.hydration = hydration;
 	}
-	
+
 	/**
 	 * Up-load the flora assignments for every tile
 	 * @param flora assignments per point
@@ -106,7 +118,7 @@ public class FoundExporter implements Exporter {
 	 */
 	public void floraMap(double[][] flora, String[] names) {
 		this.flora = flora;
-		// this.floraNames = names;
+		this.floraNames = names;
 	}
 
 	/**
@@ -153,7 +165,7 @@ public class FoundExporter implements Exporter {
 		
 		// establish height range and create the header
 		heightRange();
-		lua.fileHeader((int) lowest, (int) highest);
+		lua.fileHeader((int) lowest, (int) highest, resource_maps);
 		
 		// report our entry and exit points
 		if (num_ports > 0) {
@@ -183,54 +195,45 @@ public class FoundExporter implements Exporter {
 		 */
 		lua.startDensities();
 		String indent = "            ";
+		LuaWriter.MapInfo[] maps =  new LuaWriter.MapInfo[4];
 		
-		lua.comment(indent + "-- Create forest of Deciduous trees and a few pine\n");
-		LuaWriter.MapInfo maps[] = new LuaWriter.MapInfo[4];
 								// tree			weight	offset		scale
 		maps[0] = lua.new MapInfo("TREE_POPLAR", 8, 	0.75, 1.0,	0.85, 1.15);
 		maps[1] = lua.new MapInfo("TREE_OAK",	0.1,	0.9, 1.9,	0.9, 1.9);
 		maps[2] = lua.new MapInfo("TREE_SYCAMORE", 8,	0.75, 1.0,	0.85, 1.15);
 		maps[3] = lua.new MapInfo("TREE_PINE",	1,		0.15, 0.45,	0.7, 1.0);
-		lua.map("DECIDUOUS_DENSITY_MAP", dDecid, maps, false);
-		
-		lua.comment(indent + "-- Create forest of Pine Trees\n");
+		lua.map("DECIDUOUS_DENSITY_MAP", "forest of Deciduous trees and a few pine", dDecid, maps, false);
+
 		maps = new LuaWriter.MapInfo[1];
 								// tree			weight	offset		scale
 		maps[0] = lua.new MapInfo("TREE_PINE",	0.1,	0.75, 1.0,	0.85, 1.15);
-		lua.map("CONIFEROUS_DENSITY_MAP", dConif, maps, false);
-		
-		lua.comment(indent + "-- Create forest of berry bushes\n");
+		lua.map("CONIFEROUS_DENSITY_MAP", "forest of Pine Trees", dConif, maps, false);
 								// resource			weight	offset		scale
 		maps[0] = lua.new MapInfo("RESOURCE_BERRIES", 0.1,	0.75, 1.0,	0.85, 1.15);
-		lua.map("BERRIES_DENSITY_MAP", 1, maps, false);
-		
-		lua.comment(indent + "-- Create rock outcrops - stone resource\n");
+		lua.map("BERRIES_DENSITY_MAP", "forest of berry bushes", 1, maps, false);
 								// resource			weight	offset		scale
 		maps[0] = lua.new MapInfo("RESOURCE_ROCK",	0.1,	0.75, 1.0,	0.85, 1.15);
-		lua.map("ROCK_DENSITY_MAP", 1, maps, false);
-		
-		lua.comment(indent + "-- Create iron deposits\n");
+		lua.map("ROCK_DENSITY_MAP", "rock outcrops - stone resource", 1, maps, false);
 								// resource			weight	offset		scale
 		maps[0] = lua.new MapInfo("RESOURCE_IRON",	0.1,	0.75, 1.0,	0.85, 1.15);
-		lua.map("IRON_DENSITY_MAP", 1, maps, false);
-		
-		lua.comment(indent + "-- Create fish shoals\n");
+		lua.map("IRON_DENSITY_MAP", "iron deposits", 1, maps, false);
 								// resource			weight	offset		scale
-		maps[0] = lua.new MapInfo("RESOURCE_FISH",	0.1,	0.75, 1.0,	0.85, 1.15);
-		lua.map("FISH_DENSITY_MAP", 1, maps, true);
+		maps[0] = lua.new MapInfo("RESOURCE_FISH", 0.1,	0.75, 1.0,	0.85, 1.15);
+		lua.map("FISH_DENSITY_MAP", "fish shoals", 1, maps, true);
 		
 		lua.endDensities();
 		lua.close();
 		
 		ok &= createHeightMap(dirname);
 		
-		ok &= createRockMap(dirname);
-		ok &= createIronMap(dirname);
+		ok &= createRockMap("Granite", dirname + "/maps/rock_density.png");
+		ok &= createRockMap("Iron Ore", dirname + "/maps/iron_density.png");
 		
 		ok &= createMaterialMask(dirname);
-		ok &= createConiferMap(dirname);
-		ok &= createDeciduousMap(dirname);
-		ok &= createBerryMap(dirname);
+		
+		ok &= createFloraMap("Conifer", dirname + "/maps/coniferous_density.png");
+		ok &= createFloraMap("Broadleaf", dirname + "/maps/deciduous_density.png");
+		ok &= createFloraMap("Berries", dirname + "/maps/berries_density.png");
 		
 		ok &= createFishMap(dirname);
 		
@@ -403,13 +406,46 @@ public class FoundExporter implements Exporter {
 		return true;
 	}
 	
-	private boolean createRockMap(String project_dir) {
+	/**
+	 * create a bitmap for a specified mineral class
+	 * @param classname of mineral to be plotted
+	 * @param filename desired output file
+	 * @return success
+	 */
+	private boolean createRockMap(String classname, String filename) {
+		// figure out what class we are looking for
+		int soilClass = -1;
+		for(int i = 0; i < rockNames.length; i++)
+			if (rockNames[i] != null && classname.equals(rockNames[i])) {
+				soilClass = i;
+				break;
+			}
+		if (soilClass < 0)
+			return false;
+		
 		// create an appropriately sized gray-scale image
 		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
 											 BufferedImage.TYPE_USHORT_GRAY);
+		int scale = XY_POINTS/x_points;
+		int points = 0;
+		for(int y = 0; y < XY_POINTS; y += scale) {
+			int y_in = y/scale;
+			for(int x = 0; x < XY_POINTS; x += scale) {
+				int x_in = x/scale;
+				if (soil[y_in][x_in] != soilClass)
+					continue;
+				
+				// fill in the entire box
+				for(int i = 0; i < scale; i++)
+					for(int j = 0; j < scale; j++) {
+						img.setRGB(x+j, y+i, FULL_WHITE);
+						points++;
+					}
+				// FIX see if any of the corners should be rounded
+			}
+		}
 		
 		// write it out as a .png
-		String filename = project_dir + "/maps/rock_density.png";
 		File f = new File(filename);
 		try {
 			if (!ImageIO.write(img, "PNG", f)) {
@@ -420,16 +456,52 @@ public class FoundExporter implements Exporter {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
+		
+		if (parms.debug_level >= EXPORT_DEBUG)
+			System.out.println("    " + filename + " ... " + points + " points of " + classname);
 		return true;
 	}
 	
-	private boolean createIronMap(String project_dir) {
+	/**
+	 * create a bitmap for a specified flora class
+	 * @param classname of plant to be plotted
+	 * @param filename desired output file
+	 * @return success
+	 */
+	private boolean createFloraMap(String classname, String filename) {
+		// figure out what class we are looking for
+		int floraClass = -1;
+		for(int i = 0; i < floraNames.length; i++)
+			if (floraNames[i] != null && classname.equals(floraNames[i])) {
+				floraClass = i;
+				break;
+			}
+		if (floraClass < 0)
+			return false;
+		
 		// create an appropriately sized gray-scale image
 		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
 											 BufferedImage.TYPE_USHORT_GRAY);
+		int scale = XY_POINTS/x_points;
+		int points = 0;
+		for(int y = 0; y < XY_POINTS; y += scale) {
+			int y_in = y/scale;
+			for(int x = 0; x < XY_POINTS; x += scale) {
+				int x_in = x/scale;
+				if (flora[y_in][x_in] != floraClass)
+					continue;
+				
+				// fill in the entire box
+				for(int i = 0; i < scale; i++)
+					for(int j = 0; j < scale; j++) {
+						img.setRGB(x+j, y+i, FULL_WHITE);
+						points++;
+					}
+				// FIX see if any of the corners should be rounded
+			}
+		}
 		
 		// write it out as a .png
-		String filename = project_dir + "/maps/iron_density.png";
 		File f = new File(filename);
 		try {
 			if (!ImageIO.write(img, "PNG", f)) {
@@ -440,66 +512,9 @@ public class FoundExporter implements Exporter {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
-		return true;
-	}
-	
-	private boolean createConiferMap(String project_dir) {
-		// create an appropriately sized gray-scale image
-		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
-											 BufferedImage.TYPE_USHORT_GRAY);
 		
-		// write it out as a .png
-		String filename = project_dir + "/maps/coniferous_density.png";
-		File f = new File(filename);
-		try {
-			if (!ImageIO.write(img, "PNG", f)) {
-				System.err.println("ImageIO error while attempting to create " + filename);
-				return false;
-			}
-		} catch (IOException e) {
-			System.err.println("Write error while attempting to create " + filename);
-			return false;
-		}
-		return true;
-	}
-	
-	private boolean createDeciduousMap(String project_dir) {
-		// create an appropriately sized gray-scale image
-		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
-											 BufferedImage.TYPE_USHORT_GRAY);
-		
-		// write it out as a .png
-		String filename = project_dir + "/maps/deciduous_density.png";
-		File f = new File(filename);
-		try {
-			if (!ImageIO.write(img, "PNG", f)) {
-				System.err.println("ImageIO error while attempting to create " + filename);
-				return false;
-			}
-		} catch (IOException e) {
-			System.err.println("Write error while attempting to create " + filename);
-			return false;
-		}
-		return true;
-	}
-	
-	private boolean createBerryMap(String project_dir) {
-		// create an appropriately sized gray-scale image
-		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
-											 BufferedImage.TYPE_USHORT_GRAY);
-		
-		// write it out as a .png
-		String filename = project_dir + "/maps/berries_density.png";
-		File f = new File(filename);
-		try {
-			if (!ImageIO.write(img, "PNG", f)) {
-				System.err.println("ImageIO error while attempting to create " + filename);
-				return false;
-			}
-		} catch (IOException e) {
-			System.err.println("Write error while attempting to create " + filename);
-			return false;
-		}
+		if (parms.debug_level >= EXPORT_DEBUG)
+			System.out.println("    " + filename + " ... " + points + " points of " + classname);
 		return true;
 	}
 	

@@ -186,29 +186,37 @@ public class LuaWriter {
 	private static String maps[] = {
 		"HEIGHT_MAP",				"maps/heightmap.png",		// TODO heightmap_xxx.png?
 		"MATERIAL_MASK",			"maps/material_mask.png",	// TODO material_mask_xxx.png?
-		"CONIFEROUS_DENSITY_MAP",	"maps/coniferous_density.png",
-		"DECIDUOUS_DENSITY_MAP",	"maps/deciduous_density.png",
-		"BERRIES_DENSITY_MAP",		"maps/berries_density.png",
-		"ROCK_DENSITY_MAP",			"maps/rock_density.png",
-		"IRON_DENSITY_MAP",			"maps/iron_density.png",
-		"FISH_DENSITY_MAP",			"maps/fish_density.png" };
+	 };
 	
 	/**
 	 * write out a mod.lua file header
 	 *
 	 * @param min_altitude
 	 * @param max_altitude
+	 * @param resource_maps
 	 * @return
 	 */
-	public boolean fileHeader(int min_altitude, int max_altitude) {
+	public boolean fileHeader(int min_altitude, int max_altitude, String[] resource_maps) {
 		try {
 			luaFile.write("local mapMod = foundation.createMod();\n");
 			luaFile.write("\n");
+			
+			// standard bit-maps
 			for(int i = 0; i < maps.length; i += 2) {
 				String line = "mapMod:registerAssetId(\"";
 				line += maps[i+1];
 				line += "\", \"";
 				line += maps[i];
+				line += "\")\n";
+				luaFile.write(line);
+			}
+			
+			// resource bit-maps
+			for(int i = 0; i < resource_maps.length; i += 1) {
+				String line = "mapMod:registerAssetId(\"";
+				line += "maps/" + resource_maps[i] + "_density.png";
+				line += "\", \"";
+				line += resource_maps[i].toUpperCase() + "_DENSITY_MAP";
 				line += "\")\n";
 				luaFile.write(line);
 			}
@@ -305,12 +313,13 @@ public class LuaWriter {
 		return true;
 	}
 	
-	public boolean map(String name, double density, MapInfo[] maps, boolean last) {
+	public boolean map(String name, String comment, double density, MapInfo[] maps, boolean last) {
 		try {
 			String indent = "            ";
 			String plus4 = indent + "    ";
 			String plus8 = plus4 + "    ";
 			luaFile.write(indent + "{\n");
+			luaFile.write(plus4 + "-- Create " + comment + "\n");
 			luaFile.write(plus4 + "DensityMap = \"" + name + "\",\n");
 			if (density == 1.0)		// FIX - just to make output identical to sample
 				luaFile.write(plus4 + "Density = 1,\n");

@@ -226,14 +226,32 @@ public class FoundExporter implements Exporter {
 		
 		ok &= createHeightMap(dirname);
 		
-		ok &= createRockMap("Granite", dirname + "/maps/rock_density.png");
-		ok &= createRockMap("Iron Ore", dirname + "/maps/iron_density.png");
+		// create the rock maps
+		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
+				 BufferedImage.TYPE_USHORT_GRAY);
+		add_to_map(img, soil, "Granite", rockNames);
+		add_to_map(img, soil, "Sand Stone", rockNames);
+		ok &= createPng(img, dirname + "/maps/rock_density.png");
 		
-		ok &= createMaterialMask(dirname);
+		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
+		add_to_map(img, soil, "Iron Ore", rockNames);
+		ok &= createPng(img, dirname + "/maps/iron_density.png");
 		
-		ok &= createFloraMap("Conifer", dirname + "/maps/coniferous_density.png");
-		ok &= createFloraMap("Broadleaf", dirname + "/maps/deciduous_density.png");
-		ok &= createFloraMap("Berries", dirname + "/maps/berries_density.png");
+		// create the tree maps
+		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
+		add_to_map(img, flora, "Conifer", floraNames);
+		ok &= createPng(img, dirname + "/maps/coniferous_density.png");
+		
+		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
+		add_to_map(img, flora, "Broadleaf", floraNames);
+		add_to_map(img, flora, "Oak", floraNames);
+		add_to_map(img, flora, "Sycamore", floraNames);
+		ok &= createPng(img, dirname + "/maps/deciduous_density.png");
+		
+		// create the berry map
+		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
+		add_to_map(img, flora, "Berries", floraNames);
+		ok &= createPng(img, dirname + "/maps/berries_density.png");
 		
 		ok &= createFishMap(dirname);
 		
@@ -407,44 +425,12 @@ public class FoundExporter implements Exporter {
 	}
 	
 	/**
-	 * create a bitmap for a specified mineral class
-	 * @param classname of mineral to be plotted
-	 * @param filename desired output file
+	 * write a grey map image out to a file
+	 * @param image to be written
+	 * @param name of desired output file
 	 * @return success
 	 */
-	private boolean createRockMap(String classname, String filename) {
-		// figure out what class we are looking for
-		int soilClass = -1;
-		for(int i = 0; i < rockNames.length; i++)
-			if (rockNames[i] != null && classname.equals(rockNames[i])) {
-				soilClass = i;
-				break;
-			}
-		if (soilClass < 0)
-			return false;
-		
-		// create an appropriately sized gray-scale image
-		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
-											 BufferedImage.TYPE_USHORT_GRAY);
-		int scale = XY_POINTS/x_points;
-		int points = 0;
-		for(int y = 0; y < XY_POINTS; y += scale) {
-			int y_in = y/scale;
-			for(int x = 0; x < XY_POINTS; x += scale) {
-				int x_in = x/scale;
-				if (soil[y_in][x_in] != soilClass)
-					continue;
-				
-				// fill in the entire box
-				for(int i = 0; i < scale; i++)
-					for(int j = 0; j < scale; j++) {
-						img.setRGB(x+j, y+i, FULL_WHITE);
-						points++;
-					}
-				// FIX see if any of the corners should be rounded
-			}
-		}
-		
+	private boolean createPng(BufferedImage img, String filename) {		
 		// write it out as a .png
 		File f = new File(filename);
 		try {
@@ -456,39 +442,35 @@ public class FoundExporter implements Exporter {
 			System.err.println("Write error while attempting to create " + filename);
 			return false;
 		}
-		
-		if (parms.debug_level >= EXPORT_DEBUG)
-			System.out.println("    " + filename + " ... " + points + " points of " + classname);
+
 		return true;
 	}
 	
 	/**
-	 * create a bitmap for a specified flora class
-	 * @param classname of plant to be plotted
-	 * @param filename desired output file
-	 * @return success
+	 * add resources to a grey-scale map
+	 * @param BufferedImage for the map
+	 * @param tileValues 2D array of resources
+	 * @param className desired resource
+	 * @param nameMap array of resource class names
 	 */
-	private boolean createFloraMap(String classname, String filename) {
+	private boolean add_to_map(BufferedImage img, double[][] tileValues, String classname, String[] nameMap) {
 		// figure out what class we are looking for
-		int floraClass = -1;
-		for(int i = 0; i < floraNames.length; i++)
-			if (floraNames[i] != null && classname.equals(floraNames[i])) {
-				floraClass = i;
+		int desired = -1;
+		for(int i = 0; i < nameMap.length; i++)
+			if (nameMap[i] != null && classname.equals(nameMap[i])) {
+				desired = i;
 				break;
 			}
-		if (floraClass < 0)
+		if (desired < 0)
 			return false;
 		
-		// create an appropriately sized gray-scale image
-		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
-											 BufferedImage.TYPE_USHORT_GRAY);
 		int scale = XY_POINTS/x_points;
 		int points = 0;
 		for(int y = 0; y < XY_POINTS; y += scale) {
 			int y_in = y/scale;
 			for(int x = 0; x < XY_POINTS; x += scale) {
 				int x_in = x/scale;
-				if (flora[y_in][x_in] != floraClass)
+				if (tileValues[y_in][x_in] != desired)
 					continue;
 				
 				// fill in the entire box
@@ -501,20 +483,8 @@ public class FoundExporter implements Exporter {
 			}
 		}
 		
-		// write it out as a .png
-		File f = new File(filename);
-		try {
-			if (!ImageIO.write(img, "PNG", f)) {
-				System.err.println("ImageIO error while attempting to create " + filename);
-				return false;
-			}
-		} catch (IOException e) {
-			System.err.println("Write error while attempting to create " + filename);
-			return false;
-		}
-		
 		if (parms.debug_level >= EXPORT_DEBUG)
-			System.out.println("    " + filename + " ... " + points + " points of " + classname);
+			System.out.println("    " + "placed " + points + " points of " + classname);
 		return true;
 	}
 	

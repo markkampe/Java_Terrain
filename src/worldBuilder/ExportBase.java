@@ -255,7 +255,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		// cart is the four surrounding MeshPoints (smooth interpolation)
 		Cartesian cart = new Cartesian(map.getMesh(), 
 										box_x, box_y, box_x+box_width, box_y+box_height,
-										x_points, y_points, Cartesian.vicinity.NEIGHBORS);
+										x_points, y_points, Cartesian.vicinity.POLYGON);
 		export.heightMap(cart.interpolate(map.getHeightMap()));
 		export.erodeMap(cart.interpolate(map.getErodeMap()));
 		export.rainMap(cart.interpolate(map.getRainMap()));

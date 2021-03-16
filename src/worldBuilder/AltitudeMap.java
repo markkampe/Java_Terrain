@@ -39,7 +39,7 @@ public class AltitudeMap {
 			int w = width/cellWidth;
 			
 			// interpolate Z values from the latest mesh
-			Cartesian cart = map.getCartesian(vicinity.NEIGHBORS);
+			Cartesian cart = map.getCartesian(vicinity.POLYGON);
 			double zArray[][] = cart.interpolate(map.getHeightMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			double hArray[][] = cart.interpolate(map.getHydrationMap());

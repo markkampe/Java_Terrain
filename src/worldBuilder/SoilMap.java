@@ -45,9 +45,8 @@ public class SoilMap {
 			int w = width/cellWidth;
 			
 			// interpolate values from the latest mesh
-			Cartesian cart = map.getCartesian(Cartesian.vicinity.NEAREST);
-			double sArray[][] = cart.interpolate(map.getSoilMap());
-			cart = map.getCartesian(Cartesian.vicinity.POLYGON);
+			Cartesian cart = map.getCartesian(Cartesian.vicinity.POLYGON);
+			double sArray[][] = cart.nearest(map.getSoilMap());
 			double hArray[][] = cart.interpolate(map.getHydrationMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			
@@ -64,11 +63,11 @@ public class SoilMap {
 					if (show_hydro)
 						hydration = hArray[r][c] / Hydrology.saturation[s];
 					int shade = (int) Map.linear(DIM, BRITE, hydration);
-					Color color = new Color(0, 0, 0);
+					Color color = new Color(DARK, DARK, DARK);
 					if (show_soil)
 						color = previewColors[s];
 					else if (show_hydro)		// shades of light blue
-						color = new Color(0, shade, shade);
+						color = new Color(DARK, shade, shade);
 					else						// nothing to see
 						continue;
 					

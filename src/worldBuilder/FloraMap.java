@@ -29,9 +29,9 @@ public class FloraMap {
 		int h = height/cellWidth;
 		int w = width/cellWidth;
 		
-		// interpolate the plant types
-		Cartesian cart = map.getCartesian(Cartesian.vicinity.NEAREST);
-		double flora[][] = cart.interpolate(map.getFloraMap());
+		// rather than interpolate, use the nearest mesh point
+		Cartesian cart = map.getCartesian(Cartesian.vicinity.POLYGON);
+		double flora[][] = cart.nearest(map.getFloraMap());
 		
 		// look up the type to color mapping
 		Color[] colors = map.floraColors;

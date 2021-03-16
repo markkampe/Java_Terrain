@@ -2,7 +2,6 @@ package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ListIterator;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;

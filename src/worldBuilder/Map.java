@@ -91,7 +91,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private int downHill[];		// down-hill neighbor
 
 	private Cartesian poly_map;	// interpolation based on surrounding polygon
-	private Cartesian nearest_map;	// interpolation based on nearest neighbor
 	
 	/** selection types: points, line, rectangle, ... */
 	public enum Selection {NONE, POINT, POINTS, LINE, RECTANGLE, SQUARE, ANY};
@@ -584,8 +583,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 							getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.POLYGON);
 			// this.prox_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
 			//		getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEIGHBORS);
-			this.nearest_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-					getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEAREST);
+			// this.nearest_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
+			//		getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEAREST);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
 			this.downHill = new int[mesh.vertices.length];
@@ -599,7 +598,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.hydro = new Hydrology(this);
 		} else {
 			this.poly_map = null;
-			this.nearest_map = null;
+			// this.nearest_map = null;
 			// this.prox_map = null;
 			this.heightMap = null;
 			this.rainMap = null;
@@ -813,11 +812,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * param type (NEIGBORS, POLOGYON, NEAREST)
 	 */
 	public Cartesian getCartesian(Cartesian.vicinity type) {
-		if (type == Cartesian.vicinity.POLYGON)
-			return poly_map;
 		//if (type == Cartesian.vicinity.NEIGHBORS)
 		//	return prox_map;	
-		return nearest_map;
+		//if (type == Cartesian.vicinity.NEAREST)
+		//	return nearest_map;
+		return poly_map;
 	}
 	
 	/**
@@ -1256,8 +1255,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		y_max = (y1 >= y0) ? y1: y0;
 		poly_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
 				getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.POLYGON);
-		nearest_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-				getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEAREST);
+		// nearest_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
+		//		getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEAREST);
 		// prox_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
 		//		getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEIGHBORS);
 		repaint();
@@ -1293,8 +1292,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		if (poly_map.height != height/TOPO_CELL || poly_map.width != width/TOPO_CELL) {
 			poly_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
 								width/TOPO_CELL, height/TOPO_CELL, Cartesian.vicinity.POLYGON);
-			nearest_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-					width/TOPO_CELL, height/TOPO_CELL, Cartesian.vicinity.NEAREST);
+			// nearest_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
+			//		width/TOPO_CELL, height/TOPO_CELL, Cartesian.vicinity.NEAREST);
 			// prox_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
 			//		width/TOPO_CELL, height/TOPO_CELL, Cartesian.vicinity.NEIGHBORS);
 		}

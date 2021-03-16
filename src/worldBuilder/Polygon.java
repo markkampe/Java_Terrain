@@ -5,6 +5,10 @@ package worldBuilder;
  *	This Vicnity sub-class yields satisfactory lake shores, where
  *  there is an abrupt transition from water to land at the altitude
  *  of the escape point.
+ *  
+ *  Note: the first MeshPoint in a vicinity is the one nearest to the
+ *        specified <x,y> coordinates, which makes a POLYGON Vicinity
+ *        also usable for nearest value (rather than interpolation)
  */
 public class Polygon extends Vicinity {
 

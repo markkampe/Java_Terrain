@@ -78,4 +78,19 @@ public class Vicinity {
 
 		return sumValues / sumWeights;			// normalize weights to sum to 1
 	}
+	
+	/**
+	 * return the value of the nearest MeshPoint
+	 * @param values array for all MeshPoints
+	 * 
+	 * Note: I have stopped using Proxcimity Vicnitys, and the first point
+	 * 		 in the first point in a Polygon Vicnity is the nearest, so we
+	 * 		 can just use the first value we find.
+	 */
+	public double nearest(double values[]) {
+		for(int n = 0; n < NUM_NEIGHBORS; n++)
+			if (neighbors[n] >= 0)
+				return values[neighbors[n]];
+			return 0;
+	}
 }

@@ -80,6 +80,23 @@ public class Cartesian {
 	}
 	
 	/**
+	 * use nearest MeshPoint value for every Cartesian cell
+	 * 
+	 * @param meshValues - array of per-MeshPoint values
+	 * @return Cartesian array of per-tile values
+	 */
+	public double[][] nearest(double[] meshValues) {
+		double[][] result = new double[height][width];
+		
+		for(int r = 0; r < height; r++) {
+			for(int c = 0; c < width; c++) {
+				result[r][c] = cells[r][c].nearest(meshValues);
+			}
+		}
+		return result;
+	}
+	
+	/**
 	 * interpret a 2D array of doubles into ranges in an integer value
 	 * 			 (typically used to translate altitudes to colors
 	 * @param array - 2D array of doubles

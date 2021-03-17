@@ -262,7 +262,7 @@ public class FoundExporter implements Exporter {
 				img.setRGB(x, y, SAND_COLOR);
 		add_to_map(img, flora, "Grass", floraNames, GRASS_COLOR);
 		// FIX - they want a fairly wide brown blurred transition
-		ok &= createPng(img, dirname + "/maps/material_mask.png");
+		ok &= createPng(img, dirname + "/maps/material_mask_" + parms.map_name + ".png");
 		
 		// create the fish map
 		ok &= createFishMap(dirname);
@@ -395,7 +395,7 @@ public class FoundExporter implements Exporter {
 		}
 		
 		// write it out as a .png
-		String filename = project_dir + "/maps/heightmap.png";
+		String filename = project_dir + "/maps/heightmap_" + parms.map_name + ".png";
 		File f = new File(filename);
 		try {
 			if (!ImageIO.write(img, "PNG", f)) {

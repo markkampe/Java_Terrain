@@ -184,8 +184,8 @@ public class LuaWriter {
 	}
 
 	private static String maps[] = {
-		"HEIGHT_MAP",				"maps/heightmap.png",		// TODO heightmap_xxx.png?
-		"MATERIAL_MASK",			"maps/material_mask.png",	// TODO material_mask_xxx.png?
+		"HEIGHT_MAP",				"maps/heightmap",
+		"MATERIAL_MASK",			"maps/material_mask",
 	 };
 	
 	/**
@@ -204,7 +204,7 @@ public class LuaWriter {
 			// standard bit-maps
 			for(int i = 0; i < maps.length; i += 2) {
 				String line = "mapMod:registerAssetId(\"";
-				line += maps[i+1];
+				line += maps[i+1] + "_" + parms.map_name + ".png";
 				line += "\", \"";
 				line += maps[i];
 				line += "\")\n";

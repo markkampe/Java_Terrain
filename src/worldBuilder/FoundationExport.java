@@ -9,6 +9,8 @@ import java.awt.event.*;
 import javax.swing.JFileChooser;
 //import javax.swing.JLabel;
 //import javax.swing.JPanel;
+//import javax.swing.JTextField;
+//import javax.swing.JPanel;
 //import javax.swing.JSlider;
 //import javax.swing.event.ChangeEvent;
 //import javax.swing.event.ChangeListener;
@@ -19,7 +21,6 @@ import javax.swing.JFileChooser;
 public class FoundationExport extends ExportBase implements ActionListener {
 	private FoundExporter exporter = null;
 	
-	// flora distribution control widgets
 	//private JSlider flora_pct;		// percent plant cover
 	//private RangeSlider flora_3;	// types of plant cover
 	//private JSlider goose_temp;		// temperature up/down
@@ -71,8 +72,8 @@ public class FoundationExport extends ExportBase implements ActionListener {
 	 * create Foundation-specific widgets
 	 */
 	private void create_GUI() {
-		//Font fontSmall = new Font("Serif", Font.ITALIC, 10);
-		//Font fontLarge = new Font("Serif", Font.ITALIC, 15);
+		// Font fontSmall = new Font("Serif", Font.ITALIC, 10);
+		//  Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 	}
 
 	/**

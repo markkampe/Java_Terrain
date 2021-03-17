@@ -194,7 +194,7 @@ public class FoundExporter implements Exporter {
 		 * locations, with the below-specified parameters.
 		 */
 		lua.startDensities();
-		String indent = "            ";
+		//String indent = "            ";
 		LuaWriter.MapInfo[] maps =  new LuaWriter.MapInfo[4];
 		
 								// tree			weight	offset		scale
@@ -229,30 +229,42 @@ public class FoundExporter implements Exporter {
 		// create the rock maps
 		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
 				 BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, soil, "Granite", rockNames);
-		add_to_map(img, soil, "Sand Stone", rockNames);
+		add_to_map(img, soil, "Granite", rockNames, FULL_WHITE);
+		add_to_map(img, soil, "Sand Stone", rockNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/rock_density.png");
 		
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, soil, "Iron Ore", rockNames);
+		add_to_map(img, soil, "Iron Ore", rockNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/iron_density.png");
 		
 		// create the tree maps
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, flora, "Conifer", floraNames);
+		add_to_map(img, flora, "Conifer", floraNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/coniferous_density.png");
 		
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, flora, "Broadleaf", floraNames);
-		add_to_map(img, flora, "Oak", floraNames);
-		add_to_map(img, flora, "Sycamore", floraNames);
+		add_to_map(img, flora, "Broadleaf", floraNames, FULL_WHITE);
+		add_to_map(img, flora, "Oak", floraNames, FULL_WHITE);
+		add_to_map(img, flora, "Sycamore", floraNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/deciduous_density.png");
 		
 		// create the berry map
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, flora, "Berries", floraNames);
+		add_to_map(img, flora, "Berries", floraNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/berries_density.png");
 		
+		// create the grass/sand map
+		final int SAND_COLOR = Color.GREEN.getRGB();
+		final int GRASS_COLOR = Color.RED.getRGB();
+		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_INT_RGB);
+		for(int y = 0; y < XY_POINTS; y++)
+			for(int x = 0; x < XY_POINTS; x++)
+				img.setRGB(x, y, SAND_COLOR);
+		add_to_map(img, flora, "Grass", floraNames, GRASS_COLOR);
+		// FIX - they want a fairly wide brown blurred transition
+		ok &= createPng(img, dirname + "/maps/material_mask.png");
+		
+		// create the fish map
 		ok &= createFishMap(dirname);
 		
 		if (parms.debug_level > 0)
@@ -404,26 +416,6 @@ public class FoundExporter implements Exporter {
 		return true;
 	}
 	
-	private boolean createMaterialMask(String project_dir) {
-		// create an appropriately sized RGB image
-		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
-											 BufferedImage.TYPE_INT_RGB);
-		
-		// write it out as a .png
-		String filename = project_dir + "/maps/material_mask.png";
-		File f = new File(filename);
-		try {
-			if (!ImageIO.write(img, "PNG", f)) {
-				System.err.println("ImageIO error while attempting to create " + filename);
-				return false;
-			}
-		} catch (IOException e) {
-			System.err.println("Write error while attempting to create " + filename);
-			return false;
-		}
-		return true;
-	}
-	
 	/**
 	 * write a grey map image out to a file
 	 * @param image to be written
@@ -452,8 +444,9 @@ public class FoundExporter implements Exporter {
 	 * @param tileValues 2D array of resources
 	 * @param className desired resource
 	 * @param nameMap array of resource class names
+	 * @param rgb value color value to set for matching points
 	 */
-	private boolean add_to_map(BufferedImage img, double[][] tileValues, String classname, String[] nameMap) {
+	private boolean add_to_map(BufferedImage img, double[][] tileValues, String classname, String[] nameMap, int rgb) {
 		// figure out what class we are looking for
 		int desired = -1;
 		for(int i = 0; i < nameMap.length; i++)
@@ -476,7 +469,7 @@ public class FoundExporter implements Exporter {
 				// fill in the entire box
 				for(int i = 0; i < scale; i++)
 					for(int j = 0; j < scale; j++) {
-						img.setRGB(x+j, y+i, FULL_WHITE);
+						img.setRGB(x+j, y+i, rgb);
 						points++;
 					}
 				// FIX see if any of the corners should be rounded

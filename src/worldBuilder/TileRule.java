@@ -260,6 +260,6 @@ public class TileRule {
 	 * @param  floraClass to be checked
 	 */
 	public boolean wrongFlora(String floraClass) {
-		return (className != null && !className.equals(floraClass));
+		return className != null && !className.equals("NONE") && !className.equals(floraClass);
 	}
 }

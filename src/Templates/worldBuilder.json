@@ -65,8 +65,8 @@
 	"flora": false
     },
     "resources": {
-    	"flora": "flora.json",
-	"minerals": "minerals.json"
+    	"flora": "ecotopes.json",
+	"minerals": "geotopes.json"
     },
     "export": {
     	"map_name": "Map001",

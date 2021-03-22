@@ -38,6 +38,8 @@ public class ResourceRule {
 	/** Temperature range for this rule	*/
 	public double minTemp, maxTemp;
 	/** soil type range for this rule	*/
+	public double minSlope, maxSlope;
+	/** slope range for this rule	*/
 	public double minSoil, maxSoil;
 	/** is there flexibility in these ranges	*/
 	public boolean flexRange;
@@ -86,6 +88,8 @@ public class ResourceRule {
 		maxTemp = 70;
 		minSoil = 0;
 		maxSoil = 9;	// FIX, how many legal soil types are there
+		minSlope = 0.0;
+		maxSlope = 666;
 		flexRange = false;
 		taperedBid = false;
 		vigor = 16;
@@ -131,6 +135,7 @@ public class ResourceRule {
 		double hMin = NO_VALUE, hMax = NO_VALUE;	// hydration
 		double tMin = NO_VALUE, tMax = NO_VALUE;	// temperature
 		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
+		double mMin = NO_VALUE, mMax = NO_VALUE;	// slope
 		int red = NO_VALUE, blue = NO_VALUE, green = NO_VALUE;	
 		int vigor = NO_VALUE;
 		int order = NO_VALUE;
@@ -186,6 +191,8 @@ public class ResourceRule {
 						thisRule.minTemp = tMin;
 					if (sMin != NO_VALUE)
 						thisRule.minSoil = sMin;
+					if (mMin != NO_VALUE)
+						thisRule.minSlope = mMin;
 					if (aMax != NO_VALUE)
 						thisRule.maxAltitude = aMax;
 					if (hMax != NO_VALUE)
@@ -196,6 +203,8 @@ public class ResourceRule {
 						thisRule.maxTemp = tMax;
 					if (sMax != NO_VALUE)
 						thisRule.maxSoil = sMax;
+					if (mMax != NO_VALUE)
+						thisRule.maxSlope = mMax;
 					if (vigor != NO_VALUE)
 						thisRule.vigor = vigor;
 					if (order != NO_VALUE)
@@ -212,6 +221,7 @@ public class ResourceRule {
 					dMin = NO_VALUE; dMax = NO_VALUE;
 					hMin = NO_VALUE; hMax = NO_VALUE;
 					tMin = NO_VALUE; tMax = NO_VALUE;
+					mMin = NO_VALUE; mMax = NO_VALUE;
 					flexRange = false;
 					taperedBid = false;
 					vigor = NO_VALUE;
@@ -321,6 +331,8 @@ public class ResourceRule {
 					case "soil":
 						sMin = Double.parseDouble(thisValue);
 						break;
+					case "slope":
+						mMin = Double.parseDouble(thisValue);
 					}
 					thisKey = "";
 					break;
@@ -343,6 +355,8 @@ public class ResourceRule {
 					case "soil":
 						sMax = Double.parseDouble(thisValue);
 						break;
+					case "slope":
+						mMax = Double.parseDouble(thisValue);
 					}
 					thisKey = "";
 					break;
@@ -378,6 +392,7 @@ public class ResourceRule {
 		System.out.println(prefix + "      " + "hydro:   " + String.format("%.1f", minHydro) + "-" + String.format("%.1f", maxHydro));
 		System.out.println(prefix + "      " + "temp:    " + minTemp + "-" + maxTemp);
 		System.out.println(prefix + "      " + "soil:    " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
+		System.out.println(prefix + "      " + "slope:   " + String.format("%.1f", minSlope) + "-" + String.format("%.1f", maxSlope));
 		System.out.println(prefix + "      " + "range:   " + (flexRange ? "flexible" : "strict"));
 		System.out.println(prefix + "      " + "bid:     " + (taperedBid ? "tapered" : "flat"));
 		if (previewColor != null)

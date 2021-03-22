@@ -1,5 +1,5 @@
 { 
-  "Floral Ecotopes": [
+  "Default Floral Ecotopes": [
 	{ "//": "forests" },
 	{ "name": "Conifers",	"id": 1,
 	  "class": "Tree",	"type": 3,	"order": 1,
@@ -59,7 +59,7 @@
 	},
 
 	{ "//": "grass lands" },
-	{ "name": "meadow",	"id": 11,
+	{ "name": "Meadow",	"id": 11,
 	  "class": "Grass",	"type": 1,	"order": 3,
 	  "alt":   { "min": 0,   "max": 2500 },
 	  "temp":  { "min": 0,   "max": 20 },
@@ -69,7 +69,7 @@
 	  "range": "flexible",	"bid": "tapered",
 	  "color": [178,255,102]
 	},
-	{ "name": "prarie",	"id": 12,
+	{ "name": "Prarie",	"id": 12,
 	  "class": "Grass",	"type": 1,	"order": 3,
 	  "alt":   { "min": 0,   "max": 1000 },
 	  "temp":  { "min": 0,   "max": 20 },
@@ -79,7 +79,7 @@
 	  "range": "flexible",	"bid": "tapered",
 	  "color": [255,255,102]
 	},
-	{ "name": "marsh",	"id": 13,
+	{ "name": "Marsh",	"id": 13,
 	  "class": "Grass",	"type": 1,	"order": 3,
 	  "alt":   { "min": 0,   "max": 1000 },
 	  "temp":  { "min": 0 },

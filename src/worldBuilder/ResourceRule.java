@@ -469,7 +469,7 @@ public class ResourceRule {
 	 * 
 	 * @return			bid
 	 */
-	double bid(double alt, double hydro, double winter, double summer, double soil) {
+	double bid(double alt, double hydro, double rain, double winter, double summer, double soil) {
 
 		// range check vs altitude, hydration and temperature
 		double score = 0;
@@ -500,6 +500,12 @@ public class ResourceRule {
 		if (v <= 0)
 			justification += "+soil";
 		score += v;
+		
+		v = range_bid(rain, minRain, maxRain);
+		if (v <= 0)
+			justification += "+rain";
+		score += v;
+		
 		return vigor * score;
 	}
 	

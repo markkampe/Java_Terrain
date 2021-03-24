@@ -21,6 +21,7 @@ public class Placement {
 	private double heightMap[];	// per mesh-point altitude
 	private double erodeMap[];	// per mesh-point erosion
 	private double soilMap[];	// per mesh-point soil map
+	private double rainMap[];	// per mesh-point rainfall
 	private double resources[];	// per MeshPoint assignments
 
 	private ResourceRule bidders[];	// resource bidding rules
@@ -72,6 +73,7 @@ public class Placement {
 			this.heightMap = map.getHeightMap();
 			this.erodeMap = map.getErodeMap();
 			this.soilMap = map.getSoilMap();
+			this.rainMap = map.getRainMap();
 		}
 		this.resources = resources;
 		parms = Parameters.getInstance();
@@ -177,6 +179,7 @@ public class Placement {
 				double lapse = alt * parms.lapse_rate;
 				double soil = soilMap[i];
 				double hydro = hydroMap[i];
+				double rain = rainMap[i];
 
 				// figure out the (potentially goosed) temperature
 				double Twinter = parms.meanWinter();
@@ -191,7 +194,7 @@ public class Placement {
 					if (counts[bidders[r].type] >= quotas[bidders[r].type])
 						continue;	// already at quota
 					
-					double bid = bidders[r].bid(alt, hydro, Twinter - lapse, Tsummer - lapse, soil);
+					double bid = bidders[r].bid(alt, hydro, rain, Twinter - lapse, Tsummer - lapse, soil);
 					if (bid <= 0)
 						continue;	// doesn't want this point
 					if (bid > high_bid) {

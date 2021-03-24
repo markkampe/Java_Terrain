@@ -43,6 +43,8 @@ public class ResourceRule {
 	public double minSoil, maxSoil;
 	/** rainfall range for this rule	*/
 	public double minRain, maxRain;
+	/** river flux range for this rule	*/
+	public double minFlux, maxFlux;
 	/** is there flexibility in these ranges	*/
 	public boolean flexRange;
 	/** taper bids as we move away from mid-range	*/
@@ -94,6 +96,8 @@ public class ResourceRule {
 		maxSlope = 666;
 		minRain = 0;
 		maxRain = 666;
+		minFlux = 0;
+		maxFlux = 666;
 		flexRange = false;
 		taperedBid = false;
 		vigor = 16;
@@ -141,6 +145,7 @@ public class ResourceRule {
 		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
 		double mMin = NO_VALUE, mMax = NO_VALUE;	// slope
 		double rMin = NO_VALUE, rMax = NO_VALUE;	// rainfall
+		double fMin = NO_VALUE, fMax = NO_VALUE;	// river flux
 		int red = NO_VALUE, blue = NO_VALUE, green = NO_VALUE;	
 		int vigor = NO_VALUE;
 		int order = NO_VALUE;
@@ -198,6 +203,8 @@ public class ResourceRule {
 						thisRule.minSoil = sMin;
 					if (rMin != NO_VALUE)
 						thisRule.minRain = rMin;
+					if (fMin != NO_VALUE)
+						thisRule.minFlux = fMin;
 					if (mMin != NO_VALUE)
 						thisRule.minSlope = mMin;
 					if (aMax != NO_VALUE)
@@ -212,6 +219,8 @@ public class ResourceRule {
 						thisRule.maxSoil = sMax;
 					if (rMax != NO_VALUE)
 						thisRule.maxRain = rMax;
+					if (fMax != NO_VALUE)
+						thisRule.maxFlux = fMax;
 					if (mMax != NO_VALUE)
 						thisRule.maxSlope = mMax;
 					if (vigor != NO_VALUE)
@@ -232,6 +241,7 @@ public class ResourceRule {
 					tMin = NO_VALUE; tMax = NO_VALUE;
 					mMin = NO_VALUE; mMax = NO_VALUE;
 					rMin = NO_VALUE; rMax = NO_VALUE;
+					fMin = NO_VALUE; fMax = NO_VALUE;
 					flexRange = false;
 					taperedBid = false;
 					vigor = NO_VALUE;
@@ -347,6 +357,9 @@ public class ResourceRule {
 					case "rain":
 						rMin = Double.parseDouble(thisValue);
 						break;
+					case "flux":
+						fMin = Double.parseDouble(thisValue);
+						break;
 					}
 					thisKey = "";
 					break;
@@ -374,6 +387,9 @@ public class ResourceRule {
 						break;
 					case "rain":
 						rMax = Double.parseDouble(thisValue);
+						break;
+					case "flux":
+						fMax = Double.parseDouble(thisValue);
 						break;
 					}
 					thisKey = "";
@@ -406,8 +422,9 @@ public class ResourceRule {
 		if (className != null)
 			System.out.println(prefix + "      " + "class:   " + className + "(" + type + "," + id + ")");
 		System.out.println(prefix + "      " + "alt:     " + minAltitude + "-" + maxAltitude);
-		System.out.println(prefix + "      " + "depth:   " + (int) minDepth + "-" + (int) maxDepth);
+		System.out.println(prefix + "      " + "depth:   " + String.format("%.2f", minDepth) + "-" + String.format("%.2f", maxDepth));
 		System.out.println(prefix + "      " + "hydro:   " + String.format("%.1f", minHydro) + "-" + String.format("%.1f", maxHydro));
+		System.out.println(prefix + "      " + "flux:    " + String.format("%.2f", minFlux) + "-" + String.format("%.2f", maxFlux));
 		System.out.println(prefix + "      " + "rain:    " + String.format("%.1f", minRain) + "-" + String.format("%.1f", maxRain));
 		System.out.println(prefix + "      " + "temp:    " + minTemp + "-" + maxTemp);
 		System.out.println(prefix + "      " + "soil:    " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
@@ -462,14 +479,16 @@ public class ResourceRule {
 	 * 		characteristic bid is based on where it is in range
 	 * 
 	 * @param alt		altitude(M)
-	 * @param hydro		hydration(%)
+	 * @param hydro		positive hydration(fraction) or negative depth (M)
+	 * @param flux		river flux (M3/s)
+	 * @param rain		rainfall (cm/y)
 	 * @param winter	low temp(degC)
 	 * @param summer	high temp(degC)
 	 * @param soil		soil type
 	 * 
 	 * @return			bid
 	 */
-	double bid(double alt, double hydro, double rain, double winter, double summer, double soil) {
+	double bid(double alt, double hydro, double flux, double rain, double winter, double summer, double soil) {
 
 		// range check vs altitude, hydration and temperature
 		double score = 0;
@@ -480,12 +499,13 @@ public class ResourceRule {
 			justification += "alt";
 		score += v;
 		
+		// positive = hydration, negative = under water
 		if (hydro >= 0) {
-			v = range_bid(hydro, minHydro, maxHydro);
+			v = (minDepth > 0) ? IMPOSSIBLE : range_bid(hydro, minHydro, maxHydro);
 			if (v <= 0)
 				justification += "+hydro";
 		} else {
-			v = range_bid(-hydro, minDepth, maxDepth);
+			v = range_bid(parms.height(-hydro), minDepth, maxDepth);
 			if (maxDepth == 0 || v <= 0)
 				justification += "+depth";
 		}
@@ -504,6 +524,11 @@ public class ResourceRule {
 		v = range_bid(rain, minRain, maxRain);
 		if (v <= 0)
 			justification += "+rain";
+		score += v;
+		
+		v = range_bid(flux, minFlux, maxFlux);
+		if (v <= 0)
+			justification += "+flux";
 		score += v;
 		
 		return vigor * score;

@@ -28,6 +28,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 		private JLabel infoSuspended;
 		private JLabel infoSoil;
 		private JLabel infoHydro;
+		private JLabel infoFlora;
 		private JLabel infoDownhill;
 		private JLabel infoOutlet;
 		private JLabel infoNeighbors;
@@ -56,10 +57,11 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			infoSuspended = new JLabel();
 			infoSoil = new JLabel();
 			infoHydro = new JLabel();
+			infoFlora = new JLabel();
 			infoDownhill = new JLabel();
 			infoOutlet = new JLabel();
 			infoNeighbors = new JLabel();
-			int fields = 14;
+			int fields = 15;
 			
 			JPanel info = new JPanel(new GridLayout(fields,2));
 			info.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
@@ -81,6 +83,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			info.add(infoErode);
 			info.add(new JLabel("Suspended"));
 			info.add(infoSuspended);
+			info.add(new JLabel("Flora type:"));
+			info.add(infoFlora);
 			info.add(new JLabel("Soil Type:"));
 			info.add(infoSoil);
 			info.add(new JLabel("Hydration:"));
@@ -123,7 +127,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			infoAlt.setText(String.format("%.1f%s MSL", parms.altitude(heightMap[point.index]), Parameters.unit_z));
 			
 			double fluxMap[] = map.getFluxMap();
-			infoFlux.setText(String.format("%.1f%s", fluxMap[point.index], Parameters.unit_f));
+			infoFlux.setText(String.format("%.3f%s", fluxMap[point.index], Parameters.unit_f));
 			pack();
 			
 			double rainMap[] = map.getRainMap();
@@ -144,6 +148,12 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			
 			double susp = map.hydro.suspended[point.index];
 			infoSuspended.setText(String.format("%f%s", susp, Parameters.unit_f));
+
+			double floraMap[] = map.getFloraMap();
+			if (floraMap != null && floraMap[point.index] > 0)
+				infoFlora.setText(map.floraNames[(int) floraMap[point.index]]);
+			else
+				infoFlora.setText("None");
 			
 			double soilMap[] = map.getSoilMap();
 			desc = erodeMap[point.index] < 0 ? map.getSoilType("Alluvial") + "/" : "";

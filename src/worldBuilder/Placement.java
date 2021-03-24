@@ -22,6 +22,7 @@ public class Placement {
 	private double erodeMap[];	// per mesh-point erosion
 	private double soilMap[];	// per mesh-point soil map
 	private double rainMap[];	// per mesh-point rainfall
+	private double fluxMap[];	// per mesh-point water flow
 	private double resources[];	// per MeshPoint assignments
 
 	private ResourceRule bidders[];	// resource bidding rules
@@ -74,6 +75,7 @@ public class Placement {
 			this.erodeMap = map.getErodeMap();
 			this.soilMap = map.getSoilMap();
 			this.rainMap = map.getRainMap();
+			this.fluxMap = map.getFluxMap();
 		}
 		this.resources = resources;
 		parms = Parameters.getInstance();
@@ -180,6 +182,7 @@ public class Placement {
 				double soil = soilMap[i];
 				double hydro = hydroMap[i];
 				double rain = rainMap[i];
+				double flux = fluxMap[i];
 
 				// figure out the (potentially goosed) temperature
 				double Twinter = parms.meanWinter();
@@ -194,7 +197,23 @@ public class Placement {
 					if (counts[bidders[r].type] >= quotas[bidders[r].type])
 						continue;	// already at quota
 					
-					double bid = bidders[r].bid(alt, hydro, rain, Twinter - lapse, Tsummer - lapse, soil);
+					double bid = bidders[r].bid(alt, hydro, flux, rain, Twinter - lapse, Tsummer - lapse, soil);
+					if (parms.rule_debug != null && parms.rule_debug.equals(bidders[r].ruleName)) {
+						String msg = "   RULE " + bidders[r].ruleName + " bids " +
+									String.format("%6.2f for point %5d", bid, i) +
+									String.format(", alt=%d%s", alt, Parameters.unit_z);
+						if (hydro >= 0)
+							msg += String.format(", hydro=%.0f%%", hydro * 100);
+						else
+							msg += String.format(", depth=%.1f%s", parms.height(-hydro), Parameters.unit_z);
+						msg += String.format(", flux=%f%s", flux, Parameters.unit_f);
+						msg += String.format(", rain=%f%s", rain, Parameters.unit_r);
+						msg += String.format(", temp=%.1f-%.1f%s",
+											Twinter - lapse, Tsummer - lapse, Parameters.unit_t);
+						if (bid <= 0)
+							msg += " (" + bidders[r].justification + ")";
+						System.out.println(msg);
+					}
 					if (bid <= 0)
 						continue;	// doesn't want this point
 					if (bid > high_bid) {

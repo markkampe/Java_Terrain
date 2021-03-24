@@ -472,8 +472,16 @@ public class Hydrology {
 		map.max_flux = TOO_SMALL;
 		map.min_velocity = TOO_BIG;
 		map.max_velocity = TOO_SMALL;
+		map.min_rain = TOO_BIG;
+		map.max_rain = TOO_SMALL;
 		for(int i = 0; i < landPoints; i++) {
 			int x = byFlow[i];
+
+			// keep track of min/max rainfall
+			if (rainMap[x] < map.min_rain)
+				map.min_rain = rainMap[x];
+			if (rainMap[x] > map.max_rain)
+				map.max_rain = rainMap[x];
 
 			// add incoming off-map rivers and rainfall to this point's flux
 			fluxMap[x] += incoming[x] + (rain_to_flow * rainMap[x]);
@@ -576,6 +584,7 @@ public class Hydrology {
 			if (debug_log != null && msg != null)
 				debug_log.write(msg + "\n");
 			
+			// update minimum/aximum flux values
 			if (fluxMap[x] > map.max_flux)
 				map.max_flux = fluxMap[x];
 			if (fluxMap[x] >= parms.stream_flux/10 && fluxMap[x] < map.min_flux)
@@ -597,6 +606,11 @@ public class Hydrology {
 			map.min_velocity = 0;
 		if (map.max_velocity == TOO_SMALL)
 			map.max_velocity = 0;
+		if (map.max_rain == TOO_SMALL)
+			map.max_rain = 0;
+		if (map.min_rain == TOO_BIG)
+			map.min_rain = 0;
+		
 	}
 	
 	/**

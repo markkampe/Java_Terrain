@@ -109,6 +109,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				  max_erosion,		// maximum soil loss due to erosion (m)
 				  max_deposition;	// maximum soil gain due to sedimentation (m)
 
+	/** rainfall	*/
+	public double min_rain,			// minimum rainfall (cm/y)
+				  max_rain;			// maximum rainfall (cm/y)
+
 	private Parameters parms;
 	
 	private static final int MAP_DEBUG = 2;
@@ -446,22 +450,24 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * summarize the world topography and hydrology
 	 */
 	public void region_stats() {
-		System.out.println("Topographic Extremes");
+		System.out.println("Geographic Ranges");
 		System.out.println(String.format("  altitude: %.1f-%.0f%s (MSL)",
 								parms.altitude(min_height), 
 								parms.altitude(max_height),
 								Parameters.unit_z));
 		System.out.println(String.format("  slope:    %.3f-%.3f", min_slope, max_slope));
 		
-		if (max_flux == 0)
-			return;
-		System.out.println(String.format("  rivers:   velocity=%.4f-%.2f%s, flow=%.3f-%.2f%s",
+		if (max_rain > 0) 
+			System.out.println(String.format("  rain:     %.1f-%.1f%s",
+								min_rain, max_rain, Parameters.unit_r));
+
+		if (max_flux > 0)
+			System.out.println(String.format("  rivers:   velocity=%.4f-%.2f%s, flow=%.3f-%.2f%s",
 								min_velocity, max_velocity, Parameters.unit_v, 
 								min_flux, max_flux, Parameters.unit_f));
 		
-		if (max_erosion == 0 && max_deposition == 0)
-			return;
-		System.out.println(String.format("  erosion:  %.2f%s, deposition: %.2f%s",
+		if (max_erosion > 0 || max_deposition > 0)
+			System.out.println(String.format("  erosion:  %.2f%s, deposition: %.2f%s",
 								parms.height(max_erosion), Parameters.unit_z,
 								parms.height(max_deposition), Parameters.unit_z));
 	}
@@ -657,6 +663,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		hydro.waterFlow();
 		waterDepth();
 		repaint();
+
 		return old;
 	}
 	

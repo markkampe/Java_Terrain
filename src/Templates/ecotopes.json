@@ -4,7 +4,7 @@
 	{ "name": "Conifers",	"id": 1,
 	  "class": "Tree",	"type": 3,	"order": 1,
 	  "alt":   { "min": 1500, "max": 2500 },
-	  "temp":  { "max": 20 },
+	  "temp":  { "max": 25 },
 	  "rain":  { "min": 30,  "max": 90 },
 	  "vigor": 32,
 	   "bid": "tapered",
@@ -13,7 +13,7 @@
 	{ "name": "Broadleaf",	 "id": 2,
 	  "class": "Tree",	 "type": 3,	"order": 1,
 	  "alt":   { "min": 500, "max": 2000 },
-	  "temp":  { "min": 0,   "max": 25 },
+	  "temp":  { "min": 0,   "max": 30 },
 	  "rain":  { "min": 75,  "max": 120 },
 	  "vigor": 32,
 	   "bid": "tapered",
@@ -29,11 +29,11 @@
 	  "color": [76,153,0]
 	},
 
-	{ "//": "Brush" },
+	{ "//": "Riperian and Marsh have very limited habitat" },
 	{ "name": "Riperian",	"id": 6,
 	  "class": "Brush",	"type": 2,	"order": 2,
 	  "alt":   { "min": 250, "max": 1500 },
-	  "temp":  { "min": 5,  "max": 20 },
+	  "temp":  { "min": 0,  "max": 28 },
 	  "rain":  { "min": 75,  "max": 120 },
 	  "flux":  { "min": 0.3, "max": 2.0 },
 	  "hydro": { "min": 0.1 },
@@ -41,8 +41,20 @@
 	  "bid": "tapered",
 	  "color": [178,102,255]
 	},
+	{ "name": "Marsh",	"id": 13,
+	  "class": "Grass",	"type": 1,	"order": 2,
+	  "alt":   { "min": 0,   "max": 1000 },
+	  "temp":  { "min": 0 },
+	  "rain":  { "min": 50,  "max": 100 },
+	  "depth": { "min": 0.1, "max": 1.0},
+	  "slope": { "max": 0.1 },
+	  "vigor": 32,
+	  "color": [153,255,204]
+	},
+
+	{ "//": "more robust brush" },
 	{ "name": "Chaparral",	"id": 7,
-	  "class": "Brush",	"type": 2,	"order": 2,
+	  "class": "Brush",	"type": 2,	"order": 3,
 	  "alt":   { "min": 200, "max": 1000 },
 	  "rain":  { "min": 25,  "max": 50 },
 	  "vigor": 16,
@@ -50,7 +62,7 @@
 	  "color": [0,153,153]
 	},
 	{ "name": "Scrub",	 "id": 8,
-	  "class": "Brush",	 "type": 2,	"order": 2,
+	  "class": "Brush",	 "type": 2,	"order": 3,
 	  "alt":   { "min": 0,   "max": 500 },
 	  "temp":  { "min": 10,  "max": 20 },
 	  "rain":  { "min": 25,  "max": 50 },
@@ -59,7 +71,7 @@
 	  "color": [102,255,178]
 	},
 
-	{ "//": "grass lands" },
+	{ "//": "more robust grasses" },
 	{ "name": "Meadow",	"id": 11,
 	  "class": "Grass",	"type": 1,	"order": 4,
 	  "alt":   { "min": 250,   "max": 1500 },
@@ -71,7 +83,7 @@
 	  "color": [178,255,102]
 	},
 	{ "name": "Prarie",	"id": 12,
-	  "class": "Grass",	"type": 1,	"order": 4,
+	  "class": "Grass",	"type": 1,	"order": 5,
 	  "alt":   { "min": 200,   "max": 500 },
 	  "temp":  { "min": 0,   "max": 20 },
 	  "rain":  { "min": 25,  "max": 35 },
@@ -80,18 +92,8 @@
 	  "range": "flexible",	"bid": "tapered",
 	  "color": [255,255,102]
 	},
-	{ "name": "Marsh",	"id": 13,
-	  "class": "Grass",	"type": 1,	"order": 3,
-	  "alt":   { "min": 0,   "max": 1000 },
-	  "temp":  { "min": 0 },
-	  "rain":  { "min": 50,  "max": 100 },
-	  "depth": { "min": 0.1, "max": 1.0},
-	  "slope": { "max": 0.1 },
-	  "vigor": 32,
-	  "color": [153,255,204]
-	},
 
-	{ "//": "barrens" },
+	{ "//": "barrens go where nothing else can live" },
 	{ "name": "Alpine",	"id": 16,
 	  "class": "Barren",	"type": 0,
 	  "alt":   { "min": 2500 },

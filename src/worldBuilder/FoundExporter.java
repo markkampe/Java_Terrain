@@ -239,18 +239,18 @@ public class FoundExporter implements Exporter {
 		
 		// create the tree maps
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, flora, "Conifer", floraNames, FULL_WHITE);
+		add_to_map(img, flora, "Conifers", floraNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/coniferous_density.png");
 		
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
 		add_to_map(img, flora, "Broadleaf", floraNames, FULL_WHITE);
-		add_to_map(img, flora, "Oak", floraNames, FULL_WHITE);
-		add_to_map(img, flora, "Sycamore", floraNames, FULL_WHITE);
+		//add_to_map(img, flora, "Oak", floraNames, FULL_WHITE);
+		//add_to_map(img, flora, "Sycamore", floraNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/deciduous_density.png");
 		
 		// create the berry map
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, flora, "Berries", floraNames, FULL_WHITE);
+		add_to_map(img, flora, "Riperian", floraNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/berries_density.png");
 		
 		// create the grass/sand map
@@ -260,7 +260,8 @@ public class FoundExporter implements Exporter {
 		for(int y = 0; y < XY_POINTS; y++)
 			for(int x = 0; x < XY_POINTS; x++)
 				img.setRGB(x, y, SAND_COLOR);
-		add_to_map(img, flora, "Grass", floraNames, GRASS_COLOR);
+		add_to_map(img, flora, "Meadow", floraNames, GRASS_COLOR);
+		add_to_map(img, flora, "Prarie", floraNames, GRASS_COLOR);
 		// FIX - they want a fairly wide brown blurred transition
 		ok &= createPng(img, dirname + "/maps/material_mask_" + parms.map_name + ".png");
 		

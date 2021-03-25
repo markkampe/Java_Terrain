@@ -15,7 +15,6 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	private Map map;
 	private double[] oldRain;	// per MeshPoint rainfall at entry
 	private double[] newRain;	// edited per MeshPoint rainfall
-	private boolean[] selected;	// which points are being edited
 	
 	private Parameters parms;
 	
@@ -23,13 +22,20 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	private JButton accept;
 	private JButton cancel;
 	
+	// selected region info
+	private boolean selected;		// a region has been selected
+	private double x0, y0;			// upper left hand corner
+	private double width, height;	// selected area size (in pixels)
+	private int numPoints;			// selected area size (in MeshPoints)
+	private boolean changes_made;	// we have displayed updates
+
 	// 0-100 amount slider should be vaguely logarithmic
 	private static final int amounts[] = {0, 10, 25, 50, 100, 150, 200, 250, 300, 400, 500};
 	private static final int FULL_SCALE = 100;
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final int RAIN_DEBUG = 3;
+	private static final int RAIN_DEBUG = 2;
 	
 	/**
 	 * instantiate the widgets and register the listeners
@@ -110,9 +116,11 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		cancel.addActionListener(this);
 		map.addMapListener(this);
 		
-		// set the map for point-group selection and get current selection
-		map.selectMode(Map.Selection.POINTS);
-		map.checkSelection(Map.Selection.POINTS);
+		// get region selection input
+		changes_made = false;
+		map.addMapListener(this);	
+		map.selectMode(Map.Selection.RECTANGLE);
+		selected = map.checkSelection(Map.Selection.RECTANGLE);
 		
 		// initialize the rainfall to default values
 		rainFall(slider2rainfall(amount.getValue()));
@@ -161,21 +169,19 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	private void rainFall(int incoming) {
 		
-		// set the rainfall for every selected point (default all)
-		double[] rainmap = map.getRainMap();
-		if (selected == null) {
-			for(int i = 0; i < rainmap.length; i++)
-				rainmap[i] = incoming;
-		} else {
-			for(int i = 0; i < selected.length; i++)
-				if (selected[i])
-					rainmap[i] = incoming;
-		}
-		
+		// count and initialize the points to be populated
+		numPoints = 0;
+		MeshPoint[] points = map.mesh.vertices;
+		for(int i = 0; i < newRain.length; i++)
+			if (points[i].x >= x0 && points[i].x < x0+width &&
+				points[i].y >= y0 && points[i].y < y0+height) {
+				newRain[i] = incoming;
+				numPoints += 1;
+				}
+
 		// tell the map about the update
-		map.setRainMap(rainmap);
-		if (parms.debug_level >= RAIN_DEBUG)
-			System.out.println("Update rainfall: " + incoming + Parameters.unit_r);
+		map.setRainMap(newRain);
+		map.repaint();
 	}
 
 	/**
@@ -200,11 +206,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			map.setRainMap(oldRain);
 			oldRain = null;
 		}
-		
-		this.dispose();
-		map.removeMapListener(this);
-		map.repaint();
-		map.selectMode(Map.Selection.ANY);
+		cancelDialog();
 	}
 	
 	/**
@@ -217,17 +219,48 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	}
 	
 	/**
-	 * called when a group of points is selected on the map
-	 * @param selected	array of per point booleans (true=selected)
-	 * @param complete	mouse button has been released
+	 * called whenever a region selection changes
+	 * @param mx0	left most point (map coordinate)
+	 * @param my0	upper most point (map coordinate)
+	 * @param dx	width (in map units)
+	 * @param dy	height (in map units)
+	 * @param complete	boolean, has selection completed
+	 * 
 	 * @return	boolean	(should selection continue)
 	 */
-	public boolean groupSelected(boolean[] selected, boolean complete) {
-		this.selected = selected;
-		rainFall(slider2rainfall(amount.getValue()));
+	public boolean regionSelected(double mx0, double my0, 
+								  double dx, double dy, boolean complete) {		
+		if (changes_made) {
+			// undo any uncommitted placements
+			for(int i = 0; i < oldRain.length; i++)
+				newRain[i] = oldRain[i];
+			changes_made = false;
+		}
+		selected = complete;
+		x0 = mx0;
+		y0 = my0;
+		width = dx;
+		height = dy;
+		if (complete)
+			rainFall(slider2rainfall(amount.getValue()));
 		return true;
 	}
 
+	/**
+	 * unregister our map listener and close the dialog
+	 */
+	private void cancelDialog() {
+		map.selectMode(Map.Selection.ANY);
+		map.removeMapListener(this);
+		this.dispose();
+		WorldBuilder.activeDialog = false;
+		
+		if (parms.debug_level > 0) {
+			System.out.println("Mean rainfall: " + (int) meanRain() + Parameters.unit_r);
+			map.region_stats();
+		}
+	}
+	
 	/**
 	 * click events on ACCEPT/CANCEL buttons
 	 */
@@ -237,29 +270,25 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			map.setRainMap(oldRain);
 			map.repaint();
 			oldRain = null;
-		} else if (e.getSource() == accept) {
-			// make the new parameters official
+			cancelDialog();
+		} else if (e.getSource() == accept && selected) {
+			// checkpoint these updates
+			for(int i = 0; i < oldRain.length; i++)
+				oldRain[i] = newRain[i];
+			
+			// make the latest rainfall the default
 			parms.dAmount = slider2rainfall(amount.getValue());
 			
-			if (parms.debug_level > 0) {
-				System.out.println("Mean rainfall: " + (int) meanRain() + Parameters.unit_r);
-				map.region_stats();
+			// report the committed changes
+			if (parms.debug_level >= RAIN_DEBUG) {
+				System.out.println("Updated fainfall for " + numPoints +
+									" points to " + parms.dAmount + Parameters.unit_r);
 			}
-			
-			// we no longer need the old rain map
-			oldRain = null;
 		}
-		
-		// clean up the selection and graphics
-		this.dispose();
-		map.removeMapListener(this);
-		map.selectMode(Map.Selection.NONE);
-		map.repaint();
-		map.selectMode(Map.Selection.ANY);
 	}
 	
+	/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }
 	/** (perfunctory) */ public boolean pointSelected(double x, double y) {return false;}
-	/** (perfunctory) */ public boolean regionSelected(double x, double y, double w, double h, boolean c) {return false;}
 	/** (perfunctory) */ public void mouseMoved(MouseEvent arg0) {}
 	/** (perfunctory) */ public void mouseEntered(MouseEvent arg0) {}
 	/** (perfunctory) */ public void mouseExited(MouseEvent arg0) {}

@@ -508,6 +508,7 @@ public class WorldBuilder  extends JFrame
 		} else if (o == editSlope) {
 			placeDialog(new SlopeDialog(map), false);
 		} else if (o == editRain) {
+			parms.display_options = map.setDisplay(Map.SHOW_RAIN, true);
 			placeDialog(new RainDialog(map), false);
 		} else if (o == editRiver) {
 			if (activeDialog)

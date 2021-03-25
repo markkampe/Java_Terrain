@@ -261,7 +261,7 @@ public class FoundExporter implements Exporter {
 			for(int x = 0; x < XY_POINTS; x++)
 				img.setRGB(x, y, SAND_COLOR);
 		add_to_map(img, flora, "Meadow", floraNames, GRASS_COLOR);
-		add_to_map(img, flora, "Prarie", floraNames, GRASS_COLOR);
+		add_to_map(img, flora, "Prairie", floraNames, GRASS_COLOR);
 		// FIX - they want a fairly wide brown blurred transition
 		ok &= createPng(img, dirname + "/maps/material_mask_" + parms.map_name + ".png");
 		

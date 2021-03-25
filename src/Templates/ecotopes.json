@@ -82,7 +82,7 @@
 	  "range": "flexible",	"bid": "tapered",
 	  "color": [178,255,102]
 	},
-	{ "name": "Prarie",	"id": 12,
+	{ "name": "Prairie",	"id": 12,
 	  "class": "Grass",	"type": 1,	"order": 5,
 	  "alt":   { "min": 200,   "max": 500 },
 	  "temp":  { "min": 0,   "max": 20 },

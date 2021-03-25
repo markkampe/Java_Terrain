@@ -43,7 +43,7 @@
 	{ "//": "L1 ground cover tiles beneath ecotopes"},
 	{ "name": "grass-GP", "level": 1, "base": 2816,
 	  "terrain": "land",
-	  "class": "Prarie",
+	  "class": "Prairie",
 	  "vigor": 32
 	},
 	{ "name": "grass-GM", "level": 1, "base": 2816,

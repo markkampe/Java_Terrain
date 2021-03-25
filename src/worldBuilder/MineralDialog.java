@@ -36,12 +36,11 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	private double width, height;	// selected area size (in pixels)
 	private boolean changes_made;	// we have displayed updates
 
-	private static final int NONE = 0;
-	private static final int MAX_TYPES = 10;
-	
-	private static final int RSRC_STONE = 1;	// sand-stone, granite, etc
-	private static final int RSRC_METAL = 2;	// copper, iron, etc
-	private static final int RSRC_PRECIOUS = 3;	// gold, silver, etc
+	private static final int MIN_NONE = 0;		// merely soil
+	private static final int MIN_STONE = 1;		// sand-stone, granite, etc
+	private static final int MIN_METAL = 2;		// copper, iron, etc
+	private static final int MIN_PRECIOUS = 3;	// gold, silver, etc
+	private static final int MAX_TYPES = 4;
 	private static final String[] mineralClasses = {"None", "Stone", "Metal", "Precious" };
 
 	private static final long serialVersionUID = 1L;
@@ -176,16 +175,16 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		for(int i = 0; i < soilMap.length; i++)
 			if (points[i].x >= x0 && points[i].x < x0+width &&
 				points[i].y >= y0 && points[i].y < y0+height) {
-				soilMap[i] = NONE;
+				soilMap[i] = MIN_NONE;
 				point_count++;
 			}
 
 		// figure out the per-class quotas (in MeshPoints)
 		int quotas[] = new int[MAX_TYPES];
 		point_count = (point_count * mineral_pct.getValue())/100;
-		quotas[RSRC_PRECIOUS] = (point_count * (100 - minerals_3.getUpperValue()))/100;
-		quotas[RSRC_STONE] = (point_count * minerals_3.getValue())/100;
-		quotas[RSRC_METAL] = point_count - (quotas[1] + quotas[2]);
+		quotas[MIN_PRECIOUS] = (point_count * (100 - minerals_3.getUpperValue()))/100;
+		quotas[MIN_STONE] = (point_count * minerals_3.getValue())/100;
+		quotas[MIN_METAL] = point_count - (quotas[MIN_PRECIOUS] + quotas[MIN_STONE]);
 		
 		// assign flora types for each MeshPoint
 		classCounts = placer.update(x0, y0, height, width, quotas, mineralClasses);
@@ -266,9 +265,9 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			// report the changes
 			if (parms.debug_level > 0) {
 				System.out.println("Mineral Placement (" + ResourceRule.ruleset + 
-								   "): Stone/Metal/Precious = " + classCounts[RSRC_STONE] + 
-								   "/" + classCounts[RSRC_METAL] +
-								   "/" + classCounts[RSRC_PRECIOUS]);
+								   "): Stone/Metal/Precious = " + classCounts[MIN_STONE] + 
+								   "/" + classCounts[MIN_METAL] +
+								   "/" + classCounts[MIN_PRECIOUS]);
 			}
 		} else if (e.getSource() == chooseRocks) {
 			FileDialog d = new FileDialog(this, "Mineral Palette", FileDialog.LOAD);

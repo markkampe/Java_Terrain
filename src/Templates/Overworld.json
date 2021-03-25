@@ -40,15 +40,35 @@
 	  "vigor": 128
 	},
 
-	{ "//": "L1 ground cover tiles beneath other flora types"},
-	{ "name": "grass-G", "level": 1, "base": 2816,
+	{ "//": "L1 ground cover tiles beneath ecotopes"},
+	{ "name": "grass-GP", "level": 1, "base": 2816,
 	  "terrain": "land",
-	  "class": "Grass",
+	  "class": "Prarie",
 	  "vigor": 32
 	},
-	{ "name": "grass-B", "level": 1, "base": 2816,
+	{ "name": "grass-GM", "level": 1, "base": 2816,
 	  "terrain": "land",
-	  "class": "Brush",
+	  "class": "Meadow",
+	  "vigor": 32
+	},
+	{ "name": "grass-BR", "level": 1, "base": 2816,
+	  "terrain": "land",
+	  "class": "Riperian",
+	  "vigor": 32
+	},
+	{ "name": "grass-BS", "level": 1, "base": 2816,
+	  "terrain": "land",
+	  "class": "Scrub",
+	  "vigor": 32
+	},
+	{ "name": "grass-BC", "level": 1, "base": 2816,
+	  "terrain": "land",
+	  "class": "Chaparral",
+	  "vigor": 32
+	},
+	{ "name": "grass-TJ", "level": 1, "base": 2816,
+	  "terrain": "land",
+	  "class": "Jungle",
 	  "vigor": 32
 	},
 	{ "name": "grass-TB", "level": 1, "base": 2816,
@@ -58,20 +78,30 @@
 	},
 	{ "name": "grass-TC", "level": 1, "base": 2816,
 	  "terrain": "land",
-	  "class": "Connifer",
+	  "class": "Conifers",
 	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
 	{ "name": "snow-TC", "level": 1, "base": 3968,
 	  "terrain": "land",
-	  "class": "Connifer",
+	  "class": "Conifers",
 	  "temp": { "max": 0 },
 	  "vigor": 32
 	},
-	{ "name": "dirt-TP", "level": 1, "base": 3200,
+	{ "name": "snow", "level": 1, "base": 3968,
 	  "terrain": "land",
-	  "class": "Palm",
+	  "class": "Alpine",
 	  "vigor": 32
+	},
+	{ "name": "dirt", "level": 1, "base": 3200,
+	  "terrain": "land",
+	  "class": "Desert",
+	  "vigor": 32
+	},
+	{ "name": "marsh", "level": 1, "base": 666, "//": "FIX TILE #",
+	  "terrain": "land",
+	  "class": "Marsh",
+	  "vigor": 0
 	},
 
 
@@ -81,13 +111,29 @@
 	  "terrain": "ground",
 	  "VIGOR": 32
 	},
-	{ "name": "brush", "level": 4, "base": 2864, 
-	  "class": "Brush",
+	{ "name": "Berries", "level": 4, "base": 2864, "//": "FIX TILE #, level",
+	  "class": "Riperian",
 	  "terrain": "ground",
 	  "VIGOR": 32
 	},
+	{ "name": "Low Brush", "level": 4, "base": 2864, "//": "FIX TILE #, level",
+	  "class": "Scrub",
+	  "terrain": "ground",
+	  "VIGOR": 32
+	},
+	{ "name": "Chaparral", "level": 4, "base": 2864, "//": "FIX TILE #, level",
+	  "class": "Chaparral",
+	  "terrain": "ground",
+	  "VIGOR": 32
+	},
+
 	{ "name": "palm", "level": 2, "base": 3776,
 	  "class": "Palm",
+	  "terrain": "ground",
+	  "vigor": 32
+	},
+	{ "name": "jungle", "level": 2, "base": 666, "//": "FIX TILE#, level",
+	  "class": "Jungle",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
@@ -97,13 +143,13 @@
 	  "vigor": 32
 	},
 	{ "name": "pine", "level": 2, "base": 3056,
-	  "class": "Connifer",
+	  "class": "Conifers",
 	  "terrain": "ground",
 	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
 	{ "name": "snowpine", "level": 2, "base": 4160,
-	  "class": "Connifer",
+	  "class": "Conifers",
 	  "terrain": "ground",
 	  "temp": { "max": 0 },
 	  "vigor": 32

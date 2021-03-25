@@ -38,13 +38,13 @@ public class RainMap {
 		int h = height / cellWidth;
 		int w = width / cellWidth;
 
-		// interpolate Z values from the latest mesh
+		// interpolate rainfall values from the latest mesh
 		double rArray[][] = map.getCartesian(Cartesian.vicinity.POLYGON).interpolate(map.getRainMap());
 
-		// use height to generate background colors
+		// use rainfall to generate background colors
 		for (int r = 0; r < h; r++)
 			for (int c = 0; c < w; c++) {
-				// interpolate height (from surrounding MeshPoints)
+				// interpolate rainfall (from surrounding MeshPoints)
 				double rain = rArray[r][c];
 
 				// shade a rectangle w/cyan for that rainfall

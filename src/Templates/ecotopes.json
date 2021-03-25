@@ -7,7 +7,7 @@
 	  "temp":  { "max": 20 },
 	  "rain":  { "min": 30,  "max": 90 },
 	  "vigor": 32,
-	  "range": "flexible",	 "bid": "tapered",
+	   "bid": "tapered",
 	  "color": [0,102,51]
 	},
 	{ "name": "Broadleaf",	 "id": 2,
@@ -16,7 +16,7 @@
 	  "temp":  { "min": 0,   "max": 25 },
 	  "rain":  { "min": 75,  "max": 120 },
 	  "vigor": 32,
-	  "range": "flexible",	 "bid": "tapered",
+	   "bid": "tapered",
 	  "color": [128,255,0]
 	},
 	{ "name": "Jungle",	"id": 3,
@@ -25,7 +25,7 @@
 	  "temp":  { "min": 15 },
 	  "rain":  { "min": 100 },
 	  "vigor": 32,
-	  "range": "flexible",	"bid": "tapered",
+	  "bid": "tapered",
 	  "color": [76,153,0]
 	},
 

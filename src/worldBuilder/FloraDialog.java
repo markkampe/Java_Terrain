@@ -242,8 +242,8 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		int quotas[] = new int[MAX_TYPES];
 		quotas[FLORA_NONE] = point_count;	// no quotas imposed on barrens
 		point_count = (point_count * flora_pct.getValue())/100;
-		quotas[FLORA_GRASS] = (point_count * (100 - flora_3.getUpperValue()))/100;
-		quotas[FLORA_TREE] = (point_count * flora_3.getValue())/100;
+		quotas[FLORA_TREE] = (point_count * (100 - flora_3.getUpperValue()))/100;
+		quotas[FLORA_GRASS] = (point_count * flora_3.getValue())/100;
 		quotas[FLORA_BRUSH] = point_count - (quotas[FLORA_GRASS] + quotas[FLORA_TREE]);
 		
 		// assign flora types for each MeshPoint

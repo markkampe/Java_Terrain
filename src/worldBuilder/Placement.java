@@ -143,7 +143,7 @@ public class Placement {
 		
 		// get the class number for each bidding rule
 		int bidderClass[] = new int[numRules];
-		for(int i = 0; i < bidderClass.length; i++)
+		for(int i = 0; i < classNames.length; i++)
 			for(int r = 0; r < numRules; r++)
 				if (bidders[r].className != null && bidders[r].className.equals(classNames[i]))
 					bidderClass[r] = i;

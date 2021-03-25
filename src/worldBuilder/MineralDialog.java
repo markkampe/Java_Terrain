@@ -42,6 +42,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	private static final int RSRC_STONE = 1;	// sand-stone, granite, etc
 	private static final int RSRC_METAL = 2;	// copper, iron, etc
 	private static final int RSRC_PRECIOUS = 3;	// gold, silver, etc
+	private static final String[] mineralClasses = {"None", "Stone", "Metal", "Precious" };
 
 	private static final long serialVersionUID = 1L;
 	
@@ -187,7 +188,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		quotas[RSRC_METAL] = point_count - (quotas[1] + quotas[2]);
 		
 		// assign flora types for each MeshPoint
-		classCounts = placer.update(x0, y0, height, width, quotas);
+		classCounts = placer.update(x0, y0, height, width, quotas, mineralClasses);
 	
 		// instantiate (and display) the updated flora map
 		map.setRockColors(placer.previewColors());

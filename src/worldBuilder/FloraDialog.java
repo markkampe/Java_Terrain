@@ -17,6 +17,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	private static final int FLORA_BRUSH = 2;
 	private static final int FLORA_TREE = 3;
 	private static final int MAX_TYPES = 4;		// number of flora classes
+	private static final String[] floraClasses = {"Barren", "Grass", "Brush", "Tree"};
 	
 	private Map map;
 	private Parameters parms;
@@ -246,7 +247,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		quotas[FLORA_BRUSH] = point_count - (quotas[FLORA_GRASS] + quotas[FLORA_TREE]);
 		
 		// assign flora types for each MeshPoint
-		classCounts = placer.update(x0, y0, height, width, quotas);
+		classCounts = placer.update(x0, y0, height, width, quotas, floraClasses);
 	
 		// instantiate (and display) the updated flora map
 		map.setFloraColors(placer.previewColors());

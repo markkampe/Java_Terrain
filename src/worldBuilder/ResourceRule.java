@@ -28,8 +28,8 @@ public class ResourceRule {
 	/** name of this rule and its class	*/
 	public String ruleName, className;
 
-	/** numeric class, and ID*/
-	public int type, id;
+	/** resource type ID # */
+	public int id;
 
 	/** Altitude ranges for this rule	*/
 	public int minAltitude, maxAltitude;
@@ -77,7 +77,6 @@ public class ResourceRule {
 		this.debug = false;
 		previewColor = null;// no previews
 		className = null;	// no default class
-		type = 0;			// no default type
 		id = 0;				// no default ID
 		order = 9;			// end of the line
 		
@@ -187,8 +186,6 @@ public class ResourceRule {
 					// copy in all of the values we got
 					if (className != null)
 						thisRule.className = className;
-					if (type != NO_VALUE)
-						thisRule.type = type;
 					if (id != NO_VALUE)
 						thisRule.id = id;
 					if (aMin != NO_VALUE)
@@ -417,10 +414,10 @@ public class ResourceRule {
 	 * @param prefix ... leading blanks
 	 */
 	public void dump( String prefix ) {
-		System.out.print(prefix + "subtype: " + ruleName);
+		System.out.print(prefix + "subtype: " + ruleName + " (" + id + ")");
 		System.out.println("");
 		if (className != null)
-			System.out.println(prefix + "      " + "class:   " + className + "(" + type + "," + id + ")");
+			System.out.println(prefix + "      " + "class:   " + className);
 		System.out.println(prefix + "      " + "alt:     " + minAltitude + "-" + maxAltitude);
 		System.out.println(prefix + "      " + "depth:   " + String.format("%.2f", minDepth) + "-" + String.format("%.2f", maxDepth));
 		System.out.println(prefix + "      " + "hydro:   " + String.format("%.1f", minHydro) + "-" + String.format("%.1f", maxHydro));

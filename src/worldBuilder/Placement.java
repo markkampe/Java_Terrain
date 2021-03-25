@@ -32,6 +32,7 @@ public class Placement {
 
 	private Color colorMap[];	// per-rule preview colors
 	private String nameMap[];	// per-rule resource names
+	private String classes;		// names of resource classes
 	
 	private static final int PLACEMENT_DEBUG = 2;
 
@@ -132,12 +133,20 @@ public class Placement {
 	 * @param height ... height of selected region
 	 * @param width ... width of selected region
 	 * @param quotas ... per class quotas (in MeshPoints)
+	 * @param classNames ... names of the quota-ed classes
 	 * 
 	 * @return array of (per-class) point placements
 	 */
-	public int[] update(double x0, double y0, double height, double width, int quotas[]) {
+	public int[] update(double x0, double y0, double height, double width, int quotas[], String classNames[]) {
 
 		int counts[] = new int[MAX_RULES];	// allocated points (vs quotas)
+		
+		// get the class number for each bidding rule
+		int bidderClass[] = new int[numRules];
+		for(int i = 0; i < bidderClass.length; i++)
+			for(int r = 0; r < numRules; r++)
+				if (bidders[r].className != null && bidders[r].className.equals(classNames[i]))
+					bidderClass[r] = i;
 		
 		// initialize the points to be populated
 		for(int i = 0; i < points.length; i++)
@@ -151,10 +160,16 @@ public class Placement {
 			// see if there are any under-quota rules in this class
 			String eligible = null;
 			for(int r = 0; r < numRules; r++) {
+				// see if this bidder is assigned to this pass
 				if (bidders[r].order != pass)
 					continue;
-				if (counts[bidders[r].type] >= quotas[bidders[r].type])
+				
+				// see if this bidder has already made its quota
+				int thisClass = bidderClass[r];
+				if (counts[thisClass] >= quotas[thisClass])
 					continue;
+				
+				// construct a list of eligible bidders (for diagnostic output)
 				if (eligible == null)
 					eligible = bidders[r].ruleName;
 				else
@@ -194,7 +209,7 @@ public class Placement {
 				for(int r = 0; r < numRules; r++) {
 					if (bidders[r].order != pass)
 						continue;	// not eligible to bid this round
-					if (counts[bidders[r].type] >= quotas[bidders[r].type])
+					if (counts[bidderClass[r]] >= quotas[bidderClass[r]])
 						continue;	// already at quota
 					
 					double bid = bidders[r].bid(alt, hydro, flux, rain, Twinter - lapse, Tsummer - lapse, soil);
@@ -224,7 +239,7 @@ public class Placement {
 
 				// add the winner to our list of winning bids
 				if (winner >= 0) {
-					int type = bidders[winner].type;
+					int type = bidderClass[winner];
 					int id = bidders[winner].id;
 					thisBid = new PointBid(i, type, id, high_bid);
 

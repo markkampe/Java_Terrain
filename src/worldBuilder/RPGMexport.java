@@ -109,9 +109,9 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			need_slopes = true;
 			need_depths = true;
 		}
-		need_temp = true;
-		need_hydro1 = true;
-		need_hydro2 = true;
+		need_temp = false;		// XXX remove this entirely
+		need_hydro1 = false;	// XXX remove this entirely
+		need_hydro2 = false;	// XXX remove this entirely
 		need_palette = true;
 		need_flora_p = true;
 		need_flora_pct = true;

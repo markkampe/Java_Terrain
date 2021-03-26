@@ -33,7 +33,7 @@
 	{ "//": "precious metals" },
 	{ "name": "Deep-Rock Gold", "id": 15,	"order": 1,
 	  "class": "Precious",
-	  "soil": { "min": "3", "max": "3" },
+	  "soil": { "min": 3, "max": 3 },
 	  "vigor": 16,
 	  "color": [255,153,51]
 	},

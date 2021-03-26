@@ -351,7 +351,8 @@ public class WorldBuilder  extends JFrame
 		} else {
 			d.setDialogTitle("Save As");
 			d.setSelectedFile(new File(parms.map_name + ".json"));
-			d.setCurrentDirectory(new File("."));
+			if (parms.world_dir != null)
+				d.setCurrentDirectory(new File(parms.world_dir));
 		}
 		
 		d.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -371,6 +372,9 @@ public class WorldBuilder  extends JFrame
 		if (d.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			filename = d.getSelectedFile().getPath();
 			map.write(filename);
+			String dirname = d.getCurrentDirectory().getPath();
+			if (dirname != null)
+				parms.world_dir = dirname;
 			modified = false;
 		}
 	}
@@ -406,7 +410,7 @@ public class WorldBuilder  extends JFrame
 				checkSave();
 			JFileChooser d = new JFileChooser();
 			d.setDialogTitle("Choose world description");
-			d.setCurrentDirectory(new File("."));
+			d.setCurrentDirectory(new File(parms.world_dir));
 			d.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			FileFilter jsonFilter = new FileFilter() {
 				public boolean accept(File f) {
@@ -424,6 +428,9 @@ public class WorldBuilder  extends JFrame
 			if (d.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				filename = d.getSelectedFile().getPath();
 				map.read(filename);
+				String dir = d.getCurrentDirectory().getPath();
+				if (dir != null)
+					parms.world_dir = dir;
 				
 				// newly loaded map may have changed the sea-level
 				seaLevel.setValue((int)(parms.sea_level * parms.z_range));

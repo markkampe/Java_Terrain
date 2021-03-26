@@ -28,8 +28,9 @@ public class Parameters {
 	/** program name/version*/	public String title = PROGRAM_NAME + " " + PROGRAM_VERSION + " " + VERSION_NAME;
 	/** name of this map	*/	public String map_name = "Map001";
 	/** RPGMaker parent map	*/	public String parent_name = null;
-	/** RPGMaker project dir*/	public String project_dir = null;
-	/** Foundation export dir*/	public String export_dir = ".";
+	/** project export dir	*/	public String project_dir = null;
+	/** simple export dir	*/	public String export_dir = null;
+	/** world open/save dir	*/	public String world_dir = ".";
 	
 	private static final String DEFAULT_CONFIG = "/Templates/worldBuilder.json";
 

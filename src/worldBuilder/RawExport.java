@@ -60,12 +60,16 @@ public class RawExport extends ExportBase implements ActionListener {
 			// flush the it out to a file
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText()+".json");
+			if (parms.export_dir != null)
+				d.setDirectory(parms.export_dir);
 			d.setVisible(true);
 			String export_file = d.getFile();
 			if (export_file != null) {
 				String dir = d.getDirectory();
-				if (dir != null)
+				if (dir != null) {
 					export_file = dir + export_file;
+					parms.export_dir = dir;
+				}
 				
 				exporter.writeFile(export_file);
 				

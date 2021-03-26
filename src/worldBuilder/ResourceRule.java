@@ -165,7 +165,7 @@ public class ResourceRule {
 		String name = "", thisKey = "", thisObject = "", thisValue = "";
 		boolean inRules = false;
 		
-		int	   type = NO_VALUE,   id = NO_VALUE;	// resource class and ID
+		int	   id = NO_VALUE;	// resource ID
 		int    aMin = NO_VALUE, aMax = NO_VALUE;	// altitude
 		double dMin = NO_VALUE, dMax = NO_VALUE;	// depth
 		double hMin = NO_VALUE, hMax = NO_VALUE;	// hydration
@@ -265,7 +265,6 @@ public class ResourceRule {
 					rules.add(thisRule);
 					
 					// now reset all System.out.println("read string for key " + thisKey);the parameters for the next rule
-					type = NO_VALUE;
 					aMin = NO_VALUE; aMax = NO_VALUE;
 					dMin = NO_VALUE; dMax = NO_VALUE;
 					hMin = NO_VALUE; hMax = NO_VALUE;
@@ -352,10 +351,6 @@ public class ResourceRule {
 				}
 				
 				switch (thisKey) {
-				case "type":
-					type = parser.getInt();
-					thisKey = "";
-					break;
 				case "id":
 					id = parser.getInt();
 					thisKey = "";

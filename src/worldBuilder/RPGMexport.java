@@ -63,7 +63,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 
 	private Color[] colorTopo; // level to preview color map
 	private Color[] colorFlora;	// flora class to preview color map
-	private double[][] baseDepth;	// hydration before our adjustments
 
 	// preview colors
 	private static final Color GROUND_COLOR = new Color(102,51,0);
@@ -478,7 +477,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 		if (!exported) {
 			export(tiler);
-			baseDepth = tiler.depths;	// remember the base
 			
 			exported = true;
 			newSelection = false;

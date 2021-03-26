@@ -98,7 +98,7 @@
 	  "class": "Desert",
 	  "vigor": 32
 	},
-	{ "name": "marsh", "level": 1, "base": 666, "//": "FIX TILE #",
+	{ "name": "marsh", "level": 1, "base": 2816,	"//": "BETTER TILE ?",
 	  "terrain": "land",
 	  "class": "Marsh",
 	  "vigor": 0
@@ -106,25 +106,20 @@
 
 
 	{ "//": "L2/4 tiles for flora types in lowlands"},
-	{ "name": "tallGrass", "level": 2, "base": 2864,
-	  "class": "Grass",
+	{ "name": "tall-grass", "level": 2, "base": 2864,
+	  "class": "Grassland",
 	  "terrain": "ground",
-	  "VIGOR": 32
+	  "vigor": 32
 	},
-	{ "name": "Berries", "level": 4, "base": 2864, "//": "FIX TILE #, level",
+	{ "name": "Berries", "level": 4, "base": 2864,	"//": "BETTER TILE ?",
 	  "class": "Riperian",
 	  "terrain": "ground",
-	  "VIGOR": 32
+	  "vigor": 32
 	},
-	{ "name": "Low Brush", "level": 4, "base": 2864, "//": "FIX TILE #, level",
-	  "class": "Scrub",
+	{ "name": "Brush", "level": 4, "base": 2864,	"//": "BETTER TILE ?",
+	  "class": "Brush",
 	  "terrain": "ground",
-	  "VIGOR": 32
-	},
-	{ "name": "Chaparral", "level": 4, "base": 2864, "//": "FIX TILE #, level",
-	  "class": "Chaparral",
-	  "terrain": "ground",
-	  "VIGOR": 32
+	  "vigor": 32
 	},
 
 	{ "name": "palm", "level": 2, "base": 3776,
@@ -132,7 +127,7 @@
 	  "terrain": "ground",
 	  "vigor": 32
 	},
-	{ "name": "jungle", "level": 2, "base": 666, "//": "FIX TILE#, level",
+	{ "name": "jungle", "level": 2, "base": 3776,	"//": "BETTER TILE ?",
 	  "class": "Jungle",
 	  "terrain": "ground",
 	  "vigor": 32

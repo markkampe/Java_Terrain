@@ -10,7 +10,7 @@ import java.util.ListIterator;
  * be extended for fauna and other natural resources.
  */
 public class Placement {
-	private static final int MAX_RULES = 20;
+	private static final int MAX_RULES = 40;
 	private static final int MAX_ID = 100;
 	private static final int NONE = 0;
 	
@@ -32,7 +32,7 @@ public class Placement {
 
 	private Color colorMap[];	// per-rule preview colors
 	private String nameMap[];	// per-rule resource names
-	private String classes;		// names of resource classes
+	// private String classes;		// names of resource classes
 	
 	private static final int PLACEMENT_DEBUG = 2;
 
@@ -50,7 +50,8 @@ public class Placement {
 	public Placement(String rulesFile, Map map, double resources[]) {
 	
 		// build up a list of ResourceRules
-		ResourceRule.loadRules(rulesFile);
+		ResourceRule r = new ResourceRule("dummy");
+		r.loadRules(rulesFile);
 		bidders = new ResourceRule[MAX_RULES];
 		colorMap = new Color[MAX_ID+1];
 		nameMap = new String[MAX_ID+1];
@@ -58,7 +59,7 @@ public class Placement {
 		firstPass = 666;
 		lastPass = -666;
 		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
-			ResourceRule r = it.next();
+			r = it.next();
 			bidders[numRules++] = r;
 			colorMap[r.id] = r.previewColor;
 			nameMap[r.id] = r.ruleName;

@@ -25,7 +25,7 @@ public class ResourceRule {
 	/** list of all ingested rules	*/
 	public static String ruleFile;
 	public static String ruleset;
-	private static LinkedList<ResourceRule> rules;
+	protected static LinkedList<ResourceRule> rules;
 	
 	/** name of this rule and its class	*/
 	public String ruleName, className;
@@ -384,6 +384,9 @@ public class ResourceRule {
 					case "slope":
 						mMin = Double.parseDouble(thisValue);
 						break;
+					case "face":
+						cMin = Double.parseDouble(thisValue);
+						break;
 					case "rain":
 						rMin = Double.parseDouble(thisValue);
 						break;
@@ -417,6 +420,9 @@ public class ResourceRule {
 						break;
 					case "slope":
 						mMax = Double.parseDouble(thisValue);
+						break;
+					case "face":
+						cMax = Double.parseDouble(thisValue);
 						break;
 					case "rain":
 						rMax = Double.parseDouble(thisValue);

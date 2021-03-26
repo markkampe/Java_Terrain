@@ -14,14 +14,16 @@ import javax.json.stream.JsonParser;
 
 
 /**
- * parameters and bids for a single Flora sub-type
+ * parameters and bids for a single resource (eg flora or mineral) 
+ * that bids for MeshPoints or export tiles.
  */
 public class ResourceRule {
-	private static final String DEFAULT_CONFIG = "/Templates";
-	private static final int NO_VALUE = 666666;
-	private static final int RULE_DEBUG = 2;
+	protected static final String DEFAULT_CONFIG = "/Templates";
+	protected static final int NO_VALUE = 666666;
+	protected static final int RULE_DEBUG = 2;
 	
 	/** list of all ingested rules	*/
+	public static String ruleFile;
 	public static String ruleset;
 	private static LinkedList<ResourceRule> rules;
 	
@@ -37,9 +39,9 @@ public class ResourceRule {
 	public double minDepth, maxDepth, minHydro, maxHydro;
 	/** Temperature range for this rule	*/
 	public double minTemp, maxTemp;
+	/** slope/face ranges for this rule	*/
+	public double minSlope, maxSlope, minFace, maxFace;	// TODO support slope and face rules
 	/** soil type range for this rule	*/
-	public double minSlope, maxSlope;
-	/** slope range for this rule	*/
 	public double minSoil, maxSoil;
 	/** rainfall range for this rule	*/
 	public double minRain, maxRain;
@@ -93,6 +95,8 @@ public class ResourceRule {
 		maxSoil = 9;	// FIX, how many legal soil types are there
 		minSlope = 0.0;
 		maxSlope = 666;
+		minFace = 0;
+		maxFace = 360;
 		minRain = 0;
 		maxRain = 666;
 		minFlux = 0;
@@ -112,15 +116,29 @@ public class ResourceRule {
 		return new ResourceRule(name);
 	}
 	
-	// load and iterate over Flora type rules
+	// load and iterate over placement rules
 	public static int size() { return rules.size(); }
 	public static ListIterator<ResourceRule> iterator() { return rules.listIterator(); }
 	
+	/*
+	 * These methods are intended to be overridden by sub-classes, so that
+	 * they can process sub-class-specific attributes.
+	 */
+	public void set_attribute(String name, String value) {
+		System.err.println(ruleFile + ": Unrecognized attribute (" + name + "=\"" + value + "\")");
+	}
+	public void set_attribute(String name, int value) {
+		System.err.println(ruleFile + ": Unrecognized attribute (" + name + "=" + value + ")");
+	}
+	public void set_range(String name, String limit, double value) {
+		System.err.println(ruleFile + ": Unrecognized attribute (" + name + "." + limit + "=" + value);
+	}
+	
 	/**
-	 * load in Flora sub-type definitions
+	 * load in resource placement rules
 	 * @param file name of file to be read
 	 */
-	public static void loadRules(String file) {
+	public void loadRules(String file) {
 		rules = new LinkedList<ResourceRule>();
 		
 		Parameters parms = Parameters.getInstance();
@@ -131,6 +149,7 @@ public class ResourceRule {
 			filename = DEFAULT_CONFIG + "/" + file;
 			InputStream s = ResourceRule.class.getResourceAsStream(filename);
 			r = new BufferedReader(new InputStreamReader(s));
+			ruleFile = filename;
 		} else {
 			filename = file;
 			try {
@@ -153,6 +172,7 @@ public class ResourceRule {
 		double tMin = NO_VALUE, tMax = NO_VALUE;	// temperature
 		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
 		double mMin = NO_VALUE, mMax = NO_VALUE;	// slope
+		double cMin = NO_VALUE, cMax = NO_VALUE;	// face (compass direction)
 		double rMin = NO_VALUE, rMax = NO_VALUE;	// rainfall
 		double fMin = NO_VALUE, fMax = NO_VALUE;	// river flux
 		int red = NO_VALUE, blue = NO_VALUE, green = NO_VALUE;	
@@ -190,8 +210,8 @@ public class ResourceRule {
 					if (name.equals(""))
 						break;
 					
-					// create a new rule
-					thisRule = new ResourceRule(name);
+					// create a new rule (of the appropriate sub-type)
+					thisRule = this.factory(name);
 					
 					// copy in all of the values we got
 					if (className != null)
@@ -208,6 +228,8 @@ public class ResourceRule {
 						thisRule.minTemp = tMin;
 					if (sMin != NO_VALUE)
 						thisRule.minSoil = sMin;
+					if (cMin != NO_VALUE)
+						thisRule.minFace = cMin;
 					if (rMin != NO_VALUE)
 						thisRule.minRain = rMin;
 					if (fMin != NO_VALUE)
@@ -224,6 +246,8 @@ public class ResourceRule {
 						thisRule.maxTemp = tMax;
 					if (sMax != NO_VALUE)
 						thisRule.maxSoil = sMax;
+					if (cMax != NO_VALUE)
+						thisRule.maxFace = cMax;
 					if (rMax != NO_VALUE)
 						thisRule.maxRain = rMax;
 					if (fMax != NO_VALUE)
@@ -245,6 +269,7 @@ public class ResourceRule {
 					aMin = NO_VALUE; aMax = NO_VALUE;
 					dMin = NO_VALUE; dMax = NO_VALUE;
 					hMin = NO_VALUE; hMax = NO_VALUE;
+					cMin = NO_VALUE; cMax = NO_VALUE;
 					tMin = NO_VALUE; tMax = NO_VALUE;
 					mMin = NO_VALUE; mMax = NO_VALUE;
 					rMin = NO_VALUE; rMax = NO_VALUE;
@@ -296,6 +321,9 @@ public class ResourceRule {
 					break;
 				case "bid":
 					taperedBid = parser.getString().equals("tapered");
+					break;
+				default: // unrecognized attribute: see if the sub-class recognizes it
+					set_attribute(thisKey, parser.getString());
 					break;
 				}
 				thisKey = "";
@@ -367,6 +395,9 @@ public class ResourceRule {
 					case "flux":
 						fMin = Double.parseDouble(thisValue);
 						break;
+					default:	// unrecognized attribute - see if subclass wants it 
+						set_range(thisObject,  "min",  Double.parseDouble(thisValue));
+						break;
 					}
 					thisKey = "";
 					break;
@@ -398,7 +429,14 @@ public class ResourceRule {
 					case "flux":
 						fMax = Double.parseDouble(thisValue);
 						break;
+					default:	// unrecognized attribute - see if subclass wants it 
+						set_range(thisObject,  "max",  Double.parseDouble(thisValue));
 					}
+					thisKey = "";
+					break;
+					
+				default:	// unrecoginzed -> sub-class
+					set_attribute(thisKey, parser.getInt());
 					thisKey = "";
 					break;
 				}
@@ -418,13 +456,16 @@ public class ResourceRule {
 		}
 	}
 	
-	
 	/**
 	 * dump out a Rule (for debugging)
 	 * @param prefix ... leading blanks
+	 * 
+	 * Note: subclass should call super.dump() and then add its own output
 	 */
 	public void dump( String prefix ) {
-		System.out.print(prefix + "subtype: " + ruleName + " (" + id + ")");
+		System.out.print(prefix + "subtype: " + ruleName);
+		if (id != 0)
+			System.out.print(" (" + id + ")");
 		System.out.println("");
 		if (className != null)
 			System.out.println(prefix + "      " + "class:   " + className);
@@ -436,10 +477,11 @@ public class ResourceRule {
 		System.out.println(prefix + "      " + "temp:    " + minTemp + "-" + maxTemp);
 		System.out.println(prefix + "      " + "soil:    " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
 		System.out.println(prefix + "      " + "slope:   " + String.format("%.1f", minSlope) + "-" + String.format("%.1f", maxSlope));
+		System.out.println(prefix + "      " + "face:    " + minFace + "-" + maxFace);
 		System.out.println(prefix + "      " + "range:   " + (flexRange ? "flexible" : "strict"));
 		System.out.println(prefix + "      " + "bid:     " + (taperedBid ? "tapered" : "flat"));
 		if (previewColor != null)
-			System.out.println(prefix + "      " + "color:Flora   " +
+			System.out.println(prefix + "      " + "color:   " +
 								previewColor.getRed() + "," +
 								previewColor.getGreen() + "," +
 								previewColor.getBlue());

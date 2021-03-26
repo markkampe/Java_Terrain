@@ -50,8 +50,8 @@ public class Placement {
 	public Placement(String rulesFile, Map map, double resources[]) {
 	
 		// build up a list of ResourceRules
-		ResourceRule r = new ResourceRule("dummy");
-		r.loadRules(rulesFile);
+		ResourceRule x = new ResourceRule("dummy");
+		x.loadRules(rulesFile);
 		bidders = new ResourceRule[MAX_RULES];
 		colorMap = new Color[MAX_ID+1];
 		nameMap = new String[MAX_ID+1];
@@ -59,7 +59,7 @@ public class Placement {
 		firstPass = 666;
 		lastPass = -666;
 		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
-			r = it.next();
+			ResourceRule r = it.next();
 			bidders[numRules++] = r;
 			colorMap[r.id] = r.previewColor;
 			nameMap[r.id] = r.ruleName;

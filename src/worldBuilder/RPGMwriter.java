@@ -9,7 +9,6 @@ import java.io.IOException;
 public class RPGMwriter {
 
 	private FileWriter out;	
-	private TileRules rules;
 	private int numRows;
 	private int numCols;
 	private int[] typeMap;
@@ -19,9 +18,8 @@ public class RPGMwriter {
 	 * @param outfile open output file
 	 * @param rules tile selection rules to be used
 	 */
-	public RPGMwriter(FileWriter outfile, TileRules rules) {
+	public RPGMwriter(FileWriter outfile) {
 		out = outfile;
-		this.rules = rules;
 		typeMap = null;
 	}
 	
@@ -175,17 +173,18 @@ public class RPGMwriter {
 		int lastrow = baseTiles.length - 1;
 		int lastcol = baseTiles[row].length - 1;
 		int sameTile = baseTiles[row][col];
+		RPGMRule r = RPGMRule.tileRule(sameTile);
 		
 		/*
 		 * most auto-tiling is based on the eight surrounding
 		 * neighbors, but a few tiles distinguish only four
 		 * interesting neighbors.
 		 */
-		if (rules.neighbors(sameTile) == 4) {
-			bits |= (col > 0 && baseTiles[row][col-1] != sameTile) ? 1 : 0;		// left
-			bits |= (row > 0 && baseTiles[row-1][col] != sameTile) ? 2 : 0;		// up
+		if (r != null && r.neighbors == 4) {
+			bits |= (col > 0 && baseTiles[row][col-1] != sameTile) ? 1 : 0;			// left
+			bits |= (row > 0 && baseTiles[row-1][col] != sameTile) ? 2 : 0;			// up
 			bits |= (col < lastcol && baseTiles[row][col+1] != sameTile) ? 4 : 0;	// right
-			bits |= (row < lastrow && baseTiles[row+1][col] != sameTile) ? 8 : 0;		// down
+			bits |= (row < lastrow && baseTiles[row+1][col] != sameTile) ? 8 : 0;	// down
 			return bits;
 		}
 		
@@ -194,7 +193,7 @@ public class RPGMwriter {
 		 * borders between dissimilar tiles.  Where we want the borders depends 
 		 * on which neighbors are dissimilar.
 		 */
-		if (levels == null || !rules.landBarrier(sameTile)) {
+		if (levels == null || r == null || !r.barrier) {
 			if (row > 0) {
 				if (col > 0)
 					bits |= (baseTiles[row-1][col-1] != sameTile) ? 1 : 0;

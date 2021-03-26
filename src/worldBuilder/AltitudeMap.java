@@ -42,7 +42,7 @@ public class AltitudeMap {
 			Cartesian cart = map.getCartesian(vicinity.POLYGON);
 			double zArray[][] = cart.interpolate(map.getHeightMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
-			double hArray[][] = cart.interpolate(map.getHydrationMap());
+			double hArray[][] = cart.interpolate(map.getHydrationMap());	// FIX use depth map
 			
 			// use height to generate background colors
 			for(int r = 0; r < h; r++)

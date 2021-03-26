@@ -281,7 +281,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		Mesh mesh = map.getMesh();
 		double[] fluxMap = map.getFluxMap();
 		int[] downHill = map.getDownHill();
-		double[] hydroMap = map.getHydrationMap();
+		double[] hydroMap = map.getHydrationMap();	// FIX use  depth map
 		double[] heightMap = map.getHeightMap();
 		double[] erodeMap = map.getErodeMap();
 		

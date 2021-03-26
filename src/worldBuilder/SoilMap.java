@@ -47,7 +47,7 @@ public class SoilMap {
 			// interpolate values from the latest mesh
 			Cartesian cart = map.getCartesian(Cartesian.vicinity.POLYGON);
 			double sArray[][] = cart.nearest(map.getSoilMap());
-			double hArray[][] = cart.interpolate(map.getHydrationMap());
+			double hArray[][] = cart.interpolate(map.getHydrationMap());	// use depthMap
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			
 			// use soil type/hydration to generate background colors

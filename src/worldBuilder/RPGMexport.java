@@ -24,7 +24,6 @@ import javax.swing.event.ChangeListener;
 public class RPGMexport extends ExportBase implements ActionListener, ChangeListener{
 
 	private String format;		// export type/ rules file
-	private String export_dir;	// default output directory
 	
 	private RPGMTiler tiler = null;
 	private boolean exported = false;
@@ -527,14 +526,16 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			// get the output file name
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText() + ".json");
-			if (export_dir != null)
-				d.setDirectory(export_dir);
+			if (parms.export_dir != null)
+				d.setDirectory(parms.project_dir);
 			d.setVisible(true);
 			String export_file = d.getFile();
 			if (export_file != null) {
-				export_dir = d.getDirectory();
-				if (export_dir != null)
-					export_file = export_dir + export_file;
+				String dir = d.getDirectory();
+				if (dir != null) {
+					export_file = dir + export_file;
+					parms.project_dir = dir;
+				}
 
 				// write out the file
 				tiler.writeFile(export_file);

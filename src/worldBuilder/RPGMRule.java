@@ -1,14 +1,16 @@
 package worldBuilder;
 
+import java.util.ListIterator;
+
 /**
  * An extension of ResourceRules that includes information about RPGM tiles 
  */
 public class RPGMRule extends ResourceRule {
 	
+	/** RPGMaker tile set	*/
+	public static int tileSet;
 	/** RPGMaker map level	*/
 	public int level;
-	/** RPGMaker tile set	*/
-	public int tileSet;
 	/** base tile number for this rule	*/
 	public int baseTile;
 	/** base tile number for what we might surround*/
@@ -23,10 +25,10 @@ public class RPGMRule extends ResourceRule {
 	public int neighbors;
 	
 	// save extended parameters to store in next factory-instantiated object
-	private static int n_tileSet, n_level, n_terrain, n_baseTile, n_altTile, n_neighbors;
+	private static int n_level, n_terrain, n_baseTile, n_altTile, n_neighbors;
 	private static int n_height = 1, n_width = 1;
 	private static boolean n_barrier = false;
-	
+
 	/**
 	 * create a new rule
 	 * @param name of this rule
@@ -35,7 +37,6 @@ public class RPGMRule extends ResourceRule {
 		super(name);
 		
 		// initialize our extended attributes
-		this.tileSet = 0;
 		this.level = 0;
 		this.baseTile = 0;
 		this.altTile = 0;
@@ -59,7 +60,6 @@ public class RPGMRule extends ResourceRule {
 		RPGMRule newRule = new RPGMRule(name);
 		
 		// copy extended attributes into the new rule
-		newRule.tileSet = n_tileSet;
 		newRule.level = n_level;
 		newRule.terrain = n_terrain;
 		newRule.baseTile = n_baseTile;
@@ -70,7 +70,6 @@ public class RPGMRule extends ResourceRule {
 		newRule.barrier = n_barrier;
 		
 		// reset their values for the next rule
-		n_tileSet = 0;
 		n_level = 0;
 		n_terrain = TerrainType.NONE;
 		n_baseTile = 0;
@@ -126,8 +125,8 @@ public class RPGMRule extends ResourceRule {
 			n_altTile = value;
 			return;
 		case "tileset":
-			n_tileSet = value;
-			break;
+			tileSet = value;	// this is for the entire rule set
+			return;
 		case "neighbors":
 			n_neighbors = value;
 			return;
@@ -147,6 +146,49 @@ public class RPGMRule extends ResourceRule {
 	}
 	
 	/**
+	 * return a reference to the first rule for a specified base tile
+	 * @param base tile number
+	 */
+	public static RPGMRule tileRule(int base) {
+		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
+			RPGMRule r = (RPGMRule) it.next();
+			if (r.baseTile != base)
+				return r;
+		}
+		return null;
+	}
+	
+	/**
+	 * is this rule inapplicable to a particular terrain
+	 * @param terrain type to be checked
+	 */
+	public boolean wrongTerrain(int terrain) {
+		// see if the terrain type precludes this tile-bid
+		switch (this.terrain) {
+		case TerrainType.LAND:
+			return !TerrainType.isLand(terrain);
+
+		case TerrainType.LOW:
+			return !TerrainType.isLowLand(terrain);
+
+		case TerrainType.HIGH:
+			return !TerrainType.isHighLand(terrain);
+
+		// specific terrain types must match
+		case TerrainType.DEEP_WATER:
+		case TerrainType.SHALLOW_WATER:
+		case TerrainType.PASSABLE_WATER:
+		case TerrainType.PIT:
+		case TerrainType.GROUND:
+		case TerrainType.HILL:
+		case TerrainType.MOUNTAIN:
+		case TerrainType.SLOPE:
+		default:
+			return this.terrain != terrain;
+		}
+	}
+	
+	/**
 	 * dump out the extended field attributes (for debugging)
 	 */
 	public void dump(String prefix) {
@@ -154,10 +196,10 @@ public class RPGMRule extends ResourceRule {
 		super.dump(prefix);
 		
 		System.out.println(prefix + "      terrain=" + TerrainType.terrainType(terrain));
-		System.out.print(prefix   + "      tileset=" + tileSet + ", level=" + level);
-		System.out.print(", base=" + baseTile);
+		System.out.print(prefix   + "      level=" + level);
+		System.out.print(", base=" + tileSet + "." + baseTile);
 		if (altTile > 0)
-			System.out.print(", surround=" + altTile);
+			System.out.print(", surround=" + tileSet + "." + altTile);
 		if (neighbors != 8)
 			System.out.print(", neighbors=" + neighbors);
 		if (height > 1 || width > 1)

@@ -159,7 +159,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			desc = erodeMap[point.index] < 0 ? map.getSoilType("Alluvial") + "/" : "";
 			infoSoil.setText(desc + map.rockNames[(int) soilMap[point.index]]);
 			
-			double hydroMap[] = map.getHydrationMap();
+			double hydroMap[] = map.getHydrationMap();	// FIX use depth map
 			h = hydroMap[point.index];
 			if (h >= 0)
 				desc = String.format("%.0f%%",h * 100);

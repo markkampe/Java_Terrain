@@ -15,8 +15,10 @@ public class RPGMTiler implements Exporter {
 	private static final int SPRITES_PER_ROW = 8;
 	private static final int EXPORT_DEBUG = 3;
 	
+	private static final boolean BY_CLASS_ONLY = true;	// FIX full RPGM Tile bidding
+	
 	private Parameters parms;	// general parameters
-	private TileRules rules;	// tile selection rules
+	RPGMRule rules;				// tile placement rules 
 	private Random random;		// random # generator
 	
 	private boolean useSLOPE;	// enables special level processing
@@ -65,13 +67,14 @@ public class RPGMTiler implements Exporter {
 		this.x_points = width;
 		this.y_points = height;
 		
-		// read in the rules for this tileset
-		this.rules = new TileRules(tileRules);
+		// read in the rules for this tile-set
+		RPGMRule x = new RPGMRule("dummy");
+		x.loadRules(tileRules);
 		
 		// determine whether or not we are rendering levels
 		useSLOPE = false;
-		for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
-			TileRule r = it.next();
+		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
+			RPGMRule r = (RPGMRule) it.next();
 			if (r.terrain == TerrainType.SLOPE)
 				useSLOPE = true;
 		}
@@ -85,9 +88,9 @@ public class RPGMTiler implements Exporter {
 		random = new Random((int) (lat * lon * 1000));
 		try {
 			FileWriter output = new FileWriter(filename);
-			RPGMwriter w = new RPGMwriter(output, rules);
+			RPGMwriter w = new RPGMwriter(output);
 			w.typeMap(typeMap);
-			w.prologue(y_points,  x_points,  rules.tileset);
+			w.prologue(y_points,  x_points,  RPGMRule.tileSet);
 		
 			// produce the actual map of tiles
 			w.startList("data", "[");
@@ -136,7 +139,7 @@ public class RPGMTiler implements Exporter {
 		}
 		
 		if (parms.debug_level > 0) {
-			System.out.println("Exported(RPGMaker " + rules.ruleset + ") "  + x_points + "x" + y_points + " " + tile_size
+			System.out.println("Exported(RPGMaker " + RPGMRule.ruleset + ") "  + x_points + "x" + y_points + " " + tile_size
 					+ "M tiles from <" + String.format("%9.6f", lat) + "," + String.format("%9.6f", lon)
 					+ ">");
 			System.out.println("                             to file " + filename);
@@ -189,13 +192,21 @@ public class RPGMTiler implements Exporter {
 		final int SHADOW_BL = 4;
 		// final int SHADOW_BR = 8;
 		
-		// assemble a list of bidders for this level
-		TileRule bidders[] = new TileRule[MAXRULES];
+		// assemble a list of bidders and their ecotopes for this level
+		RPGMRule bidders[] = new RPGMRule[MAXRULES];
+		int bidder_ecotope[] = new int[MAXRULES];
 		int numRules = 0;
-		for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
-			TileRule r = it.next();
-			if (r.level == level)
-				bidders[numRules++] = r;
+		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
+			RPGMRule r = (RPGMRule) it.next();
+			if (r.level != level)
+				continue;
+			bidders[numRules] = r;
+			for(int i = 0; i < floraNames.length; i++)
+				if (r.className != null && floraNames[i] != null && r.className.equals(floraNames[i])) {
+					bidder_ecotope[i] = i;
+					break;
+				}
+			numRules++;
 		}
 		Bidder bidder = new Bidder(numRules);
 		
@@ -210,6 +221,8 @@ public class RPGMTiler implements Exporter {
 				double slope = slope(i,j);
 				double face = direction(i, j);
 				double soilType = soil[i][j];
+				double flux = 0.0;	// unused for RPGM Tile rules
+				double rain = 0.0;	// unused for RPGM Tile rules
 				int terrain = typeMap[levels[i][j]];
 				
 				// south slopes may be a special terrain type
@@ -234,15 +247,15 @@ public class RPGMTiler implements Exporter {
 				bidder.reset();
 				int bids = 0;
 				for(int b = 0; b < numRules; b++) {
-					TileRule r = bidders[b];
+					RPGMRule r = bidders[b];
 					r.justification = "OK";
 					double bid = 0;
 					if (r.wrongTerrain(terrain))
 						r.justification = "Terain mismatch";
-					else if (r.wrongFlora(floraNames[floraTypes[i][j]]))
+					else if (bidder_ecotope[b] != 0 && bidder_ecotope[b] != floraTypes[i][j])
 						r.justification = "Class mismatch";
 					else
-						bid = r.bid(alt, depth, Tmean - lapse, Tmean - lapse, soilType, slope, face);
+						bid = r.bid(alt, depth, flux, rain, Tmean - lapse, Tmean - lapse, soilType);
 
 					if (r.debug)
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
@@ -294,10 +307,10 @@ public class RPGMTiler implements Exporter {
 				grid[i][j] = 0;
 
 		// enumerate the applicable rules
-		TileRule bidders[] = new TileRule[MAXRULES];
+		RPGMRule bidders[] = new RPGMRule[MAXRULES];
 		int numRules = 0;
-		for( ListIterator<TileRule> it = rules.rules.listIterator(); it.hasNext();) {
-			TileRule r = it.next();
+		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
+			RPGMRule r = (RPGMRule) it.next();
 			if (r.level != level)
 				continue;
 			if (r.width <= SPRITES_PER_ROW) {
@@ -320,7 +333,7 @@ public class RPGMTiler implements Exporter {
 				int bids = 0;
 				for( int b = 0; b < numRules; b++ ) {
 					int bid = 0;
-					TileRule r = bidders[b];
+					RPGMRule r = bidders[b];
 					
 					// corrections require all stamps to be height/width aligned
 					if ((i % r.height) != 0 || (j % r.width) != 0)
@@ -358,6 +371,8 @@ public class RPGMTiler implements Exporter {
 							double slope = slope(i+dy,j+dx);
 							double face = direction(i+dy, j+dx);
 							double soilType = soil[i+dy][j+dx];
+							double flux = 0.0;	// not used for RPGM tile rules
+							double rain = 0.0;	// not used for RPGM tile rules
 							
 							if (parms.debug_level >= EXPORT_DEBUG && b == 0)
 								System.out.println("l" + level + "[" + (i+dy) + "," + (j+dx) + "]: " +
@@ -368,7 +383,7 @@ public class RPGMTiler implements Exporter {
 									String.format(", soil=%.1f",  soilType) + 
 									String.format(", slope=%03.0f", face));
 							
-							double thisBid = r.bid(alt, depth , Tmean - lapse, Tmean - lapse, soilType, slope, face);
+							double thisBid = r.bid(alt, depth , flux, rain, Tmean - lapse, Tmean - lapse, soilType);
 							if (r.debug)
 								System.out.println(r.ruleName + "[" + (i+dy) + "," + (j+dx) + "] (" + 
 										r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");
@@ -388,7 +403,7 @@ public class RPGMTiler implements Exporter {
 				// find and install the winner
 				if (bids > 0) {
 						int winner = bidder.winner(random.nextFloat());
-						TileRule r = bidders[winner];
+						RPGMRule r = bidders[winner];
 						for(int dy = 0; dy < r.height; dy++)
 							for(int dx = 0; dx < r.width; dx++)
 								grid[i+dy][j+dx] = r.baseTile + (dy * SPRITES_PER_ROW) + dx;
@@ -411,7 +426,7 @@ public class RPGMTiler implements Exporter {
 						continue;
 					
 					// find the rule that generated this tile
-					TileRule r = null;
+					RPGMRule r = null;
 					for(int b = 0; b < numRules; b++) 
 						if (bidders[b].baseTile == grid[i][j]) {
 							r = bidders[b];

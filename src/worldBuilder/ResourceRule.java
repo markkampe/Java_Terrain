@@ -102,6 +102,16 @@ public class ResourceRule {
 		vigor = 16;
 	}
 	
+	/**
+	 * Factory method (to be overridden by subclasses)
+	 * 
+	 * @param name ... name of new rule to be instantiated
+	 * @return new ResourceRule
+	 */
+	protected ResourceRule factory(String name) {
+		return new ResourceRule(name);
+	}
+	
 	// load and iterate over Flora type rules
 	public static int size() { return rules.size(); }
 	public static ListIterator<ResourceRule> iterator() { return rules.listIterator(); }

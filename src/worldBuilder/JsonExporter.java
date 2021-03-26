@@ -25,7 +25,7 @@ public class JsonExporter implements Exporter {
 	private double[][] heights;		// per point height (meters)
 	private double[][] rain;		// per point rainfall (meters)
 	private double[][] erode;		// per point erosion (meters)
-	private double[][] hydration;	// per point water depth (meters)
+	private double[][] depths;		// per point water depth (meters)
 	private double[][] soil;		// per point soil type
 	private double[][] flora;		// per point flora type
 	private String[] floraNames;	// per flora type names
@@ -147,17 +147,17 @@ public class JsonExporter implements Exporter {
 
 	/**
 	 * Up-load the surface-water-depth for every tile
-	 * @param hydration - per point depth of water
+	 * @param depths - per point depth of water
 	 */
-	public void waterMap(double[][] hydration) {
-		this.hydration = hydration;
+	public void waterMap(double[][] depths) {
+		this.depths = depths;
 		
 		// note the max and min heights
 		maxDepth = 0;
-		for (int i = 0; i < hydration.length; i++)
-			for (int j = 0; j < hydration[0].length; j++) {
-				if (hydration[i][j] < maxDepth)
-					maxDepth = hydration[i][j];
+		for (int i = 0; i < depths.length; i++)
+			for (int j = 0; j < depths[0].length; j++) {
+				if (depths[i][j] < maxDepth)
+					maxDepth = depths[i][j];
 			}
 	}
 
@@ -234,12 +234,12 @@ public class JsonExporter implements Exporter {
 						output.write(",");
 					output.write(NEW_POINT);
 					double z = heights[r][c]-erode[r][c];
-					double hydro = hydration[r][c];
+					double hydro = depths[r][c];
 					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(z)));
 					output.write(COMMA);
 					output.write(String.format(FORMAT_CM, "rainfall", rain[r][c]));
 					output.write(COMMA);
-					output.write(String.format(FORMAT_DP, "hydration", hydro));
+					output.write(String.format(FORMAT_DP, "depth", hydro));
 					output.write(COMMA);
 					
 					int st = (int) Math.round(soil[r][c]);
@@ -290,14 +290,14 @@ public class JsonExporter implements Exporter {
 		Color map[][] = new Color[y_points][x_points];
 		for(int i = 0; i < y_points; i++)
 			for(int j = 0; j < x_points; j++)
-				if (hydration[i][j] >= 0) {	// land
+				if (depths[i][j] >= 0) {	// land
 					double h = NORMAL + ((heights[i][j] - aMean) * aScale);
 					if (chosen == WhichMap.FLORAMAP && flora[i][j] > 0)
 						map[i][j] = colorMap[(int) flora[i][j]];
 					else	// altitudes
 						map[i][j] = new Color((int)h, (int)h, (int)h);
 				} else	{							// water
-					double depth = hydration[i][j]/maxDepth;
+					double depth = depths[i][j]/maxDepth;
 					double h = (1 - depth) * (BRIGHT - DIM);
 					map[i][j] = new Color(0, (int) h, BRIGHT);
 				}

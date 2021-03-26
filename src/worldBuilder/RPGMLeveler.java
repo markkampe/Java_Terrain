@@ -38,7 +38,7 @@ public class RPGMLeveler {
 		double slopes[][] = (slopeMap == null) ? null : new double[y_points][x_points];
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
-				double h = tiler.hydration[i][j];
+				double h = tiler.depths[i][j];
 				if (h < 0) {	// under water
 					if (-h < minDepth)
 						minDepth = -h;
@@ -72,8 +72,8 @@ public class RPGMLeveler {
 		int levels[][] = new int[y_points][x_points];
 		for(int i = 0; i < y_points; i++)
 			for(int j = 0; j < x_points; j++) {
-				if (tiler.hydration[i][j] < 0) {	// under water
-					double h = -tiler.hydration[i][j];
+				if (tiler.depths[i][j] < 0) {	// under water
+					double h = -tiler.depths[i][j];
 					double pctile = 99 * (h - minDepth) / dRange;
 					levels[i][j] = waterMap[(int) pctile];
 				} else {	// land form (based on height and slope)

@@ -37,7 +37,7 @@ public class RPGMTiler implements Exporter {
 	/** per point erosion/depostion (meters)	*/
 	public double[][] erode;
 	/** per point water depth (meters)	*/
-	public double[][] hydration;
+	public double[][] depths;
 	/** per point soil type	*/
 	public double[][] soil;
 	/** per point terrain level	*/
@@ -206,7 +206,7 @@ public class RPGMTiler implements Exporter {
 				// collect all the attributes of this square
 				int alt = (int) parms.altitude(heights[i][j] - erode[i][j]);
 				double lapse = alt * parms.lapse_rate;
-				double hydro = hydration[i][j];
+				double depth = depths[i][j];
 				double slope = slope(i,j);
 				double face = direction(i, j);
 				double soilType = soil[i][j];
@@ -226,7 +226,7 @@ public class RPGMTiler implements Exporter {
 						" terrain=" + TerrainType.terrainType(terrain) +
 						", class=" + floraNames[floraTypes[i][j]] + 
 						", alt=" + alt +
-						String.format(", hydro=%.2f", hydro) + 
+						String.format(", depth=%.2f", depth) + 
 						String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
 						String.format(", soil=%.1f",  soilType) + 
 						String.format(", slope=%.3f", slope));
@@ -242,7 +242,7 @@ public class RPGMTiler implements Exporter {
 					else if (r.wrongFlora(floraNames[floraTypes[i][j]]))
 						r.justification = "Class mismatch";
 					else
-						bid = r.bid(alt, hydro, Tmean - lapse, Tmean - lapse, soilType, slope, face);
+						bid = r.bid(alt, depth, Tmean - lapse, Tmean - lapse, soilType, slope, face);
 
 					if (r.debug)
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
@@ -272,7 +272,7 @@ public class RPGMTiler implements Exporter {
 							" terrain=" + TerrainType.terrainType(terrain) +
 							", class=" + floraNames[floraTypes[i][j]] + 
 							", alt=" + alt +
-							String.format(", hydro=%.2f", hydro) + 
+							String.format(", depth=%.2f", depth) + 
 							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
 							String.format(", soil=%.1f",  soilType) + 
 							String.format(", slope=%.3f", slope));
@@ -354,7 +354,7 @@ public class RPGMTiler implements Exporter {
 							// collect the attributes of this square
 							int alt = (int) parms.altitude(heights[i+dy][j+dx] - erode[i+dy][j+dx]);
 							double lapse = alt * parms.lapse_rate;
-							double hydro = hydration[i+dy][j+dx];
+							double depth = depths[i+dy][j+dx];
 							double slope = slope(i+dy,j+dx);
 							double face = direction(i+dy, j+dx);
 							double soilType = soil[i+dy][j+dx];
@@ -363,12 +363,12 @@ public class RPGMTiler implements Exporter {
 								System.out.println("l" + level + "[" + (i+dy) + "," + (j+dx) + "]: " +
 									" terrain=" + TerrainType.terrainType(terrain) +
 									", alt=" + alt + ", hyd=" + 
-									String.format("%.2f", hydro) + 
+									String.format("%.2f", depth) + 
 									String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
 									String.format(", soil=%.1f",  soilType) + 
 									String.format(", slope=%03.0f", face));
 							
-							double thisBid = r.bid(alt, hydro , Tmean - lapse, Tmean - lapse, soilType, slope, face);
+							double thisBid = r.bid(alt, depth , Tmean - lapse, Tmean - lapse, soilType, slope, face);
 							if (r.debug)
 								System.out.println(r.ruleName + "[" + (i+dy) + "," + (j+dx) + "] (" + 
 										r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");
@@ -593,10 +593,10 @@ public class RPGMTiler implements Exporter {
 
 	/**
 	 * Up-load the surface-water-depth for every tile
-	 * @param hydration - per point depth of water
+	 * @param depths - per point depth of water
 	 */
-	public void waterMap(double[][] hydration) {
-		this.hydration = hydration;
+	public void waterMap(double[][] depths) {
+		this.depths = depths;
 	}
 	
 	/**

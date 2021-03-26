@@ -55,9 +55,9 @@ public interface Exporter {
 	
 	/**
 	 * Up-load the surface-water-depth for every tile
-	 * @param hydration - per point depth of water
+	 * @param depth - per point depth of water
 	 */
-	void waterMap(double[][] hydration);
+	void waterMap(double[][] depths);
 	
 	/**
 	 * Up-load the surface-water-depth for every tile

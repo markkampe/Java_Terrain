@@ -17,7 +17,7 @@ public class Placement {
 	private Parameters parms;
 
 	private MeshPoint points[];	// MeshPoints
-	private double hydroMap[];	// per mesh-point hydration
+	private double depthMap[];	// per mesh-point height above water
 	private double heightMap[];	// per mesh-point altitude
 	private double erodeMap[];	// per mesh-point erosion
 	private double soilMap[];	// per mesh-point soil map
@@ -71,7 +71,7 @@ public class Placement {
 		// if we were passed a map, save its tables
 		if (map != null) {
 			this.points = map.mesh.vertices;
-			this.hydroMap = map.getHydrationMap();
+			this.depthMap = map.getDepthMap();
 			this.heightMap = map.getHeightMap();
 			this.erodeMap = map.getErodeMap();
 			this.soilMap = map.getSoilMap();
@@ -195,7 +195,7 @@ public class Placement {
 				int alt = (int) parms.altitude(heightMap[i] - erodeMap[i]);
 				double lapse = alt * parms.lapse_rate;
 				double soil = soilMap[i];
-				double hydro = hydroMap[i];
+				double depth = depthMap[i];
 				double rain = rainMap[i];
 				double flux = fluxMap[i];
 
@@ -212,15 +212,12 @@ public class Placement {
 					if (counts[bidderClass[r]] >= quotas[bidderClass[r]])
 						continue;	// already at quota
 					
-					double bid = bidders[r].bid(alt, hydro, flux, rain, Twinter - lapse, Tsummer - lapse, soil);
+					double bid = bidders[r].bid(alt, depth, flux, rain, Twinter - lapse, Tsummer - lapse, soil);
 					if (parms.rule_debug != null && parms.rule_debug.equals(bidders[r].ruleName)) {
 						String msg = "   RULE " + bidders[r].ruleName + " bids " +
 									String.format("%6.2f for point %5d", bid, i) +
 									String.format(", alt=%d%s", alt, Parameters.unit_z);
-						if (hydro >= 0)
-							msg += String.format(", hydro=%.0f%%", hydro * 100);
-						else
-							msg += String.format(", depth=%.1f%s", parms.height(-hydro), Parameters.unit_z);
+						msg += String.format(", depth=%.0f%s", depth, Parameters.unit_z);
 						msg += String.format(", flux=%f%s", flux, Parameters.unit_f);
 						msg += String.format(", rain=%f%s", rain, Parameters.unit_r);
 						msg += String.format(", temp=%.1f-%.1f%s",

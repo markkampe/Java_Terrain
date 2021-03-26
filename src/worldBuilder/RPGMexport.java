@@ -63,7 +63,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 
 	private Color[] colorTopo; // level to preview color map
 	private Color[] colorFlora;	// flora class to preview color map
-	private double[][] baseHydro;	// hydration before our adjustments
+	private double[][] baseDepth;	// hydration before our adjustments
 
 	// preview colors
 	private static final Color GROUND_COLOR = new Color(102,51,0);
@@ -478,7 +478,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 		if (!exported) {
 			export(tiler);
-			baseHydro = tiler.hydration;	// remember the base
+			baseDepth = tiler.depths;	// remember the base
 			
 			exported = true;
 			newSelection = false;
@@ -509,7 +509,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 		
 		if (hydroChanged) {
-			hydroMap();
+			// hydroMap();		we no longer use a hydro goose slider
 			hydroChanged = false;
 			floraChanged = need_flora_pct || need_flora_p || need_flora_3;
 		}
@@ -735,33 +735,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		RPGMLeveler leveler = new RPGMLeveler();
 		int[][] levelMap = leveler.getLevels(tiler, altMap, depthMap, slopeMap);
 		tiler.levelMap(levelMap, typeMap);
-	}
-	
-	/**
-	 * adjust the hydration map based on our sliders
-	 */
-	private void hydroMap() {
-		// figure out the adjustments
-		double plus = need_hydro1 ? goose_hydro1.getValue() : 0;
-		double scale = need_hydro2 ? goose_hydro2.getValue() : 100;
-		System.out.println("adjusting hydro map +" + plus + ", *" + scale);
-		
-		// create a new hydration array
-		double[][] updates = new double[tiler.y_points][tiler.x_points];
-		for(int i = 0; i < y_points; i++)
-			for(int j = 0; j < x_points; j++) {
-				double h = baseHydro[i][j];
-				if (h >= 0) {	// only do this for land
-					h *= scale;	h /= 100;	// multiply by scale
-					h += plus/100;			// add plus
-					if (h < 0) h = 0;		// result cannot go negative
-					if (h > 0.99) h = 0.99;	// cannot exceed 99%
-				}
-				updates[i][j] = h;
-			}
-		
-		// set it to be the new per-point hydration
-		tiler.waterMap(updates);
 	}
 	
 	/**

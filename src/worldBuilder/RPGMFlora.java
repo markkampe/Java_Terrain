@@ -96,7 +96,7 @@ public class RPGMFlora {
 					double lapse = alt * parms.lapse_rate;
 					int level = tiler.levels[i][j];
 					int terrain = tiler.typeMap[level];
-					double hydro = tiler.hydration[i][j];
+					double depth = tiler.depths[i][j];
 					double soil = tiler.soil[i][j];
 					double slope = tiler.slope(i, j);
 					double face = tiler.direction(i, j);
@@ -114,7 +114,7 @@ public class RPGMFlora {
 							continue;
 						
 						// collect the bid
-						double b = r.bid(alt, hydro, 
+						double b = r.bid(alt, depth, 
 										Tmean - lapse, Tmean - lapse, 
 										soil, slope, face);
 						if (b <= 0)
@@ -153,11 +153,11 @@ public class RPGMFlora {
 									alt = (int) parms.altitude(tiler.heights[i+dr][j+dc] - tiler.erode[i+dr][j+dc]);
 									lapse = alt * parms.lapse_rate;
 									terrain = tiler.typeMap[tiler.levels[i+dr][j+dc]];
-									hydro = tiler.hydration[i+dr][j+dc];
+									depth = tiler.depths[i+dr][j+dc];
 									soil = tiler.soil[i+dr][j+dc];
 									slope = tiler.slope(i+dr, j+dc);
 									face = tiler.direction(i+dr, j+dc);
-									if (r.bid(alt, hydro, Tmean - lapse, Tmean - lapse, soil, slope, face) <= 0)
+									if (r.bid(alt, depth, Tmean - lapse, Tmean - lapse, soil, slope, face) <= 0)
 										b = 0;
 									
 									// TODO: compute bid for entire stamp area?

@@ -21,7 +21,7 @@ public class FoundExporter implements Exporter {
 	
 	private double[][] heights;		// per point height (meters)
 	private double[][] erode;		// per point erosion (meters)
-	private double[][] hydration;	// per point water depth (meters)
+	private double[][] depths;		// per point water depth (meters)
 	private double[][] flora;		// per point plant IDs
 	private String[] floraNames;	// per type name strings
 	private double[][] soil;		// per point soil type
@@ -105,10 +105,10 @@ public class FoundExporter implements Exporter {
 
 	/**
 	 * Up-load the surface-water-depth for every tile
-	 * @param hydration - per point depth of water
+	 * @param depths - per point depth of water
 	 */
-	public void waterMap(double[][] hydration) {
-		this.hydration = hydration;
+	public void waterMap(double[][] depths) {
+		this.depths = depths;
 	}
 
 	/**
@@ -335,10 +335,10 @@ public class FoundExporter implements Exporter {
 			for(int y = 0; y < y_points; y++)
 				for(int x = 0; x < x_points; x++) {
 					// dry and sub-oceanic points are already OK
-					if (altitudes[y][x] < 0 || hydration[y][x] > 0)
+					if (altitudes[y][x] < 0 || depths[y][x] > 0)
 						continue;
 					// move that point to -depth MSL
-					double depth = parms.height(hydration[y][x]);
+					double depth = parms.height(depths[y][x]);
 					altitudes[y][x] = depth > lowest ? depth : lowest;
 				}
 		}
@@ -517,7 +517,7 @@ public class FoundExporter implements Exporter {
 		Color map[][] = new Color[y_points][x_points];
 		for(int y = 0; y < y_points; y++)
 			for(int x = 0; x < x_points; x++) {
-				if (hydration[y][x] < 0)	// water depth
+				if (depths[y][x] < 0)	// water depth
 					map[y][x] = Color.BLUE;
 				else {	// show altitude
 					int bright = grayscale[y][x];

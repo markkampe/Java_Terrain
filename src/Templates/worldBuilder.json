@@ -70,8 +70,7 @@
     },
     "export": {
     	"map_name": "Map001",
-    	"rules": [ "Overworld.json", "Overworld_flora.json", 
-		   "Outside.json", "Outside_flora.json" ],
+    	"rules": [ "Overworld.json", "Outside.json" ],
 	"objects": "Overlay_objects.json"
     }
 }

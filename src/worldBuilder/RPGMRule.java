@@ -23,10 +23,13 @@ public class RPGMRule extends ResourceRule {
 	public int height, width;
 	/** number of neighbors for auto-tiling	*/
 	public int neighbors;
+	/** ecotope for this tile	*/
+	public String ecotope;
 	
 	// save extended parameters to store in next factory-instantiated object
 	private static int n_level, n_terrain, n_baseTile, n_altTile, n_neighbors;
 	private static int n_height = 1, n_width = 1;
+	private static String n_eco = null;
 	private static boolean n_barrier = false;
 
 	/**
@@ -45,6 +48,7 @@ public class RPGMRule extends ResourceRule {
 		this.height = 1;
 		this.width = 1;
 		this.barrier = false;
+		this.ecotope = null;
 	}
 	
 	/**
@@ -68,6 +72,7 @@ public class RPGMRule extends ResourceRule {
 		newRule.height = n_height;
 		newRule.width = n_width;
 		newRule.barrier = n_barrier;
+		newRule.ecotope = n_eco;
 		
 		// reset their values for the next rule
 		n_level = 0;
@@ -78,6 +83,7 @@ public class RPGMRule extends ResourceRule {
 		n_height = 1;
 		n_width = 1;
 		n_barrier = false;
+		n_eco = null;
 		
 		// and return the newly fabricated object (to ResourceRule.read)
 		return newRule;
@@ -90,6 +96,9 @@ public class RPGMRule extends ResourceRule {
 	 */
 	public void set_attribute(String name, String value) {
 		switch (name) {
+		case "ecotope":		// ecotope
+			n_eco = value;
+			return;
 		case "stamp":	// width x height
 			int x = value.indexOf('x');
 			n_width = Integer.parseInt(value.substring(0,x));
@@ -195,8 +204,10 @@ public class RPGMRule extends ResourceRule {
 		// start with the standard info
 		super.dump(prefix);
 		
-		System.out.println(prefix + "      terrain=" + TerrainType.terrainType(terrain));
-		System.out.print(prefix   + "      level=" + level);
+		System.out.println(prefix + "      terrain: " + TerrainType.terrainType(terrain));
+		if (ecotope != null)
+			System.out.println(prefix + "      ecotope: " + ecotope);
+		System.out.print(prefix   + "      tile:    L" + level);
 		System.out.print(", base=" + tileSet + "." + baseTile);
 		if (altTile > 0)
 			System.out.print(", surround=" + tileSet + "." + altTile);
@@ -208,5 +219,6 @@ public class RPGMRule extends ResourceRule {
 		
 		if (barrier)
 			System.out.println(prefix + "      barrier=true");
+
 	}
 }

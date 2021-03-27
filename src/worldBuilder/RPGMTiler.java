@@ -202,7 +202,7 @@ public class RPGMTiler implements Exporter {
 				continue;
 			bidders[numRules] = r;
 			for(int i = 0; i < floraNames.length; i++)
-				if (r.className != null && floraNames[i] != null && r.className.equals(floraNames[i])) {
+				if (r.ecotope != null && floraNames[i] != null && r.ecotope.equals(floraNames[i])) {
 					bidder_ecotope[numRules] = i;
 					break;
 				}

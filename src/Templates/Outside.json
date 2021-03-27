@@ -16,29 +16,21 @@
 
 	{ "//": "L1 ground cover tiles for lowlands w/no flora class"},
 	{ "name": "dirt", "level": 1, "base": 2864,
-	  "terrain": "ground",
 	  "class": "NONE",
+	  "terrain": "lowlands",
 	  "temp": { "min": -1 },
-	  "hydro": { "max": 0.1 },
 	  "vigor": 2
 	},
 	{ "name": "rocks", "level": 1, "base": 3296,
 	  "class": "NONE",
-	  "terrain": "ground",
+	  "terrain": "lowlands",
 	  "soil": { "min": 0.5, "max": 2.5 },
 	  "vigor": 0
 	},
 	{ "name": "snow", "level": 1, "base": 3968,
-	  "terrain": "ground",
+	  "terrain": "lowlands",
 	  "temp": { "max": 1 },
 	  "vigor": 32
-	},
-	{ "name": "grass", "level": 1, "base": 2816,
-	  "class": "NONE",
-	  "terrain": "ground",
-	  "hydro": { "min": 0.1 },
-	  "temp": { "min": 0 },
-	  "vigor": 128
 	},
 
 	{ "//": "L1 ground cover tiles for highlands w/no flora class"},
@@ -46,23 +38,14 @@
 	  "barrier": "true",
 	  "class": "NONE",
 	  "terrain": "highlands",
-	  "hydro": { "max": 0.1 },
 	  "temp": { "min": -1 },
 	  "vigor": 2
 	},
 	{ "name": "hi-snow", "level": 1, "base": 7568,
-	  "barrier": "true",
 	  "terrain": "highlands",
 	  "temp": { "max": 0 },
-	  "vigor": 32
-	},
-	{ "name": "hi-grass", "level": 1, "base": 7424,
 	  "barrier": "true",
-	  "class": "NONE",
-	  "terrain": "highlands",
-	  "temp": { "min": 0 },
-	  "hydro": { "min": 0.1 },
-	  "vigor": 128
+	  "vigor": 32
 	},
 
 	{ "//": "L1 ground cover tiles for slopes"},
@@ -72,9 +55,9 @@
 	  "vigor": 2
 	},
 	{ "name": "grass-slope", "level": 1, "base": 7808, "neighbors": 4,
+	  "class": "Grass", 	"ecotope": "Grassland",
 	  "terrain": "slope",
 	  "temp": { "min": 0 },
-	  "hydro": { "min": 0.075 },
 	  "vigor": 128
 	},
 	{ "name": "snow-slope", "level": 1, "base": 7952, "neighbors": 4,
@@ -83,131 +66,146 @@
 	  "vigor": 32
 	},
 
-	{ "//": "L1 ground cover tiles beneath other flora types"},
-	{ "name": "grass-G", "level": 1, "base": 2816,
-	  "terrain": "ground",
-	  "class": "Grass",
-	  "vigor": 32
+	{ "//": "L1 lowland ground cover tiles beneath other flora types"},
+	{ "name": "grass-l", "level": 1, "base": 2816,
+	  "class": "Grass",	"ecotope": "Grassland",
+	  "terrain": "lowlands",
+	  "temp": { "min": 0 },
+	  "vigor": 128
 	},
 	{ "name": "grass-B", "level": 1, "base": 2816,
-	  "terrain": "ground",
-	  "class": "Brush",
+	  "class": "Grass",	"ecotope": "Brush",
+	  "terrain": "lowlands",
+	  "vigor": 32
+	},
+	{ "name": "grass-R", "level": 1, "base": 2816,
+	  "class": "Grass",	"ecotope": "Riperian",
+	  "terrain": "lowlands",
 	  "vigor": 32
 	},
 	{ "name": "grass-TB", "level": 1, "base": 2816,
-	  "terrain": "ground",
-	  "class": "Broadleaf",
+	  "class": "Grass",	"ecotope": "Broadleaf",
+	  "terrain": "lowlands",
 	  "vigor": 32
 	},
 	{ "name": "grass-TC", "level": 1, "base": 2816,
-	  "terrain": "ground",
-	  "class": "Connifer",
+	  "class": "Grass",	"ecotope": "Connifers",
+	  "terrain": "lowlands",
 	  "temp": { "min": 0 },
-	  "vigor": 32
-	},
-	{ "name": "grass-TP", "level": 1, "base": 2816,
-	  "terrain": "ground",
-	  "class": "Palm",
-	  "hydro": { "min": 0.075 },
 	  "vigor": 32
 	},
 	{ "name": "snow-TC", "level": 1, "base": 3968,
+	  "class": "Grass",	"ecotope": "Connifers",
 	  "terrain": "ground",
-	  "class": "Connifer",
 	  "temp": { "max": 0 },
+	  "vigor": 32
+	},
+	{ "name": "grass-TP", "level": 1, "base": 2816,
+	  "class": "Grass",	"ecotope": "Palms",
+	  "terrain": "lowlands",
 	  "vigor": 32
 	},
 	{ "name": "dirt-TP", "level": 1, "base": 2864,
-	  "terrain": "ground",
-	  "class": "Palm",
+	  "class": "NONE",	"ecotope": "NONE",
+	  "terrain": "lowlands",
 	  "vigor": 32
 	},
-	{ "//": "L1 highland ground cover tiles beneath other flora types"},
-	{ "name": "grass-G-h", "level": 1, "base": 7424,
+	{ "name": "dirt-ld", "level": 1, "base": 2864,
+	  "class": "NONE",	"ecotope": "Desert",
+	  "terrain": "lowlands",
 	  "barrier": "true",
+	  "vigor": 32
+	},
+
+	{ "//": "L1 highland ground cover tiles beneath other flora types"},
+	{ "name": "grass-h", "level": 1, "base": 7424,
+	  "class": "Grass",	"ecotope": "Grassland",
 	  "terrain": "highlands",
-	  "class": "Grass",
+	  "barrier": "true",
 	  "vigor": 32
 	},
 	{ "name": "grass-B-h", "level": 1, "base": 7424,
-	  "barrier": "true",
+	  "class": "Grass",	"ecotope": "Brush",
 	  "terrain": "highlands",
-	  "class": "Brush",
+	  "barrier": "true",
+	  "vigor": 32
+	},
+	{ "name": "grass-R-h", "level": 1, "base": 7424,
+	  "class": "Grass",	"ecotope": "Riperian",
+	  "terrain": "highlands",
+	  "barrier": "true",
 	  "vigor": 32
 	},
 	{ "name": "grass-TB-h", "level": 1, "base": 7424,
-	  "barrier": "true",
+	  "class": "Grass",	"ecotope": "Broadleaf",
 	  "terrain": "highlands",
-	  "class": "Broadleaf",
+	  "barrier": "true",
 	  "vigor": 32
 	},
 	{ "name": "grass-TC-h", "level": 1, "base": 7424,
-	  "barrier": "true",
+	  "class": "Grass",	"ecotope": "Connifers",
 	  "terrain": "highlands",
-	  "class": "Connifer",
 	  "temp": { "min": 0 },
+	  "barrier": "true",
 	  "vigor": 32
 	},
 	{ "name": "snow-TC-h", "level": 1, "base": 7568,
-	  "barrier": "true",
+	  "class": "Grass",	"ecotope": "Connifers",
 	  "terrain": "highlands",
-	  "class": "Connifer",
 	  "temp": { "max": 0 },
-	  "vigor": 32
-	},
-	{ "name": "dirt-TP-h", "level": 1, "base": 7472,
 	  "barrier": "true",
-	  "terrain": "highlands",
-	  "class": "Palm",
 	  "vigor": 32
 	},
-
+	{ "name": "dirt-h", "level": 1, "base": 7472,
+	  "class": "NONE",	"ecotope": "NONE",
+	  "terrain": "highlands",
+	  "barrier": "true",
+	  "vigor": 32
+	},
+	{ "name": "dirt-hd", "level": 1, "base": 7472,
+	  "class": "NONE",	"ecotope": "Desert",
+	  "terrain": "highlands",
+	  "barrier": "true",
+	  "vigor": 32
+	},
 
 	{ "//": "L2/4 tiles for flora types"},
 	{ "name": "tallGrass", "level": 2, "base": 3008,
-	  "class": "Grass",
+	  "class": "Grass",	"ecotope": "Grassland",
 	  "terrain": "land",
-	  "VIGOR": 32
+	  "vigor": 32
 	},
 	{ "name": "brush", "level": 4, "base": 91, 
-	  "class": "Brush",
+	  "class": "Brush",	"ecotope": "Brush",
 	  "terrain": "land",
-	  "VIGOR": 32
+	  "vigor": 32
 	},
-	{ "name": "palm", "level": 4, "base": 172, "stamp": "1x2",
-	  "class": "Palm",
+	{ "name": "berries", "level": 4, "base": 91, 
+	  "class": "Brush",	"ecotope": "Riperian",
 	  "terrain": "land",
-	  "VIGOR": 32
+	  "vigor": 32
 	},
 	{ "name": "tree", "level": 4, "base": 112, "stamp": "2x2", "surround": 114,
-	  "class": "Broadleaf",
+	  "class": "Tree",	"ecotope": "Broadleaf",
 	  "terrain": "land",
 	  "vigor": 32
 	},
 	{ "name": "pine", "level": 4, "base": 93, "stamp": "1x2",
-	  "class": "Connifer",
+	  "class": "Tree",	"ecotope": "Connifers",
 	  "terrain": "land",
 	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
 	{ "name": "snowpine", "level": 4, "base": 128, "stamp": "2x2", "surround": 130,
-	  "class": "Connifer",
+	  "class": "Tree",	"ecotope": "Connifers",
 	  "terrain": "land",
 	  "temp": { "max": 0 },
 	  "vigor": 32
 	},
-
-	{ "//": "example with all fields" },
-	{ "name": "template", "level": 666, "base": 666,
-	  "alt": { "min": 0, "max": 0 },
-	  "temp": { "min": 0.0, "max": 0.0 },
-	  "hydro": { "min": 0.0, "max": 0.0 },
-	  "depth": { "min": 0.0, "max": 0.0 },
-	  "slope": { "min": 0.0, "max": 0.0 },
-	  "soil": { "min": 0.0, "max": 0.0 },
-	  "face": { "min": 0.0, "max": 360.0 },
-	  "range": "flexible",
-	  "bid": "tapered"
+	{ "name": "palm", "level": 4, "base": 172, "stamp": "1x2",
+	  "class": "Tree",	"ecotope": "Palms",
+	  "terrain": "land",
+	  "vigor": 32
 	}
     ]
 }

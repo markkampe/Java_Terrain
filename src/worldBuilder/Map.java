@@ -219,13 +219,27 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * @param filename - of input file
 	 */
 	public void read(String filename) {
-		// get resource name/color maps
+		// get load names and preview colors
 		Placement p = new Placement(parms.flora_rules, null, null);
-		floraColors = p.previewColors();
-		floraNames = p.resourceNames();
+		Color colors[] = p.previewColors();
+		floraColors = new Color[colors.length];
+		String names[] = p.resourceNames();
+		floraNames = new String[names.length];
+		for(int i = 0; i < colors.length; i++) {
+			floraColors[i] = colors[i];
+			floraNames[i] = names[i];
+		}
+
+		// load mineral names and preview colors
 		p = new Placement(parms.mineral_rules, null, null);
-		rockColors = p.previewColors();
-		rockNames = p.resourceNames();
+		colors = p.previewColors();
+		rockColors = new Color[colors.length];
+		names = p.resourceNames();
+		rockNames = new String[names.length];
+		for(int i = 0; i < colors.length; i++) {
+			rockColors[i] = colors[i];
+			rockNames[i] = names[i];
+		}
 		
 		// read in the underlying mesh
 		Mesh m = new Mesh();

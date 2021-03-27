@@ -27,8 +27,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	
 	private RPGMTiler tiler = null;
 	private boolean exported = false;
-	private boolean tempChanged;
-	private boolean hydroChanged;
 	private boolean levelsChanged;
 	private boolean floraChanged;
 
@@ -97,7 +95,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			need_slopes = true;
 			need_depths = true;
 		}
-
 		need_palette = true;
 		need_flora_pct = true;
 		need_flora_3 = true;
@@ -386,12 +383,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		if (e.getSource() == previewT && selected) {
 			tiler.preview(Exporter.WhichMap.HEIGHTMAP, colorTopo);
 			return;
-		}
-		
-		if (hydroChanged) {
-			// hydroMap();		we no longer use a hydro goose slider
-			hydroChanged = false;
-			floraChanged = need_flora_pct || need_flora_3;
 		}
 		
 		if (floraChanged) {

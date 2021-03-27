@@ -538,7 +538,7 @@ public class ResourceRule {
 	 * 
 	 * @return			bid
 	 */
-	double bid(double alt, double hydro, double flux, double rain, double winter, double summer, double soil) {
+	double bid(double alt, double depth, double flux, double rain, double winter, double summer, double soil) {
 
 		// range check vs altitude, hydration and temperature
 		double score = 0;
@@ -549,16 +549,13 @@ public class ResourceRule {
 			justification += "alt";
 		score += v;
 		
-		// positive = hydration, negative = under water
-		if (hydro >= 0) {
-			v = (minDepth > 0) ? IMPOSSIBLE : range_bid(hydro, minHydro, maxHydro);
-			if (v <= 0)
-				justification += "+hydro";
-		} else {
-			v = range_bid(parms.height(-hydro), minDepth, maxDepth);
-			if (maxDepth == 0 || v <= 0)
-				justification += "+depth";
-		}
+		// negative depth is under water, positive is above water
+		if (depth >= 0)
+			v = (minDepth > 0) ? IMPOSSIBLE : 0;
+		else
+			v = range_bid(-depth, minDepth, maxDepth);
+		if (v <= 0)
+			justification += "+depth";
 		score += v;
 		
 		v = range_bid((winter+summer)/2, minTemp, maxTemp);

@@ -28,6 +28,15 @@
 	  "bid": "tapered",
 	  "color": [76,153,0]
 	},
+	{ "name": "Palms",	"id": 4,	"order": 1,
+	  "class": "Tree",
+	  "alt":   { "min": 0,  "max": 100 },
+	  "temp":  { "min": 15 },
+	  "rain":  { "min": 20, "max": 50 },
+	  "vigor": 32,
+	  "bid": "tapered",
+	  "color": [76,200,0]
+	},
 
 	{ "//": "Riperian and Marsh have very limited habitat" },
 	{ "name": "Riperian",	"id": 6,	"order": 2,
@@ -36,7 +45,6 @@
 	  "temp":  { "min": 0,  "max": 28 },
 	  "rain":  { "min": 75,  "max": 120 },
 	  "flux":  { "min": 0.3, "max": 9.9 },
-	  "hydro": { "min": 0.1 },
 	  "vigor": 32,
 	  "bid": "tapered",
 	  "color": [178,102,255]

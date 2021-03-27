@@ -203,7 +203,7 @@ public class RPGMTiler implements Exporter {
 			bidders[numRules] = r;
 			for(int i = 0; i < floraNames.length; i++)
 				if (r.className != null && floraNames[i] != null && r.className.equals(floraNames[i])) {
-					bidder_ecotope[i] = i;
+					bidder_ecotope[numRules] = i;
 					break;
 				}
 			numRules++;
@@ -253,7 +253,7 @@ public class RPGMTiler implements Exporter {
 					if (r.wrongTerrain(terrain))
 						r.justification = "Terain mismatch";
 					else if (bidder_ecotope[b] != 0 && bidder_ecotope[b] != floraTypes[i][j])
-						r.justification = "Class mismatch";
+						r.justification = "Class mismatch" + " (" + floraNames[bidder_ecotope[b]] + "!=" + floraNames[floraTypes[i][j]] + ")";
 					else
 						bid = r.bid(alt, depth, flux, rain, Tmean - lapse, Tmean - lapse, soilType);
 

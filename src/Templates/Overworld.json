@@ -32,15 +32,9 @@
 	  "temp": { "max": 0 },
 	  "vigor": 32
 	},
-	{ "name": "grass", "level": 1, "base": 2816,
-	  "class": "NONE",
-	  "terrain": "land",
-	  "temp": { "min": 0 },
-	  "vigor": 128
-	},
 
 	{ "//": "L1 ground cover tiles beneath ecotopes"},
-	{ "name": "grass-GP", "level": 1, "base": 2816,
+	{ "name": "grass-G", "level": 1, "base": 2816,
 	  "terrain": "land",
 	  "class": "Grassland",
 	  "vigor": 32
@@ -82,9 +76,14 @@
 	  "class": "Alpine",
 	  "vigor": 32
 	},
-	{ "name": "dirt", "level": 1, "base": 3200,
+	{ "name": "dirt-D", "level": 1, "base": 3200,
 	  "terrain": "land",
 	  "class": "Desert",
+	  "vigor": 32
+	},
+	{ "name": "rocks-A", "level": 1, "base": 3296,
+	  "terrain": "land",
+	  "class": "Alpine",
 	  "vigor": 32
 	},
 	{ "name": "marsh", "level": 1, "base": 2816,	"//": "BETTER TILE ?",
@@ -112,7 +111,7 @@
 	},
 
 	{ "name": "palm", "level": 2, "base": 3776,
-	  "class": "Palm",
+	  "class": "Palms",
 	  "terrain": "ground",
 	  "vigor": 32
 	},

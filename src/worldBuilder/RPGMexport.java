@@ -41,10 +41,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	private boolean need_depths; 	// slider for passable/shallow/deep
 	private boolean need_flora_pct;	// slider for percentage plant cover
 	private boolean need_flora_3;	// slider for tall grass/brush/trees
-	private boolean need_temp;		// slider for temperature up/down
-	private boolean need_hydro1;	// slider for hydration addition
-	private boolean need_hydro2;	// slider for hydration multiplication
-	private boolean need_flora_p;	// flora palette selection
 
 	// control widgets
 	private JSlider levels; 	// number of height levels
@@ -53,13 +49,8 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	private RangeSlider depths; // marsh, shallow, deep
 	private JSlider flora_pct;	// percent plant cover
 	private RangeSlider flora_3;	// types of plant cover
-	private JSlider goose_temp;	// temperature up/down
-	private JSlider goose_hydro1; // hydration up/down
-	private JSlider goose_hydro2; // hydration multiplier
 	private JTextField palette; // tile set description file
 	private JButton choosePalette; // select palette file
-	private JTextField flora_palette;	// flora description file
-	private JButton chooseFlora;	// select flora file
 
 	private Color[] colorTopo; // level to preview color map
 	private Color[] colorFlora;	// flora class to preview color map
@@ -74,9 +65,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	
 	// indices into the tileRules list
 	private static final int OW_TILES = 0;
-	private static final int OW_FLORA = 1;
-	private static final int OUT_TILES = 2;
-	private static final int OUT_FLORA = 3;
+	private static final int OUT_TILES = 1;
 
 	private static final int EXPORT_DEBUG = 2;
 	
@@ -108,11 +97,8 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			need_slopes = true;
 			need_depths = true;
 		}
-		need_temp = false;		// XXX remove this entirely
-		need_hydro1 = false;	// XXX remove this entirely
-		need_hydro2 = false;	// XXX remove this entirely
+
 		need_palette = true;
-		need_flora_p = true;
 		need_flora_pct = true;
 		need_flora_3 = true;
 
@@ -277,26 +263,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		if (need_flora_pct || need_flora_3)
 			locals.add(new JLabel("     "));
 		
-		if (need_flora_p) {	// create flora palette selector
-			String rulesFile = parms.exportRules.get(overworld ? OW_FLORA : OUT_FLORA);
-			flora_palette = new JTextField(rulesFile);
-			JLabel fTitle = new JLabel("Flora Palette", JLabel.CENTER);
-			chooseFlora = new JButton("Browse");
-			fTitle.setFont(fontLarge);
-			JPanel f_panel = new JPanel(new GridLayout(2, 1));
-			f_panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-			f_panel.add(fTitle);
-			JPanel f1_panel = new JPanel();
-			f1_panel.setLayout(new BoxLayout(f1_panel, BoxLayout.LINE_AXIS));
-			f1_panel.add(flora_palette);
-			f1_panel.add(Box.createRigidArea(new Dimension(40, 0)));
-			f1_panel.add(chooseFlora);
-			f_panel.add(f1_panel);
-			locals.add(f_panel);
-
-			chooseFlora.addActionListener(this);
-		}
-		
 		if (need_flora_pct) {	// create a plant percentage slider
 			flora_pct = new JSlider(JSlider.HORIZONTAL, 0, 100, parms.dFloraPct);
 			flora_pct.setMajorTickSpacing(10);
@@ -348,62 +314,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			flora_3.addChangeListener(this);
 		}
 		
-		if (need_temp || need_hydro1 || need_hydro2)
-			locals.add(new JLabel("    "));
-		
-		if (need_temp) {	// create temperature adjustment slider
-			goose_temp = new JSlider(JSlider.HORIZONTAL, -parms.delta_t_max, parms.delta_t_max, parms.dDeltaT);
-			goose_temp.setMajorTickSpacing(5);
-			goose_temp.setMinorTickSpacing(1);
-			goose_temp.setFont(fontSmall);
-			goose_temp.setPaintTicks(true);
-			goose_temp.setPaintLabels(true);
-			JLabel lTitle = new JLabel("Temperature Adjustment (deg C)");
-			lTitle.setFont(fontSmall);
-
-			// add this to the local panel
-			locals.add(new JLabel("    "));
-			locals.add(goose_temp);
-			locals.add(lTitle);
-			
-			goose_temp.addChangeListener(this);
-		}
-		
-		if (need_hydro1) {	// create hydration adjustment slider
-			goose_hydro1 = new JSlider(JSlider.HORIZONTAL, -parms.delta_h_max, parms.delta_h_max, parms.dDeltaH);
-			goose_hydro1.setMajorTickSpacing(10);
-			goose_hydro1.setMinorTickSpacing(1);
-			goose_hydro1.setFont(fontSmall);
-			goose_hydro1.setPaintTicks(true);
-			goose_hydro1.setPaintLabels(true);
-			JLabel lTitle = new JLabel("Hydration plus/minus (percentage)");
-			lTitle.setFont(fontSmall);
-
-			// add this to the local panel
-			locals.add(new JLabel("    "));
-			locals.add(goose_hydro1);
-			locals.add(lTitle);
-			
-			goose_hydro1.addChangeListener(this);
-		}
-
-		if (need_hydro2) {	// create hydration adjustment slider
-			goose_hydro2 = new JSlider(JSlider.HORIZONTAL, 0, 200, parms.dTimesH);
-			goose_hydro2.setMajorTickSpacing(25);
-			goose_hydro2.setMinorTickSpacing(5);
-			goose_hydro2.setFont(fontSmall);
-			goose_hydro2.setPaintTicks(true);
-			goose_hydro2.setPaintLabels(true);
-			JLabel lTitle = new JLabel("Hydration Scaling (x percentage)");
-			lTitle.setFont(fontSmall);
-
-			// add this to the local panel
-			locals.add(new JLabel("    "));
-			locals.add(goose_hydro2);
-			locals.add(lTitle);
-			
-			goose_hydro2.addChangeListener(this);
-		}
 		// add the local panel to the main panel
 		controls.add(locals);
 		pack();
@@ -427,13 +337,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			floraChanged = true;
 		} else if (source == flora_pct || source == flora_3)
 			floraChanged = true;
-		else if (source == goose_hydro1 || source == goose_hydro2) {
-			hydroChanged = true;
-			floraChanged = true;
-		} else if (source == goose_temp) {
-			tempChanged = true;
-			floraChanged = true;
-		}
 	}
 	
 	/**
@@ -456,19 +359,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 				palette.setText(palette_file);
 			}
 			return;
-		} else if (e.getSource() == chooseFlora) {
-			FileDialog d = new FileDialog(this, "Flora Palette", FileDialog.LOAD);
-			d.setFile(flora_palette.getText());
-			d.setVisible(true);
-			String palette_file = d.getFile();
-			if (palette_file != null) {
-				String dir = d.getDirectory();
-				if (dir != null)
-					palette_file = dir + palette_file;
-				flora_palette.setText(palette_file);
-			}
-			return;
-		}
+		} 
 		
 		// make sure we have a ready Tiler
 		if (tiler == null || newSelection) {
@@ -481,23 +372,14 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			exported = true;
 			newSelection = false;
 			levelsChanged = true;
-			floraChanged = need_flora_pct || need_flora_p || need_flora_3;
-			tempChanged = need_temp;
-			hydroChanged = need_hydro1 || need_hydro2;
-		}
-		
-		// make sure temperatures, levels, hydration, and flora are up to date
-		if (tempChanged) {
-			int deltaT = goose_temp.getValue();
-			tiler.temps(parms.meanTemp()+deltaT, parms.meanSummer()+deltaT, parms.meanWinter()+deltaT);
-			tempChanged = false;
-			floraChanged = need_flora_pct || need_flora_p || need_flora_3;
+			floraChanged = need_flora_pct || need_flora_3;
+
 		}
 		
 		if (levelsChanged) {
 			levelMap();
 			levelsChanged = false;
-			floraChanged = need_flora_pct || need_flora_p || need_flora_3;
+			floraChanged = need_flora_pct || need_flora_3;
 		}
 		
 		// topo previews do not require hydration and flora updates
@@ -509,7 +391,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		if (hydroChanged) {
 			// hydroMap();		we no longer use a hydro goose slider
 			hydroChanged = false;
-			floraChanged = need_flora_pct || need_flora_p || need_flora_3;
+			floraChanged = need_flora_pct || need_flora_3;
 		}
 		
 		if (floraChanged) {
@@ -526,7 +408,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			// get the output file name
 			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
 			d.setFile(sel_name.getText() + ".json");
-			if (parms.export_dir != null)
+			if (parms.project_dir != null)
 				d.setDirectory(parms.project_dir);
 			d.setVisible(true);
 			String export_file = d.getFile();
@@ -566,15 +448,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 				if (flora_3 != null) {
 					parms.dFloraMin = flora_3.getValue();
 					parms.dFloraMax = flora_3.getUpperValue();
-				}
-				if (goose_temp != null) {
-					parms.dDeltaT = goose_temp.getValue();
-				}
-				if (goose_hydro1 != null) {
-					parms.dDeltaH = goose_hydro1.getValue();
-				}
-				if (goose_hydro1 != null) {
-					parms.dTimesH = goose_hydro2.getValue();
 				}
 			}
 		}
@@ -744,6 +617,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	 */
 	private void floraMap() {
 		
+		/*
 		if (format.equals("Outside")) {
 			// we have to re-do bidding for each tile
 			RPGMFlora flora = new RPGMFlora(tiler, flora_palette.getText());
@@ -758,10 +632,10 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			
 			// assign flora type to every tile
 			tiler.rpgmFloraMap(flora.getFlora(floraClasses, quotas), flora.getFloraNames());
-			colorFlora = flora.getFloraColors();
 		} else {
 			// ExportBase has already up-loaded per-tile flora
-			colorFlora = map.getFloraColors();
 		}
+		*/
+		colorFlora = map.getFloraColors();
 	}
 }

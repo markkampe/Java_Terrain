@@ -208,8 +208,9 @@ public class RPGMTiler implements Exporter {
 				}
 			numRules++;
 		}
-		Bidder bidder = new Bidder(numRules);
 		
+		// use the active rules to collect bids for every tile
+		Bidder bidder = new Bidder(numRules);
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
 				grid[i][j] = 0;
@@ -250,11 +251,13 @@ public class RPGMTiler implements Exporter {
 					RPGMRule r = bidders[b];
 					r.justification = "OK";
 					double bid = 0;
+					// ResourceRule bidder doesn't know about RPGM Terrain types
 					if (r.wrongTerrain(terrain))
 						r.justification = "Terain mismatch";
-					else if (bidder_ecotope[b] != 0 && bidder_ecotope[b] != floraTypes[i][j])
+					else	// ResourceRule bidder doesn't know about matching class to ecotope
+					if (bidder_ecotope[b] != 0 && bidder_ecotope[b] != floraTypes[i][j])
 						r.justification = "Class mismatch" + " (" + floraNames[bidder_ecotope[b]] + "!=" + floraNames[floraTypes[i][j]] + ")";
-					else
+					else	// if bid fails, it will add its own justification
 						bid = r.bid(alt, depth, flux, rain, Tmean - lapse, Tmean - lapse, soilType);
 
 					if (r.debug)

@@ -147,10 +147,6 @@ public class Parameters {
 	/** default export % structural		*/	public int dRockMin;
 	/** default export % metal			*/	public int dRockMax;
 
-	/** default export temp offset (degC)	*/	public int dDeltaT;	
-	/** default export hydro plus/minus	(%)	*/	public int dDeltaH;
-	/** default export hydro scaling (x)	*/	public int dTimesH;
-
 	/** default export overworld palette*/	public String OW_palette;
 	/** default overworld % ground	(by height)	*/	public int dHillMin;
 	/** default overworld % hill (by height)	*/	public int dHillMax;
@@ -255,11 +251,6 @@ public class Parameters {
 		dRockPct = 10;
 		dRockMin = 70;
 		dRockMax = 95;
-		
-		// default temp and hydration offsets
-		dDeltaT = 0;
-		dDeltaH = 0;
-		dTimesH = 100;
 		
 		descr_height = 4;
 		descr_width = 80;

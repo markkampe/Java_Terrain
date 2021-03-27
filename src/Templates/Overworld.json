@@ -35,7 +35,6 @@
 	{ "name": "grass", "level": 1, "base": 2816,
 	  "class": "NONE",
 	  "terrain": "land",
-	  "hydro": { "min": 0.1 },
 	  "temp": { "min": 0 },
 	  "vigor": 128
 	},
@@ -43,12 +42,7 @@
 	{ "//": "L1 ground cover tiles beneath ecotopes"},
 	{ "name": "grass-GP", "level": 1, "base": 2816,
 	  "terrain": "land",
-	  "class": "Prairie",
-	  "vigor": 32
-	},
-	{ "name": "grass-GM", "level": 1, "base": 2816,
-	  "terrain": "land",
-	  "class": "Meadow",
+	  "class": "Grassland",
 	  "vigor": 32
 	},
 	{ "name": "grass-BR", "level": 1, "base": 2816,
@@ -56,14 +50,9 @@
 	  "class": "Riperian",
 	  "vigor": 32
 	},
-	{ "name": "grass-BS", "level": 1, "base": 2816,
+	{ "name": "grass-BB", "level": 1, "base": 2816,
 	  "terrain": "land",
-	  "class": "Scrub",
-	  "vigor": 32
-	},
-	{ "name": "grass-BC", "level": 1, "base": 2816,
-	  "terrain": "land",
-	  "class": "Chaparral",
+	  "class": "Brush",
 	  "vigor": 32
 	},
 	{ "name": "grass-TJ", "level": 1, "base": 2816,
@@ -153,14 +142,12 @@
 
 	{ "//": "L2 tiles for hills" },
 	{ "name": "dirthill", "level": 2, "base": 3488,
-	  "hydro": { "max": 0.10 },
 	  "terrain": "hill",
 	  "temp": { "min": 0 },
 	  "vigor": 2
 	},
 	{ "name": "greenhill", "level": 2, "base": 3104,
 	  "terrain": "hill",
-	  "hydro": { "min": 0.09 },
 	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
@@ -174,20 +161,17 @@
 	{ "//": "L2 tiles for mountains" },
 	{ "name": "mountain", "level": 2, "base": 3536,
 	  "terrain": "mountain",
-	  "hydro": { "max": 0.10 },
 	  "temp": { "min": 0 },
 	  "soil": { "max": 0.5 },
 	  "vigor": 16
 	},
 	{ "name": "greenmountain", "level": 2, "base": 3536,
 	  "terrain": "mountain",
-	  "hydro": { "min": 0.09 },
 	  "temp": { "min": 0 },
 	  "vigor": 64
 	},
 	{ "name": "rockmountain", "level": 2, "base": 3152,
 	  "terrain": "mountain",
-	  "hydro": { "max": 0.10 },
 	  "temp": { "min": 0 },
 	  "soil": { "min": 0.5, "max": 2.5 },
 	  "vigor": 16
@@ -213,7 +197,6 @@
 	},
 	{ "name": "greenpeak", "level": 4, "base": 285, "stamp":"2x2", "surround": 301,
 	  "terrain": "mountain",
-	  "hydro": { "min": 0.09 },
 	  "temp": { "min": 0 },
 	  "vigor": 64
 	},
@@ -221,19 +204,6 @@
 	  "terrain": "mountain",
 	  "temp": { "max": 5 },
 	  "vigor": 96
-	},
-
-
-	{ "name": "template", "level": 666, "base": 666,
-	  "terrain": "none",
-	  "class": "none",
-	  "alt": { "min": 0, "max": 0 },
-	  "temp": { "min": 0.0, "max": 0.0 },
-	  "hydro": { "min": 0.0, "max": 0.0 },
-	  "depth": { "min": 0.0, "max": 0.0 },
-	  "slope": { "min": 0.0, "max": 0.0 },
-	  "soil": { "min": 0.0, "max": 0.0 },
-	  "face": { "min": 0.0, "max": 360.0 }
 	}
     ]
 }

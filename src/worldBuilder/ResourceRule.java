@@ -163,7 +163,7 @@ public class ResourceRule {
 		String name = "", thisKey = "", thisObject = "", thisValue = "";
 		boolean inRules = false;
 		
-		int	   id = NO_VALUE;	// resource ID
+		int	   numRules = 0;
 		int    aMin = NO_VALUE, aMax = NO_VALUE;	// altitude
 		double dMin = NO_VALUE, dMax = NO_VALUE;	// depth
 		double tMin = NO_VALUE, tMax = NO_VALUE;	// temperature
@@ -213,8 +213,6 @@ public class ResourceRule {
 					// copy in all of the values we got
 					if (className != null)
 						thisRule.className = className;
-					if (id != NO_VALUE)
-						thisRule.id = id;
 					if (aMin != NO_VALUE)
 						thisRule.minAltitude = aMin;
 					if (dMin != NO_VALUE)
@@ -256,6 +254,7 @@ public class ResourceRule {
 					thisRule.flexRange = flexRange;
 					thisRule.taperedBid = taperedBid;
 					rules.add(thisRule);
+					thisRule.id = ++numRules;
 					
 					// now reset all System.out.println("read string for key " + thisKey);the parameters for the next rule
 					aMin = NO_VALUE; aMax = NO_VALUE;
@@ -343,10 +342,6 @@ public class ResourceRule {
 				}
 				
 				switch (thisKey) {
-				case "id":
-					id = parser.getInt();
-					thisKey = "";
-					break;
 				case "vigor":
 					vigor = parser.getInt();
 					thisKey = "";

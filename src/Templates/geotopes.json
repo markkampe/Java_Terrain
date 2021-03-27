@@ -1,72 +1,71 @@
 { 
   "Default Minerals": [
 	{ "//": "basic soil types" },
-	{ "name": "Sedimentary", "id": 1,
+	{ "name": "Sedimentary",
 	  "vigor": 0,			"//": "assigned, does not bid",
 	  "color": [229,204,255]
 	},
-	{ "name": "Metamorphic", "id": 2,
+	{ "name": "Metamorphic",
 	  "vigor": 0,			"//": "assigned, does not bid",
 	  "color": [153,251,255]
 	},
-	{ "name": "Igneous", "id": 3,
+	{ "name": "Igneous",
 	  "vigor": 0,			"//": "assigned, does not bid",
 	  "color": [153,0,153]
 	},
-	{ "name": "Alluvial", "id": 4,
+	{ "name": "Alluvial",
 	  "vigor": 0,			"//": "assigned, does not bid",
 	  "color": [0,255,0]
     	},
-	{ "name": "Sedimentary Alluvium", "id": 5,
+	{ "name": "Sedimentary Alluvium",
 	  "vigor": 0,			"//": "assigned, does not bid",
 	  "color": [204,204,255]
     	},
-	{ "name": "Metamorphic Alluvium", "id": 6,
+	{ "name": "Metamorphic Alluvium",
 	  "vigor": 0,			"//": "assigned, does not bid",
 	  "color": [255,204,255]
     	},
-	{ "name": "Igneous Alluvium", "id": 7,
+	{ "name": "Igneous Alluvium",
 	  "vigor": 0,			"//": "assigned, does not bid",
 	  "color": [255,204,229]
    	},
 
 	{ "//": "precious metals" },
-	{ "name": "Deep-Rock Gold", "id": 15,	"order": 1,
+	{ "name": "Deep-Rock Gold", 		"order": 1,
 	  "class": "Precious",
 	  "soil": { "min": 3, "max": 3 },
 	  "vigor": 16,
 	  "color": [255,153,51]
 	},
 	{ "name": "Placer Gold", 
-	  "class":"Precious", "id": 16,		"order": 1,
+	  "class":"Precious", 			"order": 1,
 	  "soil": { "min": 4, "max": 7 },
 	  "vigor": 16,
 	  "color": [255,128,0]
 	},
 
 	{ "//": "metal ores" },
-	{ "name": "Copper Ore", "id": 12,	"order": 2,
+	{ "name": "Copper Ore", 		"order": 2,
 	  "class":"Metal",
-	  "id": 12,
 	  "soil": { "min": 3, "max": 3 },
 	  "vigor": 16,
 	  "color": [153,153,0]
 	},
-	{ "name": "Iron Ore", "id": 13,		"order": 2,
+	{ "name": "Iron Ore", 			"order": 2,
 	  "class":"Metal",
 	  "soil": { "min": 3, "max": 3 },
 	  "vigor": 16,
 	  "color": [255,102,102]
 	},
 	{ "//": "building stone" },
-	{ "name": "Granite", "id": 11, 		"order": 3,
+	{ "name": "Granite", 	 		"order": 3,
 	  "class":"Stone",
 	  "soil": { "min": 2, "max": 2 },
 	  "vigor": 16,
 	  "order": 3,
 	  "color": [224,224,224]
 	},
-	{ "name": "Sand Stone", "id": 10, 	"order": 4,
+	{ "name": "Sand Stone", 	 	"order": 4,
 	  "class": "Stone",
 	  "soil": { "min": 1, "max": 1 },
 	  "vigor": 16,

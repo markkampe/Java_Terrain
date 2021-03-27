@@ -1,7 +1,7 @@
 { 
   "Default Floral Ecotopes": [
 	{ "//": "forests" },
-	{ "name": "Conifers",	"id": 1,	"order": 1,
+	{ "name": "Conifers",	"order": 1,
 	  "class": "Tree",
 	  "alt":   { "min": 1500, "max": 2500 },
 	  "temp":  { "max": 25 },
@@ -10,7 +10,7 @@
 	   "bid": "tapered",
 	  "color": [0,102,51]
 	},
-	{ "name": "Broadleaf",	 "id": 2,	"order": 1,
+	{ "name": "Broadleaf",	 "order": 1,
 	  "class": "Tree",
 	  "alt":   { "min": 500, "max": 2000 },
 	  "temp":  { "min": 0,   "max": 30 },
@@ -19,7 +19,7 @@
 	   "bid": "tapered",
 	  "color": [128,255,0]
 	},
-	{ "name": "Jungle",	"id": 3,	"order": 1,
+	{ "name": "Jungle",	"order": 1,
 	  "class": "Tree",
 	  "alt":   { "min": 0,  "max": 1000 },
 	  "temp":  { "min": 15 },
@@ -28,7 +28,7 @@
 	  "bid": "tapered",
 	  "color": [76,153,0]
 	},
-	{ "name": "Palms",	"id": 4,	"order": 1,
+	{ "name": "Palms",	"order": 1,
 	  "class": "Tree",
 	  "alt":   { "min": 0,  "max": 100 },
 	  "temp":  { "min": 15 },
@@ -39,7 +39,7 @@
 	},
 
 	{ "//": "Riperian and Marsh have very limited habitat" },
-	{ "name": "Riperian",	"id": 6,	"order": 2,
+	{ "name": "Riperian",	"order": 2,
 	  "class": "Brush",	
 	  "alt":   { "min": 250, "max": 1500 },
 	  "temp":  { "min": 0,  "max": 28 },
@@ -49,14 +49,14 @@
 	  "bid": "tapered",
 	  "color": [178,102,255]
 	},
-	{ "name": "Marsh",	"id": 13,	"order": 2,
+	{ "name": "Marsh",	"order": 2,
 	  "class": "Grass",
 	  "vigor": 0,		"//": "automatic, does not bid",
 	  "color": [153,255,204]
 	},
 
 	{ "//": "more robust brush" },
-	{ "name": "Brush",	"id": 7,	"order": 3,
+	{ "name": "Brush",	"order": 3,
 	  "class": "Brush",
 	  "alt":   { "min": 0,  "max": 1000 },
 	  "rain":  { "min": 25,  "max": 50 },
@@ -66,7 +66,7 @@
 	},
 
 	{ "//": "more robust grasses" },
-	{ "name": "Grassland",	"id": 11,	"order": 4,
+	{ "name": "Grassland",	"order": 4,
 	  "class": "Grass",
 	  "alt":   { "min": 100,   "max": 1500 },
 	  "temp":  { "min": 0,   "max": 20 },
@@ -78,7 +78,7 @@
 	},
 
 	{ "//": "barrens go where nothing else can live" },
-	{ "name": "Alpine",	"id": 16,
+	{ "name": "Alpine",	
 	  "class": "Barren",
 	  "alt":   { "min": 2500 },
 	  "temp":  { "max": 15 },
@@ -86,7 +86,7 @@
 	  "bid": "tapered",
 	  "color": [192,192,192]
 	},
-	{ "name": "Desert",	"id": 17,
+	{ "name": "Desert",
 	  "class": "Barren",
 	  "temp":  { "min": 15 },
 	  "rain":  { "max": 25 },

@@ -219,27 +219,13 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * @param filename - of input file
 	 */
 	public void read(String filename) {
-		// get load names and preview colors
+		// get load flora/mineral names and preview colors
 		Placement p = new Placement(parms.flora_rules, null, null);
-		Color colors[] = p.previewColors();
-		floraColors = new Color[colors.length];
-		String names[] = p.resourceNames();
-		floraNames = new String[names.length];
-		for(int i = 0; i < colors.length; i++) {
-			floraColors[i] = colors[i];
-			floraNames[i] = names[i];
-		}
-
-		// load mineral names and preview colors
+		setFloraColors(p.previewColors());
+		setFloraNames(p.resourceNames());
 		p = new Placement(parms.mineral_rules, null, null);
-		colors = p.previewColors();
-		rockColors = new Color[colors.length];
-		names = p.resourceNames();
-		rockNames = new String[names.length];
-		for(int i = 0; i < colors.length; i++) {
-			rockColors[i] = colors[i];
-			rockNames[i] = names[i];
-		}
+		setRockColors(p.previewColors());
+		setRockNames(p.resourceNames());
 		
 		// read in the underlying mesh
 		Mesh m = new Mesh();
@@ -307,16 +293,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 						break;
 						
 					case "flora":
-						String s = parser.getString();
-						for(int i = 0; i < floraNames.length; i++)
-						if (floraNames[i] != null && s.equals(floraNames[i])) {
-							flora = i;
-							break;
-						}
+						flora = getFloraType(parser.getString());
 						break;
 						
 					case "rain":
-						s = parser.getString();
+						String s = parser.getString();
 						int u = s.indexOf(Parameters.unit_r);
 						if (u != -1)
 							s = s.substring(0, u);
@@ -761,11 +742,30 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
+	 * return ID-> mineral name map
+	 */
+	public String[] getRockNames() {
+		return rockNames;
+	}
+	
+	/**
 	 * update the mapping from rock types to preview colors
 	 * @param newColors
 	 */
 	public void setRockColors(Color[] newColors) {
-		rockColors = newColors;
+		rockColors = new Color[newColors.length];
+		for(int i = 0; i < newColors.length; i++)
+			rockColors[i] = newColors[i];
+	}
+	
+	/**
+	 * update the mapping from mineral types to names
+	 * @param newNames
+	 */
+	public void setRockNames(String[] newNames) {
+		rockNames = new String[newNames.length];
+		for(int i = 0; i < newNames.length; i++)
+			rockNames[i] = newNames[i];
 	}
 	
 	/**
@@ -786,11 +786,33 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
+	 * return type ID of a specified flora type
+	 */
+	public int getFloraType(String name) {
+		for(int i = 0; i <floraNames.length; i++)
+			if (floraNames[i] != null && name.equals(floraNames[i]))
+				return i;
+		return 0;
+	}
+	
+	/**
 	 * update the mapping from flora types to preview colors
 	 * @param newColors
 	 */
 	public void setFloraColors(Color[] newColors) {
-		floraColors = newColors;
+		floraColors = new Color[newColors.length];
+		for(int i = 0; i < newColors.length; i++)
+			floraColors[i] = newColors[i];
+	}
+	
+	/**
+	 * update the mapping from flora types to names
+	 * @param newNames
+	 */
+	public void setFloraNames(String[] newNames) {
+		floraNames = new String[newNames.length];
+		for(int i = 0; i < newNames.length; i++)
+			floraNames[i] = newNames[i];
 	}
 	
 	/*

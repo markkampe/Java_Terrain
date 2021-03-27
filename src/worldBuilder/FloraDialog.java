@@ -251,6 +251,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	
 		// instantiate (and display) the updated flora map
 		map.setFloraColors(placer.previewColors());
+		map.setFloraNames(placer.resourceNames());
 		map.setFloraMap(floraMap);
 		map.repaint();
 		changes_made = true;

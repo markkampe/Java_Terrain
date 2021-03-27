@@ -20,6 +20,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	private double soilMap[];		// per mesh-point soil/mineral types
 	private double prevSoil[];		// saved soil Map
 	private Color prevColors[];		// saved type to preview color map
+	private String prevNames[];		// saved type to name map
 	private int classCounts[];		// returned placements per class
 	
 	// widgets
@@ -56,6 +57,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		// get incoming Flora Map and its preview colors
 		prevSoil = map.getSoilMap();
 		prevColors = map.getRockColors();
+		prevNames = map.getRockNames();
 		soilMap = new double[prevSoil.length];
 		for(int i = 0; i < prevSoil.length; i++)
 			soilMap[i] = prevSoil[i];
@@ -191,6 +193,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	
 		// instantiate (and display) the updated flora map
 		map.setRockColors(placer.previewColors());
+		map.setRockNames(placer.resourceNames());
 		map.setSoilMap(soilMap);
 		map.repaint();
 		changes_made = true;
@@ -261,6 +264,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			for(int i = 0; i < soilMap.length; i++)
 				prevSoil[i] = soilMap[i];
 			prevColors = placer.previewColors();
+			prevNames = placer.resourceNames();
 			
 			// report the changes
 			if (parms.debug_level > 0) {
@@ -284,6 +288,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			placer = null;
 		} else if (e.getSource() == cancel) {
 			map.setRockColors(prevColors);
+			map.setRockNames(prevNames);
 			map.setSoilMap(prevSoil);
 			map.repaint();
 			cancelDialog();

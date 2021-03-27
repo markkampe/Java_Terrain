@@ -260,7 +260,7 @@ public class RPGMTiler implements Exporter {
 					else	// if bid fails, it will add its own justification
 						bid = r.bid(alt, depth, flux, rain, Tmean - lapse, Tmean - lapse, soilType);
 
-					if (r.debug)
+					if (r.debug || parms.debug_level >= EXPORT_DEBUG)
 						System.out.println(r.ruleName + "[" + i + "," + j + "] (" + r.baseTile + 
 								") bids " + bid + " (" + r.justification + ")");
 					if (bid > 0) {
@@ -387,7 +387,7 @@ public class RPGMTiler implements Exporter {
 									String.format(", slope=%03.0f", face));
 							
 							double thisBid = r.bid(alt, depth , flux, rain, Tmean - lapse, Tmean - lapse, soilType);
-							if (r.debug)
+							if (r.debug || parms.debug_level >= EXPORT_DEBUG)
 								System.out.println(r.ruleName + "[" + (i+dy) + "," + (j+dx) + "] (" + 
 										r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");
 							if (thisBid <= 0)

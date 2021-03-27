@@ -35,8 +35,8 @@ public class ResourceRule {
 
 	/** Altitude ranges for this rule	*/
 	public int minAltitude, maxAltitude;
-	/** Hydration and water-depth ranges for this rule	*/
-	public double minDepth, maxDepth, minHydro, maxHydro;
+	/** water-depth ranges for this rule	*/
+	public double minDepth, maxDepth;
 	/** Temperature range for this rule	*/
 	public double minTemp, maxTemp;
 	/** slope/face ranges for this rule	*/
@@ -87,8 +87,6 @@ public class ResourceRule {
 		maxAltitude = parms.alt_max;
 		minDepth = 0;
 		maxDepth = 0;
-		minHydro = 0.0;
-		maxHydro = 1.0;
 		minTemp = -60;
 		maxTemp = 70;
 		minSoil = 0;
@@ -168,7 +166,6 @@ public class ResourceRule {
 		int	   id = NO_VALUE;	// resource ID
 		int    aMin = NO_VALUE, aMax = NO_VALUE;	// altitude
 		double dMin = NO_VALUE, dMax = NO_VALUE;	// depth
-		double hMin = NO_VALUE, hMax = NO_VALUE;	// hydration
 		double tMin = NO_VALUE, tMax = NO_VALUE;	// temperature
 		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
 		double mMin = NO_VALUE, mMax = NO_VALUE;	// slope
@@ -220,8 +217,6 @@ public class ResourceRule {
 						thisRule.id = id;
 					if (aMin != NO_VALUE)
 						thisRule.minAltitude = aMin;
-					if (hMin != NO_VALUE)
-						thisRule.minHydro = hMin;
 					if (dMin != NO_VALUE)
 						thisRule.minDepth = dMin;
 					if (tMin != NO_VALUE)
@@ -238,8 +233,6 @@ public class ResourceRule {
 						thisRule.minSlope = mMin;
 					if (aMax != NO_VALUE)
 						thisRule.maxAltitude = aMax;
-					if (hMax != NO_VALUE)
-						thisRule.maxHydro = hMax;
 					if (dMax != NO_VALUE)
 						thisRule.maxDepth = dMax;
 					if (tMax != NO_VALUE)
@@ -267,7 +260,6 @@ public class ResourceRule {
 					// now reset all System.out.println("read string for key " + thisKey);the parameters for the next rule
 					aMin = NO_VALUE; aMax = NO_VALUE;
 					dMin = NO_VALUE; dMax = NO_VALUE;
-					hMin = NO_VALUE; hMax = NO_VALUE;
 					cMin = NO_VALUE; cMax = NO_VALUE;
 					tMin = NO_VALUE; tMax = NO_VALUE;
 					mMin = NO_VALUE; mMax = NO_VALUE;
@@ -372,9 +364,6 @@ public class ResourceRule {
 					case "temp":
 						tMin = Double.parseDouble(thisValue);
 						break;
-					case "hydro":
-						hMin = Double.parseDouble(thisValue);
-						break;
 					case "depth":
 						dMin = Double.parseDouble(thisValue);
 						break;
@@ -408,9 +397,6 @@ public class ResourceRule {
 						break;
 					case "temp":
 						tMax = Double.parseDouble(thisValue);
-						break;
-					case "hydro":
-						hMax = Double.parseDouble(thisValue);
 						break;
 					case "depth":
 						dMax = Double.parseDouble(thisValue);
@@ -472,7 +458,6 @@ public class ResourceRule {
 			System.out.println(prefix + "      " + "class:   " + className);
 		System.out.println(prefix + "      " + "alt:     " + minAltitude + "-" + maxAltitude);
 		System.out.println(prefix + "      " + "depth:   " + String.format("%.2f", minDepth) + "-" + String.format("%.2f", maxDepth));
-		System.out.println(prefix + "      " + "hydro:   " + String.format("%.1f", minHydro) + "-" + String.format("%.1f", maxHydro));
 		System.out.println(prefix + "      " + "flux:    " + String.format("%.2f", minFlux) + "-" + String.format("%.2f", maxFlux));
 		System.out.println(prefix + "      " + "rain:    " + String.format("%.1f", minRain) + "-" + String.format("%.1f", maxRain));
 		System.out.println(prefix + "      " + "temp:    " + minTemp + "-" + maxTemp);
@@ -529,7 +514,7 @@ public class ResourceRule {
 	 * 		characteristic bid is based on where it is in range
 	 * 
 	 * @param alt		altitude(M)
-	 * @param hydro		positive hydration(fraction) or negative depth (M)
+	 * @param depth		positive above water, negative below water
 	 * @param flux		river flux (M3/s)
 	 * @param rain		rainfall (cm/y)
 	 * @param winter	low temp(degC)
@@ -549,11 +534,10 @@ public class ResourceRule {
 			justification += "alt";
 		score += v;
 		
-		// negative depth is under water, positive is above water
-		if (depth >= 0)
-			v = (minDepth > 0) ? IMPOSSIBLE : 0;
+		if (minDepth == 0 && maxDepth == 0)
+			v = 0;			// no depth requirement
 		else
-			v = range_bid(-depth, minDepth, maxDepth);
+			v = (depth > 0) ? IMPOSSIBLE : range_bid(-depth, minDepth, maxDepth);
 		if (v <= 0)
 			justification += "+depth";
 		score += v;

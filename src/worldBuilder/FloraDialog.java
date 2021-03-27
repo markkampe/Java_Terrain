@@ -36,20 +36,12 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	private JButton chooseFlora;	// browse for flora placement trulesnewColors
 	private JSlider flora_pct;		// fraction of area to be covered
 	private RangeSlider flora_3;	// grass/brush/tree distribution
-	private JSlider goose_temp;		// goose temperature
-	private JSlider goose_hydro1;	// goose hydration adder
-	private JSlider goose_hydro2;	// goose hydration multiplier
 	
 	// selected region info
 	private boolean selected;		// a region has been selected
 	private boolean changes_made;	// we have displayed updates
 	private double x0, y0;			// upper left hand corner
 	private double width, height;	// selected area size (in pixels)
-
-	// enablers for WIP attribute tweaks
-	private final boolean goose_t = false;
-	private final boolean goose_h1 = false;
-	private final boolean goose_h2 = false;
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -141,57 +133,6 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		locals.add(flora_3);
 		locals.add(fTitle);
 		flora_3.addChangeListener(this);
-		
-		if (goose_t) {
-			// temperature goosing slider
-			locals.add(new JLabel("    "));
-			goose_temp = new JSlider(JSlider.HORIZONTAL, -parms.delta_t_max, parms.delta_t_max, parms.dDeltaT);
-			goose_temp.setMajorTickSpacing(5);
-			goose_temp.setMinorTickSpacing(1);
-			goose_temp.setFont(fontSmall);
-			goose_temp.setPaintTicks(true);
-			goose_temp.setPaintLabels(true);
-			JLabel lTitle = new JLabel("Temperature Adjustment (deg C)");
-			lTitle.setFont(fontSmall);
-			locals.add(new JLabel("    "));
-			locals.add(goose_temp);
-			locals.add(lTitle);
-			goose_temp.addChangeListener(this);
-		}
-		
-		if (goose_h1) {
-			// hydration delta slider
-			goose_hydro1 = new JSlider(JSlider.HORIZONTAL, -parms.delta_h_max, parms.delta_h_max, parms.dDeltaH);
-			goose_hydro1.setMajorTickSpacing(25);
-			goose_hydro1.setMinorTickSpacing(5);
-			goose_hydro1.setFont(fontSmall);
-			goose_hydro1.setPaintTicks(true);
-			goose_hydro1.setPaintLabels(true);
-			fTitle = new JLabel("Hydration plus/minus (percentage)");
-			fTitle.setFont(fontSmall);
-	
-			locals.add(new JLabel("    "));
-			locals.add(goose_hydro1);
-			locals.add(fTitle);
-			goose_hydro1.addChangeListener(this);
-		}
-
-		if (goose_h2) {
-			// hydration scaling slider
-			goose_hydro2 = new JSlider(JSlider.HORIZONTAL, 0, 200, parms.dTimesH);
-			goose_hydro2.setMajorTickSpacing(25);
-			goose_hydro2.setMinorTickSpacing(5);
-			goose_hydro2.setFont(fontSmall);
-			goose_hydro2.setPaintTicks(true);
-			goose_hydro2.setPaintLabels(true);
-			fTitle = new JLabel("Hydration Scaling (x percentage)");
-			fTitle.setFont(fontSmall);
-	
-			locals.add(new JLabel("    "));
-			locals.add(goose_hydro2);
-			locals.add(fTitle);
-			goose_hydro2.addChangeListener(this);
-		}
 		
 		// put all the sliders in the middle of the pane
 		mainPane.add(locals);

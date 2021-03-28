@@ -29,7 +29,7 @@ public class RPGMRule extends ResourceRule {
 	// save extended parameters to store in next factory-instantiated object
 	private static int n_level, n_terrain, n_baseTile, n_altTile, n_neighbors;
 	private static int n_height = 1, n_width = 1;
-	private static String n_eco = null;
+	private static String n_eco = "ANY";
 	private static boolean n_barrier = false;
 
 	/**
@@ -48,7 +48,7 @@ public class RPGMRule extends ResourceRule {
 		this.height = 1;
 		this.width = 1;
 		this.barrier = false;
-		this.ecotope = null;
+		this.ecotope = "ANY";
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class RPGMRule extends ResourceRule {
 		n_height = 1;
 		n_width = 1;
 		n_barrier = false;
-		n_eco = null;
+		n_eco = "ANY";
 		
 		// and return the newly fabricated object (to ResourceRule.read)
 		return newRule;

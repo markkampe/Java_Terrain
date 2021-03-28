@@ -90,7 +90,7 @@ public class ResourceRule {
 		minTemp = -60;
 		maxTemp = 70;
 		minSoil = 0;
-		maxSoil = 9;	// FIX, how many legal soil types are there
+		maxSoil = 99;	// FIX, how many legal soil types are there
 		minSlope = 0.0;
 		maxSlope = 666;
 		minFace = 0;
@@ -533,7 +533,7 @@ public class ResourceRule {
 			v = 0;			// no depth requirement
 		else
 			v = (depth > 0) ? IMPOSSIBLE : range_bid(-depth, minDepth, maxDepth);
-		if (v <= 0)
+		if (v < 0)
 			justification += "+depth";
 		score += v;
 		

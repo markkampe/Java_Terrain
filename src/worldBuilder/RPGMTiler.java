@@ -15,7 +15,9 @@ public class RPGMTiler implements Exporter {
 	private static final int SPRITES_PER_ROW = 8;
 	private static final int EXPORT_DEBUG = 3;
 	
-	private static final boolean BY_CLASS_ONLY = true;	// FIX full RPGM Tile bidding
+	private static final int ECOTOPE_ANY = -1;
+	private static final int ECOTOPE_GREEN = -2;
+	private static final int ECOTOPE_NON_GREEN = -3;	// NONE, Desert, Alpine
 	
 	private Parameters parms;	// general parameters
 	RPGMRule rules;				// tile placement rules 
@@ -50,6 +52,8 @@ public class RPGMTiler implements Exporter {
 	public int[] typeMap;
 	/** map from flora types to class names	*/
 	public String[] floraNames;
+	/** map from flora types to green-ness	*/
+	private boolean[] floraGreen;
 	//private double minHeight;	// lowest altitude in export
 	//private double maxHeight;	// highest altitude in export
 	//private double minDepth;	// shallowest water in export
@@ -201,11 +205,24 @@ public class RPGMTiler implements Exporter {
 			if (r.level != level)
 				continue;
 			bidders[numRules] = r;
-			for(int i = 0; i < floraNames.length; i++)
-				if (r.ecotope != null && floraNames[i] != null && r.ecotope.equals(floraNames[i])) {
-					bidder_ecotope[numRules] = i;
-					break;
-				}
+			
+			// get the numeric floral ecotope type for each competing rule
+			if (r.ecotope == null)
+				bidder_ecotope[numRules] = 0;
+			else {
+				if (r.ecotope.equals("any") || r.ecotope.equals("ANY"))
+					bidder_ecotope[numRules] = ECOTOPE_ANY;
+				else if (r.ecotope.equals("green") || r.ecotope.equals("GREEN"))
+					bidder_ecotope[numRules] = ECOTOPE_GREEN;
+				else if (r.ecotope.equals("non-green") || r.ecotope.equals("NON-GREEN"))
+					bidder_ecotope[numRules] = ECOTOPE_NON_GREEN;
+				else
+					for(int i = 0; i < floraNames.length; i++)
+						if (r.ecotope.equals(floraNames[i])) {
+							bidder_ecotope[numRules] = i;
+							break;
+						}
+			}
 			numRules++;
 		}
 		
@@ -219,8 +236,8 @@ public class RPGMTiler implements Exporter {
 				int alt = (int) parms.altitude(heights[i][j] - erode[i][j]);
 				double lapse = alt * parms.lapse_rate;
 				double depth = depths[i][j];
-				double slope = slope(i,j);
-				double face = direction(i, j);
+				// double slope = slope(i,j);
+				// double face = direction(i, j);
 				double soilType = soil[i][j];
 				double flux = 0.0;	// unused for RPGM Tile rules
 				double rain = 0.0;	// unused for RPGM Tile rules
@@ -242,8 +259,7 @@ public class RPGMTiler implements Exporter {
 						", alt=" + alt +
 						String.format(", depth=%.2f", depth) + 
 						String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
-						String.format(", soil=%.1f",  soilType) + 
-						String.format(", slope=%.3f", slope));
+						String.format(", soil=%.1f",  soilType)); 
 				// collect the bids from each rule
 				bidder.reset();
 				int bids = 0;
@@ -254,9 +270,9 @@ public class RPGMTiler implements Exporter {
 					// ResourceRule bidder doesn't know about RPGM Terrain types
 					if (r.wrongTerrain(terrain))
 						r.justification = "Terain mismatch";
-					else	// ResourceRule bidder doesn't know about matching class to ecotope
-					if (bidder_ecotope[b] != 0 && bidder_ecotope[b] != floraTypes[i][j])
-						r.justification = "Class mismatch" + " (" + floraNames[bidder_ecotope[b]] + "!=" + floraNames[floraTypes[i][j]] + ")";
+					else	// ResourceRule bidder doesn't know about matching ecotopes
+					if (wrongEcotope(bidder_ecotope[b], floraTypes[i][j]))
+						r.justification = "ecotope mismatch" + " (" + r.ecotope + "!=" + floraNames[floraTypes[i][j]] + ")";
 					else	// if bid fails, it will add its own justification
 						bid = r.bid(alt, depth, flux, rain, Tmean - lapse, Tmean - lapse, soilType);
 
@@ -290,10 +306,28 @@ public class RPGMTiler implements Exporter {
 							", alt=" + alt +
 							String.format(", depth=%.2f", depth) + 
 							String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
-							String.format(", soil=%.1f",  soilType) + 
-							String.format(", slope=%.3f", slope));
+							String.format(", soil=%.1f",  soilType));
 				}
 			}
+	}
+	
+	/**
+	 * determine whether or not a tile ecotope matches a rule
+	 * @param rule_ecotope
+	 * @param tile_ecotope
+	 * @return
+	 */
+	boolean wrongEcotope(int rule_ecotope, int tile_ecotope) {
+		switch(rule_ecotope) {
+		case ECOTOPE_ANY:
+			return false;
+		case ECOTOPE_GREEN:
+			return !floraGreen[tile_ecotope];
+		case ECOTOPE_NON_GREEN:
+			return floraGreen[tile_ecotope];
+		default:
+			return rule_ecotope == tile_ecotope;
+		}
 	}
 	
 	/**
@@ -371,20 +405,21 @@ public class RPGMTiler implements Exporter {
 							int alt = (int) parms.altitude(heights[i+dy][j+dx] - erode[i+dy][j+dx]);
 							double lapse = alt * parms.lapse_rate;
 							double depth = depths[i+dy][j+dx];
-							double slope = slope(i+dy,j+dx);
-							double face = direction(i+dy, j+dx);
+							// double slope = slope(i+dy,j+dx);
+							// double face = direction(i+dy, j+dx);
 							double soilType = soil[i+dy][j+dx];
 							double flux = 0.0;	// not used for RPGM tile rules
 							double rain = 0.0;	// not used for RPGM tile rules
 							
+							// we only print out per-tile info once (not per rule)
 							if (parms.debug_level >= EXPORT_DEBUG && b == 0)
 								System.out.println("l" + level + "[" + (i+dy) + "," + (j+dx) + "]: " +
 									" terrain=" + TerrainType.terrainType(terrain) +
 									", alt=" + alt + ", hyd=" + 
 									String.format("%.2f", depth) + 
 									String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
-									String.format(", soil=%.1f",  soilType) + 
-									String.format(", slope=%03.0f", face));
+									String.format(", soil=%.1f",  soilType));
+									// String.format(", face=%03.0f", face));
 							
 							double thisBid = r.bid(alt, depth , flux, rain, Tmean - lapse, Tmean - lapse, soilType);
 							if (r.debug || parms.debug_level >= EXPORT_DEBUG)
@@ -618,26 +653,38 @@ public class RPGMTiler implements Exporter {
 	}
 	
 	/**
-	 * Up-load the flora type for every tile
+	 * Up-load the (integer) flora type for every tile
 	 * @param flora - per point flora type
 	 * @param names - per type name strings
 	 */
 	public void floraMap(double[][] flora, String[] names) {
+		// ecotope valued do not interpolate, they are discrete integers
 		this.floraTypes = new int[flora.length][flora[0].length];
 		for(int y = 0; y < flora.length; y++)
 			for(int x = 0; x < flora[0].length; x++)
 				floraTypes[y][x] = (int) flora[y][x];
 		
+		// figure out which ecotope types are green
 		this.floraNames = names;
+		floraGreen = new boolean[names.length];
+		for(int i = 0; i < names.length; i++) {
+			String ecotope = names[i];
+			if (ecotope == null || ecotope.equals("NONE"))
+				continue;
+			if (ecotope.equals("Desert") || ecotope.equals("Alpine"))
+				continue;
+			floraGreen[i] = true;
+		}
 	}
 	
 	/**
 	 * Up-load the flora assignments for every tile
 	 * @param flora assignments per point
 	 * @param names of flora classes
-	 */
+	 * 
 	public void rpgmFloraMap(int[][] flora, String[] names) {
 		this.floraTypes = flora;
 		this.floraNames = names;
 	}
+	 */
 }

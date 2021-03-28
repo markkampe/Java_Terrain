@@ -39,8 +39,6 @@ public class ResourceRule {
 	public double minDepth, maxDepth;
 	/** Temperature range for this rule	*/
 	public double minTemp, maxTemp;
-	/** slope/face ranges for this rule	*/
-	public double minSlope, maxSlope, minFace, maxFace;	// TODO support slope and face rules
 	/** soil type range for this rule	*/
 	public double minSoil, maxSoil;
 	/** rainfall range for this rule	*/
@@ -90,11 +88,7 @@ public class ResourceRule {
 		minTemp = -60;
 		maxTemp = 70;
 		minSoil = 0;
-		maxSoil = 99;	// FIX, how many legal soil types are there
-		minSlope = 0.0;
-		maxSlope = 666;
-		minFace = 0;
-		maxFace = 360;
+		maxSoil = 99;	// FIX, how many legal soil types are there0;
 		minRain = 0;
 		maxRain = 666;
 		minFlux = 0;
@@ -168,8 +162,6 @@ public class ResourceRule {
 		double dMin = NO_VALUE, dMax = NO_VALUE;	// depth
 		double tMin = NO_VALUE, tMax = NO_VALUE;	// temperature
 		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
-		double mMin = NO_VALUE, mMax = NO_VALUE;	// slope
-		double cMin = NO_VALUE, cMax = NO_VALUE;	// face (compass direction)
 		double rMin = NO_VALUE, rMax = NO_VALUE;	// rainfall
 		double fMin = NO_VALUE, fMax = NO_VALUE;	// river flux
 		int red = NO_VALUE, blue = NO_VALUE, green = NO_VALUE;	
@@ -221,14 +213,10 @@ public class ResourceRule {
 						thisRule.minTemp = tMin;
 					if (sMin != NO_VALUE)
 						thisRule.minSoil = sMin;
-					if (cMin != NO_VALUE)
-						thisRule.minFace = cMin;
 					if (rMin != NO_VALUE)
 						thisRule.minRain = rMin;
 					if (fMin != NO_VALUE)
 						thisRule.minFlux = fMin;
-					if (mMin != NO_VALUE)
-						thisRule.minSlope = mMin;
 					if (aMax != NO_VALUE)
 						thisRule.maxAltitude = aMax;
 					if (dMax != NO_VALUE)
@@ -237,14 +225,10 @@ public class ResourceRule {
 						thisRule.maxTemp = tMax;
 					if (sMax != NO_VALUE)
 						thisRule.maxSoil = sMax;
-					if (cMax != NO_VALUE)
-						thisRule.maxFace = cMax;
 					if (rMax != NO_VALUE)
 						thisRule.maxRain = rMax;
 					if (fMax != NO_VALUE)
 						thisRule.maxFlux = fMax;
-					if (mMax != NO_VALUE)
-						thisRule.maxSlope = mMax;
 					if (vigor != NO_VALUE)
 						thisRule.vigor = vigor;
 					if (order != NO_VALUE)
@@ -259,9 +243,7 @@ public class ResourceRule {
 					// now reset all System.out.println("read string for key " + thisKey);the parameters for the next rule
 					aMin = NO_VALUE; aMax = NO_VALUE;
 					dMin = NO_VALUE; dMax = NO_VALUE;
-					cMin = NO_VALUE; cMax = NO_VALUE;
 					tMin = NO_VALUE; tMax = NO_VALUE;
-					mMin = NO_VALUE; mMax = NO_VALUE;
 					rMin = NO_VALUE; rMax = NO_VALUE;
 					fMin = NO_VALUE; fMax = NO_VALUE;
 					flexRange = false;
@@ -365,12 +347,6 @@ public class ResourceRule {
 					case "soil":
 						sMin = Double.parseDouble(thisValue);
 						break;
-					case "slope":
-						mMin = Double.parseDouble(thisValue);
-						break;
-					case "face":
-						cMin = Double.parseDouble(thisValue);
-						break;
 					case "rain":
 						rMin = Double.parseDouble(thisValue);
 						break;
@@ -398,12 +374,6 @@ public class ResourceRule {
 						break;
 					case "soil":
 						sMax = Double.parseDouble(thisValue);
-						break;
-					case "slope":
-						mMax = Double.parseDouble(thisValue);
-						break;
-					case "face":
-						cMax = Double.parseDouble(thisValue);
 						break;
 					case "rain":
 						rMax = Double.parseDouble(thisValue);
@@ -457,8 +427,6 @@ public class ResourceRule {
 		System.out.println(prefix + "      " + "rain:    " + String.format("%.1f", minRain) + "-" + String.format("%.1f", maxRain));
 		System.out.println(prefix + "      " + "temp:    " + minTemp + "-" + maxTemp);
 		System.out.println(prefix + "      " + "soil:    " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
-		System.out.println(prefix + "      " + "slope:   " + String.format("%.1f", minSlope) + "-" + String.format("%.1f", maxSlope));
-		System.out.println(prefix + "      " + "face:    " + minFace + "-" + maxFace);
 		System.out.println(prefix + "      " + "range:   " + (flexRange ? "flexible" : "strict"));
 		System.out.println(prefix + "      " + "bid:     " + (taperedBid ? "tapered" : "flat"));
 		if (previewColor != null)

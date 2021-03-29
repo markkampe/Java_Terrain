@@ -85,6 +85,8 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem debug1;
 	private JMenuItem debug2;
 	private JMenuItem debug3;
+	private JMenuItem flora_legend;
+	private JMenuItem rock_legend;
 	
 	// control widgets
 	private JSlider rainfall;
@@ -273,6 +275,18 @@ public class WorldBuilder  extends JFrame
 		
 		// create help menu
 		helpInfo = new JMenuItem("about WorldBuilder");
+		helpInfo.addActionListener(this);
+		
+		// Map color legends
+		flora_legend = new JMenuItem("flora");
+		rock_legend = new JMenuItem("minerals");
+		JMenu legendMenu = new JMenu("Map legends");
+		legendMenu.add(flora_legend);
+		legendMenu.add(rock_legend);
+		flora_legend.addActionListener(this);
+		rock_legend.addActionListener(this);
+		
+		// output verbosity
 		debug0 = new JMenuItem("none");
 		debug1 = new JMenuItem("basic");
 		debug2 = new JMenuItem("verbose");
@@ -284,14 +298,14 @@ public class WorldBuilder  extends JFrame
 		dbgMenu.add(debug3);
 		ruleDebug = new JMenuItem("Rule Trace");
 		ruleDebug.addActionListener(this);
-		
 		debug0.addActionListener(this);
 		debug1.addActionListener(this);
 		debug2.addActionListener(this);
 		debug3.addActionListener(this);
-		helpInfo.addActionListener(this);
+
 		JMenu helpMenu = new JMenu("Help");
 		helpMenu.add(helpInfo);
+		helpMenu.add(legendMenu);
 		helpMenu.add(ruleDebug);
 		helpMenu.add(dbgMenu);
 		
@@ -597,6 +611,10 @@ public class WorldBuilder  extends JFrame
 		} else if (o == debug3) {
 			parms.debug_level = 3;
 			System.out.println("   verbosity:  " + parms.debug_level);
+		} else if (o == flora_legend) {
+			placeDialog(new LegendDisplay("Flora", map.floraColors, map.floraNames), false);
+		} else if (o == rock_legend) {
+			placeDialog(new LegendDisplay("Mineral", map.rockColors, map.rockNames), false);
 		}
 		updateDisplayMenus(parms.display_options);
 	}

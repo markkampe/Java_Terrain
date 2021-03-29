@@ -93,7 +93,7 @@
 	  "terrain": "land",
 	  "vigor": 32
 	},
-	{ "name": "berries", "level": 4, "base": 91, 
+	{ "name": "berries", "level": 4, "base": 111, 
 	  "class": "Brush",	"ecotope": "Riperian",
 	  "terrain": "land",
 	  "vigor": 32
@@ -103,14 +103,19 @@
 	  "terrain": "land",
 	  "vigor": 32
 	},
+	{ "name": "jungle", "level": 4, "base": 87,
+	  "class": "Tree",	"ecotope": "Jungle",
+	  "terrain": "land",
+	  "vigor": 32
+	},
 	{ "name": "pine", "level": 4, "base": 93, "stamp": "1x2",
-	  "class": "Tree",	"ecotope": "Connifers",
+	  "class": "Tree",	"ecotope": "Conifers",
 	  "terrain": "land",
 	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
 	{ "name": "snowpine", "level": 4, "base": 128, "stamp": "2x2", "surround": 130,
-	  "class": "Tree",	"ecotope": "Connifers",
+	  "class": "Tree",	"ecotope": "Conifers",
 	  "terrain": "land",
 	  "temp": { "max": 0 },
 	  "vigor": 32

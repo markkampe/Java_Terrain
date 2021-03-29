@@ -1,7 +1,7 @@
 { 
   "Default Floral Ecotopes": [
 	{ "//": "forests" },
-	{ "name": "Conifers",	"order": 1,
+	{ "name": "Conifers",	"order": 2,
 	  "class": "Tree",
 	  "alt":   { "min": 1500, "max": 2500 },
 	  "temp":  { "max": 25 },
@@ -10,7 +10,7 @@
 	   "bid": "tapered",
 	  "color": [0,102,51]
 	},
-	{ "name": "Broadleaf",	 "order": 1,
+	{ "name": "Broadleaf",	 "order": 2,
 	  "class": "Tree",
 	  "alt":   { "min": 500, "max": 2000 },
 	  "temp":  { "min": 0,   "max": 30 },
@@ -19,7 +19,7 @@
 	   "bid": "tapered",
 	  "color": [128,255,0]
 	},
-	{ "name": "Jungle",	"order": 1,
+	{ "name": "Jungle",	"order": 2,
 	  "class": "Tree",
 	  "alt":   { "min": 0,  "max": 1000 },
 	  "temp":  { "min": 15 },
@@ -28,7 +28,7 @@
 	  "bid": "tapered",
 	  "color": [76,153,0]
 	},
-	{ "name": "Palms",	"order": 1,
+	{ "name": "Palms",	"order": 3,
 	  "class": "Tree",
 	  "alt":   { "min": 0,  "max": 100 },
 	  "temp":  { "min": 15 },
@@ -39,24 +39,24 @@
 	},
 
 	{ "//": "Riperian and Marsh have very limited habitat" },
-	{ "name": "Riperian",	"order": 2,
+	{ "name": "Riperian",	"order": 1,
 	  "class": "Brush",	
-	  "alt":   { "min": 250, "max": 1500 },
+	  "alt":   { "min": 100, "max": 1500 },
 	  "temp":  { "min": 0,  "max": 28 },
-	  "rain":  { "min": 75,  "max": 120 },
+	  "rain":  { "min": 60,  "max": 120 },
 	  "flux":  { "min": 0.3, "max": 9.9 },
 	  "vigor": 32,
 	  "bid": "tapered",
 	  "color": [178,102,255]
 	},
-	{ "name": "Marsh",	"order": 2,
+	{ "name": "Marsh",	"order": 3,
 	  "class": "Grass",
 	  "vigor": 0,		"//": "automatic, does not bid",
 	  "color": [153,255,204]
 	},
 
 	{ "//": "more robust brush" },
-	{ "name": "Brush",	"order": 3,
+	{ "name": "Brush",	"order": 4,
 	  "class": "Brush",
 	  "alt":   { "min": 0,  "max": 1000 },
 	  "rain":  { "min": 25,  "max": 50 },
@@ -66,7 +66,7 @@
 	},
 
 	{ "//": "more robust grasses" },
-	{ "name": "Grassland",	"order": 4,
+	{ "name": "Grassland",	"order": 5,
 	  "class": "Grass",
 	  "alt":   { "min": 100,   "max": 1500 },
 	  "temp":  { "min": 0,   "max": 20 },

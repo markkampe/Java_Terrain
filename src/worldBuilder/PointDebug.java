@@ -81,13 +81,13 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			info.add(infoVelocity);
 			info.add(new JLabel("Erosion/(Deposition):"));
 			info.add(infoErode);
-			info.add(new JLabel("Suspended"));
+			info.add(new JLabel("Suspended:"));
 			info.add(infoSuspended);
 			info.add(new JLabel("Flora type:"));
 			info.add(infoFlora);
 			info.add(new JLabel("Soil Type:"));
 			info.add(infoSoil);
-			info.add(new JLabel("Hydration:"));
+			info.add(new JLabel("Depth:"));
 			info.add(infoHydro);
 			info.add(new JLabel("Down-hill:"));
 			info.add(infoDownhill);
@@ -159,14 +159,13 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			desc = erodeMap[point.index] < 0 ? map.getSoilType("Alluvial") + "/" : "";
 			infoSoil.setText(desc + map.rockNames[(int) soilMap[point.index]]);
 			
-			double hydroMap[] = map.getHydrationMap();	// FIX use depth map
-			h = hydroMap[point.index];
+			double depthMap[] = map.getDepthMap();
+			h = depthMap[point.index];
 			if (h >= 0)
-				desc = String.format("%.0f%%",h * 100);
+				desc = String.format("%.1f%s above outlet", h, parms.unit_z);
 			else
-				desc = String.format(h > 10.0 ? "%.2f%s" : "%.1f%s",
-									parms.height(-h), Parameters.unit_z) + 
-									" under water";
+				desc = String.format((h > -10.0) ? "%.2f" : "%.1f", -h) +
+						Parameters.unit_z + " below water";
 			infoHydro.setText(desc);
 			
 			int downHill[] = map.getDownHill();

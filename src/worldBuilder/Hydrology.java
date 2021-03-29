@@ -449,7 +449,7 @@ public class Hydrology {
 		
 		// initialize our output maps to no flowing water
 		fluxMap = map.getFluxMap();
-		hydrationMap = map.getHydrationMap();	// FIX why am I getting this?
+		hydrationMap = map.getHydrationMap();	// FIX switch to depthMap
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			fluxMap[i] = 0.0;
 			removal[i] = 0.0;

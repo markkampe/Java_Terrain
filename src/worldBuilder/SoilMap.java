@@ -47,27 +47,21 @@ public class SoilMap {
 			// interpolate values from the latest mesh
 			Cartesian cart = map.getCartesian(Cartesian.vicinity.POLYGON);
 			double sArray[][] = cart.nearest(map.getSoilMap());
-			double hArray[][] = cart.interpolate(map.getHydrationMap());	// use depthMap
+			double dArray[][] = cart.interpolate(map.getDepthMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			
-			// use soil type/hydration to generate background colors
+			// use soil type to generate background colors
 			Color[] previewColors = map.rockColors;
 			for(int r = 0; r < h; r++)
 				for(int c = 0; c < w; c++) {
-					if (hArray[r][c] < 0)	// ignore under water
+					if (dArray[r][c] < 0)	// ignore under water
 						continue;
 					int s = (int) sArray[r][c];	// soil type
 					if (eArray[r][c] < 0)		// negative erosion is alluvial
 						s = ALLUVIAL;
-					double hydration = 0.5;		// how saturated is the soil
-					if (show_hydro)
-						hydration = hArray[r][c] / Hydrology.saturation[s];
-					int shade = (int) Map.linear(DIM, BRITE, hydration);
 					Color color = new Color(DARK, DARK, DARK);
 					if (show_soil)
 						color = previewColors[s];
-					else if (show_hydro)		// shades of light blue
-						color = new Color(DARK, shade, shade);
 					else						// nothing to see
 						continue;
 					

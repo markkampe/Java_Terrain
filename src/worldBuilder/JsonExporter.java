@@ -152,7 +152,7 @@ public class JsonExporter implements Exporter {
 	public void waterMap(double[][] depths) {
 		this.depths = depths;
 		
-		// note the max and min heights
+		// note the max depth
 		maxDepth = 0;
 		for (int i = 0; i < depths.length; i++)
 			for (int j = 0; j < depths[0].length; j++) {

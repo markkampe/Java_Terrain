@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ListIterator;
-import java.util.Random;
 
 /**
  * exporter to write world map as tile numbers in RPGMaker levels
@@ -21,7 +20,6 @@ public class RPGMTiler implements Exporter {
 
 	private Parameters parms;	// general parameters
 	RPGMRule rules;				// tile placement rules 
-	private Random random;		// random # generator
 
 	private boolean useSLOPE;	// enables special level processing
 
@@ -94,7 +92,6 @@ public class RPGMTiler implements Exporter {
 	 * @param filename of output file
 	 */
 	public boolean writeFile(String filename) {		
-		random = new Random((int) (lat * lon * 1000));
 		try {
 			FileWriter output = new FileWriter(filename);
 			RPGMwriter w = new RPGMwriter(output);
@@ -245,7 +242,6 @@ public class RPGMTiler implements Exporter {
 		double flux = 0.0, rain = 0.0;	// unused for RPGM Tile rules
 
 		// collect the bids from each rule
-		int bids = 0;
 		double best_bid = 0;
 		RPGMRule winning_rule = null;
 		for(int b = 0; b < numRules; b++) {

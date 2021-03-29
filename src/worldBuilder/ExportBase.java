@@ -281,14 +281,14 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		Mesh mesh = map.getMesh();
 		double[] fluxMap = map.getFluxMap();
 		int[] downHill = map.getDownHill();
-		double[] hydroMap = map.getHydrationMap();	// FIX use  depth map
+		double[] depthMap = map.getDepthMap();
 		double[] heightMap = map.getHeightMap();
 		double[] erodeMap = map.getErodeMap();
 		
 		// consider all points in the Mesh
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			// ignore any source point already under water
-			if (hydroMap[i] < 0)
+			if (depthMap[i] < 0)
 				continue;
 			
 			// ignore any w/no downhill flow

@@ -235,6 +235,7 @@ public class FoundExporter implements Exporter {
 		
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
 		add_to_map(img, soil, "Iron Ore", rockNames, FULL_WHITE);
+		// add_to_map(img, soil, "Copper Ore", rockNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/iron_density.png");
 		
 		// create the tree maps

@@ -214,7 +214,7 @@ public class Placement {
 						continue;	// already at quota
 					
 					double bid = bidders[r].bid(alt, depth, flux, rain, Twinter - lapse, Tsummer - lapse, soil);
-					if (parms.rule_debug != null && parms.rule_debug.equals(bidders[r].ruleName)) {
+					if (parms.debug_level >= PLACEMENT_DEBUG || parms.rule_debug != null && parms.rule_debug.equals(bidders[r].ruleName)) {
 						String msg = "   RULE " + bidders[r].ruleName + " bids " +
 									String.format("%6.2f for point %5d", bid, i) +
 									String.format(", alt=%d%s", alt, Parameters.unit_z);

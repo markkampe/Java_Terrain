@@ -42,12 +42,12 @@ public class AltitudeMap {
 			Cartesian cart = map.getCartesian(vicinity.POLYGON);
 			double zArray[][] = cart.interpolate(map.getHeightMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
-			double hArray[][] = cart.interpolate(map.getHydrationMap());	// FIX use depth map
+			double dArray[][] = cart.interpolate(map.getDepthMap());
 			
 			// use height to generate background colors
 			for(int r = 0; r < h; r++)
 				for(int c = 0; c < w; c++) {
-					if (hArray[r][c] < 0)	// cell is under water
+					if (dArray[r][c] < 0)	// cell is under water
 						continue;
 					
 					double z = zArray[r][c] - eArray[r][c];

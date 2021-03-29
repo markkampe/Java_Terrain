@@ -162,7 +162,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener {
 			double depthMap[] = map.getDepthMap();
 			h = depthMap[point.index];
 			if (h >= 0)
-				desc = String.format("%.1f%s above outlet", h, parms.unit_z);
+				desc = String.format("%.1f%s above outlet", h, Parameters.unit_z);
 			else
 				desc = String.format((h > -10.0) ? "%.2f" : "%.1f", -h) +
 						Parameters.unit_z + " below water";

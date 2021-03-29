@@ -276,7 +276,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	 * @param	hydration (cartesian map to update)
 	 * @param 	tilesize (in meters)
 	 */
-	protected void add_rivers(double[][] hydration, int tilesize) {
+	protected void add_rivers(double[][] depths, int tilesize) {
 		
 		Mesh mesh = map.getMesh();
 		double[] fluxMap = map.getFluxMap();
@@ -350,10 +350,10 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 					int start = c - (stroke/2);
 					if (r >= 0 && r < y_points && start >= 0 && start + stroke <= x_points) {
 						for(int j = 0; j < stroke; j++)
-							if (hydration[r][start + j] > -depth)
-								hydration[r][start + j] = -depth;
+							if (depths[r][start + j] > -depth)
+								depths[r][start + j] = -depth;
 							else	// already deep water gets deeper
-								hydration[r][start+j] -= depth;
+								depths[r][start+j] -= depth;
 					}
 					// move on to the next row
 					r += (dR>0) ? 1 : -1;
@@ -362,10 +362,10 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 					int start = r - (stroke/2);
 					if (c >= 0 && c < x_points && start >= 0 && start + stroke <= y_points) {
 						for(int j = 0; j < stroke; j++)
-							if (hydration[start + j][c] > -depth)
-								hydration[start + j][c] = -depth;
+							if (depths[start + j][c] > -depth)
+								depths[start + j][c] = -depth;
 							else	// already deep water gets deeper
-								hydration[start + j][c] -= depth;
+								depths[start + j][c] -= depth;
 					}
 					// move on to the next column
 					if (dC != 0) {

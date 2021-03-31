@@ -39,7 +39,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	
 	// selected region info
 	private boolean selected;		// a region has been selected
-	private boolean changes_made;	// we have displayed updates
+	private boolean changes_made;	// we have displayed uncommitted updates
 	private double x0, y0;			// upper left hand corner
 	private double width, height;	// selected area size (in pixels)
 	
@@ -238,8 +238,18 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	 * unregister our map listener and close the dialog
 	 */
 	private void cancelDialog() {
+		if (changes_made) {
+			// back out any uncommitted changes
+			map.setFloraColors(prevColors);
+			map.setFloraMap(prevFlora);
+			map.repaint();
+		}
+
+		// cease to listen to selection events
 		map.selectMode(Map.Selection.ANY);
 		map.removeMapListener(this);
+
+		// close the window
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
@@ -263,6 +273,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			for(int i = 0; i < floraMap.length; i++)
 				prevFlora[i] = floraMap[i];
 			prevColors = placer.previewColors();
+			changes_made = false;
 			
 			// report the changes
 			if (parms.debug_level > 0) {
@@ -284,9 +295,6 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 				placer = null;
 			}
 		} else if (e.getSource() == cancel) {
-			map.setFloraColors(prevColors);
-			map.setFloraMap(prevFlora);
-			map.repaint();
 			cancelDialog();
 		}
 	}

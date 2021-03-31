@@ -898,19 +898,19 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
-	 * return width (in pixels) of the current Map
+	 * return width (in map units) of a number of pixels
 	 */
 	public double map_width(int x_pixels) {
 		double pixels = x_pixels;
-		return pixels/getWidth();
+		return (x_max - x_min) * pixels / getWidth();
 	}
 	
 	/**
-	 * return height (in pixels) of the current Map
+	 * return height (in map units) of a number of pixels
 	 */
 	public double map_height(int y_pixels) {
 		double pixels = y_pixels;
-		return pixels/getHeight();
+		return (y_max - y_min) * pixels / getHeight();
 	}
 	
 	/**
@@ -1122,7 +1122,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				x = (x > x_start) ? x_start + dy : x_start - dy;
 			else
 				y = (y > y_start) ? y_start + dx : y_start - dx;
-			
 			selectRect(x_start, y_start, x, y);
 			if (listener != null &&
 				!listener.regionSelected(map_x(sel_x0),  map_y(sel_y0),

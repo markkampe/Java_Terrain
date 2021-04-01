@@ -11,7 +11,7 @@ public class Cartesian {
 	/** number of tile rows in this map */
 	public int height;
 	/** the nearest MeshPoints to every tile in our map	*/
-	private Vicinity cells[][];
+	public Vicinity cells[][];
 	
 	/** types of vicinities				*/
 	public enum vicinity {

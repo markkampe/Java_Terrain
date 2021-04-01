@@ -14,6 +14,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 		private static final int BORDER_WIDTH = 5;
 		private static final Color SELECTED_COLOR = Color.MAGENTA;
 		private static final Color NEIGHBOR_COLOR = Color.BLACK;
+		private static final Color GRAYED = Color.LIGHT_GRAY;
 		
 		private static final long serialVersionUID = 1L;
 		
@@ -31,7 +32,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 		private JLabel infoSuspended;
 		private JLabel labelSuspended;
 		private JLabel infoSoil;
-		private JLabel infoHydro;
+		private JLabel infoDepth;
 		private JLabel infoFlora;
 		private JLabel infoDownhill;
 		private JLabel labelDownhill;
@@ -40,8 +41,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 		private JLabel infoNeighbors;
 		private JButton selectMode;
 		
-		private boolean meshMode = true;
-		private String modes[] = { "Map Point", "Mesh Point" };
+		private boolean meshMode;
 		
 		/** instantiate the point information display, register for selection events */
 		public PointDebug(Map map)  {
@@ -56,7 +56,9 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			addWindowListener( this );
 			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			
-			selectMode = new JButton(modes[1]);
+			meshMode = true;
+			selectMode = new JButton("Mesh Points");
+			
 			infoIndex = new JLabel("Select a point");
 			infoMap = new JLabel();
 			infoWorld = new JLabel();
@@ -67,7 +69,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			infoErode = new JLabel();
 			infoSuspended = new JLabel();
 			infoSoil = new JLabel();
-			infoHydro = new JLabel();
+			infoDepth = new JLabel();
 			infoFlora = new JLabel();
 			infoDownhill = new JLabel();
 			infoOutlet = new JLabel();
@@ -81,37 +83,42 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			labelIndex = new JLabel("Index:");
 			info.add(labelIndex);
 			info.add(infoIndex);
+			
+			// information available for all points
 			info.add(new JLabel("Map Location:"));
 			info.add(infoMap);
 			info.add(new JLabel("Lat,Lon:"));
 			info.add(infoWorld);
 			info.add(new JLabel("Altitude:"));
 			info.add(infoAlt);
+			info.add(new JLabel("Depth:"));
+			info.add(infoDepth);
 			info.add(new JLabel("rainfall:"));
 			info.add(infoRain);
+			info.add(new JLabel("Flora type:"));
+			info.add(infoFlora);
+			info.add(new JLabel("Soil Type:"));
+			info.add(infoSoil);			
+			info.add(new JLabel("Erosion/(Deposition):"));
+			info.add(infoErode);
+			
+			// information only available for Mesh Points
+			labelDownhill = new JLabel("Downhill:");
+			info.add(labelDownhill);
+			info.add(infoDownhill);
 			labelFlux = new JLabel("Water Flux:");
 			info.add(labelFlux);
 			info.add(infoFlux);
 			labelVelocity = new JLabel("Water Velocity");
 			info.add(labelVelocity);
 			info.add(infoVelocity);
-			info.add(new JLabel("Erosion/(Deposition):"));
-			info.add(infoErode);
-			labelSuspended = new JLabel("Suspended:");
-			info.add(labelSuspended);
-			info.add(infoSuspended);
-			info.add(new JLabel("Flora type:"));
-			info.add(infoFlora);
-			info.add(new JLabel("Soil Type:"));
-			info.add(infoSoil);
-			info.add(new JLabel("Depth:"));
-			info.add(infoHydro);
-			labelDownhill = new JLabel("Downhill:");
-			info.add(labelDownhill);
-			info.add(infoDownhill);
 			labelOutlet = new JLabel("Outlet:");
 			info.add(labelOutlet);
 			info.add(infoOutlet);
+			labelSuspended = new JLabel("Suspended:");
+			info.add(labelSuspended);
+			info.add(infoSuspended);
+			
 			info.add(new JLabel("Neighbors: "));
 			info.add(infoNeighbors);
 
@@ -223,7 +230,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			else
 				desc = String.format((h > -10.0) ? "%.2f" : "%.1f", -h) +
 						Parameters.unit_z + " below water";
-			infoHydro.setText(desc);
+			infoDepth.setText(desc);
 			
 			int downHill[] = map.getDownHill();
 			infoDownhill.setText(String.format("%d", downHill[point.index]));
@@ -243,46 +250,51 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			infoMap.setText(String.format("<%.7f, %.7f>", map_x, map_y));
 			infoWorld.setText(String.format("<%.6f, %.6f>", parms.latitude(map_y), parms.longitude(map_x)));
 			
-			double h = 0; // = parms.height(erodeMap[point.index]);
-			String desc = "TBD";
+			// figure out where we are relative to MeshPoints
+			int row = map.map_row(map_y);
+			int col = map.map_col(map_x);
+			Cartesian cart = map.getCartesian(Cartesian.vicinity.POLYGON);
 			
-			double heightMap[] = map.getHeightMap();
-			//infoAlt.setText(String.format("%.1f%s MSL", parms.altitude(heightMap[point.index]), Parameters.unit_z));
-			infoAlt.setText(desc);
+			// Cartesian interpolated height
+			double v = cart.cells[row][col].interpolate(map.getHeightMap());
+			infoAlt.setText(String.format("%.1f%s MSL", parms.altitude(v), Parameters.unit_z));
 			
-			double rainMap[] = map.getRainMap();
-			//infoRain.setText(String.format("%.1f%s", rainMap[point.index], Parameters.unit_r));
-			infoRain.setText(desc);
-			
-			double erodeMap[] = map.getErodeMap();
+			// Cartesian interpolated rainfall
+			v = cart.cells[row][col].interpolate(map.getRainMap());
+			infoRain.setText(String.format("%.1f%s", v, Parameters.unit_r));
 
-			if (h < 0)
-				desc = String.format("(%.3f%s)",- h, Parameters.unit_z);
-			else
-				desc = String.format("%.3f%s", h, Parameters.unit_z);
+			// Cartesian interpolated erosion
+			v = cart.cells[row][col].interpolate(map.getErodeMap());
+			String desc = 
+					(v < 0) ? String.format("(%.3f%s)", -v, Parameters.unit_z)
+							: String.format("%.3f%s", v, Parameters.unit_z);
 			infoErode.setText(desc);
 			
-			double floraMap[] = map.getFloraMap();
-			//if (floraMap != null && floraMap[point.index] > 0)
-			//	infoFlora.setText(map.floraNames[(int) floraMap[point.index]]);
-			//else
-			// infoFlora.setText("None");
-			infoFlora.setText(desc);
-			
-			double soilMap[] = map.getSoilMap();
-			//desc = erodeMap[point.index] < 0 ? map.getSoilType("Alluvial") + "/" : "";
-			//infoSoil.setText(desc + map.rockNames[(int) soilMap[point.index]]);
-			infoSoil.setText(desc);
-			
-			double depthMap[] = map.getDepthMap();
-			//h = depthMap[point.index];
-			if (h > 0)
-				desc = String.format((h >= 10.0) ? "%.1f" : "%.2f", h) +
-						Parameters.unit_z + " above outlet";
+			// Cartesian interpolated water depth
+			v = cart.cells[row][col].interpolate(map.getDepthMap());
+			if (v > 0)
+				desc = String.format((v >= 10.0) ? "%.1f" : "%.2f", v) +
+						Parameters.unit_z + " above water";
 			else
-				desc = String.format((h > -10.0) ? "%.2f" : "%.1f", -h) +
+				desc = String.format((v > -10.0) ? "%.2f" : "%.1f", -v) +
 						Parameters.unit_z + " below water";
-			infoHydro.setText(desc);
+			infoDepth.setText(desc);
+			
+			// soil from nearest MeshPoint
+			double m[] = map.getSoilMap();
+			if (m != null) {
+				v = cart.cells[row][col].nearest(m);
+				infoSoil.setText(map.rockNames[(int) v]);
+			} else
+				infoSoil.setText("");
+			
+			// flora from nearest MeshPoint
+			m = map.getFloraMap();
+			if (m != null) {
+				v = cart.cells[row][col].nearest(m);
+				infoFlora.setText(map.floraNames[(int) v]);
+			} else
+				infoFlora.setText("");
 		}
 		
 		/**
@@ -291,30 +303,31 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == selectMode) {
 				if (meshMode) {
-					infoIndex.setText("");
-					labelIndex.setForeground(Color.GRAY);
-					infoFlux.setText("");
-					labelFlux.setForeground(Color.GRAY);
-					infoVelocity.setText("");
-					labelVelocity.setForeground(Color.GRAY);
-					infoSuspended.setText("");
-					labelSuspended.setForeground(Color.GRAY);
-					infoDownhill.setText("");
-					labelDownhill.setForeground(Color.GRAY);
-					infoOutlet.setText("");
-					labelOutlet.setForeground(Color.GRAY);
-					selectMode.setText(modes[0]);
 					meshMode = false;
+					// gray out the MeshPoint-only fields
+					infoIndex.setText("");
+					labelIndex.setForeground(GRAYED);
+					infoFlux.setText("");
+					labelFlux.setForeground(GRAYED);
+					infoVelocity.setText("");
+					labelVelocity.setForeground(GRAYED);
+					infoSuspended.setText("");
+					labelSuspended.setForeground(GRAYED);
+					infoDownhill.setText("");
+					labelDownhill.setForeground(GRAYED);
+					infoOutlet.setText("");
+					labelOutlet.setForeground(GRAYED);
 				} else {
+					meshMode = true;
+					// re-enable the MeshPoint only fields
 					labelIndex.setForeground(Color.BLACK);
 					labelFlux.setForeground(Color.BLACK);
 					labelVelocity.setForeground(Color.BLACK);
 					labelSuspended.setForeground(Color.BLACK);
 					labelDownhill.setForeground(Color.BLACK);
 					labelOutlet.setForeground(Color.BLACK);
-					selectMode.setText(modes[1]);
-					meshMode = true;
 				}
+				selectMode.setText((meshMode ? "Mesh" : "Map") + " Points");
 			}
 		}
 		/**

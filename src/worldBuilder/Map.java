@@ -914,6 +914,24 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
+	 * return the Cartesian Map column for a Map Y coordinate
+	 */
+	public int map_col(double x) {
+		int cols = getWidth()/TOPO_CELL;	// cols on the map
+		double dx = cols * (x - x_min) / (x_max - x_min);
+		return (int) dx;
+	}
+
+	/**
+	 * return the Cartesian Map column for a Map Y coordinate
+	 */
+	public int map_row(double y) {
+		int rows = getHeight()/TOPO_CELL;
+		double dy = rows * (y - y_min) / (y_max - y_min);
+		return (int) dy;
+	}
+
+	/**
 	 * return pixel column for a given map x position
 	 */
 	public int screen_x(double x) {

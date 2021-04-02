@@ -25,7 +25,8 @@ public class Hydrology {
 	// maps we create, that will be pushed into the Map
 	private int downHill[];			// down-hill neighbor of each MeshPoint
 	private double fluxMap[];		// water flow through MeshPoint
-	private double hydrationMap[];	// hydration or water depth of MeshPoint
+	private double hydrationMap[];	// FIX 86 hydrationMap
+	private double waterLevel[];	// water level at each MeshPoint
 	
 	// maps we create and use to compute water flow, erosion and deposition
 	private int sinkMap[];			// the point to which each MeshPoint drains
@@ -447,15 +448,17 @@ public class Hydrology {
 		double[] soilMap = map.getSoilMap();
 		final int ALLUVIAL = map.getSoilType("Alluvial");
 		
-		// initialize our output maps to no flowing water
+		// 0. initialize our output maps to no flowing water or lakes
 		fluxMap = map.getFluxMap();
-		hydrationMap = map.getHydrationMap();	// FIX switch to depthMap
+		hydrationMap = map.getHydrationMap();	// FIX 86 hydrationMap
+		waterLevel = map.getWaterLevel();
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			fluxMap[i] = 0.0;
 			removal[i] = 0.0;
 			suspended[i] = 0.0;
 			velocityMap[i] = 0.0;
-			hydrationMap[i] = oceanic[i] ? heightMap[i] - parms.sea_level : 0.0;
+			hydrationMap[i] = oceanic[i] ? heightMap[i] - parms.sea_level : 0.0;	// FIX 86 hydrationMap
+			waterLevel[i] = oceanic[i] ? parms.sea_level : UNKNOWN;
 		}
 		
 		// if no incoming rivers or rain, we are done
@@ -467,7 +470,7 @@ public class Hydrology {
 		double Vmin = parms.Vmin;	// minimum velocity to carry sediment
 		double Smax = parms.Smax;	// maximum sediment per M^3 of water
 		
-		// calculate the incoming water flux for each non-oceanic point
+		// calculate the incoming flux, erosion, deposition, and water depth
 		map.min_flux = TOO_BIG;
 		map.max_flux = TOO_SMALL;
 		map.min_velocity = TOO_BIG;
@@ -568,13 +571,16 @@ public class Hydrology {
 			// if this point is under water, figure out how deep
 			if (outlet[x] != UNKNOWN)
 				if (heightMap[x] - erodeMap[x] < outlet[x]) {
-					hydrationMap[x] = (heightMap[x] - erodeMap[x]) - outlet[x];
+					hydrationMap[x] = (heightMap[x] - erodeMap[x]) - outlet[x];	// FIX 86 hydrationMap
+					waterLevel[x] = outlet[x];
 					if (debug_log != null)
 						msg += String.format("\n\tflood %d (at %.1fMSL) %.1f%s u/w",
 								x, parms.altitude(heightMap[x] - erodeMap[x]),
 								parms.height(-hydrationMap[x]), Parameters.unit_z);
 				} else {	// escape point is trivially under water
+					// FIX water depth at exit point determined by flow
 					hydrationMap[x] = -parms.z(EXIT_DEPTH);
+					waterLevel[x] = heightMap[x] - erodeMap[x] + parms.z(EXIT_DEPTH);
 					if (debug_log != null)
 						msg += String.format("\n\tflood exit point %d %.2f%s u/w",
 											x, parms.height(-hydrationMap[x]), Parameters.unit_z);
@@ -591,11 +597,19 @@ public class Hydrology {
 				map.min_flux = fluxMap[x];
 		}
 		
+		/*
+		 * compute the water level for all above-water points to be that of the
+		 * highest under-water point below them.
+		 */
+		for(int i = 0; i < landPoints; i++) {
+			int point = byHeight[i];	// work highest-to-lowest
+			if (waterLevel[point] != UNKNOWN)
+				pushWaterLevel(point, waterLevel[point]);
+		}
+		
 		// flush out any debugging info
 		if (debug_log != null)
 			debug_log.flush();
-		
-		// we have already updated the in-place flux and hydration maps
 		
 		// if there was no water flow, fix the Map min/max values
 		if (map.max_flux == TOO_SMALL)
@@ -610,7 +624,24 @@ public class Hydrology {
 			map.max_rain = 0;
 		if (map.min_rain == TOO_BIG)
 			map.min_rain = 0;
+	}
+	
+	/**
+	 * set all of my up-hill neighbors, who do not already know their water level
+	 *     to have the same water level I do.
+	 * @param point	index of neighbor to be checked
+	 * @param level to set his water level to
+	 */
+	void pushWaterLevel(int point, double level) {
+		double myHeight = heightMap[point] - erodeMap[point];
 		
+		for(int n = 0; n < mesh.vertices[point].neighbors; n++) {
+			int x = mesh.vertices[point].neighbor[n].index;
+			if (heightMap[x] - erodeMap[x] > myHeight && waterLevel[x] == UNKNOWN) {
+				waterLevel[x] = level;
+				pushWaterLevel(x, waterLevel[point]);
+			}
+		}
 	}
 	
 	/**

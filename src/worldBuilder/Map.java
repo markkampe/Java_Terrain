@@ -84,10 +84,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double rainMap[];	// Rainfall of each mesh point
 	private double fluxMap[];	// Water flow through each point
 	private double erodeMap[];	// erosion/deposition
-	private double hydrationMap[];	// soil hydration
-	private double depthMap[];	// height above/below water
+	private double hydrationMap[];	// FIX 86 hydrationMap
+	private double depthMap[];	// FIX depth=alt-waterLevel
 	private double incoming[];	// incoming water from off-map
 	private double floraMap[];	// assigned flora type
+	private double waterLevel[];// level of nearest water body
 	private int downHill[];		// down-hill neighbor
 
 	private Cartesian poly_map;	// interpolation based on surrounding polygon
@@ -592,7 +593,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.fluxMap = new double[mesh.vertices.length];
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
-			this.hydrationMap = new double[mesh.vertices.length];
+			this.waterLevel = new double[mesh.vertices.length];
+			this.hydrationMap = new double[mesh.vertices.length]; // FIX 86 hydrationMap
 			this.floraMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
@@ -607,7 +609,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.fluxMap = null;
 			this.erodeMap = null;
 			this.soilMap = null;
-			this.hydrationMap = null;
+			this.hydrationMap = null;	// FIX 86 hydrationMap
+			this.waterLevel = null;
 			this.floraMap = null;
 			this.incoming = null;
 			this.highLights = null;
@@ -677,6 +680,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		waterDepth();
 		repaint(); }
 	
+	// FIX depth = alt - water-level
 	/**
 	 * update the depthMap based on the updated drainage and flux
 	 * 
@@ -834,15 +838,16 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * return array of net erosion/deposition at each mesh point
 	 */
 	public double[] getErodeMap() {return erodeMap;}
-
-	/**
-	 * return array of soil hydration for each mesh point
-	 */
-	public double [] getHydrationMap() { return hydrationMap; }
 	
 	/**
-	 * return array of above/below water heights
+	 * return array of nearest water level to each mesh point
 	 */
+	public double[] getWaterLevel() {return waterLevel;}
+
+	// FIX 86 hydrationmap
+	public double [] getHydrationMap() { return hydrationMap; }
+	
+	// FIX depth = alt - waterlevel
 	public double[] getDepthMap() { return depthMap; }
 	
 	/**
@@ -1336,8 +1341,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		super.paintComponent(g);
 		int height = getHeight();
 		int width = getWidth();
-		final int charWidth = 7;	// XXX do better
-		final int charHeight = 12;	// XXX do better
+		final int charWidth = 7;	// XXX get actual character width
+		final int charHeight = 12;	// XXX get actual character height
 		
 		// make sure we have something to display
 		if (mesh == null || mesh.vertices.length == 0) {

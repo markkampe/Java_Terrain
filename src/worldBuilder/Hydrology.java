@@ -164,12 +164,12 @@ public class Hydrology {
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			if (oceanic[i])		// already known to be oceanic
 				continue;
-
 			if (heightMap[i] < parms.sea_level && mesh.vertices[i].neighbors < 3)
 				mark_as_oceanic(i);		// recurses for all sub-sea-level neighbors
-			else
-				byHeight[landPoints++] = i;	// accumulate list of non-oceanic points
 		}
+		for(int i = 0; i < mesh.vertices.length; i++)
+			if (!oceanic[i])	// anything left is a land point
+				byHeight[landPoints++] = i;
 
 		/*
 		 * 2. determine the down-hill neighbor of all non-oceanic points

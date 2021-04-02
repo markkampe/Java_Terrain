@@ -49,7 +49,7 @@
 	"improvements": 1,
 	"topo_major": 10,
 	"topo_minor": 100,
-	"stream": 0.25,
+	"stream": 0.10,
 	"river": 2.5,
 	"artery": 25,
 	"deep": 10

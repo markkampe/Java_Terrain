@@ -222,13 +222,13 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			desc = erodeMap[point.index] < 0 ? map.getSoilType("Alluvial") + "/" : "";
 			infoSoil.setText(desc + map.rockNames[(int) soilMap[point.index]]);
 			
-			double depthMap[] = map.getDepthMap();
-			h = depthMap[point.index];
+			double waterLevel[] = map.getWaterLevel();
+			h = heightMap[point.index] - waterLevel[point.index];
 			if (h > 0)
-				desc = String.format((h >= 10.0) ? "%.1f" : "%.2f", h) +
-						Parameters.unit_z + " above outlet";
+				desc = String.format((h >= 10.0) ? "%.1f" : "%.2f", parms.altitude(h)) +
+						Parameters.unit_z + " above nearest water";
 			else
-				desc = String.format((h > -10.0) ? "%.2f" : "%.1f", -h) +
+				desc = String.format((h > -10.0) ? "%.2f" : "%.1f", parms.altitude(-h)) +
 						Parameters.unit_z + " below water";
 			infoDepth.setText(desc);
 			

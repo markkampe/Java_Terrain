@@ -83,7 +83,7 @@ public class Vicinity {
 	 * return the value of the nearest MeshPoint
 	 * @param values array for all MeshPoints
 	 * 
-	 * Note: I have stopped using Proxcimity Vicnitys, and the first point
+	 * Note: I have stopped using Proxcimity Vicnities, and the first point
 	 * 		 in the first point in a Polygon Vicnity is the nearest, so we
 	 * 		 can just use the first value we find.
 	 */
@@ -92,5 +92,27 @@ public class Vicinity {
 			if (neighbors[n] >= 0)
 				return values[neighbors[n]];
 			return 0;
+	}
+	
+	/**
+	 * return the value of the nearest MeshPoint with a VALID value
+	 * @param values array of per MeshPoint values
+	 * @param invalid the value to be ignored
+	 * 
+	 * This function is used to find the water level associated with
+	 * the nearest neighbor, where most nodes do not have a water level
+	 */
+	public double nearestValid(double values[], double invalid) {
+		int nearest = -1;
+		for(int n = 0; n < NUM_NEIGHBORS; n++) {
+			System.out.print("neighbor[" + n + "] = " + neighbors[n]);
+			if (neighbors[n] >= 0 && values[neighbors[n]] != invalid) {
+				System.out.println(", dist=" + distances[n] + ", value=" + values[neighbors[n]]);
+				if (nearest < 0 || distances[n] < distances[nearest])
+					nearest = n;
+			} else
+				System.out.println(", INVALID");
+		}
+		return (nearest >= 0) ? values[neighbors[nearest]] : invalid;
 	}
 }

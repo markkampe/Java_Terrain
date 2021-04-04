@@ -89,8 +89,6 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem rock_legend;
 	
 	// control widgets
-	private JSlider rainfall;
-	private JSlider erosion;
 	private JSlider seaLevel;
 	
 	// configuration
@@ -624,14 +622,9 @@ public class WorldBuilder  extends JFrame
 	 */
 	public void stateChanged(ChangeEvent e) {
 		Object o = e.getSource();
-		if (o == erosion) {
-			System.out.println("Erosion changed to " + erosion.getValue());
-		} else if (o == seaLevel) {
+		if (o == seaLevel) {
 			parms.sea_level = ((double) seaLevel.getValue()) / parms.z_range;
-			map.recompute();
-			map.repaint();
-		} else if (o == rainfall) {
-			System.out.println("rainfall changed to " + rainfall.getValue());
+			map.setSeaLevel();
 		}
 	}
 	

@@ -32,7 +32,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 		private JLabel infoSuspended;
 		private JLabel labelSuspended;
 		private JLabel infoSoil;
-		private JLabel infoDepth;
+		private JLabel infoWater;
 		private JLabel infoFlora;
 		private JLabel infoDownhill;
 		private JLabel labelDownhill;
@@ -70,7 +70,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			infoErode = new JLabel();
 			infoSuspended = new JLabel();
 			infoSoil = new JLabel();
-			infoDepth = new JLabel();
+			infoWater = new JLabel();
 			infoFlora = new JLabel();
 			infoDownhill = new JLabel();
 			infoOutlet = new JLabel();
@@ -92,8 +92,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			info.add(infoWorld);
 			info.add(new JLabel("Altitude:"));
 			info.add(infoAlt);
-			info.add(new JLabel("Depth:"));
-			info.add(infoDepth);
+			info.add(new JLabel("Water Level:"));
+			info.add(infoWater);
 			info.add(new JLabel("rainfall:"));
 			info.add(infoRain);
 			info.add(new JLabel("Flora type:"));
@@ -179,7 +179,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			
 			double heightMap[] = map.getHeightMap();
 			double v = parms.altitude(heightMap[point.index]);
-			String desc = String.format((v >= 10.0 ? "%.1f%s" : "%.2f%s"), v, Parameters.unit_z);
+			String desc = String.format("%.3f%s", v, Parameters.unit_z);
 			infoAlt.setText(desc);
 			
 			double fluxMap[] = map.getFluxMap();
@@ -193,7 +193,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			double erodeMap[] = map.getErodeMap();
 			v = parms.height(erodeMap[point.index]);
 			if (v < 0)
-				desc = String.format("(%.3f%s)",- v, Parameters.unit_z);
+				desc = String.format("(%.3f%s)", -v, Parameters.unit_z);
 			else
 				desc = String.format("%.3f%s", v, Parameters.unit_z);
 			infoErode.setText(desc);
@@ -215,21 +215,19 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			infoSoil.setText(desc + map.rockNames[(int) soilMap[point.index]]);
 			
 			double waterLevel[] = map.getWaterLevel();
-			v = heightMap[point.index] - waterLevel[point.index];
+			v = waterLevel[point.index];
 			if (v > 0)
-				desc = String.format((v >= 10.0) ? "%.1f" : "%.2f", parms.altitude(v)) +
-						Parameters.unit_z + " above nearest water";
+				desc = String.format("%.3f%s", parms.altitude(v), Parameters.unit_z);
 			else
-				desc = String.format((v > -10.0) ? "%.2f" : "%.1f", parms.altitude(-v)) +
-						Parameters.unit_z + " below water";
-			infoDepth.setText(desc);
+				desc = "ABOVE WATER";
+			infoWater.setText(desc);
 			
 			int downHill[] = map.getDrainage().downHill;
 			infoDownhill.setText(String.format("%d", downHill[point.index]));
 			
 			double outlet = map.drainage.outlet[point.index];
 			infoOutlet.setText(outlet == Drainage.UNKNOWN ? "NONE" :
-								String.format("%.1fMSL", parms.altitude(outlet)));
+								String.format("%.3fMSL", parms.altitude(outlet)));
 			
 			// find and highlight our Mesh neighbors
 			String neighbors = "";
@@ -256,37 +254,36 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			// figure out where we are relative to MeshPoints
 			int row = map.map_row(map_y);
 			int col = map.map_col(map_x);
-			Cartesian cart = map.getCartesian(Cartesian.vicinity.POLYGON);
+			Vicinity vicinity = new Polygon(map.mesh, map_x, map_y);
 			
 			// Cartesian interpolated height
-			double v = parms.altitude(cart.cells[row][col].interpolate(map.getHeightMap()));
-			String desc = String.format((v >= 10.0 ? "%.1f%s" : "%.2f%s"), v, Parameters.unit_z);
+			double h = parms.altitude(vicinity.interpolate(map.getHeightMap()));
+			String desc = String.format("%.3f%s", h, Parameters.unit_z);
 			infoAlt.setText(desc);
 			
+			// nearest valid water depth
+			double v = vicinity.nearestValid(map.getWaterLevel(), WaterFlow.UNKNOWN);
+			if (v != WaterFlow.UNKNOWN)
+				desc = String.format("%.3f%s", parms.altitude(v), Parameters.unit_z);
+			else
+				desc = "NONE NEARBY";
+			infoWater.setText(desc);
+			
 			// Cartesian interpolated rainfall
-			v = cart.cells[row][col].interpolate(map.getRainMap());
+			v = vicinity.interpolate(map.getRainMap());
 			infoRain.setText(String.format("%.1f%s", v, Parameters.unit_r));
 
 			// Cartesian interpolated erosion
-			v = cart.cells[row][col].interpolate(map.getErodeMap());
+			v = vicinity.interpolate(map.getErodeMap());
 			desc = (v < 0) ? String.format("(%.3f%s)", -v, Parameters.unit_z)
 							: String.format("%.3f%s", v, Parameters.unit_z);
 			infoErode.setText(desc);
 			
-			// Cartesian interpolated water depth
-			v = cart.cells[row][col].interpolate(map.getDepthMap());
-			if (v > 0)
-				desc = String.format((v >= 10.0) ? "%.1f" : "%.2f", v) +
-						Parameters.unit_z + " above water";
-			else
-				desc = String.format((v > -10.0) ? "%.2f" : "%.1f", -v) +
-						Parameters.unit_z + " below water";
-			infoDepth.setText(desc);
-			
+						
 			// soil from nearest MeshPoint
 			double m[] = map.getSoilMap();
 			if (m != null) {
-				v = cart.cells[row][col].nearest(m);
+				v = vicinity.nearest(m);
 				infoSoil.setText(map.rockNames[(int) v]);
 			} else
 				infoSoil.setText("");
@@ -294,13 +291,13 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			// flora from nearest MeshPoint
 			m = map.getFloraMap();
 			if (m != null) {
-				v = cart.cells[row][col].nearest(m);
+				v = vicinity.nearest(m);
 				infoFlora.setText(map.floraNames[(int) v]);
 			} else
 				infoFlora.setText("");
 			
 			// find and highlight our polygon neighbors
-			Vicinity vicinity = new Polygon(map.mesh, map_x, map_y);
+			
 			String neighbors = "";
 			for(int i = 0; i < Vicinity.NUM_NEIGHBORS; i++)
 				if (vicinity.neighbors[i] >= 0) {

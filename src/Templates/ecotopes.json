@@ -70,7 +70,7 @@
 	  "class": "Grass",
 	  "alt":   { "min": 100,   "max": 1500 },
 	  "temp":  { "min": 0,   "max": 20 },
-	  "rain":  { "min": 25,  "max": 70 },
+	  "rain":  { "min": 25,  "max": 100 },
 	  "vigor": 32,
 	  "range": "flexible",	"bid": "tapered",
 	  "color": [178,255,102]

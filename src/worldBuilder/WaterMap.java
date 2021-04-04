@@ -77,7 +77,7 @@ public class WaterMap {
 				int x = c * cellWidth;
 				int y = r * cellWidth;
 				
-				if (waterMap[r][c] <= 0) {	// this cell is under-water
+				if (waterMap[r][c] < 0) {	// this cell is under-water
 					int drys = check_neighbors(r, c, true);
 					if ((drys & (LFT+UL+TOP)) == (LFT+UL+TOP)) {
 						// round off the upper left corner

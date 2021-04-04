@@ -71,7 +71,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private Color highLights[];		// points to highlight
 	private boolean highlighting;	// are there points to highlight
 	
-	public Hydrology hydro;		// hydrology calculator for current map
+	public Drainage drainage;		// drainage calculator
+	public WaterFlow waterflow;		// water-flow calculator
+	//public Hydrology hydro;		// hydrology calculator for current map
 	
 	public Color floraColors[];	// display color for each flora type
 	public Color rockColors[];	// display color for each mineral type
@@ -89,7 +91,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double incoming[];	// incoming water from off-map
 	private double floraMap[];	// assigned flora type
 	private double waterLevel[];// level of nearest water body
-	private int downHill[];		// down-hill neighbor
 
 	private Cartesian poly_map;	// interpolation based on surrounding polygon
 	
@@ -184,7 +185,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			if (inTheBox(p.x, p.y)) {
 				for (int j = 0; j < mesh.vertices.length; j++) {
 					MeshPoint p2 = mesh.vertices[j];
-					if (downHill[j] == i && !inTheBox(p2.x, p2.y)) {
+					if (drainage.downHill[j] == i && !inTheBox(p2.x, p2.y)) {
 						// we found a point of water entry into the box
 						// find the closest point (in new mesh) to the source
 						double x = (p2.x - xShift) * xScale;
@@ -204,8 +205,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		incoming = f;
 		
 		// instantiate a new hydrology calculator and compute the topography
-		hydro = new Hydrology(this);
-		setHeightMap(h);	// force the hydrology recalculation
+		drainage = new Drainage(this);
+		waterflow = new WaterFlow(this);
+		//hydro = new Hydrology(this);
+		//setHeightMap(h);	// force the hydrology recalculation
 		
 		if (parms.debug_level > 0) {
 			parms.worldParms();
@@ -434,7 +437,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		parms.checkDefaults();	// Make sure defaults are consistent w/new world size
 		
 		// initialize the Hydrology engine
-		recompute();
+		drainage = new Drainage(this);
+		waterflow = new WaterFlow(this);
 		
 		if (parms.debug_level > 0) {
 			parms.worldParms();
@@ -461,11 +465,15 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			System.out.println(String.format("  rivers:   velocity=%.4f-%.2f%s, flow=%.3f-%.2f%s",
 								min_velocity, max_velocity, Parameters.unit_v, 
 								min_flux, max_flux, Parameters.unit_f));
+		else
+			System.out.println("  rivers:   NONE");
 		
 		if (max_erosion > 0 || max_deposition > 0)
 			System.out.println(String.format("  erosion:  %.2f%s, deposition: %.2f%s",
 								parms.height(max_erosion), Parameters.unit_z,
 								parms.height(max_deposition), Parameters.unit_z));
+		else
+			System.out.println("  erosion:  NONE, deposition: NONE");
 	}
 	
 	/**
@@ -589,7 +597,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			//		getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEAREST);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
-			this.downHill = new int[mesh.vertices.length];
 			this.fluxMap = new double[mesh.vertices.length];
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
@@ -598,14 +605,16 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.floraMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
-			this.hydro = new Hydrology(this);
+			//this.hydro = new Hydrology(this);
+			this.drainage = new Drainage(this);
+			this.waterflow = new WaterFlow(this);
+			waterDepth();
 		} else {
 			this.poly_map = null;
 			// this.nearest_map = null;
 			// this.prox_map = null;
 			this.heightMap = null;
 			this.rainMap = null;
-			this.downHill = null;
 			this.fluxMap = null;
 			this.erodeMap = null;
 			this.soilMap = null;
@@ -614,7 +623,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.floraMap = null;
 			this.incoming = null;
 			this.highLights = null;
-			this.hydro = null;
+			this.drainage = null;
+			this.waterflow = null;
+			//this.hydro = null;
 		}
 		
 		repaint();
@@ -626,26 +637,18 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public double[] getHeightMap() {return heightMap;}
 
 	/**
-	 * update the height map for the current mesth
-	 * @param newHeight new set of Z values
+	 * update the height map for the current mesth	 * @param newHeight new set of Z values
 	 */
 	public double[] setHeightMap(double newHeight[]) {
 		double old[] = heightMap; 
 		heightMap = newHeight; 
-		recompute();
+		drainage.recompute();
+		waterflow.recompute();
+		waterDepth();
 		repaint();
 		return old;
 	}
 	
-	/**
-	 * recompute the drainage and water flow
-	 */
-	public void recompute() {
-		hydro.drainage();
-		hydro.waterFlow();
-		waterDepth();
-	}
-
 	/**
 	 * return rainMap (cm of rainfall) for the current mesh
 	 */
@@ -658,11 +661,22 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public double[] setRainMap(double newRain[]) {
 		double old[] = rainMap; 
 		rainMap = newRain; 
-		hydro.waterFlow();
+		waterflow.recompute();
+		//hydro.waterFlow();
 		waterDepth();
 		repaint();
 
 		return old;
+	}
+	
+	/**
+	 * record a change in sea level
+	 */
+	public void setSeaLevel() {
+		drainage.recompute();
+		waterflow.recompute();
+		waterDepth();
+		repaint();
 	}
 	
 	/**
@@ -676,7 +690,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 */
 	public void setIncoming(double[] new_map) {
 		incoming = new_map;
-		hydro.waterFlow();
+		//hydro.waterFlow();
+		waterflow.recompute();
 		waterDepth();
 		repaint(); }
 	
@@ -691,7 +706,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 */
 	private void waterDepth() {
 		depthMap = new double[hydrationMap.length];
-		double[] outlets = hydro.outlet;
+		double[] outlets = drainage.outlet;
 
 		// for every mesh point
 		for(int i = 0; i < hydrationMap.length; i++) {
@@ -703,7 +718,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		    	double water_level = parms.sea_level;
 		    	for(int j = 0; j < mesh.vertices[i].neighbors; j++) {
 		    		int n = mesh.vertices[i].neighbor[j].index;
-		    		if (outlets[n] != Hydrology.UNKNOWN && outlets[n] > water_level)
+		    		if (outlets[n] != Drainage.UNKNOWN && outlets[n] > water_level)
 		    			water_level = outlets[n];
 		    	}
 		    	double delta_z = (heightMap[i] - erodeMap[i]) - water_level;
@@ -825,11 +840,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 */
 
 	/**
-	 * return array of down-hill neigbor for each mesh point
-	 */
-	public int[] getDownHill() { return downHill; }
-
-	/**
 	 * return array of water flow through each mesh point
 	 */
 	public double[] getFluxMap() {return fluxMap;}
@@ -854,6 +864,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * return map from flora types into preview colors
 	 */
 	public Color[] getFloraColors() { return floraColors; }
+	
+	/**
+	 * return reference to the Drainage calculator
+	 */
+	public Drainage getDrainage() { return drainage; }
 	
 	/**
 	 * return MeshPoint to Cartesian translation matrix

@@ -13,15 +13,16 @@ public class Drainage {
 	// maps that we import/export from/to Map
 	private double heightMap[];		// Z value of each MeshPoint (from Map)
 	private double erodeMap[];		// Z erosion of each MeshPoint (from Map)
-	private int downHill[];			// down-hill neighbor of each MeshPoint
+	
 	
 	// per Meshpoint maps we create for use by WaterFlow
 	public boolean oceanic[];		// which points are under the sea
+	protected int downHill[];		// down-hill neighbor of each MeshPoint
 	public double outlet[];			// height at which detained water can escape
-	private double slopeMap[];		// slope downhill from each MeshPoint
-	public int landPoints;			// number of non-oceanic points
-	public int byHeight[];			// land MeshPoint indices, sorted by height
-	public int byFlow[];			// land MeshPoint indices, sorted by water flow
+	protected double slopeMap[];	// slope downhill from each MeshPoint
+	protected int landPoints;		// number of non-oceanic points
+	protected int byHeight[];		// land MeshPoint indices, sorted by height
+	protected int byFlow[];			// land MeshPoint indices, sorted by water flow
 	
 	// maps we create for our own use
 	private int sinkMap[];			// the point to which each MeshPoint drains
@@ -59,16 +60,26 @@ public class Drainage {
 	 */
 	public Drainage(Map map) {
 		// obtain copies of the needed resources
-		Parameters parms = Parameters.getInstance();
+		parms = Parameters.getInstance();
 		this.map = map;
 		this.mesh = map.getMesh();
 		this.heightMap = map.getHeightMap();
 		this.erodeMap = map.getErodeMap();
-		this.downHill = map.getDownHill();
 		
 		// make sure we have heights to work with
 		if (mesh == null || mesh.vertices.length == 0 || heightMap == null)
 			return;
+		
+		// create our own maps
+		this.downHill = new int[mesh.vertices.length];
+		this.oceanic = new boolean[mesh.vertices.length];
+		this.sinkMap = new int[mesh.vertices.length];
+		this.slopeMap = new double[mesh.vertices.length];
+		this.outlet = new double[mesh.vertices.length];
+		this.byHeight = new int[mesh.vertices.length];
+		this.byFlow = new int[mesh.vertices.length];
+		
+		references = new int[mesh.vertices.length];
 		
 		// see if we are producing a debug log
 		if (parms.debug_level > HYDRO_DEBUG)
@@ -76,6 +87,11 @@ public class Drainage {
 		else
 			debug_log = null;
 		
+		// compute the down-hill neighbors
+		recompute();
+	}
+	
+	public void recompute() {
 		// reinitialize the maps we are to create
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			oceanic[i] = false;		// no known ocean points
@@ -87,7 +103,7 @@ public class Drainage {
 		}
 
 		// turn off any previous sink-point debugs
-		if (parms.debug_level >= Hydrology.HYDRO_DEBUG)
+		if (parms.debug_level >= HYDRO_DEBUG)
 			map.highlight(-1, null);
 
 		/*
@@ -425,6 +441,8 @@ public class Drainage {
 	 * debug routine to confirm correctness of reference counters
 	 */
 	private void check_refcounts() {
+		int tot_expected = 0;
+		int tot_found = 0;
 		for(int i = 0; i < landPoints; i++) {
 			int point = byHeight[i];
 			int expect = references[point];
@@ -434,7 +452,14 @@ public class Drainage {
 					found += 1;
 			if (found != expect)
 				System.err.println("x=" + point + ", expected " + expect + ", found " + found);
+			tot_expected += expect;
+			tot_found += found;
 		}
+		
+		if (parms.debug_level > 1)
+			System.out.println("DownHill audit: " + landPoints + " land points" +
+							", refcount=" + tot_expected + 
+							", pointers=" + tot_found);
 	}
 }
 

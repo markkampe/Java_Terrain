@@ -105,13 +105,9 @@ public class Vicinity {
 	public double nearestValid(double values[], double invalid) {
 		int nearest = -1;
 		for(int n = 0; n < NUM_NEIGHBORS; n++) {
-			System.out.print("neighbor[" + n + "] = " + neighbors[n]);
-			if (neighbors[n] >= 0 && values[neighbors[n]] != invalid) {
-				System.out.println(", dist=" + distances[n] + ", value=" + values[neighbors[n]]);
+			if (neighbors[n] >= 0 && values[neighbors[n]] != invalid)
 				if (nearest < 0 || distances[n] < distances[nearest])
 					nearest = n;
-			} else
-				System.out.println(", INVALID");
 		}
 		return (nearest >= 0) ? values[neighbors[nearest]] : invalid;
 	}

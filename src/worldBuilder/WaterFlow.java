@@ -45,7 +45,7 @@ public class WaterFlow {
 		0.5		// alluvial erosion resistance
 	};
 	
-	protected static final int UNKNOWN = -666;	// sinkMap: sink point not yet found
+	protected static final int UNKNOWN = -666;	// sinkMap, waterLevel
 	protected static final int OCEAN = -1;		// sinkMap: drains to ocean
 	protected static final int OFF_MAP = -2;	// sinkMap: drains off map
 	
@@ -256,16 +256,6 @@ public class WaterFlow {
 				map.min_flux = fluxMap[x];
 		}
 		
-		/*
-		 * compute the water level for all above-water points to be that of the
-		 * highest under-water point below them.
-		 */
-		for(int i = 0; i < drainage.landPoints; i++) {
-			int point = drainage.byHeight[i];	// work highest-to-lowest
-			if (waterLevel[point] != UNKNOWN)
-				pushWaterLevel(point, waterLevel[point]);
-		}
-		
 		// flush out any debugging info
 		if (debug_log != null)
 			debug_log.flush();
@@ -283,24 +273,6 @@ public class WaterFlow {
 			map.max_rain = 0;
 		if (map.min_rain == TOO_BIG)
 			map.min_rain = 0;
-	}
-	
-	/**
-	 * set all of my up-hill neighbors, who do not already know their water level
-	 *     to have the same water level I do.
-	 * @param point	index of neighbor to be checked
-	 * @param level to set his water level to
-	 */
-	void pushWaterLevel(int point, double level) {
-		double myHeight = heightMap[point] - erodeMap[point];
-		
-		for(int n = 0; n < mesh.vertices[point].neighbors; n++) {
-			int x = mesh.vertices[point].neighbor[n].index;
-			if (heightMap[x] - erodeMap[x] > myHeight && waterLevel[x] == UNKNOWN) {
-				waterLevel[x] = level;
-				pushWaterLevel(x, waterLevel[point]);
-			}
-		}
 	}
 	
 	/**

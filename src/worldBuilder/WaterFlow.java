@@ -8,25 +8,24 @@ package worldBuilder;
  */
 public class WaterFlow {
 	
-	//private Map map;
+	private Map map;
 	private Mesh mesh;
+	private Drainage drainage;
 	private Parameters parms;
 	
 	// maps that we import/export from/to Map
 	private double heightMap[];		// Z value of each MeshPoint (from Map)
 	private double erodeMap[];		// Z erosion of each MeshPoint (from Map)
 	private int downHill[];			// down-hill neighbor of each MeshPoint
+	private double fluxMap[];		// water flow through MeshPoint
 	
 	// maps we create, that will be pushed into the Map
-	private double fluxMap[];		// water flow through MeshPoint
+	
 	private double hydrationMap[];	// FIX 86 hydrationMap
 	private double waterLevel[];	// water level at each MeshPoint
 	
 	// maps we create and use to compute water flow, erosion and deposition
-	private double slopeMap[];		// slope downhill from MeshPoint
 	private double removal[];		// M^3 of removed soil
-	
-	// these should be private, but are exposed for PointDebug use
 	protected double suspended[]; 	// M^3 of suspended sediment per second
 	protected double velocityMap[]; // water velocity at MeshPoint
 	
@@ -70,19 +69,20 @@ public class WaterFlow {
 	 *	Assertion: drainage has been called: 
 	 *			   oceanic and downHill are up-to-date
 	 */
-	public WaterFlow(Map map, Drainage drainage) {
+	public WaterFlow(Map map) {
 		// obtain copies of the needed resources
-		Parameters parms = Parameters.getInstance();
+		parms = Parameters.getInstance();
+		this.map = map;
 		this.mesh = map.getMesh();
+		this.drainage = map.getDrainage();
 		this.heightMap = map.getHeightMap();
 		this.erodeMap = map.getErodeMap();
-		this.downHill = map.getDownHill();
+		this.downHill = drainage.downHill;
 		
-		// import the rainfall and arterial river influx
-		double[] rainMap = map.getRainMap();
-		double[] incoming = map.getIncoming();
-		double[] soilMap = map.getSoilMap();
-		final int ALLUVIAL = map.getSoilType("Alluvial");
+		// many square meters per (average) mesh point
+		area = 1000000 * (parms.xy_range * parms.xy_range) / mesh.vertices.length;
+		// how many M^3/s is 1cm of annual rainfall
+		rain_to_flow = .01 * area / YEAR;
 		
 		// see if we are producing a debug log
 		if (parms.debug_level > HYDRO_DEBUG)
@@ -90,8 +90,23 @@ public class WaterFlow {
 		else
 			debug_log = null;
 		
+		recompute();
+	}
+	
+	public void recompute() {
+		// import the rainfall and arterial river influx
+		double[] rainMap = map.getRainMap();
+		double[] incoming = map.getIncoming();
+		double[] soilMap = map.getSoilMap();
+		double[] fluxMap = map.getFluxMap();
+		final int ALLUVIAL = map.getSoilType("Alluvial");
+		
+		// allocate our internal maps
+		removal = new double[mesh.vertices.length];
+		suspended = new double[mesh.vertices.length];
+		velocityMap = new double[mesh.vertices.length];
+				
 		// 0. initialize our output maps to no flowing water or lakes
-		fluxMap = map.getFluxMap();
 		hydrationMap = map.getHydrationMap();	// FIX 86 hydrationMap
 		waterLevel = map.getWaterLevel();
 		for(int i = 0; i < mesh.vertices.length; i++) {
@@ -130,11 +145,12 @@ public class WaterFlow {
 
 			// add incoming off-map rivers and rainfall to this point's flux
 			fluxMap[x] += incoming[x] + (rain_to_flow * rainMap[x]);
-
+		
 			// compute the soil absorbtion and evaporative loss
 			int soilType = erodeMap[x] < 0 ? ALLUVIAL : (int) soilMap[x];
 			double absorbed = saturation[soilType] * parms.Dp * area;
 			double lost = absorbed * evaporation();
+
 			
 			// if loss exceeds incoming, net flux is zero
 			if (fluxMap[x] * YEAR <= lost) {
@@ -155,7 +171,7 @@ public class WaterFlow {
 				fluxMap[d] += fluxMap[x];
 				
 				// calculate the down-hill water velocity
-				double v = velocity(slopeMap[x]);
+				double v = velocity(drainage.slopeMap[x]);
 				if (velocityMap[d] < v)
 					velocityMap[d] = v;
 				

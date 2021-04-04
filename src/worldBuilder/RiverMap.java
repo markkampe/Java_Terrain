@@ -32,7 +32,7 @@ public class RiverMap {
 	public void paint(Graphics g, int width, int height) {
 		
 		Mesh mesh = map.getMesh();
-		int downHill[] = map.getDownHill();
+		int downHill[] = map.getDrainage().downHill;
 		double flux[] = map.getFluxMap();
 		
 		// calculate the color curve (blue vs flow)

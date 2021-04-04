@@ -280,7 +280,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		
 		Mesh mesh = map.getMesh();
 		double[] fluxMap = map.getFluxMap();
-		int[] downHill = map.getDownHill();
+		int[] downHill = map.getDrainage().downHill;
 		double[] depthMap = map.getDepthMap();
 		double[] heightMap = map.getHeightMap();
 		double[] erodeMap = map.getErodeMap();
@@ -321,9 +321,9 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 			double slope = parms.height(z0 - z1)/dist;
 		
 			// figure out the river depth and width
-			double v = map.hydro.velocity(slope);
-			double depth = map.hydro.depth(fluxMap[i],  v);
-			double width = map.hydro.width(fluxMap[i],  v);
+			double v = map.waterflow.velocity(slope);
+			double depth = map.waterflow.depth(fluxMap[i],  v);
+			double width = map.waterflow.width(fluxMap[i],  v);
 			
 			// figure out how many tiles wide the river should be
 			int stroke = (width <= tilesize) ? 1 : (int) ((width + width - 1) / tilesize);

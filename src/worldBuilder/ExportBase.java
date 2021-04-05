@@ -255,14 +255,27 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		Cartesian cart = new Cartesian(map.getMesh(), 
 										box_x, box_y, box_x+box_width, box_y+box_height,
 										x_points, y_points, Cartesian.vicinity.POLYGON);
-		export.heightMap(cart.interpolate(map.getHeightMap()));
-		export.erodeMap(cart.interpolate(map.getErodeMap()));
+		
+		// do the simple interpolations
 		export.rainMap(cart.interpolate(map.getRainMap()));
 		export.soilMap(cart.nearest(map.getSoilMap()), map.rockNames);
 		export.floraMap(cart.nearest(map.getFloraMap()), map.floraNames);
+		double heights[][] = cart.interpolate(map.getHeightMap());
+		export.heightMap(heights);
+		double erosion[][] = cart.interpolate(map.getErodeMap());
+		export.erodeMap(erosion);
 		
-		double depth[][] = cart.interpolate(map.getDepthMap());
-		add_rivers(depth, meters);	// add rivers to depth map
+		// per-tile water depth must be computed
+		double[] waterLevel = map.getWaterLevel();
+		double depth[][] = new double[y_points][x_points];
+		for(int i = 0; i < y_points; i++)
+			for(int j = 0; j < x_points; j++) {
+				double water = cart.cells[i][j].nearestValid(waterLevel, WaterFlow.UNKNOWN);
+				double height = heights[i][j] - erosion[i][j];
+				if (water > height)
+					depth[i][j] = water - height;
+			}
+		add_rivers(depth, meters);
 		export.waterMap(depth);
 	}
 	
@@ -273,7 +286,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	 * 		the maps because a river is not distributed over the
 	 * 		entire MeshPoint, but only in specific tiles.
 	 * 
-	 * @param	hydration (cartesian map to update)
+	 * @param	depths (cartesian map to update)
 	 * @param 	tilesize (in meters)
 	 */
 	protected void add_rivers(double[][] depths, int tilesize) {
@@ -281,14 +294,14 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		Mesh mesh = map.getMesh();
 		double[] fluxMap = map.getFluxMap();
 		int[] downHill = map.getDrainage().downHill;
-		double[] depthMap = map.getDepthMap();
+		double[] waterLevel = map.getWaterLevel();
 		double[] heightMap = map.getHeightMap();
 		double[] erodeMap = map.getErodeMap();
 		
 		// consider all points in the Mesh
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			// ignore any source point already under water
-			if (depthMap[i] < 0)
+			if (waterLevel[i] > heightMap[i] - erodeMap[i])
 				continue;
 			
 			// ignore any w/no downhill flow
@@ -322,8 +335,9 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		
 			// figure out the river depth and width
 			double v = map.waterflow.velocity(slope);
-			double depth = map.waterflow.depth(fluxMap[i],  v);
 			double width = map.waterflow.width(fluxMap[i],  v);
+			double depth = map.waterflow.depth(fluxMap[i],  v);
+			double deltaZ = parms.z(depth);
 			
 			// figure out how many tiles wide the river should be
 			int stroke = (width <= tilesize) ? 1 : (int) ((width + width - 1) / tilesize);
@@ -350,10 +364,10 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 					int start = c - (stroke/2);
 					if (r >= 0 && r < y_points && start >= 0 && start + stroke <= x_points) {
 						for(int j = 0; j < stroke; j++)
-							if (depths[r][start + j] > -depth)
-								depths[r][start + j] = -depth;
+							if (depths[r][start + j] < deltaZ)
+								depths[r][start + j] = deltaZ;
 							else	// already deep water gets deeper
-								depths[r][start+j] -= depth;
+								depths[r][start+j] += deltaZ;
 					}
 					// move on to the next row
 					r += (dR>0) ? 1 : -1;
@@ -362,10 +376,10 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 					int start = r - (stroke/2);
 					if (c >= 0 && c < x_points && start >= 0 && start + stroke <= y_points) {
 						for(int j = 0; j < stroke; j++)
-							if (depths[start + j][c] > -depth)
-								depths[start + j][c] = -depth;
+							if (depths[start + j][c] < deltaZ)
+								depths[start + j][c] = deltaZ;
 							else	// already deep water gets deeper
-								depths[start + j][c] -= depth;
+								depths[start + j][c] += deltaZ;
 					}
 					// move on to the next column
 					if (dC != 0) {

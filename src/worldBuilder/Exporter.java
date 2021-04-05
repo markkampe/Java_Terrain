@@ -29,14 +29,14 @@ public interface Exporter {
 
 	/**
 	 * Up-load the altitude of every tile
-	 * @param heights	height (in meters) of every point
+	 * @param heights	height (Z value) of every point
 	 */
 	void heightMap(double[][] heights);
 
 	/**
 	 * Up-load the net erosion/deposition for every tile
-	 * @param erode	per point height (in meters) of soil lost to erosion
-	 * 		negative means sedimentqation
+	 * @param erode	per point height (Z value) of soil lost to erosion
+	 * 		negative means sedimentation
 	 */
 	void erodeMap(double[][] erode);
 
@@ -54,13 +54,13 @@ public interface Exporter {
 	void soilMap(double[][] soil, String[] names);
 	
 	/**
-	 * Up-load the surface-water-depth for every tile
+	 * Up-load the surface-water-depth (delta-Z) for every tile
 	 * @param depth - per point depth of water
 	 */
 	void waterMap(double[][] depths);
 	
 	/**
-	 * Up-load the surface-water-depth for every tile
+	 * Up-load the floral ecotope for every tile
 	 * @param flora - per point flora types
 	 * @param names - per-type name strings
 	 */

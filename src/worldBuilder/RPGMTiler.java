@@ -18,6 +18,9 @@ public class RPGMTiler implements Exporter {
 	private static final int ECOTOPE_GREEN = -2;
 	private static final int ECOTOPE_NON_GREEN = -3;	// NONE, Desert, Alpine
 
+	private static final int WATER_SHADE_MIN = 96;	// for previews
+	private static final int WATER_SHADE_DELTA = 80;
+
 	private Parameters parms;	// general parameters
 	RPGMRule rules;				// tile placement rules 
 
@@ -170,9 +173,9 @@ public class RPGMTiler implements Exporter {
 			for(int j = 0; j < x_points; j++) {
 				int l = levels[i][j];
 				if (chosen == WhichMap.FLORAMAP) {
-					if (typeMap[l] <= TerrainType.PASSABLE_WATER)
-						map[i][j] = Color.BLUE;
-					else {
+					if (typeMap[l] <= TerrainType.PASSABLE_WATER) {
+						map[i][j] = waterColor(typeMap[l]);
+					} else {
 						int flora = floraTypes[i][j];
 						map[i][j] = (flora <= 0) ? Color.GRAY : colormap[flora];
 					}
@@ -657,6 +660,23 @@ public class RPGMTiler implements Exporter {
 				continue;
 			floraGreen[i] = true;
 		}
+	}
+	
+	/**
+	 * water colors for flora previews
+	 * @param terrainType
+	 */
+	public Color waterColor(int terrainType) {
+
+		switch( terrainType ) {
+		case TerrainType.DEEP_WATER:
+			return new Color(0, 0, WATER_SHADE_MIN);
+		case TerrainType.SHALLOW_WATER:
+			return new Color(0, 0, WATER_SHADE_DELTA);
+		case TerrainType.PASSABLE_WATER:
+			return new Color(0, 0, 255);
+		}
+		return Color.BLACK;
 	}
 
 	/**

@@ -43,18 +43,18 @@ public class SoilMap {
 	public void paint(Graphics g, int width, int height, int cellWidth) {
 			int h = height/cellWidth;
 			int w = width/cellWidth;
+			double dArray[][] = map.getTileDepths();
 			
 			// interpolate values from the latest mesh
 			Cartesian cart = map.getCartesian(Cartesian.vicinity.POLYGON);
 			double sArray[][] = cart.nearest(map.getSoilMap());
-			double dArray[][] = cart.interpolate(map.getDepthMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			
 			// use soil type to generate background colors
 			Color[] previewColors = map.rockColors;
 			for(int r = 0; r < h; r++)
 				for(int c = 0; c < w; c++) {
-					if (dArray[r][c] < 0)	// ignore under water
+					if (dArray[r][c] > 0)	// ignore under water
 						continue;
 					int s = (int) sArray[r][c];	// soil type
 					if (eArray[r][c] < 0)		// negative erosion is alluvial

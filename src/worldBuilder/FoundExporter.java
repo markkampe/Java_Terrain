@@ -334,12 +334,12 @@ public class FoundExporter implements Exporter {
 			// 2. ensure that all u/w points have negative altitude
 			for(int y = 0; y < y_points; y++)
 				for(int x = 0; x < x_points; x++) {
-					// dry and sub-oceanic points are already OK
-					if (altitudes[y][x] < 0 || depths[y][x] > 0)
+					// sub-oceanic and dry points are already OK
+					if (altitudes[y][x] < 0 || depths[y][x] == 0)
 						continue;
-					// move that point to -depth MSL
+					// move this point to -depth MSL
 					double depth = parms.height(depths[y][x]);
-					altitudes[y][x] = depth > lowest ? depth : lowest;
+					altitudes[y][x] = -depth >= lowest ? -depth : lowest;
 				}
 		}
 	}

@@ -11,7 +11,7 @@ public class WaterMap {
 	private Map map;
 	// private Parameters parms;
 	
-	double[][] waterMap;	// + = above water, - = below water
+	double[][] depthMap;	// + = below water (in meters)
 	
 	// returned bitmap from check_neighbors
 	private static final int UL  = 0x01;	// upper left neighbor
@@ -46,13 +46,13 @@ public class WaterMap {
 		int w = width/cellWidth;
 		
 		// interpolate per-cell water depth from the mesh
-		waterMap = map.getCartesian(Cartesian.vicinity.POLYGON).interpolate(map.getDepthMap());
+		depthMap = map.getTileDepths();
 		
 		/*
 		 * We paint blue any point that is under water, and
 		 * leave land points as already painted.  But if we
 		 * just painted squares of water, the shore-lines
-		 * would be very jaggetd.
+		 * would be very jagged.
 		 * 
 		 * If a water-corner is surrounded (on both sides) by
 		 * land, we round it off by adjusting the starting and
@@ -77,7 +77,7 @@ public class WaterMap {
 				int x = c * cellWidth;
 				int y = r * cellWidth;
 				
-				if (waterMap[r][c] < 0) {	// this cell is under-water
+				if (depthMap[r][c] > 0) {	// this cell is under-water
 					int drys = check_neighbors(r, c, true);
 					if ((drys & (LFT+UL+TOP)) == (LFT+UL+TOP)) {
 						// round off the upper left corner
@@ -153,21 +153,21 @@ public class WaterMap {
 		int dry_neighbors = 0;
 		if (row > 0) {
 			if (col > 0)
-				dry_neighbors += waterMap[row-1][col-1] >= 0 ? UL : 0;
-			dry_neighbors += waterMap[row-1][col]   >= 0 ? TOP : 0;
-			if (col < waterMap[0].length - 1)
-				dry_neighbors += waterMap[row-1][col+1] >= 0 ? UR : 0;
+				dry_neighbors += depthMap[row-1][col-1] == 0 ? UL : 0;
+			dry_neighbors += depthMap[row-1][col]   == 0 ? TOP : 0;
+			if (col < depthMap[0].length - 1)
+				dry_neighbors += depthMap[row-1][col+1] == 0 ? UR : 0;
 		}
 		if (col > 0)
-			dry_neighbors += waterMap[row][col-1]   >= 0 ? LFT : 0;
-		if (col < waterMap[0].length - 1)
-			dry_neighbors += waterMap[row][col+1]   >= 0 ? RGT : 0;
-		if (row < waterMap.length - 1) {
+			dry_neighbors += depthMap[row][col-1]   == 0 ? LFT : 0;
+		if (col < depthMap[0].length - 1)
+			dry_neighbors += depthMap[row][col+1]   == 0 ? RGT : 0;
+		if (row < depthMap.length - 1) {
 			if (col > 0)
-				dry_neighbors += waterMap[row+1][col-1] >= 0 ? LL : 0;
-			dry_neighbors += waterMap[row+1][col]   >= 0 ? BOT : 0;
-			if (col < waterMap[0].length-1)
-				dry_neighbors += waterMap[row+1][col+1] >= 0 ? LR: 0;
+				dry_neighbors += depthMap[row+1][col-1] == 0 ? LL : 0;
+			dry_neighbors += depthMap[row+1][col]   == 0 ? BOT : 0;
+			if (col < depthMap[0].length-1)
+				dry_neighbors += depthMap[row+1][col+1] == 0 ? LR: 0;
 		}
 		
 		// if asked for wet points, complement the mask

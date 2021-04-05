@@ -34,11 +34,11 @@ public class RPGMTiler implements Exporter {
 	private double Tmean; 	// mean temperature (degC)
 	//private double[][] rain;	// per point rainfall (meters)
 
-	/** per point height (meters)	*/
+	/** per point height (Z units)	*/
 	public double[][] heights;
-	/** per point erosion/depostion (meters)	*/
+	/** per point erosion/depostion (Z units)	*/
 	public double[][] erode;
-	/** per point water depth (meters)	*/
+	/** per point water depth (Z units)	*/
 	public double[][] depths;
 	/** per point soil type	*/
 	public double[][] soil;
@@ -267,7 +267,7 @@ public class RPGMTiler implements Exporter {
 					// collect all the attributes of this square
 					alt = (int) parms.altitude(heights[row+dy][col+dx] - erode[row+dy][col+dx]);
 					lapse = alt * parms.lapse_rate;
-					depth = depths[row+dy][col+dx];
+					depth = parms.height(depths[row+dy][col+dx]);
 					soilType = soil[row+dy][col+dx];
 					terrain = typeMap[levels[row+dy][col+dx]];
 					if (useSLOPE &&												// SLOPE rules enabled

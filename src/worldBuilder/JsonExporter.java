@@ -156,7 +156,7 @@ public class JsonExporter implements Exporter {
 		maxDepth = 0;
 		for (int i = 0; i < depths.length; i++)
 			for (int j = 0; j < depths[0].length; j++) {
-				if (depths[i][j] < maxDepth)
+				if (depths[i][j] > maxDepth)
 					maxDepth = depths[i][j];
 			}
 	}
@@ -182,7 +182,7 @@ public class JsonExporter implements Exporter {
 			final String FORMAT_S = " \"%s\": \"%s\"";
 			final String FORMAT_D = " \"%s\": %d";
 			final String FORMAT_DM = " \"%s\": \"%dm\"";
-			final String FORMAT_DP = " \"%s\": %.2f";
+			final String FORMAT_DP = " \"%s\": %.2fm";
 			final String FORMAT_FM = " \"%s\": \"%.2fm\"";
 			final String FORMAT_CM = " \"%s\": \"%.0fcm\"";
 			final String FORMAT_L = " \"%s\": %.6f";
@@ -234,12 +234,14 @@ public class JsonExporter implements Exporter {
 						output.write(",");
 					output.write(NEW_POINT);
 					double z = heights[r][c]-erode[r][c];
-					double hydro = depths[r][c];
+					double depth = depths[r][c];
 					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(z)));
 					output.write(COMMA);
 					output.write(String.format(FORMAT_CM, "rainfall", rain[r][c]));
-					output.write(COMMA);
-					output.write(String.format(FORMAT_DP, "depth", hydro));
+					if (depth > 0) {
+						output.write(COMMA);
+						output.write(String.format(FORMAT_DP, "depth", parms.height(depth)));
+					}
 					output.write(COMMA);
 					
 					int st = (int) Math.round(soil[r][c]);
@@ -251,7 +253,6 @@ public class JsonExporter implements Exporter {
 						output.write(COMMA);
 						output.write(String.format(FORMAT_S, "flora", floraNames[f]));
 					}
-						
 
 					output.write(" }");
 				}
@@ -290,7 +291,7 @@ public class JsonExporter implements Exporter {
 		Color map[][] = new Color[y_points][x_points];
 		for(int i = 0; i < y_points; i++)
 			for(int j = 0; j < x_points; j++)
-				if (depths[i][j] >= 0) {	// land
+				if (depths[i][j] == 0) {	// land
 					double h = NORMAL + ((heights[i][j] - aMean) * aScale);
 					if (chosen == WhichMap.FLORAMAP && flora[i][j] > 0)
 						map[i][j] = colorMap[(int) flora[i][j]];

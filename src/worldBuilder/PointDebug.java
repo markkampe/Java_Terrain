@@ -179,7 +179,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			
 			double heightMap[] = map.getHeightMap();
 			double v = parms.altitude(heightMap[point.index]);
-			String desc = String.format("%.3f%s", v, Parameters.unit_z);
+			String desc = String.format("%.3f%s MSL", v, Parameters.unit_z);
 			infoAlt.setText(desc);
 			
 			double fluxMap[] = map.getFluxMap();
@@ -216,10 +216,10 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			
 			double waterLevel[] = map.getWaterLevel();
 			v = waterLevel[point.index];
-			if (v > 0)
-				desc = String.format("%.3f%s", parms.altitude(v), Parameters.unit_z);
+			if (v > WaterFlow.UNKNOWN)
+				desc = String.format("%.3f%s MSL", parms.altitude(v), Parameters.unit_z);
 			else
-				desc = "ABOVE WATER";
+				desc = "NONE NEARBY";
 			infoWater.setText(desc);
 			
 			int downHill[] = map.getDrainage().downHill;
@@ -258,13 +258,13 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			
 			// Cartesian interpolated height
 			double h = parms.altitude(vicinity.interpolate(map.getHeightMap()));
-			String desc = String.format("%.3f%s", h, Parameters.unit_z);
+			String desc = String.format("%.3f%s MSL", h, Parameters.unit_z);
 			infoAlt.setText(desc);
 			
 			// nearest valid water depth
 			double v = vicinity.nearestValid(map.getWaterLevel(), WaterFlow.UNKNOWN);
 			if (v != WaterFlow.UNKNOWN)
-				desc = String.format("%.3f%s", parms.altitude(v), Parameters.unit_z);
+				desc = String.format("%.3f%s MSL", parms.altitude(v), Parameters.unit_z);
 			else
 				desc = "NONE NEARBY";
 			infoWater.setText(desc);

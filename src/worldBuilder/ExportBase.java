@@ -300,10 +300,6 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		
 		// consider all points in the Mesh
 		for(int i = 0; i < mesh.vertices.length; i++) {
-			// ignore any source point already under water
-			if (waterLevel[i] > heightMap[i] - erodeMap[i])
-				continue;
-			
 			// ignore any w/no downhill flow
 			int d = downHill[i];
 			if (d < 0)
@@ -311,6 +307,12 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 			
 			// ignore any that fall below stream flux
 			if (fluxMap[i] < parms.stream_flux)
+				continue;
+			
+			// ignore segments where both src/dst are in same body
+			if (waterLevel[i] == waterLevel[d] &&
+				waterLevel[i] > heightMap[i] - erodeMap[i] &&
+				waterLevel[d] > heightMap[d] - erodeMap[d])
 				continue;
 	
 			// ignore flows that are entirely outside the box

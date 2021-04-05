@@ -517,7 +517,7 @@ public class FoundExporter implements Exporter {
 		Color map[][] = new Color[y_points][x_points];
 		for(int y = 0; y < y_points; y++)
 			for(int x = 0; x < x_points; x++) {
-				if (depths[y][x] < 0)	// water depth
+				if (depths[y][x] > 0)	// water depth
 					map[y][x] = Color.BLUE;
 				else {	// show altitude
 					int bright = grayscale[y][x];

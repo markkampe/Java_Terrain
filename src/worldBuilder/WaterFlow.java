@@ -20,9 +20,7 @@ public class WaterFlow {
 	private double fluxMap[];		// water flow through MeshPoint
 	
 	// maps we create, that will be pushed into the Map
-	
-	private double hydrationMap[];	// FIX 86 hydrationMap
-	private double waterLevel[];	// water level at each MeshPoint
+	private double waterLevel[];	// water level at each (u/w) MeshPoint
 	
 	// maps we create and use to compute water flow, erosion and deposition
 	private double removal[];		// M^3 of removed soil
@@ -107,14 +105,12 @@ public class WaterFlow {
 		velocityMap = new double[mesh.vertices.length];
 				
 		// 0. initialize our output maps to no flowing water or lakes
-		hydrationMap = map.getHydrationMap();	// FIX 86 hydrationMap
 		waterLevel = map.getWaterLevel();
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			fluxMap[i] = 0.0;
 			removal[i] = 0.0;
 			suspended[i] = 0.0;
 			velocityMap[i] = 0.0;
-			hydrationMap[i] = drainage.oceanic[i] ? heightMap[i] - parms.sea_level : 0.0;	// FIX 86 hydrationMap
 			waterLevel[i] = drainage.oceanic[i] ? parms.sea_level : UNKNOWN;
 		}
 		
@@ -154,13 +150,11 @@ public class WaterFlow {
 			
 			// if loss exceeds incoming, net flux is zero
 			if (fluxMap[x] * YEAR <= lost) {
-				hydrationMap[x] = fluxMap[x] * YEAR / (parms.Dp * area); 
 				fluxMap[x] = 0;
 				continue;
 			}
 				
 			// net incoming is reduced by evaporative loss
-			hydrationMap[x] = saturation[soilType];
 			fluxMap[x] -= lost / YEAR;
 			
 			// figure out what happens to the excess water
@@ -230,19 +224,17 @@ public class WaterFlow {
 			double outlet = drainage.outlet[x];
 			if (outlet != UNKNOWN)
 				if (heightMap[x] - erodeMap[x] < outlet) {
-					hydrationMap[x] = (heightMap[x] - erodeMap[x]) - outlet;	// FIX 86 hydrationMap
 					waterLevel[x] = outlet;
 					if (debug_log != null)
-						msg += String.format("\n\tflood %d (at %.1fMSL) %.1f%s u/w",
+						msg += String.format("\n\tflood %d (at %.1fMSL) to %.1f%s u/w",
 								x, parms.altitude(heightMap[x] - erodeMap[x]),
-								parms.height(-hydrationMap[x]), Parameters.unit_z);
+								parms.height(waterLevel[x]), Parameters.unit_z);
 				} else {	// escape point is trivially under water
 					// FIX water depth at exit point determined by flow
-					hydrationMap[x] = -parms.z(EXIT_DEPTH);
 					waterLevel[x] = heightMap[x] - erodeMap[x] + parms.z(EXIT_DEPTH);
 					if (debug_log != null)
-						msg += String.format("\n\tflood exit point %d %.2f%s u/w",
-											x, parms.height(-hydrationMap[x]), Parameters.unit_z);
+						msg += String.format("\n\tflood exit point %d@%.2f%s",
+											x, parms.height(waterLevel[x]), Parameters.unit_z);
 				}
 				
 			// debug logging

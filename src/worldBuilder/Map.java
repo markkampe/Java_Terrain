@@ -73,7 +73,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	
 	public Drainage drainage;		// drainage calculator
 	public WaterFlow waterflow;		// water-flow calculator
-	//public Hydrology hydro;		// hydrology calculator for current map
 	
 	public Color floraColors[];	// display color for each flora type
 	public Color rockColors[];	// display color for each mineral type
@@ -86,8 +85,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double rainMap[];	// Rainfall of each mesh point
 	private double fluxMap[];	// Water flow through each point
 	private double erodeMap[];	// erosion/deposition
-	private double hydrationMap[];	// FIX 86 hydrationMap
-	private double depthMap[];	// FIX depth=alt-waterLevel
 	private double incoming[];	// incoming water from off-map
 	private double floraMap[];	// assigned flora type
 	private double waterLevel[];// level of nearest water body
@@ -596,7 +593,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.erodeMap = new double[mesh.vertices.length];
 			this.soilMap = new double[mesh.vertices.length];
 			this.waterLevel = new double[mesh.vertices.length];
-			this.hydrationMap = new double[mesh.vertices.length]; // FIX 86 hydrationMap
 			this.floraMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
@@ -615,7 +611,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.fluxMap = null;
 			this.erodeMap = null;
 			this.soilMap = null;
-			this.hydrationMap = null;	// FIX 86 hydrationMap
 			this.waterLevel = null;
 			this.floraMap = null;
 			this.incoming = null;
@@ -823,12 +818,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 */
 	public double[] getWaterLevel() {return waterLevel;}
 
-	// FIX 86 hydrationmap
-	public double [] getHydrationMap() { return hydrationMap; }
-	
-	// FIX depth = alt - waterlevel
-	public double[] getDepthMap() { return depthMap; }
-	
 	/**
 	 * return map from flora types into preview colors
 	 */

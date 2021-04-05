@@ -43,7 +43,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 							SHOW_SOIL = 0x40,
 							SHOW_HYDRO = 0x80,
 							SHOW_FLORA = 0x100;
-	private int display;		// bitmask for enabled SHOWs
+	protected int display;	// bitmask for enabled SHOWs
 	
 	// map size (in pixels)
 	private static final int MIN_WIDTH = 400;	// min screen width
@@ -92,7 +92,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double floraMap[];	// assigned flora type
 	private double waterLevel[];// level of nearest water body
 
-	private Cartesian poly_map;	// interpolation based on surrounding polygon
+	private Cartesian poly_map;		// interpolation based on surrounding polygon
+	private double tileHeight[][];	// altitude of each screen tile (Z units)
+	private double tileDepth[][];	// depth u/w of each screen tile (meters)
 	
 	/** selection types: points, line, rectangle, ... */
 	public enum Selection {NONE, POINT, POINTS, LINE, RECTANGLE, SQUARE, ANY};
@@ -207,8 +209,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		// instantiate a new hydrology calculator and compute the topography
 		drainage = new Drainage(this);
 		waterflow = new WaterFlow(this);
-		//hydro = new Hydrology(this);
-		//setHeightMap(h);	// force the hydrology recalculation
+		setHeightMap(heightMap);
 		
 		if (parms.debug_level > 0) {
 			parms.worldParms();
@@ -436,7 +437,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		
 		parms.checkDefaults();	// Make sure defaults are consistent w/new world size
 		
-		// initialize the Hydrology engine
+		// the topography ahd Hydrology engines
 		drainage = new Drainage(this);
 		waterflow = new WaterFlow(this);
 		
@@ -589,12 +590,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public void setMesh(Mesh mesh) {
 		this.mesh = mesh;	
 		if (mesh != null) {
-			this.poly_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-							getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.POLYGON);
-			// this.prox_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-			//		getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEIGHBORS);
-			// this.nearest_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-			//		getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEAREST);
 			this.heightMap = new double[mesh.vertices.length];
 			this.rainMap = new double[mesh.vertices.length];
 			this.fluxMap = new double[mesh.vertices.length];
@@ -605,10 +600,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.floraMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
-			//this.hydro = new Hydrology(this);
 			this.drainage = new Drainage(this);
 			this.waterflow = new WaterFlow(this);
-			waterDepth();
+			// these will be created by the first paint()
+			this.poly_map = null;
+			this.tileHeight = null;
+			this.tileDepth = null;
 		} else {
 			this.poly_map = null;
 			// this.nearest_map = null;
@@ -625,7 +622,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.highLights = null;
 			this.drainage = null;
 			this.waterflow = null;
-			//this.hydro = null;
+			this.tileHeight = null;
+			this.tileDepth = null;
 		}
 		
 		repaint();
@@ -641,11 +639,14 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 */
 	public double[] setHeightMap(double newHeight[]) {
 		double old[] = heightMap; 
+		// recompute drainage and waterflow
 		heightMap = newHeight; 
 		drainage.recompute();
 		waterflow.recompute();
-		waterDepth();
+		tileHeight = null;
+		tileDepth = null;
 		repaint();
+		
 		return old;
 	}
 	
@@ -662,8 +663,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		double old[] = rainMap; 
 		rainMap = newRain; 
 		waterflow.recompute();
-		//hydro.waterFlow();
-		waterDepth();
+		tileDepth = null;
 		repaint();
 
 		return old;
@@ -675,8 +675,19 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public void setSeaLevel() {
 		drainage.recompute();
 		waterflow.recompute();
-		waterDepth();
+		tileDepth = null;
 		repaint();
+	}
+	
+	/**
+	 * update the water-flow after a change to the incoming arterial river
+	 * @param new_map new incoming flux per point
+	 */
+	public void setIncoming(double[] new_map) {
+		incoming = new_map;
+		waterflow.recompute();
+		tileDepth = null;
+		repaint(); 
 	}
 	
 	/**
@@ -684,48 +695,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 */
 	public double[] getIncoming() { return incoming; }
 
-	/**
-	 * update the water-flow after a change to the incoming arterial river
-	 * @param new_map new incoming flux per point
-	 */
-	public void setIncoming(double[] new_map) {
-		incoming = new_map;
-		//hydro.waterFlow();
-		waterflow.recompute();
-		waterDepth();
-		repaint(); }
-	
-	// FIX depth = alt - water-level
-	/**
-	 * update the depthMap based on the updated drainage and flux
-	 * 
-	 *	The hydrationMap cannot be used for interpolation, because 
-	 * 	positive values are saturation and negative values are depth.
-	 * 	The depthMap is distances(M) above or below water, which can be
-	 *	interpolated to locate lake boundaries.
-	 */
-	private void waterDepth() {
-		depthMap = new double[hydrationMap.length];
-		double[] outlets = drainage.outlet;
-
-		// for every mesh point
-		for(int i = 0; i < hydrationMap.length; i++) {
-		    if (hydrationMap[i] < 0)
-		    	// use the depth under water
-		    	depthMap[i] = parms.height(hydrationMap[i]);
-		    else {
-		    	// find height above nearest highest outlet
-		    	double water_level = parms.sea_level;
-		    	for(int j = 0; j < mesh.vertices[i].neighbors; j++) {
-		    		int n = mesh.vertices[i].neighbor[j].index;
-		    		if (outlets[n] != Drainage.UNKNOWN && outlets[n] > water_level)
-		    			water_level = outlets[n];
-		    	}
-		    	double delta_z = (heightMap[i] - erodeMap[i]) - water_level;
-		    	depthMap[i] = (delta_z > 0) ? parms.height(delta_z) : 0;
-		    }
-		}
-	}
 	
 	/**
 	 * return map of soil type for the current mesh
@@ -869,6 +838,16 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * return reference to the Drainage calculator
 	 */
 	public Drainage getDrainage() { return drainage; }
+	
+	/**
+	 * return reference to the per-tile heights (not valid until paint)
+	 */
+	public double[][] getTileHeights() { return tileHeight; }
+	
+	/**
+	 * return reference to the per-tile depths (in meters)
+	 */
+	public double[][] getTileDepths() { return tileDepth; }
 	
 	/**
 	 * return MeshPoint to Cartesian translation matrix
@@ -1333,12 +1312,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		y_min = (y1 >= y0) ? y0 : y1;
 		x_max = (x1 >= x0) ? x1 : x0;
 		y_max = (y1 >= y0) ? y1: y0;
-		poly_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-				getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.POLYGON);
-		// nearest_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-		//		getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEAREST);
-		// prox_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-		//		getWidth()/TOPO_CELL, getHeight()/TOPO_CELL, Cartesian.vicinity.NEIGHBORS);
+		
+		// force already digested maps to be regener
+		poly_map = null;
+		tileHeight = null;
+		tileDepth = null;
 		repaint();
 		
 		if (parms.debug_level >= MAP_DEBUG)
@@ -1369,13 +1347,32 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			setBackground(Color.GRAY);
 		
 		// make sure the Cartesian translation is up-to-date
-		if (poly_map.height != height/TOPO_CELL || poly_map.width != width/TOPO_CELL) {
+		if (poly_map == null ||
+			poly_map.height != height/TOPO_CELL || poly_map.width != width/TOPO_CELL) {
 			poly_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
 								width/TOPO_CELL, height/TOPO_CELL, Cartesian.vicinity.POLYGON);
-			// nearest_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-			//		width/TOPO_CELL, height/TOPO_CELL, Cartesian.vicinity.NEAREST);
-			// prox_map = new Cartesian(mesh, x_min, y_min, x_max, y_max, 
-			//		width/TOPO_CELL, height/TOPO_CELL, Cartesian.vicinity.NEIGHBORS);
+		}
+		
+		// make sure we have an up-to-date per-tile altitude map
+		if (tileHeight == null || 
+				tileHeight.length != poly_map.height || tileHeight[0].length != poly_map.width) {
+			tileHeight = poly_map.interpolate(heightMap);
+			double[][] erosion = poly_map.interpolate(erodeMap);
+			for(int i = 0; i < poly_map.height; i++)
+				for(int j = 0; j < poly_map.width; j++)
+					tileHeight[i][j] -= erosion[i][j];
+		}
+		
+		// make sure we have an up-to-date per-tile depth map
+		if (tileDepth == null || 
+				tileDepth.length != poly_map.height || tileDepth[0].length != poly_map.width) {
+			tileDepth = new double[poly_map.height][poly_map.width];
+			for(int i = 0; i < poly_map.height; i++)
+				for(int j = 0; j < poly_map.width; j++) {
+					double water = poly_map.cells[i][j].nearestValid(waterLevel, WaterFlow.UNKNOWN);
+					if (water > tileHeight[i][j])
+						tileDepth[i][j] = parms.height(water - tileHeight[i][j]);
+				}
 		}
 		
 		// start by rendering backgrounds (rain or altitude)

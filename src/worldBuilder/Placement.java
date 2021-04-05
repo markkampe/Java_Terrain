@@ -17,7 +17,7 @@ public class Placement {
 	private Parameters parms;
 
 	private MeshPoint points[];	// MeshPoints
-	private double depthMap[];	// per mesh-point height above water
+	private double waterLevel[];// per mesh-point depth below water
 	private double heightMap[];	// per mesh-point altitude
 	private double erodeMap[];	// per mesh-point erosion
 	private double soilMap[];	// per mesh-point soil map
@@ -72,7 +72,7 @@ public class Placement {
 		// if we were passed a map, save its tables
 		if (map != null) {
 			this.points = map.mesh.vertices;
-			this.depthMap = map.getDepthMap();
+			this.waterLevel = map.getWaterLevel();
 			this.heightMap = map.getHeightMap();
 			this.erodeMap = map.getErodeMap();
 			this.soilMap = map.getSoilMap();
@@ -196,7 +196,8 @@ public class Placement {
 				int alt = (int) parms.altitude(heightMap[i] - erodeMap[i]);
 				double lapse = alt * parms.lapse_rate;
 				double soil = soilMap[i];
-				double depth = depthMap[i];
+				double depth = (waterLevel[i] > (heightMap[i] - erodeMap[i])) ?
+								(waterLevel[i] - (heightMap[i] - erodeMap[i])) : 0;
 				double rain = rainMap[i];
 				double flux = fluxMap[i];
 

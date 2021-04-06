@@ -48,7 +48,8 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	private static final int MAX_TYPES = 4;
 	private static final String[] mineralClasses = {"None", "Stone", "Metal", "Precious" };
 	
-	private static final String AUTO_MODE = "Rule Based";
+	private static final String AUTO_NAME = "Rule Based";
+	private static final int AUTOMATIC = -1;
 	
 	// multiple selections are additive (vs replacement)
 	private boolean progressive = true;
@@ -89,7 +90,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		// manual vs rule-based assignment
 		JPanel mPanel = new JPanel(new GridLayout(1,3));
 		modeMenu = new JMenu("Mineral Selection");
-		ruleMode = new JMenuItem(AUTO_MODE);
+		ruleMode = new JMenuItem(AUTO_NAME);
 		modeMenu.add(ruleMode);
 		ruleMode.addActionListener(this);
 		modeMenu.addSeparator();
@@ -195,8 +196,8 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		selected = map.checkSelection(Map.Selection.RECTANGLE);
 		
 		// we start out with rule-based placement
-		chosen_mineral = -1;
-		mode.setText(AUTO_MODE);
+		chosen_mineral = AUTOMATIC;
+		mode.setText(AUTO_NAME);
 	}
 	
 	/**
@@ -269,7 +270,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		width = dx;
 		height = dy;
 		if (complete)
-			if (chosen_mineral < 0)
+			if (chosen_mineral == AUTOMATIC)
 				rulePlacement();
 			else
 				manualPlacement();
@@ -313,7 +314,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			for(int i = 0; i < soilMap.length; i++)
 				prevSoil[i] = soilMap[i];
 			
-			if (chosen_mineral < 0) {
+			if (chosen_mineral == AUTOMATIC) {
 				prevColors = placer.previewColors();
 				prevNames = placer.resourceNames();
 				
@@ -353,19 +354,14 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 				rock_palette.setEnabled(true);
 				mineral_pct.setEnabled(true);
 				minerals_3.setEnabled(true);
-				chosen_mineral = -1;
+				chosen_mineral = AUTOMATIC;
 			} else {
 				// manual choice and placement
 				chooseRocks.setEnabled(false);
 				rock_palette.setEnabled(false);
 				mineral_pct.setEnabled(false);
 				minerals_3.setEnabled(false);
-				String[] choices = map.getRockNames();
-				for(int i = 0; i < choices.length; i++)
-					if (chosen.equals(choices[i])) {
-						chosen_mineral = i;
-						break;
-					}
+				chosen_mineral = map.getSoilType(chosen);
 			}
 			mode.setText(chosen);
 		}

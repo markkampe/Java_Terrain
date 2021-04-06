@@ -331,10 +331,7 @@ public class Parameters {
 					display_options |= Map.SHOW_WATER;
 					break;
 				case "soil":
-					display_options |= Map.SHOW_SOIL;
-					break;
-				case "hydro":
-					display_options |= Map.SHOW_HYDRO;
+					display_options |= Map.SHOW_ROCKS;
 					break;
 				case "flora":
 					display_options |= Map.SHOW_FLORA;

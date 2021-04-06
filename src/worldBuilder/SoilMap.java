@@ -13,17 +13,13 @@ public class SoilMap {
 	private static int ALLUVIAL;
 	
 	private Map map;
-	private boolean show_soil;
 	
 	/**
 	 * instantiate a soil map generator
 	 * @param map to be displayed
-	 * @param show_soil should we display soil type
-	 * @param show_hydro should we display water content
 	 */
-	public SoilMap(Map map, boolean show_soil, boolean show_hydro) {
+	public SoilMap(Map map) {
 		this.map = map;
-		this.show_soil = show_soil;
 		ALLUVIAL = map.getSoilType("Alluvial");
 	}
 
@@ -54,11 +50,7 @@ public class SoilMap {
 					int s = (int) sArray[r][c];	// soil type
 					if (eArray[r][c] < 0)		// negative erosion is alluvial
 						s = ALLUVIAL;
-					Color color = new Color(DARK, DARK, DARK);
-					if (show_soil)
-						color = previewColors[s];
-					else						// nothing to see
-						continue;
+					Color color = previewColors[s];
 					
 					g.setColor(color);
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);

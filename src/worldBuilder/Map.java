@@ -40,9 +40,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 							SHOW_RAIN = 0x08,
 							SHOW_WATER = 0x10,
 							SHOW_ERODE = 0x20,
-							SHOW_SOIL = 0x40,
-							SHOW_HYDRO = 0x80,
-							SHOW_FLORA = 0x100;
+							SHOW_ROCKS = 0x40,
+							SHOW_FLORA= 0x80;
 	protected int display;	// bitmask for enabled SHOWs
 	
 	// map size (in pixels)
@@ -1378,9 +1377,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			e.paint(g, width, height, TOPO_CELL);
 		}
 		
-		// see if we are rendering soil/hydration
-		if ((display & (SHOW_SOIL|SHOW_HYDRO)) != 0) {
-			SoilMap s = new SoilMap(this, (display&SHOW_SOIL) != 0, (display&SHOW_HYDRO) != 0);
+		// see if we are rendering minerals
+		if ((display & SHOW_ROCKS) != 0) {
+			SoilMap s = new SoilMap(this);
 			s.paint(g, width, height, TOPO_CELL);
 		}
 		

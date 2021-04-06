@@ -27,14 +27,6 @@ public class WaterFlow {
 	protected double suspended[]; 	// M^3 of suspended sediment per second
 	protected double velocityMap[]; // water velocity at MeshPoint
 	
-	/** how much water can different types of soil hold (m^3/m^3) */
-	public static double saturation[] = {
-		0.30,	// max water content of sedimentary soil
-		0.15,	// max water content of metamorphic soil
-		0.10,	// max water content of igneous soil
-		0.40	// max water content of alluvial soil
-	};
-	
 	/** relative erosion resistances for various bed rocks */
 	private static double resistance[] = {
 		1.0,	// sedimentary erosion resistance
@@ -142,11 +134,8 @@ public class WaterFlow {
 			// add incoming off-map rivers and rainfall to this point's flux
 			fluxMap[x] += incoming[x] + (rain_to_flow * rainMap[x]);
 		
-			// compute the soil absorbtion and evaporative loss
-			int soilType = erodeMap[x] < 0 ? ALLUVIAL : (int) soilMap[x];
-			double absorbed = saturation[soilType] * parms.Dp * area;
-			double lost = absorbed * evaporation();
-
+			// compute the soil evaporative loss
+			double lost = evaporation();
 			
 			// if loss exceeds incoming, net flux is zero
 			if (fluxMap[x] * YEAR <= lost) {

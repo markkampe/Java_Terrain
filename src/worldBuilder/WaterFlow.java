@@ -89,7 +89,6 @@ public class WaterFlow {
 		double[] incoming = map.getIncoming();
 		double[] soilMap = map.getSoilMap();
 		double[] fluxMap = map.getFluxMap();
-		final int ALLUVIAL = map.getSoilType("Alluvial");
 		
 		// allocate our internal maps
 		removal = new double[mesh.vertices.length];

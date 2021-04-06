@@ -22,6 +22,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	private Color prevColors[];		// saved type to preview color map
 	private String prevNames[];		// saved type to name map
 	private int classCounts[];		// returned placements per class
+	private int chosen_mineral;		// mineral type being placed
 	
 	// widgets
 	private JLabel mode;			// auto/manual mode
@@ -48,7 +49,9 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	private static final String[] mineralClasses = {"None", "Stone", "Metal", "Precious" };
 	
 	private static final String AUTO_MODE = "Rule Based";
-	private static final String[] choices = {"Sand Stone", "Marble", "Granite", "Copper", "Iron", "Gold/Silver", "Semi-Precious", "Precious"};
+	
+	// multiple selections are additive (vs replacement)
+	private boolean progressive = true;
 
 	private static final long serialVersionUID = 1L;
 	
@@ -90,15 +93,17 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		modeMenu.add(ruleMode);
 		ruleMode.addActionListener(this);
 		modeMenu.addSeparator();
-		for(int i = 0; i < choices.length; i++) {
-			JMenuItem item = new JMenuItem(choices[i]);
-			modeMenu.add(item);
-			item.addActionListener(this);
-		}
+		String[] choices = map.getRockNames();
+		for(int i = 0; i < choices.length; i++) 
+			if (choices[i] != null) {
+				JMenuItem item = new JMenuItem(choices[i]);
+				modeMenu.add(item);
+				item.addActionListener(this);
+			}
 		JMenuBar bar = new JMenuBar();
 		bar.add(modeMenu);
 		mPanel.add(bar);
-		mode = new JLabel(AUTO_MODE);
+		mode = new JLabel("");
 		mPanel.add(mode);
 		mPanel.add(new JLabel(" "));
 		locals.add(mPanel);
@@ -188,12 +193,16 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		map.addMapListener(this);	
 		map.selectMode(Map.Selection.RECTANGLE);
 		selected = map.checkSelection(Map.Selection.RECTANGLE);
+		
+		// we start out with rule-based placement
+		chosen_mineral = -1;
+		mode.setText(AUTO_MODE);
 	}
 	
 	/**
 	 * (re-)determine the mineral types of each selected mesh point
 	 */
-	private void placeMinerals() {
+	private void rulePlacement() {
 		if (placer == null)
 			placer = new Placement(rock_palette.getText(), map, soilMap);
 		
@@ -224,6 +233,18 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		map.repaint();
 		changes_made = true;
 	}
+	
+	private void manualPlacement() {
+		MeshPoint[] points = map.mesh.vertices;
+		for(int i = 0; i < soilMap.length; i++)
+			if (points[i].x >= x0 && points[i].x < x0+width &&
+				points[i].y >= y0 && points[i].y < y0+height) {
+				soilMap[i] = chosen_mineral;
+			}
+		
+		map.setSoilMap(soilMap);
+		map.repaint();
+	}
 
 	/**
 	 * called whenever a region selection changes
@@ -237,8 +258,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	 */
 	public boolean regionSelected(double mx0, double my0, 
 								  double dx, double dy, boolean complete) {		
-		if (changes_made) {
-			// undo any uncommitted placements
+		if (changes_made && !progressive) {
 			for(int i = 0; i < soilMap.length; i++)
 				soilMap[i] = prevSoil[i];
 			changes_made = false;
@@ -249,7 +269,10 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		width = dx;
 		height = dy;
 		if (complete)
-			placeMinerals();
+			if (chosen_mineral < 0)
+				rulePlacement();
+			else
+				manualPlacement();
 		return true;
 	}
 
@@ -258,7 +281,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (selected)
-			placeMinerals();
+			rulePlacement();
 	}
 	
 	/**
@@ -289,15 +312,18 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			// check-point these updates
 			for(int i = 0; i < soilMap.length; i++)
 				prevSoil[i] = soilMap[i];
-			prevColors = placer.previewColors();
-			prevNames = placer.resourceNames();
 			
-			// report the changes
-			if (parms.debug_level > 0) {
-				System.out.println("Mineral Placement (" + ResourceRule.ruleset + 
-								   "): Stone/Metal/Precious = " + classCounts[MIN_STONE] + 
-								   "/" + classCounts[MIN_METAL] +
-								   "/" + classCounts[MIN_PRECIOUS]);
+			if (chosen_mineral < 0) {
+				prevColors = placer.previewColors();
+				prevNames = placer.resourceNames();
+				
+				// report the changes
+				if (parms.debug_level > 0) {
+					System.out.println("Mineral Placement (" + ResourceRule.ruleset + 
+									   "): Stone/Metal/Precious = " + classCounts[MIN_STONE] + 
+									   "/" + classCounts[MIN_METAL] +
+									   "/" + classCounts[MIN_PRECIOUS]);
+				}
 			}
 		} else if (e.getSource() == chooseRocks) {
 			FileDialog d = new FileDialog(this, "Mineral Palette", FileDialog.LOAD);
@@ -320,18 +346,28 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			cancelDialog();
 		} else {	// most likely a menu item
 			JMenuItem item = (JMenuItem) e.getSource();
-			mode.setText(item.getText());
+			String chosen = item.getText();
 			if (item == ruleMode) {
+				// go back to rule-based selection
 				chooseRocks.setEnabled(true);
 				rock_palette.setEnabled(true);
 				mineral_pct.setEnabled(true);
 				minerals_3.setEnabled(true);
+				chosen_mineral = -1;
 			} else {
+				// manual choice and placement
 				chooseRocks.setEnabled(false);
 				rock_palette.setEnabled(false);
 				mineral_pct.setEnabled(false);
 				minerals_3.setEnabled(false);
+				String[] choices = map.getRockNames();
+				for(int i = 0; i < choices.length; i++)
+					if (chosen.equals(choices[i])) {
+						chosen_mineral = i;
+						break;
+					}
 			}
+			mode.setText(chosen);
 		}
 	}
 

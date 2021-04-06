@@ -35,8 +35,6 @@ public class JsonExporter implements Exporter {
 	private double minHeight;		// lowest discovered altitude
 	private double maxDepth;		// deepest discovered water
 	
-	static final int ALLUVIAL = 4;	// FIX better alluvial labeling
-	
 	// brightness constants for preview colors
 	private static final int DIM = 32;
 	private static final int BRIGHT = 256 - DIM;

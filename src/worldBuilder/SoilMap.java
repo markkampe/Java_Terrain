@@ -8,16 +8,12 @@ import java.awt.Graphics;
  */
 public class SoilMap {
 
-	// topographic lines are shades of gray
 	private static final int DARK = 0;
-	private static final int DIM = 128;
-	private static final int BRITE = 255;
 	
 	private static int ALLUVIAL;
 	
 	private Map map;
 	private boolean show_soil;
-	private boolean show_hydro;
 	
 	/**
 	 * instantiate a soil map generator
@@ -28,7 +24,6 @@ public class SoilMap {
 	public SoilMap(Map map, boolean show_soil, boolean show_hydro) {
 		this.map = map;
 		this.show_soil = show_soil;
-		this.show_hydro = show_hydro;
 		ALLUVIAL = map.getSoilType("Alluvial");
 	}
 
@@ -68,7 +63,6 @@ public class SoilMap {
 					g.setColor(color);
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				}
-			
 	}
 }
 

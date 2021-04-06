@@ -28,11 +28,12 @@ public class ObjectExporter implements Exporter {
 	// private double Tsummer;		// mean summer temperature
 	// private double Twinter;		// mean winter temperature
 
-	private double[][] heights;		// per point height (meters)
+	private double[][] heights;		// per point height (Z units)
 	// private double[][] rain;		// per point rainfall (meters)
-	private double[][] erode;		// per point erosion (meters)
-	private double[][] waterDepth;	// per point water depth (meters)
+	private double[][] erode;		// per point erosion (Z units)
+	private double[][] waterDepth;	// per point water depth (Z units)
 	// private double[][] soil;		// per point soil type
+	private double[][] flora;		// per point flora type
 	private OverlayObjects objSet;	// defined overlay objects
 
 	private double maxHeight;		// highest discovered altitude
@@ -145,8 +146,7 @@ public class ObjectExporter implements Exporter {
 	 * @param flora - per point flora type
 	 */
 	public void floraMap(double[][] flora, String[] names) {
-		// this.flora = flora;
-		// this.floraNames = names;
+		this.flora = flora;
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class ObjectExporter implements Exporter {
 		maxDepth = 0;
 		for (int i = 0; i < depths.length; i++)
 			for (int j = 0; j < depths[0].length; j++) {
-				if (depths[i][j] < maxDepth)
+				if (depths[i][j] > maxDepth)
 					maxDepth = depths[i][j];
 			}
 	}
@@ -357,6 +357,16 @@ public class ObjectExporter implements Exporter {
 	 * @param colorMap - palette to be used in preview
 	 */
 	public void preview(WhichMap chosen, Color colorMap[]) {
+		
+		// start by laying out the water
+		Color map[][] = new Color[y_points][x_points];
+		for(int i = 0; i < y_points; i++)
+			for(int j = 0; j < x_points; j++)
+				if (waterDepth[i][j] > 0) {	// water
+					double depth = waterDepth[i][j]/maxDepth;
+					double h = (1 - depth) * (BRIGHT - DIM);
+					map[i][j] = new Color(0, (int) h, BRIGHT);
+				}
 
 		if (chosen == WhichMap.HEIGHTMAP) {
 			// make sure we have an overlay list
@@ -369,17 +379,12 @@ public class ObjectExporter implements Exporter {
 			if (maxHeight > minHeight)
 				aScale /= maxHeight - minHeight;
 
-			// fill in the preview map with altitudes or water
-			Color map[][] = new Color[y_points][x_points];
+			// fill in the land altitudes
 			for(int i = 0; i < y_points; i++)
 				for(int j = 0; j < x_points; j++)
-					if (waterDepth[i][j] >= 0) {	// land
+					if (waterDepth[i][j] == 0) {	// land
 						double h = NORMAL + ((heights[i][j] - aMean) * aScale);
 						map[i][j] = new Color((int)h, (int)h, (int)h);
-					} else	{							// water
-						double depth = waterDepth[i][j]/maxDepth;
-						double h = (1 - depth) * (BRIGHT - DIM);
-						map[i][j] = new Color(0, (int) h, BRIGHT);
 					}
 			
 			// add any overlayed icons
@@ -390,13 +395,16 @@ public class ObjectExporter implements Exporter {
 					preview.addIcon(o.row, o.col, o.obj.icon);
 				}
 		} else if (chosen == WhichMap.FLORAMAP) {
-			// fill in the preview map
-			Color map[][] = new Color[y_points][x_points];
+			// fill in the land flora
 			for(int i = 0; i < y_points; i++)
-				for(int j = 0; j < x_points; j++) {
-					// FIX: implement flora preview
-					map[i][j] = new Color(NORMAL, NORMAL, NORMAL);
-				}
+				for(int j = 0; j < x_points; j++)
+					if (waterDepth[i][j] == 0) {
+						if (flora[i][j] > 0)
+							map[i][j] = colorMap[(int) flora[i][j]];
+						else
+							map[i][j] = new Color(NORMAL, NORMAL, NORMAL);
+					}
+			
 			new PreviewMap("Export Preview (flora)", map, objSet.tileSize);
 		}
 	}

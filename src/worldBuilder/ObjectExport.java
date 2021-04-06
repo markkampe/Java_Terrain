@@ -129,7 +129,7 @@ public class ObjectExport extends ExportBase implements ActionListener {
 		} else if (e.getSource() == previewT && selected) {
 			exporter.preview(Exporter.WhichMap.HEIGHTMAP, null);
 		} else if (e.getSource() == previewF && selected) {
-			exporter.preview(Exporter.WhichMap.FLORAMAP, null);
+			exporter.preview(Exporter.WhichMap.FLORAMAP, map.getFloraColors());
 		}
 	}
 }

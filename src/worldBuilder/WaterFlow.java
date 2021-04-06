@@ -27,14 +27,6 @@ public class WaterFlow {
 	protected double suspended[]; 	// M^3 of suspended sediment per second
 	protected double velocityMap[]; // water velocity at MeshPoint
 	
-	/** relative erosion resistances for various bed rocks */
-	private static double resistance[] = {
-		1.0,	// sedimentary erosion resistance
-		4.0,	// metamorphic erosion resistance
-		2.5,	// igneous erosion resistance
-		0.5		// alluvial erosion resistance
-	};
-	
 	protected static final int UNKNOWN = -666;	// sinkMap, waterLevel
 	protected static final int OCEAN = -1;		// sinkMap: drains to ocean
 	protected static final int OFF_MAP = -2;	// sinkMap: drains off map
@@ -380,7 +372,7 @@ public class WaterFlow {
 		double suspended = parms.Smax;
 		if (velocity < parms.Vmax)
 			suspended *= velocity/parms.Vmax;
-		return parms.Ce * suspended / resistance[mineral];
+		return parms.Ce * suspended;	// TODO: soil type erosion resistance
 	}
 	
 	/**

@@ -233,8 +233,8 @@ public class ResourceRule {
 						thisRule.vigor = vigor;
 					if (order != NO_VALUE)
 						thisRule.order = order;
-					if (red != NO_VALUE)
-						thisRule.previewColor = new Color(red, blue, green);
+					if (red != NO_VALUE && green != NO_VALUE && blue != NO_VALUE)
+						thisRule.previewColor = new Color(red, green, blue);
 					thisRule.flexRange = flexRange;
 					thisRule.taperedBid = taperedBid;
 					rules.add(thisRule);
@@ -309,11 +309,11 @@ public class ResourceRule {
 						inColor++;
 						break;
 					case 2:
-						blue = parser.getInt();
+						green = parser.getInt();
 						inColor++;
 						break;
 					case 3:
-						green = parser.getInt();
+						blue = parser.getInt();
 						inColor++;
 						break;
 					default:

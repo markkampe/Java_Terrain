@@ -230,7 +230,9 @@ public class FoundExporter implements Exporter {
 		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
 				 BufferedImage.TYPE_USHORT_GRAY);
 		add_to_map(img, soil, "Granite", rockNames, FULL_WHITE);
+		// add_to_map(img, soil, "Basalt", rockNames, FULL_WHITE);
 		add_to_map(img, soil, "Sand Stone", rockNames, FULL_WHITE);
+		// add_to_map(img, soil, "Lime Stone", rockNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/rock_density.png");
 		
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);

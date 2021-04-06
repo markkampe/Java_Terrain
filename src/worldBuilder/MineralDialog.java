@@ -24,6 +24,9 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	private int classCounts[];		// returned placements per class
 	
 	// widgets
+	private JLabel mode;			// auto/manual mode
+	private JMenu modeMenu;			// mode selection menu
+	private JMenuItem ruleMode;		// automatic (rule based) selection
 	private JButton accept;			// accept these updates
 	private JButton cancel;			// cancel dialog, no updates
 	private JTextField rock_palette;	// mineral placement rules
@@ -43,6 +46,9 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	private static final int MIN_PRECIOUS = 3;	// gold, silver, etc
 	private static final int MAX_TYPES = 4;
 	private static final String[] mineralClasses = {"None", "Stone", "Metal", "Precious" };
+	
+	private static final String AUTO_MODE = "Rule Based";
+	private static final String[] choices = {"Sand Stone", "Marble", "Granite", "Copper", "Iron", "Gold/Silver", "Semi-Precious", "Precious"};
 
 	private static final long serialVersionUID = 1L;
 	
@@ -70,12 +76,32 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
-		// create a panel for flora selection widgets
+		// create a panel for mineral selection widgets
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		JPanel locals = new JPanel();
 		locals.setLayout(new BoxLayout(locals, BoxLayout.PAGE_AXIS));
 		locals.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
+		
+		// manual vs rule-based assignment
+		JPanel mPanel = new JPanel(new GridLayout(1,3));
+		modeMenu = new JMenu("Mineral Selection");
+		ruleMode = new JMenuItem(AUTO_MODE);
+		modeMenu.add(ruleMode);
+		ruleMode.addActionListener(this);
+		modeMenu.addSeparator();
+		for(int i = 0; i < choices.length; i++) {
+			JMenuItem item = new JMenuItem(choices[i]);
+			modeMenu.add(item);
+			item.addActionListener(this);
+		}
+		JMenuBar bar = new JMenuBar();
+		bar.add(modeMenu);
+		mPanel.add(bar);
+		mode = new JLabel(AUTO_MODE);
+		mPanel.add(mode);
+		mPanel.add(new JLabel(" "));
+		locals.add(mPanel);
 		
 		// flora rules selection field
 		rock_palette = new JTextField(parms.mineral_rules);
@@ -292,6 +318,20 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			map.setSoilMap(prevSoil);
 			map.repaint();
 			cancelDialog();
+		} else {	// most likely a menu item
+			JMenuItem item = (JMenuItem) e.getSource();
+			mode.setText(item.getText());
+			if (item == ruleMode) {
+				chooseRocks.setEnabled(true);
+				rock_palette.setEnabled(true);
+				mineral_pct.setEnabled(true);
+				minerals_3.setEnabled(true);
+			} else {
+				chooseRocks.setEnabled(false);
+				rock_palette.setEnabled(false);
+				mineral_pct.setEnabled(false);
+				minerals_3.setEnabled(false);
+			}
 		}
 	}
 

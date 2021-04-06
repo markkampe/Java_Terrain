@@ -252,8 +252,6 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			infoWorld.setText(String.format("<%.6f, %.6f>", parms.latitude(map_y), parms.longitude(map_x)));
 			
 			// figure out where we are relative to MeshPoints
-			int row = map.map_row(map_y);
-			int col = map.map_col(map_x);
 			Vicinity vicinity = new Polygon(map.mesh, map_x, map_y);
 			
 			// Cartesian interpolated height

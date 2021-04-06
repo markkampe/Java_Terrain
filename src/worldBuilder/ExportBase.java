@@ -131,13 +131,10 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		mainPane.add(descPanel, BorderLayout.NORTH);
 
 		// SOUTH: 3 buttons
-		JPanel buttons = new JPanel(new GridLayout(1,7));
+		JPanel buttons = new JPanel();
 		buttons.add(cancel);
-		buttons.add(new JLabel(" "));
 		buttons.add(previewT);
-		buttons.add(new JLabel("  "));
 		buttons.add(previewF);
-		buttons.add(new JLabel("  "));
 		buttons.add(accept);
 		buttons.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));
 		mainPane.add(buttons, BorderLayout.SOUTH);

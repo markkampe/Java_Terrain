@@ -50,10 +50,11 @@ public class SoilMap {
 					int s = (int) sArray[r][c];	// soil type
 					if (eArray[r][c] < 0)		// negative erosion is alluvial
 						s = ALLUVIAL;
-					Color color = previewColors[s];
-					
-					g.setColor(color);
-					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
+					if (s > 0) {
+						Color color = previewColors[s];
+						g.setColor(color);
+						g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
+					}
 				}
 	}
 }

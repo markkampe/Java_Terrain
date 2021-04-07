@@ -26,8 +26,10 @@ public class FoundExporter implements Exporter {
 	private String[] floraNames;	// per type name strings
 	private double[][] soil;		// per point soil type
 	private String[] rockNames;		// per type name strings
+	private double[][] fauna;		// per point game IDs
+	private String[] faunaNames;	// per type name strings
 	
-	private double dDecid = 0.9;	// FIX add deciduous desity slider
+	private double dDecid = 0.9;	// FIX add deciduous density slider
 	private double dConif = 0.9;	// FIX add coniferous density slider
 	
 	// calculated information for our output
@@ -36,6 +38,7 @@ public class FoundExporter implements Exporter {
 	private double[][] altitudes;	// height+erosion, in meters
 	private double highest;			// max altitude (meters MSL)
 	private double lowest;			// min altitude (meters MSL)
+	private double maxDepth;		// max depth (meters MSL)
 	
 	private int[][] ports;			// entry and exit points
 	private int num_ports;			// number reported
@@ -50,6 +53,15 @@ public class FoundExporter implements Exporter {
 			"iron",
 			"fish"
 	};
+	
+	// mapping from eco/geo type names into Foundation resources
+	private static String coniferous_resources[] = { "Conifers" };
+	private static String deciduous_resources[] = { "Broadleaf" };
+	private static String berry_resources[] = { "Riperian" };
+	private static String grass_resources[] = { "Grassland" };
+	private static String stone_resources[] = { "Sand Stone", "Granite" };
+	private static String metal_resources[] = { "Iron Ore", "Copper Ore" };
+	private static String fish_resources[] = { "Fish" };
 	
 	// color ranges for use in output maps
 	private static final int DIM = 16;
@@ -145,7 +157,7 @@ public class FoundExporter implements Exporter {
 	}
 	
 	/**
-	 * Export the up-loaded information in selected format
+	 * Export the up-loaded information in selected forma
 	 * 
 	 * @param dirname - name of output directory
 	 */
@@ -229,31 +241,30 @@ public class FoundExporter implements Exporter {
 		// create the rock maps
 		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
 				 BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, soil, "Granite", rockNames, FULL_WHITE);
-		// add_to_map(img, soil, "Basalt", rockNames, FULL_WHITE);
-		add_to_map(img, soil, "Sand Stone", rockNames, FULL_WHITE);
-		// add_to_map(img, soil, "Lime Stone", rockNames, FULL_WHITE);
+		for(int i = 0; i < stone_resources.length; i++)
+			add_to_map(img, soil, stone_resources[i], rockNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/rock_density.png");
 		
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, soil, "Iron Ore", rockNames, FULL_WHITE);
-		// add_to_map(img, soil, "Copper Ore", rockNames, FULL_WHITE);
+		for(int i = 0; i < metal_resources.length; i++)
+			add_to_map(img, soil, metal_resources[i], rockNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/iron_density.png");
 		
 		// create the tree maps
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, flora, "Conifers", floraNames, FULL_WHITE);
+		for(int i = 0; i < coniferous_resources.length; i++)
+			add_to_map(img, flora, coniferous_resources[i], floraNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/coniferous_density.png");
 		
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, flora, "Broadleaf", floraNames, FULL_WHITE);
-		//add_to_map(img, flora, "Oak", floraNames, FULL_WHITE);
-		//add_to_map(img, flora, "Sycamore", floraNames, FULL_WHITE);
+		for(int i = 0; i < deciduous_resources.length; i++)
+			add_to_map(img, flora, deciduous_resources[i], floraNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/deciduous_density.png");
 		
 		// create the berry map
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
-		add_to_map(img, flora, "Riperian", floraNames, FULL_WHITE);
+		for(int i = 0; i < berry_resources.length; i++)
+			add_to_map(img, flora, berry_resources[i], floraNames, FULL_WHITE);
 		ok &= createPng(img, dirname + "/maps/berries_density.png");
 		
 		// create the grass/sand map
@@ -263,12 +274,18 @@ public class FoundExporter implements Exporter {
 		for(int y = 0; y < XY_POINTS; y++)
 			for(int x = 0; x < XY_POINTS; x++)
 				img.setRGB(x, y, SAND_COLOR);
-		add_to_map(img, flora, "Grassland", floraNames, GRASS_COLOR);
+		for(int i = 0; i < grass_resources.length; i++)
+			add_to_map(img, flora, grass_resources[i], floraNames, GRASS_COLOR);
 		// FIX - they want a fairly wide brown blurred transition
 		ok &= createPng(img, dirname + "/maps/material_mask_" + parms.map_name + ".png");
 		
 		// create the fish map
-		ok &= createFishMap(dirname);
+		faunaNames = new String[1];	// TODO implement Map.faunaNames
+		fauna = new double[1][1];	// TODO implement Exporter.faunaMap
+		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
+		for(int i = 0; i < fish_resources.length; i++)
+			add_to_map(img, fauna, fish_resources[i], faunaNames, FULL_WHITE);
+		ok &= createPng(img, dirname + "/maps/fish_density.png");
 		
 		if (parms.debug_level > 0)
 			System.out.println("Exported Foundation map " + parms.map_name + " to " + dirname);
@@ -323,6 +340,7 @@ public class FoundExporter implements Exporter {
 			// 1. convert all Z heights to Meters MSL
 			highest = -666666;
 			lowest = 666666;
+			maxDepth = 0;
 			for(int y = 0; y < y_points; y++)
 				for(int x = 0; x < x_points; x++) {
 					double alt = parms.altitude(heights[y][x] - erode[y][x]);
@@ -331,6 +349,11 @@ public class FoundExporter implements Exporter {
 						highest = alt;
 					if (alt < lowest)
 						lowest = alt;
+					if (depths[y][x] > 0) {
+						double depth = parms.height(depths[y][x]);
+						if (depth > maxDepth)
+							maxDepth = depth;
+					}
 				}
 
 			// 2. ensure that all u/w points have negative altitude
@@ -484,26 +507,6 @@ public class FoundExporter implements Exporter {
 		return true;
 	}
 	
-	private boolean createFishMap(String project_dir) {
-		// create an appropriately sized gray-scale image
-		BufferedImage img = new BufferedImage(XY_POINTS, XY_POINTS, 
-											 BufferedImage.TYPE_USHORT_GRAY);
-		
-		// write it out as a .png
-		String filename = project_dir + "/maps/fish_density.png";
-		File f = new File(filename);
-		try {
-			if (!ImageIO.write(img, "PNG", f)) {
-				System.err.println("ImageIO error while attempting to create " + filename);
-				return false;
-			}
-		} catch (IOException e) {
-			System.err.println("Write error while attempting to create " + filename);
-			return false;
-		}
-		return true;
-	}
-	
 	/**
 	 * generate a preview of the currently up-loaded export
 	 * @param chosen map type (e.g. height, flora)
@@ -519,9 +522,11 @@ public class FoundExporter implements Exporter {
 		Color map[][] = new Color[y_points][x_points];
 		for(int y = 0; y < y_points; y++)
 			for(int x = 0; x < x_points; x++) {
-				if (depths[y][x] > 0)	// water depth
-					map[y][x] = Color.BLUE;
-				else {	// show altitude
+				if (depths[y][x] > 0) {	// water depth
+					double depth = parms.height(depths[y][x]);
+					double shade = 1.0 - (depth / maxDepth);
+					map[y][x] = new Color(0, 0, DIM + (int)(BRIGHT * shade));
+				} else {	// show altitude
 					int bright = grayscale[y][x];
 					if (chosen == WhichMap.FLORAMAP && flora[y][x] > 0)
 						map[y][x] = colorMap[(int) flora[y][x]];

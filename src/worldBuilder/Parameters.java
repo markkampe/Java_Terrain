@@ -160,6 +160,7 @@ public class Parameters {
 	
 	/** default export overlay objects	*/	public String overlay_objects;
 	/** default flora configuration 	*/	public String flora_rules;
+	/** default fauna configuration		*/	public String fauna_rules;
 	/** default mineral resources		*/	public String mineral_rules;
 
 	/*
@@ -335,6 +336,10 @@ public class Parameters {
 					break;
 				case "flora":
 					display_options |= Map.SHOW_FLORA;
+					break;
+				case "fauna":
+					display_options |= Map.SHOW_FAUNA;
+					break;
 				}
 				break;
 
@@ -360,6 +365,9 @@ public class Parameters {
 					break;
 				case "flora":
 					flora_rules = parser.getString();
+					break;
+				case "fauna":
+					fauna_rules = parser.getString();
 					break;
 				case "minerals":
 					mineral_rules = parser.getString();
@@ -542,6 +550,7 @@ public class Parameters {
 			System.out.println("               watershed=" + tribute_max + " " + unit_f);
 			System.out.println("   resource placement:");
 			System.out.println("               flora rules:   " + flora_rules);
+			System.out.println("               fauna rules:   " + fauna_rules);
 			System.out.println("               mineral rules: " + mineral_rules);
 			System.out.println("   export:     name=" + map_name);
 			for (ListIterator<String> it = exportRules.listIterator(); it.hasNext();) {

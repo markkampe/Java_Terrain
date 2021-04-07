@@ -66,6 +66,7 @@
     },
     "resources": {
     	"flora": "ecotopes.json",
+	"fauna": "faunatopes.json",
 	"minerals": "geotopes.json"
     },
     "export": {

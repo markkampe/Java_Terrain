@@ -1469,7 +1469,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		
 		// see if we are rendering animal cover
 		if ((display & SHOW_FAUNA) != 0) {
-			FaunaMap r = new FaunaMap(this);
+			FaunaMap r = new FaunaMap(this, null);
 			r.paint(g, width, height, TOPO_CELL);
 		}
 			
@@ -1485,6 +1485,13 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			r.paint(g, width, height);
 			WaterMap w = new WaterMap(this);
 			w.paint(g, width, height, TOPO_CELL);		
+		}
+		
+		// fish get painted on top of water
+		// see if we are rendering animal cover
+		if ((display & SHOW_FAUNA) != 0) {
+			FaunaMap r = new FaunaMap(this, "Fish");
+			r.paint(g, width, height, TOPO_CELL);
 		}
 		
 		// see if we are rendering the mesh (debugging, put it on top)

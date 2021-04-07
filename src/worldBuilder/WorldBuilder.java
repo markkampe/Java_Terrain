@@ -76,6 +76,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem viewErode;
 	private JMenuItem viewRocks;
 	private JMenuItem viewFlora;
+	private JMenuItem viewFauna;
 	private JMenuItem viewZoom;
 	private JMenuItem viewDebug;
 	private JMenuItem helpInfo;
@@ -250,6 +251,8 @@ public class WorldBuilder  extends JFrame
 		viewRocks.addActionListener(this);
 		viewFlora = new JMenuItem("Flora");
 		viewFlora.addActionListener(this);
+		viewFauna = new JMenuItem("Fauna");
+		viewFauna.addActionListener(this);
 		viewZoom = new JMenuItem("Zoom");
 		viewZoom.addActionListener(this);
 		viewDebug = new JMenuItem("Point Details");
@@ -263,6 +266,7 @@ public class WorldBuilder  extends JFrame
 		viewMenu.add(viewErode);
 		viewMenu.add(viewRocks);
 		viewMenu.add(viewFlora);
+		viewMenu.add(viewFauna);
 		viewMenu.add(viewZoom);
 		viewMenu.add(new JSeparator());
 		viewMenu.add(viewDebug);
@@ -571,6 +575,8 @@ public class WorldBuilder  extends JFrame
 			parms.display_options = map.setDisplay(Map.SHOW_ROCKS, (parms.display_options & Map.SHOW_ROCKS) == 0);
 		else if (o == viewFlora)
 			parms.display_options = map.setDisplay(Map.SHOW_FLORA, (parms.display_options & Map.SHOW_FLORA) == 0);
+		else if (o == viewFauna)
+			parms.display_options = map.setDisplay(Map.SHOW_FAUNA, (parms.display_options & Map.SHOW_FAUNA) == 0);
 		else if (o == viewZoom)	{
 			if (activeDialog)
 				twoDialogError();
@@ -631,6 +637,7 @@ public class WorldBuilder  extends JFrame
 		viewErode.setText( (opts & Map.SHOW_ERODE) != 0 ? "~erosion" : "Erosion");
 		viewRocks.setText( (opts & Map.SHOW_ROCKS) != 0 ? "~minerals" : "Minerals");
 		viewFlora.setText( (opts & Map.SHOW_FLORA) != 0 ? "~flora" : "Flora");
+		viewFauna.setText( (opts & Map.SHOW_FAUNA) != 0 ? "~fauna" : "Fauna");
 	}
 	
 	/**

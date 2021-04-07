@@ -41,7 +41,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 							SHOW_WATER = 0x10,
 							SHOW_ERODE = 0x20,
 							SHOW_ROCKS = 0x40,
-							SHOW_FLORA= 0x80;
+							SHOW_FLORA= 0x80,
+							SHOW_FAUNA= 0x100;
 	protected int display;	// bitmask for enabled SHOWs
 	
 	// map size (in pixels)

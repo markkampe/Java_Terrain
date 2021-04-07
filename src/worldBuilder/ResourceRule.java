@@ -39,8 +39,6 @@ public class ResourceRule {
 	public double minDepth, maxDepth;
 	/** Temperature range for this rule	*/
 	public double minTemp, maxTemp;
-	/** soil type range for this rule	*/
-	public double minSoil, maxSoil;
 	/** rainfall range for this rule	*/
 	public double minRain, maxRain;
 	/** river flux range for this rule	*/
@@ -51,6 +49,8 @@ public class ResourceRule {
 	public boolean taperedBid;
 	/** how high should this rule bid	*/
 	public int vigor;
+	/** where can this creature live	*/
+	public String ecotope;
 	
 	/** when, in the sequence of bids, does this go	*/
 	public int order;
@@ -87,12 +87,11 @@ public class ResourceRule {
 		maxDepth = 0;
 		minTemp = -60;
 		maxTemp = 70;
-		minSoil = 0;
-		maxSoil = 99;	// FIX, how many legal soil types are there0;
 		minRain = 0;
 		maxRain = 666;
 		minFlux = 0;
 		maxFlux = 666;
+		ecotope = null;
 		flexRange = false;
 		taperedBid = false;
 		vigor = 16;
@@ -161,7 +160,6 @@ public class ResourceRule {
 		int    aMin = NO_VALUE, aMax = NO_VALUE;	// altitude
 		double dMin = NO_VALUE, dMax = NO_VALUE;	// depth
 		double tMin = NO_VALUE, tMax = NO_VALUE;	// temperature
-		double sMin = NO_VALUE, sMax = NO_VALUE;	// soil
 		double rMin = NO_VALUE, rMax = NO_VALUE;	// rainfall
 		double fMin = NO_VALUE, fMax = NO_VALUE;	// river flux
 		int red = NO_VALUE, blue = NO_VALUE, green = NO_VALUE;	
@@ -211,8 +209,6 @@ public class ResourceRule {
 						thisRule.minDepth = dMin;
 					if (tMin != NO_VALUE)
 						thisRule.minTemp = tMin;
-					if (sMin != NO_VALUE)
-						thisRule.minSoil = sMin;
 					if (rMin != NO_VALUE)
 						thisRule.minRain = rMin;
 					if (fMin != NO_VALUE)
@@ -223,8 +219,6 @@ public class ResourceRule {
 						thisRule.maxDepth = dMax;
 					if (tMax != NO_VALUE)
 						thisRule.maxTemp = tMax;
-					if (sMax != NO_VALUE)
-						thisRule.maxSoil = sMax;
 					if (rMax != NO_VALUE)
 						thisRule.maxRain = rMax;
 					if (fMax != NO_VALUE)
@@ -294,6 +288,9 @@ public class ResourceRule {
 				case "bid":
 					taperedBid = parser.getString().equals("tapered");
 					break;
+				case "ecotope":
+					ecotope = parser.getString();
+					break;
 				default: // unrecognized attribute: see if the sub-class recognizes it
 					set_attribute(thisKey, parser.getString());
 					break;
@@ -344,9 +341,6 @@ public class ResourceRule {
 					case "depth":
 						dMin = Double.parseDouble(thisValue);
 						break;
-					case "soil":
-						sMin = Double.parseDouble(thisValue);
-						break;
 					case "rain":
 						rMin = Double.parseDouble(thisValue);
 						break;
@@ -371,9 +365,6 @@ public class ResourceRule {
 						break;
 					case "depth":
 						dMax = Double.parseDouble(thisValue);
-						break;
-					case "soil":
-						sMax = Double.parseDouble(thisValue);
 						break;
 					case "rain":
 						rMax = Double.parseDouble(thisValue);
@@ -426,7 +417,7 @@ public class ResourceRule {
 		System.out.println(prefix + "      " + "flux:    " + String.format("%.2f", minFlux) + "-" + String.format("%.2f", maxFlux));
 		System.out.println(prefix + "      " + "rain:    " + String.format("%.1f", minRain) + "-" + String.format("%.1f", maxRain));
 		System.out.println(prefix + "      " + "temp:    " + minTemp + "-" + maxTemp);
-		System.out.println(prefix + "      " + "soil:    " + String.format("%.1f", minSoil) + "-" + String.format("%.1f", maxSoil));
+		System.out.println(prefix + "      " + "ecotope: " + (ecotope == null ? "NONE" : ecotope));
 		System.out.println(prefix + "      " + "range:   " + (flexRange ? "flexible" : "strict"));
 		System.out.println(prefix + "      " + "bid:     " + (taperedBid ? "tapered" : "flat"));
 		if (previewColor != null)
@@ -508,11 +499,6 @@ public class ResourceRule {
 		v = range_bid((winter+summer)/2, minTemp, maxTemp);
 		if (v <= 0)
 			justification += "+temp";
-		score += v;
-		
-		v = range_bid(soil, minSoil, maxSoil);
-		if (v <= 0)
-			justification += "+soil";
 		score += v;
 		
 		v = range_bid(rain, minRain, maxRain);

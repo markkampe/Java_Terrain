@@ -8,7 +8,6 @@
 	{ "//": "construction stone" },
 	{ "name": "Sand Stone",
 	  "class": "Stone",
-	  "soil": { "min": 1, "max": 1 },
 	  "color": [255,204,153]
 	},
 	{ "name": "Granite",

@@ -52,7 +52,7 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 	private static final int AUTOMATIC = -1;
 	
 	// multiple selections are additive (vs replacement)
-	private boolean progressive = true;
+	private boolean progressive = false;
 
 	private static final long serialVersionUID = 1L;
 	

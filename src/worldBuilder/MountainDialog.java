@@ -18,9 +18,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private Parameters parms;
 	
 	private JCheckBox symmetric;
-	private JCheckBox igneous;
-	private JCheckBox metamorphic;
-	private JCheckBox sedimentary;
 	private JComboBox<String> form;
 	private JSlider altitude;
 	private JSlider diameter1;
@@ -30,15 +27,15 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private JButton accept;
 	private JButton cancel;
 	
+	private JMenu mineralChoice;
+	private JLabel composition;
+	private int mineral;
+	
 	private boolean selected;		// selection completed
 	private double x_start, x_end, y_start, y_end;		// selection start/end coordinates
 	
 	private int d_max;				// diameter: full scale
 	private int a_max;				// altitude: full scale
-	
-	private final int IGNEOUS;
-	private final int METAMORPHIC;
-	private final int SEDIMENTARY;
 	
 	/**
 	 * a LandForm is a macro for a collection of (size, shape) mountain parameters
@@ -79,9 +76,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		this.map = map;
 		this.oldHeight = map.getHeightMap();
 		this.parms = Parameters.getInstance();
-		IGNEOUS = map.getSoilType("Igneous");
-		METAMORPHIC = map.getSoilType("Metamorphic");
-		SEDIMENTARY = map.getSoilType("Sedimentary");
 
 		// copy the current height map
 		this.newHeight = new double[oldHeight.length];
@@ -101,6 +95,12 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
+		// menu for mineral type selection
+		JMenuBar bar = new JMenuBar();
+		mineralChoice = new JMenu("Mineral Composition");
+		bar.add(mineralChoice);
+		composition = new JLabel("None");
+		
 		// create the basic widgets
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
@@ -110,10 +110,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		symmetric = new JCheckBox("Symmetric");
 		symmetric.setFont(fontLarge);
 		symmetric.setSelected(true);
-		
-		igneous = new JCheckBox("Igneous");
-		metamorphic = new JCheckBox("Metamorphic");
-		sedimentary = new JCheckBox("Sedimentary");
 		
 		form = new JComboBox<String>();
 		JLabel formLabel = new JLabel("Land Form", JLabel.CENTER);
@@ -181,10 +177,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		 * Then pack all the controls into a 3x3 grid
 		 */
 		JPanel p0 = new JPanel();
-		p0.add(igneous);
-		p0.add(metamorphic);
-		p0.add(sedimentary);
-		p0.add(symmetric);
+		p0.add(bar);
+		p0.add(composition);
 		
 		JPanel formPanel = new JPanel();
 		formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.PAGE_AXIS));
@@ -193,6 +187,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 15));
 		JPanel p6 = new JPanel();
 		p6.add(formPanel);
+		p6.add(symmetric);
 		
 		JPanel altPanel = new JPanel();
 		altPanel.setLayout(new BoxLayout(altPanel, BoxLayout.PAGE_AXIS));
@@ -248,10 +243,22 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		mainPane.add(controls);
 		
+		// add mineral types to the composition menu
+		JMenuItem item = new JMenuItem("None");
+		item.addActionListener(this);
+		mineralChoice.add(item);
+		String[] names = map.getRockNames();
+		for(int i = 0; i < names.length; i++)
+			if (names[i] != null) {
+				item = new JMenuItem(names[i]);
+				item.addActionListener(this);
+				mineralChoice.add(item);
+			}
+		
 		pack();
 		setVisible(true);
 		
-		// add the action listeners
+		// add the other widget action listeners
 		altitude.addChangeListener(this);
 		diameter1.addChangeListener(this);
 		diameter2.addChangeListener(this);
@@ -263,9 +270,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		map.addKeyListener(this);
 		addKeyListener(this);
 		symmetric.addItemListener(this);
-		igneous.addItemListener(this);
-		metamorphic.addItemListener(this);
-		sedimentary.addItemListener(this);
 		form.addActionListener(this);
 		map.requestFocus();
 		
@@ -475,22 +479,11 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		int shape1 = rounding1.getValue();
 		int shape2 = rounding2.getValue();
 		
-		// see if the user has chosen a composition
-		int composition = -1;
-		if (igneous.isSelected())
-			composition = IGNEOUS;
-		else if (metamorphic.isSelected())
-			composition = METAMORPHIC;
-		else if (sedimentary.isSelected())
-			composition = SEDIMENTARY;
-		
 		// how many mountains can we create
 		if (mountains < 2) {
 			// one mountain goes in the center (likely volcanic)
-			if (composition < 0)
-			composition = (shape1 <= (Parameters.CONICAL + Parameters.SPHERICAL)/2) ? IGNEOUS : METAMORPHIC;
 			placeMountain(map, (x_start + x_end)/2, (y_start + y_end)/2,
-						  d1/2, z, shape1, composition);
+						  d1/2, z, shape1, mineral);
 			String form;
 			if (z < 0)
 				form = "caldera";
@@ -499,20 +492,18 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			else
 				form = "mountain";
 			placed = "Placed " + parms.km(d1) + Parameters.unit_xy + " wide, " +
-					alt + Parameters.unit_z + " " + map.rockNames[composition] + " " + 
+					alt + Parameters.unit_z + " " + map.rockNames[mineral] + " " + 
 					form + " at <" +
 					String.format(POS_FMT, parms.latitude((x_start+x_end)/2)) + "," +
 					String.format(POS_FMT, parms.longitude((y_start + y_end)/2)) + 
 					"> shape=" + shape1 + "/" + Parameters.CYLINDRICAL + "\n";
 		} else {
-			if (composition < 0)
-				composition = (alt > 0) ? METAMORPHIC : SEDIMENTARY;
 			placeRidge(map, x_start, y_start, x_end, y_end, d1/2, d2/2, z, 
-					   shape1, shape2, composition);
+					   shape1, shape2, mineral);
 			String form = (alt > 0) ? "ridge" : "trench";
 			placed = "Placed " + parms.km(d1+d2)/2 + Parameters.unit_xy + " wide, " +
 					alt + Parameters.unit_z + " " +
-					map.rockNames[composition] + " " + form + " from <" +
+					map.rockNames[mineral] + " " + form + " from <" +
 					String.format(POS_FMT, parms.latitude(x_start)) + "," + 
 					String.format(POS_FMT, parms.longitude(y_start)) + "> to <" +
 					String.format(POS_FMT, parms.latitude(x_end)) + "," + 
@@ -645,6 +636,14 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			diameter1.setValue(landforms[x].width);
 			if (selected)
 				redraw();
+		} else {	// most likely a mineral selection
+			JMenuItem item = (JMenuItem) e.getSource();
+			String chosen = item.getText();
+			if (chosen.equals("None"))
+				mineral = 0;
+			else
+				mineral = map.getSoilType(chosen);
+			composition.setText(chosen);
 		}
 	}
 	
@@ -662,19 +661,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 				if (selected)
 					redraw();
 			}
-		} else
-		// soil types are radio buttons
-		// NOTE: changing soil type does not change type of a mountain already drawn
-		if (e.getSource() == igneous && igneous.isSelected()) {
-			metamorphic.setSelected(false);
-			sedimentary.setSelected(false);
-		} else if (e.getSource() == metamorphic && metamorphic.isSelected()) {
-			igneous.setSelected(false);
-			sedimentary.setSelected(false);
-		} else if (e.getSource() == sedimentary && sedimentary.isSelected()) {
-			metamorphic.setSelected(false);
-			igneous.setSelected(false);
-		}
+		} 
 	}
 	
 	/** (perfunctory) */ public boolean pointSelected(double map_x, double map_y) { return false; }

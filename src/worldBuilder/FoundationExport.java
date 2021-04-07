@@ -1,19 +1,7 @@
 package worldBuilder;
 
-//import java.awt.Font;
-//import java.awt.GridLayout;
 import java.awt.event.*;
-
-//import javax.swing.BorderFactory;
-//import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
-//import javax.swing.JLabel;
-//import javax.swing.JPanel;
-//import javax.swing.JTextField;
-//import javax.swing.JPanel;
-//import javax.swing.JSlider;
-//import javax.swing.event.ChangeEvent;
-//import javax.swing.event.ChangeListener;
 
 /**
  * Dialog to collect information for a Raw (JSON) export

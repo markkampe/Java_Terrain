@@ -1,0 +1,37 @@
+{ 
+  "Default Fauna": [
+	{ "name": "Fish",	 "class": "Fish",
+	  "depth": { "min": 5, "max": 50 },
+	  "vigor": 32,
+	  "color": [127,0,255]
+    	},
+
+	{ "//": "small game" },
+	{ "name": "Rabbits",	"class": "Small Game",
+	  "ecotope": "Grassland",
+	  "vigor": 32,
+	  "color": [204,204,0]
+	},
+	{ "name": "Birds",	"class": "Small Game",
+	  "vigor": 32,
+	  "color": [255,204,153]
+	},
+	{ "name": "Foxes",	"class": "Small Game",
+	  "ecotope": "Broadleaf",
+	  "vigor": 32,
+	  "color": [255,102,102]
+	},
+
+	{ "//": "large game" },
+	{ "name": "Deer",	"class": "Large Game",
+	  "ecotope": "Broadleaf",
+	  "vigor": 32,
+	  "color": [255,153,51]
+	},
+	{ "name": "Bear",	"class": "Large Game",
+	  "ecotope": "Conifers",
+	  "vigor": 32,
+	  "color": [153,76,0]
+	}
+    ]
+}

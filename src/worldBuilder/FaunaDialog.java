@@ -237,14 +237,19 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 	
 	private void manualPlacement() {
 		MeshPoint[] points = map.mesh.vertices;
+		int count = 0;
 		for(int i = 0; i < faunaMap.length; i++)
 			if (points[i].x >= x0 && points[i].x < x0+width &&
 				points[i].y >= y0 && points[i].y < y0+height) {
 				faunaMap[i] = chosen_type;
+				count++;
 			}
 		
 		map.setFaunaMap(faunaMap);
 		map.repaint();
+		if (parms.debug_level > 0)
+			System.out.println("Fauna Placement: " + prevNames[chosen_type] + 
+								"(" + chosen_type + ") = " + count);
 	}
 
 	/**
@@ -320,8 +325,8 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 				
 				// report the changes
 				if (parms.debug_level > 0) {
-					System.out.println("Mineral Placement (" + ResourceRule.ruleset + 
-									   "): Stone/Metal/Precious = " + classCounts[FAUNA_FISH] + 
+					System.out.println("Fauna Placement (" + ResourceRule.ruleset + 
+									   "): Fish/Small/Large = " + classCounts[FAUNA_FISH] + 
 									   "/" + classCounts[FAUNA_SMALL] +
 									   "/" + classCounts[FAUNA_LARGE]);
 				}
@@ -362,7 +367,7 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 				fauna_palette.setEnabled(false);
 				fauna_pct.setEnabled(false);
 				fauna_3.setEnabled(false);
-				chosen_type = map.getSoilType(chosen);
+				chosen_type = map.getFaunaType(chosen);
 				progressive = true;
 			}
 			mode.setText(chosen);

@@ -76,8 +76,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	
 	public Color floraColors[];	// display color for each flora type
 	public Color rockColors[];	// display color for each mineral type
+	public Color faunaColors[];	// display color for each fauna type
 	public String floraNames[];	// import/export name for each flora type
 	public String rockNames[];	// import/export name for each mineral type
+	public String faunaNames[];	// import/export name for each fauna type
 
 	// per MeshPoint information
 	private double heightMap[]; // Height of each mesh point
@@ -87,6 +89,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double erodeMap[];	// erosion/deposition
 	private double incoming[];	// incoming water from off-map
 	private double floraMap[];	// assigned flora type
+	private double faunaMap[];	// assigned fauna type
 	private double waterLevel[];// level of nearest water body
 
 	private Cartesian poly_map;		// interpolation based on surrounding polygon
@@ -221,10 +224,13 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * @param filename - of input file
 	 */
 	public void read(String filename) {
-		// get load flora/mineral names and preview colors
+		// get load flora/fauna/mineral names and preview colors
 		Placement p = new Placement(parms.flora_rules, null, null);
 		setFloraColors(p.previewColors());
 		setFloraNames(p.resourceNames());
+		p = new Placement(parms.fauna_rules, null, null);
+		setFaunaColors(p.previewColors());
+		setFaunaNames(p.resourceNames());
 		p = new Placement(parms.mineral_rules, null, null);
 		setRockColors(p.previewColors());
 		setRockNames(p.resourceNames());
@@ -260,6 +266,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		double rain = 0;
 		int soil = 0;
 		int flora = 0;
+		int fauna = 0;
 		double influx = 0;
 		isSubRegion = false;
 		
@@ -296,6 +303,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 						
 					case "flora":
 						flora = getFloraType(parser.getString());
+						break;
+						
+					case "fauna":
+						fauna = getFaunaType(parser.getString());
 						break;
 						
 					case "rain":
@@ -399,6 +410,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					heightMap[points] = z;
 					soilMap[points] = soil;
 					floraMap[points] = flora;
+					faunaMap[points] = fauna;
 					rainMap[points] = rain;
 					incoming[points] = influx;
 					points++;
@@ -418,6 +430,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					influx = 0;
 					soil = 0;
 					flora = 0;
+					fauna = 0;
 					rain = 0;
 					z = 0.0;
 				}
@@ -570,6 +583,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			output.write(String.format(", \"soil\": \"%s\"", rockNames[(int) Math.round(soilMap[x])]));
 		if (floraMap[x] != 0)
 			output.write(String.format(", \"flora\": \"%s\"", floraNames[(int) Math.round(floraMap[x])]));
+		if (faunaMap[x] != 0)
+			output.write(String.format(", \"fauna\": \"%s\"", faunaNames[(int) Math.round(faunaMap[x])]));
 		if (incoming[x] != 0)
 			output.write(String.format(", \"influx\": \"%.2f%s\"", incoming[x], Parameters.unit_f));
 		output.write(" }");
@@ -594,6 +609,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.soilMap = new double[mesh.vertices.length];
 			this.waterLevel = new double[mesh.vertices.length];
 			this.floraMap = new double[mesh.vertices.length];
+			this.faunaMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
 			this.drainage = new Drainage(this);
@@ -613,6 +629,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.soilMap = null;
 			this.waterLevel = null;
 			this.floraMap = null;
+			this.faunaMap = null;
 			this.incoming = null;
 			this.highLights = null;
 			this.drainage = null;
@@ -798,6 +815,60 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			floraNames[i] = newNames[i];
 	}
 	
+	/**
+	 * update the flora map for the current mesh
+	 * @param newFlora new set of flora types
+	 * @return previous flora map
+	 */
+	public double[] setFaunaMap(double[] newFauna) {
+		double[] old = faunaMap;
+		faunaMap = newFauna;
+		repaint();
+		return old;
+	}
+	
+	/**
+	 * return map of flora types for the current mesh
+	 */
+	public double[] getFaunaMap() { return faunaMap; }
+	
+	/**
+	 * return ID-> mineral name map
+	 */
+	public String[] getFaunaNames() {
+		return faunaNames;
+	}
+	
+	/**
+	 * return type ID of a specified flora type
+	 */
+	public int getFaunaType(String name) {
+		for(int i = 0; i <faunaNames.length; i++)
+			if (faunaNames[i] != null && name.equals(faunaNames[i]))
+				return i;
+		return 0;
+	}
+	
+	/**
+	 * update the mapping from flora types to preview colors
+	 * @param newColors
+	 */
+	public void setFaunaColors(Color[] newColors) {
+		faunaColors = new Color[newColors.length];
+		for(int i = 0; i < newColors.length; i++)
+			faunaColors[i] = newColors[i];
+	}
+	
+	/**
+	 * update the mapping from flora types to names
+	 * @param newNames
+	 */
+	public void setFaunaNames(String[] newNames) {
+		faunaNames = new String[newNames.length];
+		for(int i = 0; i < newNames.length; i++)
+			faunaNames[i] = newNames[i];
+	}
+	
 	/*
 	 * these arrays are regularly re-calculated from height/rain
 	 * and so do not need to be explicitly SET
@@ -822,6 +893,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 * return map from flora types into preview colors
 	 */
 	public Color[] getFloraColors() { return floraColors; }
+	
+	/**
+	 * return map from flora types into preview colors
+	 */
+	public Color[] getFaunaColors() { return faunaColors; }
+	
 	
 	/**
 	 * return reference to the Drainage calculator
@@ -1387,6 +1464,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		// see if we are rendering plant cover
 		if ((display & SHOW_FLORA) != 0) {
 			FloraMap r = new FloraMap(this);
+			r.paint(g, width, height, TOPO_CELL);
+		}
+		
+		// see if we are rendering animal cover
+		if ((display & SHOW_FAUNA) != 0) {
+			FaunaMap r = new FaunaMap(this);
 			r.paint(g, width, height, TOPO_CELL);
 		}
 			

@@ -66,6 +66,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem editRain;
 	private JMenuItem editFlora;
 	private JMenuItem editRocks;
+	private JMenuItem editFauna;
 	private JMenuItem editCity;
 	private JMenuItem editRoads;
 	private JMenuItem viewPoints;
@@ -86,6 +87,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem debug2;
 	private JMenuItem debug3;
 	private JMenuItem flora_legend;
+	private JMenuItem fauna_legend;
 	private JMenuItem rock_legend;
 	
 	// control widgets
@@ -213,6 +215,8 @@ public class WorldBuilder  extends JFrame
 		editRiver.addActionListener(this);
 		editFlora = new JMenuItem("flora distribution");
 		editFlora.addActionListener(this);
+		editFauna = new JMenuItem("fauna distribution");
+		editFauna.addActionListener(this);
 		editRocks = new JMenuItem("mineral distribution");
 		editRocks.addActionListener(this);
 		editCity = new JMenuItem("add city");
@@ -229,6 +233,7 @@ public class WorldBuilder  extends JFrame
 		editMenu.add(editRiver);
 		editMenu.add(editRain);
 		editMenu.add(editFlora);
+		editMenu.add(editFauna);
 		editMenu.add(editRocks);
 		editMenu.add(new JSeparator());
 		editMenu.add(editCity);
@@ -241,18 +246,18 @@ public class WorldBuilder  extends JFrame
 		viewMesh.addActionListener(this);
 		viewTopo = new JMenuItem("Topo");
 		viewTopo.addActionListener(this);
-		viewRain = new JMenuItem("Rain");
-		viewRain.addActionListener(this);
 		viewWater = new JMenuItem("Water");
 		viewWater.addActionListener(this);
-		viewErode = new JMenuItem("Erosion");
-		viewErode.addActionListener(this);
-		viewRocks = new JMenuItem("Minerals");
-		viewRocks.addActionListener(this);
+		viewRain = new JMenuItem("Rain");
+		viewRain.addActionListener(this);
 		viewFlora = new JMenuItem("Flora");
 		viewFlora.addActionListener(this);
 		viewFauna = new JMenuItem("Fauna");
 		viewFauna.addActionListener(this);
+		viewRocks = new JMenuItem("Minerals");
+		viewRocks.addActionListener(this);
+		viewErode = new JMenuItem("Erosion");
+		viewErode.addActionListener(this);
 		viewZoom = new JMenuItem("Zoom");
 		viewZoom.addActionListener(this);
 		viewDebug = new JMenuItem("Point Details");
@@ -261,12 +266,12 @@ public class WorldBuilder  extends JFrame
 		viewMenu.add(viewPoints);
 		viewMenu.add(viewMesh);
 		viewMenu.add(viewTopo);
-		viewMenu.add(viewRain);
 		viewMenu.add(viewWater);
 		viewMenu.add(viewErode);
-		viewMenu.add(viewRocks);
+		viewMenu.add(viewRain);
 		viewMenu.add(viewFlora);
 		viewMenu.add(viewFauna);
+		viewMenu.add(viewRocks);
 		viewMenu.add(viewZoom);
 		viewMenu.add(new JSeparator());
 		viewMenu.add(viewDebug);
@@ -277,11 +282,14 @@ public class WorldBuilder  extends JFrame
 		
 		// Map color legends
 		flora_legend = new JMenuItem("flora");
+		fauna_legend = new JMenuItem("fauna");
 		rock_legend = new JMenuItem("minerals");
 		JMenu legendMenu = new JMenu("Map legends");
 		legendMenu.add(flora_legend);
+		legendMenu.add(fauna_legend);
 		legendMenu.add(rock_legend);
 		flora_legend.addActionListener(this);
+		fauna_legend.addActionListener(this);
 		rock_legend.addActionListener(this);
 		
 		// output verbosity
@@ -544,6 +552,14 @@ public class WorldBuilder  extends JFrame
 				placeDialog(new FloraDialog(map), false);
 				activeDialog = true;
 			}
+		} else if (o == editFauna) {
+			if (activeDialog)
+				twoDialogError();
+			else {
+				parms.display_options = map.setDisplay(Map.SHOW_FAUNA, true);
+				placeDialog(new FaunaDialog(map), false);
+				activeDialog = true;
+			}
 		} else if (o == editRocks) {
 			if (activeDialog)
 				twoDialogError();
@@ -611,6 +627,8 @@ public class WorldBuilder  extends JFrame
 			System.out.println("   verbosity:  " + parms.debug_level);
 		} else if (o == flora_legend) {
 			placeDialog(new LegendDisplay("Flora", map.floraColors, map.floraNames), false);
+		} else if (o == fauna_legend) {
+			placeDialog(new LegendDisplay("Fauna", map.faunaColors, map.faunaNames), false);
 		} else if (o == rock_legend) {
 			placeDialog(new LegendDisplay("Mineral", map.rockColors, map.rockNames), false);
 		}

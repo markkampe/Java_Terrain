@@ -40,8 +40,8 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	private JLabel sel_points;		// number of tiles in region
 	private JSlider resolution;		// tile size @return selection
 	
-	private double box_x, box_y;		// selection box map coordinates
-	private double box_width, box_height;	// selection box size (map units)
+	protected double box_x, box_y;		// selection box map coordinates
+	protected double box_width, box_height;	// selection box size (map units)
 	private double x_km, y_km;			// selection box size (in km)
 	
 	// parameters for the tile size selection slider
@@ -420,7 +420,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		if (resolution != null)
 			// x_points/y_points is a function of tile size
 			tile_size(Integer.parseInt(sel_t_size.getText()));
-		else {
+		else if (x_points > 0 && y_points > 0) {
 			// tile size is a function of x_points/y_points
 			sel_points.setText(x_points + "x" + y_points);
 			int tile_size = (int) (x_km * 1000 / x_points);

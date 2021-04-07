@@ -53,6 +53,8 @@ public class FoundationExport extends ExportBase implements ActionListener {
 		// 1024x1024 is slow and noisy, start small and interpolate
 		x_points = EXPORT_SIZE;
 		y_points = EXPORT_SIZE;
+		if (selected)
+			regionSelected(box_x, box_y, box_width, box_height, true);
 		
 		// add our controls to those in the base class
 		create_GUI();

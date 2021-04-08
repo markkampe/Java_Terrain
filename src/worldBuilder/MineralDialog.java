@@ -52,7 +52,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	private static final int AUTOMATIC = -1;
 	
 	// multiple selections are additive (vs replacement)
-	private boolean progressive = true;
+	private boolean progressive = false;
 
 	private static final long serialVersionUID = 1L;
 	
@@ -355,6 +355,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 				mineral_pct.setEnabled(true);
 				minerals_3.setEnabled(true);
 				chosen_mineral = AUTOMATIC;
+				progressive = false;
 			} else {
 				// manual choice and placement
 				chooseRocks.setEnabled(false);
@@ -362,6 +363,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 				mineral_pct.setEnabled(false);
 				minerals_3.setEnabled(false);
 				chosen_mineral = map.getSoilType(chosen);
+				progressive = true;
 			}
 			mode.setText(chosen);
 		}

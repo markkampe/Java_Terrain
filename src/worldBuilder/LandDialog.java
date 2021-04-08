@@ -10,7 +10,7 @@ import javax.swing.event.*;
 /**
  * Dialog to adjust height, erosion and deposition
  */
-public class LandDialog extends JFrame implements ActionListener, ChangeListener, ItemListener, MapListener, KeyListener, WindowListener {	
+public class LandDialog extends JFrame implements ActionListener, ChangeListener, MapListener, KeyListener, WindowListener {	
 	
 	private Map map;
 	private Parameters parms;
@@ -27,12 +27,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	private double[] old_height, new_height;
 	private double[] old_erosion, erodeMap;
-	private double[] old_soil, new_soil;
 	
-	private JCheckBox igneous;
-	private JCheckBox metamorphic;
-	private JCheckBox sedimentary;
-	private JCheckBox alluvial;
 	private JSlider altitude;
 	private JSlider flatness;
 	private JSlider erosion;
@@ -57,17 +52,14 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		// pick up references current maps
 		this.map = map;
 		this.old_height = map.getHeightMap();
-		this.old_soil = map.getSoilMap();
 		this.erodeMap = map.getErodeMap();	// erodeMap is edit-in-place
 		
 		// make new (WIP) copies of each
 		int points = old_height.length;
 		new_height = new double[points];
 		old_erosion = new double[points];
-		new_soil = new double[points];
 		for(int i = 0; i < points; i++) {
 			new_height[i] = old_height[i];
-			new_soil[i] = old_soil[i];
 			old_erosion[i] = erodeMap[i];
 		}
 		
@@ -84,11 +76,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		Font fontLarge = new Font("Serif", Font.ITALIC, 15);
 		accept = new JButton("ACCEPT (Enter)");
 		cancel = new JButton("CANCEL (Esc)");
-		
-		igneous = new JCheckBox("Igneous");
-		metamorphic = new JCheckBox("Metamorphic");
-		sedimentary = new JCheckBox("Sedimentary");
-		alluvial = new JCheckBox("Alluvial");
 		
 		altitude = new JSlider(JSlider.HORIZONTAL, -parms.delta_z_max, parms.delta_z_max, 0);
 		altitude.setMajorTickSpacing(Parameters.niceTics(-parms.delta_z_max, parms.delta_z_max, true));
@@ -173,13 +160,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		sliders.add(depoPanel);
 		
 		// create a panel for each button (or set of radio buttons)
-		JPanel soil = new JPanel();
-		soil.setLayout(new GridLayout(2,2));
-		soil.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
-		soil.add(igneous);
-		soil.add(metamorphic);
-		soil.add(sedimentary);
-		soil.add(alluvial);
 		JPanel b1 = new JPanel();
 		b1.add(cancel);
 		b1.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
@@ -189,8 +169,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		
 		// and put them in a 1x3 grid
 		JPanel buttons = new JPanel();
-		buttons.setLayout(new GridLayout(1,3));
-		buttons.add(soil);
+		buttons.setLayout(new GridLayout(1,2));
 		buttons.add(b1);
 		buttons.add(b2);
 
@@ -213,10 +192,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		map.addMapListener(this);
 		map.addKeyListener(this);
 		addKeyListener(this);
-		igneous.addItemListener(this);
-		metamorphic.addItemListener(this);
-		sedimentary.addItemListener(this);
-		alluvial.addItemListener(this);
 		map.requestFocus();
 		
 		// set us up for point-group selection
@@ -231,7 +206,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		// get the parameters
 		int points = selected_points.length;
 		double delta_z = parms.z(altitude.getValue());
-		double soil = soilType();
 		
 		// figure out the vertical range of the selected points
 		double z_min = 666.0, z_max = -666.0;
@@ -267,10 +241,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 			// apply the general altitude shift
 			new_height[i] += delta_z;
 			
-			// update the soil type (if a type has been selected)
-			if (soil >= 0)
-				new_soil[i] = soil;
-			
 			// perform incremental erosion 
 			double e_meters = e_mult * map.waterflow.erosion(i);
 			if (e_meters > 0)
@@ -287,7 +257,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		
 		// instantiate these updates and redraw the map
 		map.setHeightMap(new_height);
-		map.setSoilMap(new_soil);
 		// no-need to update erodeMap, that being edit-in-place
 		map.repaint();
 	}
@@ -312,9 +281,8 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		// disable any in-progress selection
 		map.selectMode(Map.Selection.NONE);
 		
-		// restore the old height, soil and erosion maps
+		// restore the old height and erosion maps
 		map.setHeightMap(old_height);
-		map.setSoilMap(old_soil);
 		for(int i = 0; i < erodeMap.length; i++)
 			erodeMap[i] = old_erosion[i];
 		
@@ -333,7 +301,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		int points = new_height.length;
 		for(int i = 0; i < points; i++) {
 			old_height[i] = new_height[i];
-			old_soil[i] = new_soil[i];
 			old_erosion[i] = erodeMap[i];
 		}
 		
@@ -344,10 +311,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 				if (selected_points[i])
 					points++;
 			String descr = String.format("Updated %d points", points);
-			
-			double s = soilType();
-			if (s >= 0)
-				descr += ", soil=" + map.rockNames[(int)s];
 			
 			int v = altitude.getValue();
 			if (v != 0)
@@ -382,10 +345,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		flatness.setValue(0);
 		erosion.setValue(0);
 		deposition.setValue(0);
-		igneous.setSelected(false);
-		metamorphic.setSelected(false);
-		sedimentary.setSelected(false);
-		alluvial.setSelected(false);
 		
 		// un-do the current selection
 		map.selectMode(Map.Selection.NONE);
@@ -428,48 +387,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		} else if (e.getSource() == accept && have_selection) {
 			acceptChanges();
 		}
-	}
-	
-	/**
-	 * soil type has changed
-	 * 
-	 * @param e
-	 */
-	public void itemStateChanged(ItemEvent e) {
-		if (e.getSource() == igneous && igneous.isSelected()) {
-			metamorphic.setSelected(false);
-			sedimentary.setSelected(false);
-			alluvial.setSelected(false);
-		} else if (e.getSource() == metamorphic && metamorphic.isSelected()) {
-			igneous.setSelected(false);
-			sedimentary.setSelected(false);
-			alluvial.setSelected(false);
-		} else if (e.getSource() == sedimentary && sedimentary.isSelected()) {
-			metamorphic.setSelected(false);
-			igneous.setSelected(false);
-			alluvial.setSelected(false);
-		} else if (e.getSource() == alluvial && alluvial.isSelected()) {
-			metamorphic.setSelected(false);
-			igneous.setSelected(false);
-			sedimentary.setSelected(false);
-		}
-		if (have_selection)
-			redraw();
-	}
-	
-	/**
-	 * return the currently selected soil type
-	 */
-	private double soilType() {
-		if (igneous.isSelected())
-			return(map.getSoilType("Igneous"));
-		if (metamorphic.isSelected())
-			return(map.getSoilType("Metamorphic"));
-		if (alluvial.isSelected())
-			return map.getSoilType("Alluvial");
-		if (sedimentary.isSelected())
-			return map.getSoilType("Sedimentary");
-		return -1;
 	}
 	
 	/**

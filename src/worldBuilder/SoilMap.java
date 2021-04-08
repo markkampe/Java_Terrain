@@ -7,9 +7,6 @@ import java.awt.Graphics;
  * a class to render the MeshPoint soil types in shades of yellow-to-blue
  */
 public class SoilMap {
-
-	private static final int DARK = 0;
-	
 	private static int ALLUVIAL;
 	
 	private Map map;

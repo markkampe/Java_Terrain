@@ -43,6 +43,8 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	private double x0, y0;			// upper left hand corner
 	private double width, height;	// selected area size (in pixels)
 	
+	private boolean progressive;	// multiple selects per accept
+	
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -160,6 +162,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		map.addMapListener(this);	
 		map.selectMode(Map.Selection.RECTANGLE);
 		selected = map.checkSelection(Map.Selection.RECTANGLE);
+		progressive = false;
 	}
 	
 	/**
@@ -211,7 +214,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	public boolean regionSelected(double mx0, double my0, 
 								  double dx, double dy, boolean complete) {	
 		// undo any uncommitted placements
-		if (changes_made) {
+		if (changes_made && !progressive) {
 			for(int i = 0; i < floraMap.length; i++)
 				floraMap[i] = prevFlora[i];
 			changes_made = false;

@@ -28,8 +28,10 @@ public class JsonExporter implements Exporter {
 	private double[][] depths;		// per point water depth (meters)
 	private double[][] soil;		// per point soil type
 	private double[][] flora;		// per point flora type
+	private double[][] fauna;		// per point fauna type
 	private String[] floraNames;	// per flora type names
 	private String[] rockNames;		// per soil type names
+	private String[] faunaNames;	// per fauna type names
 	
 	private double maxHeight;		// highest discovered altitude
 	private double minHeight;		// lowest discovered altitude
@@ -142,6 +144,15 @@ public class JsonExporter implements Exporter {
 		this.flora = flora;
 		this.floraNames = names;
 	}
+	
+	/**
+	 * Up-load the fauna type for every tile
+	 * @param fauna - per point fauna type
+	 */
+	public void faunaMap(double[][] fauna, String[] names) {
+		this.fauna = fauna;
+		this.faunaNames = names;
+	}
 
 	/**
 	 * Up-load the surface-water-depth for every tile
@@ -250,6 +261,12 @@ public class JsonExporter implements Exporter {
 					if (f > 0) {
 						output.write(COMMA);
 						output.write(String.format(FORMAT_S, "flora", floraNames[f]));
+					}
+					
+					f = (int) fauna[r][c];
+					if (f > 0) {
+						output.write(COMMA);
+						output.write(String.format(FORMAT_S, "fauna", faunaNames[f]));
 					}
 
 					output.write(" }");

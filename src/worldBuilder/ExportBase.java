@@ -257,6 +257,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		export.rainMap(cart.interpolate(map.getRainMap()));
 		export.soilMap(cart.nearest(map.getSoilMap()), map.rockNames);
 		export.floraMap(cart.nearest(map.getFloraMap()), map.floraNames);
+		export.faunaMap(cart.nearest(map.getFaunaMap()), map.faunaNames);
 		double heights[][] = cart.interpolate(map.getHeightMap());
 		export.heightMap(heights);
 		double erosion[][] = cart.interpolate(map.getErodeMap());

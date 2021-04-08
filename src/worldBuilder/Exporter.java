@@ -67,6 +67,13 @@ public interface Exporter {
 	void floraMap(double[][] flora, String[] names);
 	
 	/**
+	 * Up-load the fauna distribution for every tile
+	 * @param fauna - per point fauna types
+	 * @param names - per-type name strings
+	 */
+	void faunaMap(double[][] fauna, String[] names);
+	
+	/**
 	 * Export the up-loaded information in selected format
 	 * 
 	 * @param outputFile - name of output file

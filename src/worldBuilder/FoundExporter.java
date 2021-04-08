@@ -132,6 +132,15 @@ public class FoundExporter implements Exporter {
 		this.flora = flora;
 		this.floraNames = names;
 	}
+	
+	/**
+	 * Up-load the fauna type for every tile
+	 * @param fauna - per point fauna type
+	 */
+	public void faunaMap(double[][] fauna, String[] names) {
+		this.fauna = fauna;
+		this.faunaNames = names;
+	}
 
 	/**
 	 * entry/exit points (for explorers)
@@ -280,8 +289,6 @@ public class FoundExporter implements Exporter {
 		ok &= createPng(img, dirname + "/maps/material_mask_" + parms.map_name + ".png");
 		
 		// create the fish map
-		faunaNames = new String[1];	// TODO implement Map.faunaNames
-		fauna = new double[1][1];	// TODO implement Exporter.faunaMap
 		img = new BufferedImage(XY_POINTS, XY_POINTS, BufferedImage.TYPE_USHORT_GRAY);
 		for(int i = 0; i < fish_resources.length; i++)
 			add_to_map(img, fauna, fish_resources[i], faunaNames, FULL_WHITE);

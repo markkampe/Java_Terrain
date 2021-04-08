@@ -148,6 +148,15 @@ public class ObjectExporter implements Exporter {
 	public void floraMap(double[][] flora, String[] names) {
 		this.flora = flora;
 	}
+	
+	/**
+	 * Up-load the fauna type for every tile
+	 * @param fauna - per point fauna type
+	 */
+	public void faunaMap(double[][] soil, String[] names) {
+		// this.fauna = fauna;
+		// this.faunaNames = names;
+	}
 
 	/**
 	 * Up-load the surface-water-depth for every tile

@@ -20,7 +20,6 @@ public class Placement {
 	private double waterLevel[];// per mesh-point depth below water
 	private double heightMap[];	// per mesh-point altitude
 	private double erodeMap[];	// per mesh-point erosion
-	private double soilMap[];	// per mesh-point soil map
 	private double rainMap[];	// per mesh-point rainfall
 	private double fluxMap[];	// per mesh-point water flow
 	private double resources[];	// per MeshPoint assignments
@@ -75,7 +74,6 @@ public class Placement {
 			this.waterLevel = map.getWaterLevel();
 			this.heightMap = map.getHeightMap();
 			this.erodeMap = map.getErodeMap();
-			this.soilMap = map.getSoilMap();
 			this.rainMap = map.getRainMap();
 			this.fluxMap = map.getFluxMap();
 		}
@@ -195,7 +193,6 @@ public class Placement {
 				// gather bidding attributes for this point
 				int alt = (int) parms.altitude(heightMap[i] - erodeMap[i]);
 				double lapse = alt * parms.lapse_rate;
-				double soil = soilMap[i];
 				double depth = (waterLevel[i] > (heightMap[i] - erodeMap[i])) ?
 								(waterLevel[i] - (heightMap[i] - erodeMap[i])) : 0;
 				double rain = rainMap[i];
@@ -214,7 +211,7 @@ public class Placement {
 					if (counts[bidderClass[r]] >= quotas[bidderClass[r]])
 						continue;	// already at quota
 					
-					double bid = bidders[r].bid(alt, depth, flux, rain, Twinter - lapse, Tsummer - lapse, soil);
+					double bid = bidders[r].bid(alt, depth, flux, rain, Twinter - lapse, Tsummer - lapse);
 					if (parms.debug_level >= PLACEMENT_DEBUG || parms.rule_debug != null && parms.rule_debug.equals(bidders[r].ruleName)) {
 						String msg = "   RULE " + bidders[r].ruleName + " bids " +
 									String.format("%6.2f for point %5d", bid, i) +

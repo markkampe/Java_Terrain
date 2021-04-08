@@ -17,12 +17,12 @@
 	{ "//": "L1 ground cover tiles for land w/o flora class"},
 	{ "name": "dirt",	"level": 1, "base": 3296,
 	  "terrain": "land",
-	  "ecotope": "NON-GREEN",
+	  "flora": "NON-GREEN",
 	  "temp": { "min": 0 },
 	  "vigor": 2
 	},
 	{ "name": "rocks",	"level": 1, "base": 3680,
-	  "ecotope": "NON-GREEN",
+	  "flora": "NON-GREEN",
 	  "terrain": "land",
 	  "soil": { "min": 0.5, "max": 2.5 },
 	  "vigor": 0
@@ -33,19 +33,19 @@
 	  "vigor": 32
 	},
 
-	{ "//": "L1 ground cover tiles beneath ecotopes"},
+	{ "//": "L1 ground cover tiles beneath floras"},
 	{ "name": "grass",	"level": 1, "base": 2816,
-	  "class": "Grass",	"ecotope": "GREEN",
+	  "class": "Grass",	"flora": "GREEN",
 	  "terrain": "land",
 	  "vigor": 32
 	},
 	{ "name": "rocks-A",	"level": 1, "base": 3680,
 	  "terrain": "land",
-	  "ecotope": "Alpine",
+	  "flora": "Alpine",
 	  "vigor": 32
 	},
 	{ "name": "marsh",	"level": 1, "base": 2816,	"//": "FIND BETTER TILE ?",
-	  "class": "Grass",	"ecotope": "Marsh",
+	  "class": "Grass",	"flora": "Marsh",
 	  "terrain": "land",
 	  "vigor": 0
 	},
@@ -53,44 +53,44 @@
 
 	{ "//": "L2/4 tiles for flora types in lowlands"},
 	{ "name": "tall-grass",	"level": 2, "base": 2864,
-	  "class": "Grass",	"ecotope": "Grassland",
+	  "class": "Grass",	"flora": "Grassland",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
 	{ "name": "Berries",	"level": 4, "base": 2864,	"//": "FIND BETTER TILE ?",
-	  "class": "Brush",	"ecotope": "Riperian",
+	  "class": "Brush",	"flora": "Riperian",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
 	{ "name": "Brush",	"level": 4, "base": 2864,	"//": "FIND BETTER TILE ?",
-	  "class": "Brush",	"ecotope": "Brush",
+	  "class": "Brush",	"flora": "Brush",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
 
 	{ "name": "palm",	"level": 2, "base": 3776,
-	  "class": "Tree",	"ecotope": "Palms",
+	  "class": "Tree",	"flora": "Palms",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
 	{ "name": "jungle",	"level": 2, "base": 3776,	"//": "FIND BETTER TILE ?",
-	  "class": "Tree",	"ecotope": "Jungle",
+	  "class": "Tree",	"flora": "Jungle",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
 	{ "name": "tree",	"level": 2, "base": 3008,
-	  "class": "Tree",	"ecotope": "Broadleaf",
+	  "class": "Tree",	"flora": "Broadleaf",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
 	{ "name": "pine",	"level": 2, "base": 3056,
-	  "class": "Tree",	"ecotope": "Conifers",
+	  "class": "Tree",	"flora": "Conifers",
 	  "terrain": "ground",
 	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
 	{ "name": "snowpine",	"level": 2, "base": 4160,
-	  "class": "Tree",	"ecotope": "Conifers",
+	  "class": "Tree",	"flora": "Conifers",
 	  "terrain": "ground",
 	  "temp": { "max": 0 },
 	  "vigor": 32
@@ -99,12 +99,12 @@
 
 	{ "//": "L2 tiles for hills" },
 	{ "name": "dirthill",	"level": 2, "base": 3488,
-	  "terrain": "hill",	"ecotope": "NON-GREEN",
+	  "terrain": "hill",	"flora": "NON-GREEN",
 	  "temp": { "min": 0 },
 	  "vigor": 2
 	},
 	{ "name": "greenhill",	"level": 2, "base": 3104,
-	  "terrain": "hill",	"ecotope": "GREEN",
+	  "terrain": "hill",	"flora": "GREEN",
 	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
@@ -117,18 +117,18 @@
 
 	{ "//": "L2 tiles for mountains" },
 	{ "name": "mountain",	"level": 2, "base": 3536,
-	  "terrain": "mountain",	"ecotope": "NON-GREEN",
+	  "terrain": "mountain",	"flora": "NON-GREEN",
 	  "temp": { "min": 0 },
 	  "soil": { "max": 0.5 },
 	  "vigor": 16
 	},
 	{ "name": "greenmountain", "level": 2, "base": 3536,
-	  "terrain": "mountain",	"ecotope": "GREEN",
+	  "terrain": "mountain",	"flora": "GREEN",
 	  "temp": { "min": 0 },
 	  "vigor": 64
 	},
 	{ "name": "rockmountain", "level": 2, "base": 3152,
-	  "terrain": "mountain",	"ecotope": "NON-GREEN",
+	  "terrain": "mountain",	"flora": "NON-GREEN",
 	  "temp": { "min": 0 },
 	  "soil": { "min": 0.5, "max": 2.5 },
 	  "vigor": 16
@@ -141,19 +141,19 @@
 
 	{ "//": "L4 tiles for mountain stamps" },
 	{ "name": "peak",	"level": 4, "base": 26, "stamp":"2x2", "surround": 42,
-	  "terrain": "mountain",	"ecotope": "NON-GREEN",
+	  "terrain": "mountain",	"flora": "NON-GREEN",
 	  "temp": { "min": 0 },
 	  "soil": { "max": 0.51 },
 	  "vigor": 16
 	},
 	{ "name": "stonepeak",	"level": 4, "base": 283, "stamp":"2x2", "surround": 299,
-	  "terrain": "mountain",	"ecotope": "NON-GREEN",
+	  "terrain": "mountain",	"flora": "NON-GREEN",
 	  "temp": { "min": 0 },
 	  "soil": { "min": 0.49 },
 	  "vigor": 16
 	},
 	{ "name": "greenpeak",	"level": 4, "base": 285, "stamp":"2x2", "surround": 301,
-	  "terrain": "mountain",	"ecotope": "GREEN",
+	  "terrain": "mountain",	"flora": "GREEN",
 	  "temp": { "min": 0 },
 	  "vigor": 64
 	},

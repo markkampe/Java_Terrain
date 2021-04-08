@@ -211,18 +211,18 @@ public class RPGMTiler implements Exporter {
 			bidders[numRules] = r;
 
 			// get the numeric floral ecotope type for each competing rule
-			if (r.ecotope == null)
-				bidder_ecotope[numRules] = 0;
+			if (r.floraType == null)
+				bidder_ecotope[numRules] = ECOTOPE_ANY;
 			else {
-				if (r.ecotope.equals("any") || r.ecotope.equals("ANY"))
+				if (r.floraType.equals("any") || r.floraType.equals("ANY"))
 					bidder_ecotope[numRules] = ECOTOPE_ANY;
-				else if (r.ecotope.equals("green") || r.ecotope.equals("GREEN"))
+				else if (r.floraType.equals("green") || r.floraType.equals("GREEN"))
 					bidder_ecotope[numRules] = ECOTOPE_GREEN;
-				else if (r.ecotope.equals("non-green") || r.ecotope.equals("NON-GREEN"))
+				else if (r.floraType.equals("non-green") || r.floraType.equals("NON-GREEN"))
 					bidder_ecotope[numRules] = ECOTOPE_NON_GREEN;
 				else
 					for(int i = 0; i < floraNames.length; i++)
-						if (r.ecotope.equals(floraNames[i])) {
+						if (r.floraType.equals(floraNames[i])) {
 							bidder_ecotope[numRules] = i;
 							break;
 						}
@@ -271,7 +271,6 @@ public class RPGMTiler implements Exporter {
 					alt = (int) parms.altitude(heights[row+dy][col+dx] - erode[row+dy][col+dx]);
 					lapse = alt * parms.lapse_rate;
 					depth = parms.height(depths[row+dy][col+dx]);
-					soilType = soil[row+dy][col+dx];
 					terrain = typeMap[levels[row+dy][col+dx]];
 					if (useSLOPE &&												// SLOPE rules enabled
 							!TerrainType.isWater(terrain) &&					// is not water
@@ -285,11 +284,10 @@ public class RPGMTiler implements Exporter {
 					if (parms.debug_level >= EXPORT_DEBUG)
 						System.out.println("l" + level + "[" + (row+dy) + "," + (col+dx) + "]: " +
 								" terrain=" + TerrainType.terrainType(terrain) +
-								", ecotope=" + floraNames[floraTypes[row][col]] + 
+								", flora=" + floraNames[floraTypes[row][col]] + 
 								", alt=" + alt +
 								String.format(", depth=%.2f", depth) + 
-								String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
-								String.format(", soil=%.1f",  soilType)); 
+								String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse)); 
 
 					// XXX I once thought it necessary to check whether or not this square is already taken
 					// does our terrain type match the rule
@@ -301,12 +299,12 @@ public class RPGMTiler implements Exporter {
 					// does our ecotope match the rule
 					if (wrongEcotope(bidder_ecotope[b], floraTypes[row][col])) {
 						r.justification = "ecotope mismatch" + 
-								" (" + r.ecotope + "!=" + floraNames[floraTypes[row+dy][col+dx]] + ")";
+								" (" + r.floraType + "!=" + floraNames[floraTypes[row+dy][col+dx]] + ")";
 						refused = true;
 						continue;
 					}
 					else	// if bid fails, it will add its own justification
-						thisBid = r.bid(alt, depth, flux, rain, Tmean - lapse, Tmean - lapse, soilType);
+						thisBid = r.bid(alt, depth, flux, rain, Tmean - lapse, Tmean - lapse);
 
 					// if full debug is enabled, log every bid for every tile
 					if (r.debug || parms.debug_level >= EXPORT_DEBUG)
@@ -338,11 +336,10 @@ public class RPGMTiler implements Exporter {
 			// there seems to be a hole in the rules
 			System.err.println("NOBID l" + level + "[" + row + "," + col + "]: " +
 					" terrain=" + TerrainType.terrainType(terrain) +
-					", class=" + floraNames[floraTypes[row][col]] + 
+					", flora=" + floraNames[floraTypes[row][col]] + 
 					", alt=" + alt +
 					String.format(", depth=%.2f", depth) + 
-					String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse) +
-					String.format(", soil=%.1f",  soilType));
+					String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse));
 		}
 
 		return null;

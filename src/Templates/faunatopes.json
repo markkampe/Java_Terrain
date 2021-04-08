@@ -8,7 +8,7 @@
 
 	{ "//": "small game" },
 	{ "name": "Rabbits",	"class": "Small Game",
-	  "ecotope": "Grassland",
+	  "flora": "Grassland",
 	  "vigor": 32,
 	  "color": [204,204,0]
 	},
@@ -17,19 +17,19 @@
 	  "color": [255,204,153]
 	},
 	{ "name": "Foxes",	"class": "Small Game",
-	  "ecotope": "Broadleaf",
+	  "flora": "Broadleaf",
 	  "vigor": 32,
 	  "color": [255,102,102]
 	},
 
 	{ "//": "large game" },
 	{ "name": "Deer",	"class": "Large Game",
-	  "ecotope": "Broadleaf",
+	  "flora": "Broadleaf",
 	  "vigor": 32,
 	  "color": [255,153,51]
 	},
 	{ "name": "Bear",	"class": "Large Game",
-	  "ecotope": "Conifers",
+	  "flora": "Conifers",
 	  "vigor": 32,
 	  "color": [153,76,0]
 	}

@@ -50,7 +50,7 @@ public class ResourceRule {
 	/** how high should this rule bid	*/
 	public int vigor;
 	/** where can this creature live	*/
-	public String ecotope;
+	public String floraType;
 	
 	/** when, in the sequence of bids, does this go	*/
 	public int order;
@@ -77,6 +77,7 @@ public class ResourceRule {
 		this.debug = false;
 		previewColor = null;// no previews
 		className = null;	// no default class
+		floraType = null;	// no default flora type
 		id = 0;				// no default ID
 		order = 9;			// end of the line
 		
@@ -91,7 +92,7 @@ public class ResourceRule {
 		maxRain = 666;
 		minFlux = 0;
 		maxFlux = 666;
-		ecotope = null;
+		floraType = null;
 		flexRange = false;
 		taperedBid = false;
 		vigor = 16;
@@ -169,7 +170,8 @@ public class ResourceRule {
 		boolean flexRange = false;
 		boolean taperedBid = false;
 		
-		String className = null;					// floral class
+		String className = null;					// resource class
+		String floraType = null;					// required flora type
 		
 		int inColor = 0;
 		
@@ -203,6 +205,8 @@ public class ResourceRule {
 					// copy in all of the values we got
 					if (className != null)
 						thisRule.className = className;
+					if (floraType != null)
+						thisRule.floraType = floraType;
 					if (aMin != NO_VALUE)
 						thisRule.minAltitude = aMin;
 					if (dMin != NO_VALUE)
@@ -234,7 +238,7 @@ public class ResourceRule {
 					rules.add(thisRule);
 					thisRule.id = ++numRules;
 					
-					// now reset all System.out.println("read string for key " + thisKey);the parameters for the next rule
+					// now reset all the parameters for the next rule
 					aMin = NO_VALUE; aMax = NO_VALUE;
 					dMin = NO_VALUE; dMax = NO_VALUE;
 					tMin = NO_VALUE; tMax = NO_VALUE;
@@ -245,6 +249,8 @@ public class ResourceRule {
 					vigor = NO_VALUE;
 					order = NO_VALUE;
 					red = NO_VALUE; green = NO_VALUE; blue = NO_VALUE;
+					className = null;
+					floraType = null;
 					name = "";
 				} else
 					thisObject = "";
@@ -288,8 +294,8 @@ public class ResourceRule {
 				case "bid":
 					taperedBid = parser.getString().equals("tapered");
 					break;
-				case "ecotope":
-					ecotope = parser.getString();
+				case "flora":
+					floraType = parser.getString();
 					break;
 				default: // unrecognized attribute: see if the sub-class recognizes it
 					set_attribute(thisKey, parser.getString());
@@ -417,7 +423,7 @@ public class ResourceRule {
 		System.out.println(prefix + "      " + "flux:    " + String.format("%.2f", minFlux) + "-" + String.format("%.2f", maxFlux));
 		System.out.println(prefix + "      " + "rain:    " + String.format("%.1f", minRain) + "-" + String.format("%.1f", maxRain));
 		System.out.println(prefix + "      " + "temp:    " + minTemp + "-" + maxTemp);
-		System.out.println(prefix + "      " + "ecotope: " + (ecotope == null ? "NONE" : ecotope));
+		System.out.println(prefix + "      " + "flora:   " + (floraType == null ? "NONE" : floraType));
 		System.out.println(prefix + "      " + "range:   " + (flexRange ? "flexible" : "strict"));
 		System.out.println(prefix + "      " + "bid:     " + (taperedBid ? "tapered" : "flat"));
 		if (previewColor != null)
@@ -473,13 +479,12 @@ public class ResourceRule {
 	 * @param rain		rainfall (cm/y)
 	 * @param winter	low temp(degC)
 	 * @param summer	high temp(degC)
-	 * @param soil		soil type
 	 * 
 	 * @return			bid
 	 */
-	double bid(double alt, double depth, double flux, double rain, double winter, double summer, double soil) {
+	double bid(double alt, double depth, double flux, double rain, double winter, double summer) {
 
-		// range check vs altitude, hydration and temperature
+		// range check vs altitude/depth rain and temperature
 		double score = 0;
 		double v;
 		justification = "";

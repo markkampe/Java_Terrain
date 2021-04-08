@@ -6,44 +6,47 @@
     	},
 
 	{ "//": "construction stone" },
-	{ "name": "Sand Stone",
-	  "class": "Stone",
+	{ "name": "Sand Stone",	"class": "Stone",
+	  "alt": { "min": 300, "max": 600 },
+	  "vigor": 32,
 	  "color": [255,204,153]
 	},
-	{ "name": "Granite",
-	  "class":"Stone",
+	{ "name": "Granite",	"class":"Stone",
+	  "alt": { "min": 1000, "max": 2000 },
+	  "vigor": 32,
 	  "color": [224,224,224]
 	},
-	{ "name": "Basalt",
-	  "class":"Stone",
+	{ "name": "Basalt",	"class":"Stone",
 	  "color": [128,128,128]
 	},
-	{ "name": "Lime Stone",
-	  "class": "Stone",
+	{ "name": "Lime Stone",	"class": "Stone",
+	  "alt": { "min": 0, "max": 100 },
+	  "vigor": 32,
 	  "color": [229,255,204]
 	},
-	{ "name": "Marble",
-	  "class":"Stone",
+	{ "name": "Marble",	"class":"Stone",
 	  "color": [255,209,204]
 	},
 
 	{ "//": "useful metals" },
-	{ "name": "Copper Ore",
-	  "class":"Metal",
+	{ "name": "Copper Ore",	"class":"Metal",
 	  "color": [153,153,0]
 	},
-	{ "name": "Iron Ore",
-	  "class":"Metal",
+	{ "name": "Iron Ore",	"class":"Metal",
+	  "alt": { "min": 100, "max": 350 },
+	  "bid": "tapered",
+	  "vigor": 32,
 	  "color": [153,0,0]
 	},
 
 	{ "//": "precious minerals" },
-	{ "name": "Silver", 
-	  "class":"Precious",
+	{ "name": "Silver",	"class":"Precious",
 	  "color": [192,192,192]
 	},
-	{ "name": "Gold", 
-	  "class":"Precious",
+	{ "name": "Gold",	"class":"Precious",
+	  "alt": { "min": 1000, "max": 2000 },
+	  "flux": { "min": 5 },
+	  "vigor": 64,
 	  "color": [255,215,0]
 	}
     ]

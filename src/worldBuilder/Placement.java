@@ -14,6 +14,7 @@ public class Placement {
 	private static final int MAX_ID = 100;
 	private static final int NONE = 0;
 	
+	private Map map;
 	private Parameters parms;
 
 	private MeshPoint points[];	// MeshPoints
@@ -22,6 +23,7 @@ public class Placement {
 	private double erodeMap[];	// per mesh-point erosion
 	private double rainMap[];	// per mesh-point rainfall
 	private double fluxMap[];	// per mesh-point water flow
+	private double floraMap[];	// per mesh point floral ecotope
 	private double resources[];	// per MeshPoint assignments
 
 	private ResourceRule bidders[];	// resource bidding rules
@@ -32,6 +34,10 @@ public class Placement {
 	private Color colorMap[];	// per-rule preview colors
 	private String nameMap[];	// per-rule resource names
 	// private String classes;		// names of resource classes
+	
+	private static final int ECOTOPE_ANY = -1;
+	private static final int ECOTOPE_GREEN = -2;
+	private static final int ECOTOPE_NON_GREEN = -3;	// NONE, Desert, Alpine
 	
 	private static final int PLACEMENT_DEBUG = 2;
 
@@ -47,7 +53,8 @@ public class Placement {
 	 * @param resources ... array of per MeshPoint values (can be null)
 	 */
 	public Placement(String rulesFile, Map map, double resources[]) {
-	
+		this.map = map;
+		
 		// build up a list of ResourceRules
 		ResourceRule x = new ResourceRule("dummy");
 		x.loadRules(rulesFile);
@@ -76,6 +83,7 @@ public class Placement {
 			this.erodeMap = map.getErodeMap();
 			this.rainMap = map.getRainMap();
 			this.fluxMap = map.getFluxMap();
+			this.floraMap = map.getFloraMap();
 		}
 		this.resources = resources;
 		parms = Parameters.getInstance();
@@ -147,6 +155,36 @@ public class Placement {
 				if (bidders[r].className != null && bidders[r].className.equals(classNames[i]))
 					bidderClass[r] = i;
 		
+		// get the ecotope number for each bidding rule
+		String[] floraNames = map.floraNames;
+		int bidderFlora[] = new int[numRules];
+		for(int r = 0; r < numRules; r++) {
+			String f = bidders[r].floraType;
+			if (f == null || f.equals("ANY") || f.equals("any"))
+				bidderFlora[r] = ECOTOPE_ANY;
+			else if (f.equals("GREEN") || f.equals("green"))
+				bidderFlora[r] = ECOTOPE_GREEN;
+			else if (f.equals("NON-GREEN") || f.equals("non-green"))
+				bidderFlora[r] = ECOTOPE_NON_GREEN;
+			else	// look it up
+				for(int i = 0; i < floraNames.length; i++) {
+					if (floraNames[i] != null && floraNames[i].equals(f)) {
+						bidderFlora[r] = i;
+						break;
+					}
+				}
+		}
+		
+		// figure out which ecotopes are green
+		boolean floraGreen[] = new boolean[floraNames.length];
+		for(int i = 0; i < floraNames.length; i++) {
+			if (floraNames[i] == null || floraNames[i].equals("NONE"))
+				continue;
+			if (floraNames[i].equals("Desert") || floraNames[i].equals("Alpine"))
+				continue;
+			floraGreen[i] = true;
+		}
+		
 		// initialize the points to be populated
 		for(int i = 0; i < points.length; i++)
 			if (points[i].x >= x0 && points[i].x < x0+width &&
@@ -197,6 +235,7 @@ public class Placement {
 								(waterLevel[i] - (heightMap[i] - erodeMap[i])) : 0;
 				double rain = rainMap[i];
 				double flux = fluxMap[i];
+				int flora = (int) floraMap[i];
 
 				// figure out the (potentially goosed) temperature
 				double Twinter = parms.meanWinter();
@@ -211,6 +250,15 @@ public class Placement {
 					if (counts[bidderClass[r]] >= quotas[bidderClass[r]])
 						continue;	// already at quota
 					
+					// floral ecotope matching is a little to complex for bid()
+					int wants = bidderFlora[r];
+					if (wants == ECOTOPE_GREEN && !floraGreen[flora])
+						continue;
+					if (wants == ECOTOPE_NON_GREEN && floraGreen[flora])
+						continue;
+					if (wants != ECOTOPE_ANY && wants != flora)
+						continue;
+										
 					double bid = bidders[r].bid(alt, depth, flux, rain, Twinter - lapse, Tsummer - lapse);
 					if (parms.debug_level >= PLACEMENT_DEBUG || parms.rule_debug != null && parms.rule_debug.equals(bidders[r].ruleName)) {
 						String msg = "   RULE " + bidders[r].ruleName + " bids " +

@@ -6,11 +6,11 @@ all map generation parameters configurable.  Other files can be
 specified on the command line or in export dialogs, but these 
 are the configuration files that are used by default:
    * **worldBuilder.json** ... initial values for all parameters in the _Parameters_ singleton.
+   * **ecotope.json** ... definitions of flora-type sub-classes and the conditions they like
+   * **faunatope.json** ... definitions of fauna-type sub-classes and the conditions they like
+   * **geotope.json** ... definitions of mineral resources and where they are found
    * **Outside.json** ... descriptions of **RPGMaker Outside** tile sets for various levels, terrains, and plant covers.
    * **Overworld.json** ... descriptions of **RPGMaker Overworld** tile sets for various levels, terrains, and plant covers.
-   * **flora.json** ... definitions of flora-type sub-classes and the conditions they like
-   * **Outside_flora.json** ... definitions of flora-type sub-classes and the conditions they like
-   * **Overworld_flora.json** ... definitions of flora-type sub-classes and the conditions they like
 
 ## Default initial meshes
 One of the first inspirations we took from O'Leary was projecting

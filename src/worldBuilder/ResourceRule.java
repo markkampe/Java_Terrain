@@ -496,7 +496,7 @@ public class ResourceRule {
 		if (minDepth == 0 && maxDepth == 0)
 			v = 0;			// no depth requirement
 		else
-			v = (depth > 0) ? IMPOSSIBLE : range_bid(-depth, minDepth, maxDepth);
+			v = (depth < 0) ? IMPOSSIBLE : range_bid(depth, minDepth, maxDepth);
 		if (v < 0)
 			justification += "+depth";
 		score += v;

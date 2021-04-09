@@ -146,6 +146,10 @@ public class Parameters {
 	/** default export % mineral deps	*/	public int dRockPct;
 	/** default export % structural		*/	public int dRockMin;
 	/** default export % metal			*/	public int dRockMax;
+	
+	/** default export % mineral deps	*/	public int dFaunaPct;
+	/** default export % structural		*/	public int dFaunaMin;
+	/** default export % metal			*/	public int dFaunaMax;
 
 	/** default export overworld palette*/	public String OW_palette;
 	/** default overworld % ground	(by height)	*/	public int dHillMin;
@@ -252,6 +256,10 @@ public class Parameters {
 		dRockPct = 10;
 		dRockMin = 70;
 		dRockMax = 95;
+		// default fauna distribution
+		dFaunaPct = 10;
+		dFaunaMin = 35;
+		dFaunaMax = 90;
 		
 		descr_height = 4;
 		descr_width = 80;

@@ -1,23 +1,25 @@
 { 
   "Default Fauna": [
 	{ "name": "Fish",	 "class": "Fish",
-	  "depth": { "min": 5, "max": 50 },
-	  "vigor": 32,
+	  "depth": { "min": 10, "max": 100 },
+	  "vigor": 32,		"order": 4,
 	  "color": [127,0,255]
     	},
+
+	{ "name": "Birds",	"class": "Birds",
+	  "depth": { "max": 0 },
+	  "vigor": 32,		"order": 3,
+	  "color": [255,204,153]
+	},
 
 	{ "//": "small game" },
 	{ "name": "Rabbits",	"class": "Small Game",
 	  "flora": "Grassland",
-	  "vigor": 32,
+	  "vigor": 32,		"order": 2,
 	  "color": [204,204,0]
 	},
-	{ "name": "Birds",	"class": "Small Game",
-	  "vigor": 32,
-	  "color": [255,204,153]
-	},
 	{ "name": "Foxes",	"class": "Small Game",
-	  "flora": "Broadleaf",
+	  "flora": "Broadleaf",	"order": 2,
 	  "vigor": 32,
 	  "color": [255,102,102]
 	},
@@ -25,11 +27,11 @@
 	{ "//": "large game" },
 	{ "name": "Deer",	"class": "Large Game",
 	  "flora": "Broadleaf",
-	  "vigor": 32,
+	  "vigor": 32,		"order": 1,
 	  "color": [255,153,51]
 	},
 	{ "name": "Bear",	"class": "Large Game",
-	  "flora": "Conifers",
+	  "flora": "Conifers",	"order": 1,
 	  "vigor": 32,
 	  "color": [153,76,0]
 	}

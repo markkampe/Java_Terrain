@@ -41,12 +41,12 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 	private double width, height;	// selected area size (in pixels)
 	private boolean changes_made;	// we have displayed updates
 
-	private static final int FAUNA_NONE = 0;	// merely soil
-	private static final int FAUNA_FISH = 1;	// sand-stone, granite, etc
-	private static final int FAUNA_SMALL = 2;	// copper, iron, etc
-	private static final int FAUNA_LARGE = 3;	// gold, silver, etc
+	private static final int FAUNA_NONE = 0;
+	private static final int FAUNA_BIRDS = 1;
+	private static final int FAUNA_SMALL = 2;
+	private static final int FAUNA_LARGE = 3;
 	private static final int MAX_TYPES = 4;
-	private static final String[] faunaClasses = {"None", "Fish", "Small Game", "Large Game" };
+	private static final String[] faunaClasses = {"None", "Birds", "Small Game", "Large Game" };
 	
 	private static final String AUTO_NAME = "Rule Based";
 	private static final int AUTOMATIC = -1;
@@ -127,7 +127,7 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 		chooseFauna.addActionListener(this);
 	
 		// mineral coverage slider
-		fauna_pct = new JSlider(JSlider.HORIZONTAL, 0, 100, parms.dRockPct);
+		fauna_pct = new JSlider(JSlider.HORIZONTAL, 0, 100, parms.dFaunaPct);
 		fauna_pct.setMajorTickSpacing(10);
 		fauna_pct.setMinorTickSpacing(5);
 		fauna_pct.setFont(fontSmall);
@@ -152,8 +152,8 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 		fT3.setFont(fontLarge);
 		fPanel.add(fT3);
 		fauna_3 = new RangeSlider(0, 100);
-		fauna_3.setValue(parms.dRockMin);
-		fauna_3.setUpperValue(parms.dRockMax);
+		fauna_3.setValue(parms.dFaunaMin);
+		fauna_3.setUpperValue(parms.dFaunaMax);
 		fauna_3.setMajorTickSpacing(10);
 		fauna_3.setMinorTickSpacing(5);
 		fauna_3.setFont(fontSmall);
@@ -208,21 +208,28 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 			placer = new Placement(fauna_palette.getText(), map, faunaMap);
 		
 		// count and initialize the points to be populated
-		int point_count = 0;
+		double[] heightMap = map.getHeightMap();
+		double[] erodeMap = map.getErodeMap();
+		double[] waterLevel = map.getWaterLevel();
+		int land_points = 0, water_points = 0;
 		MeshPoint[] points = map.mesh.vertices;
 		for(int i = 0; i < faunaMap.length; i++)
 			if (points[i].x >= x0 && points[i].x < x0+width &&
 				points[i].y >= y0 && points[i].y < y0+height) {
 				faunaMap[i] = FAUNA_NONE;
-				point_count++;
+				if (waterLevel[i] < heightMap[i] - erodeMap[i])
+					land_points++;
+				else
+					water_points++;
 			}
 
 		// figure out the per-class quotas (in MeshPoints)
 		int quotas[] = new int[MAX_TYPES];
-		point_count = (point_count * fauna_pct.getValue())/100;
-		quotas[FAUNA_LARGE] = (point_count * (100 - fauna_3.getUpperValue()))/100;
-		quotas[FAUNA_FISH] = (point_count * fauna_3.getValue())/100;
-		quotas[FAUNA_SMALL] = point_count - (quotas[FAUNA_LARGE] + quotas[FAUNA_FISH]);
+		land_points = (land_points * fauna_pct.getValue())/100;
+		quotas[FAUNA_LARGE] = (land_points * (100 - fauna_3.getUpperValue()))/100;
+		quotas[FAUNA_BIRDS] = (land_points * fauna_3.getValue())/100;
+		quotas[FAUNA_SMALL] = land_points - (quotas[FAUNA_LARGE] + quotas[FAUNA_BIRDS]);
+		quotas[FAUNA_NONE] = (water_points * fauna_pct.getValue())/100;
 		
 		// assign flora types for each MeshPoint
 		classCounts = placer.update(x0, y0, height, width, quotas, faunaClasses);
@@ -294,8 +301,17 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 	 * unregister our map listener and close the dialog
 	 */
 	private void cancelDialog() {
+		// back out any in progress changes
+		map.setFaunaColors(prevColors);
+		map.setFaunaNames(prevNames);
+		map.setFaunaMap(prevFauna);
+		map.repaint();
+		
+		// release our hold on selection
 		map.selectMode(Map.Selection.ANY);
 		map.removeMapListener(this);
+		
+		// and close the window
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
@@ -312,8 +328,11 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			// remember the chosen fauna palette
+			// remember the chosen fauna palette/distribution
 			parms.fauna_rules = fauna_palette.getText();
+			parms.dFaunaPct = fauna_pct.getValue();
+			parms.dFaunaMin = fauna_3.getValue();
+			parms.dFaunaMax = fauna_3.getUpperValue();
 			
 			// check-point these updates
 			for(int i = 0; i < faunaMap.length; i++)
@@ -326,7 +345,7 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 				// report the changes
 				if (parms.debug_level > 0) {
 					System.out.println("Fauna Placement (" + ResourceRule.ruleset + 
-									   "): Fish/Small/Large = " + classCounts[FAUNA_FISH] + 
+									   "): Birds/Small/Large = " + classCounts[FAUNA_BIRDS] + 
 									   "/" + classCounts[FAUNA_SMALL] +
 									   "/" + classCounts[FAUNA_LARGE]);
 				}
@@ -345,10 +364,6 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 			}
 			placer = null;
 		} else if (e.getSource() == cancel) {
-			map.setFaunaColors(prevColors);
-			map.setFaunaNames(prevNames);
-			map.setFaunaMap(prevFauna);
-			map.repaint();
 			cancelDialog();
 		} else {	// most likely a menu item
 			JMenuItem item = (JMenuItem) e.getSource();

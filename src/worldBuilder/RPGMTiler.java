@@ -241,7 +241,7 @@ public class RPGMTiler implements Exporter {
 	RPGMRule winner(int level, int row, int col) {
 		// per point attributes for tile bidding
 		int alt = 0, terrain = 0;
-		double lapse = 0.0, depth = 0.0, soilType = 0.0;
+		double lapse = 0.0, depth = 0.0;
 		double flux = 0.0, rain = 0.0;	// unused for RPGM Tile rules
 
 		// collect the bids from each rule

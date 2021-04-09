@@ -9,16 +9,7 @@ import javax.swing.JFileChooser;
 public class FoundationExport extends ExportBase implements ActionListener {
 	private FoundExporter exporter = null;
 	
-	//private JSlider flora_pct;		// percent plant cover
-	//private RangeSlider flora_3;	// types of plant cover
-	//private JSlider goose_temp;		// temperature up/down
-	//private JSlider goose_hydro1;	// hydration up/down
-	//private JSlider goose_hydro2;	// hydration multiplier
-	
 	// state variables to advice us of need to recompute
-	boolean floraChanged = false;	// flora distribution has changed
-	boolean hydroChanged = false;	// hydration has changed
-	boolean tempChanged = false;	// temperatures have changed
 	private boolean exported = false;
 	
 	/*

@@ -289,8 +289,17 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	 * unregister our map listener and close the dialog
 	 */
 	private void cancelDialog() {
+		// back out any in-progress changes
+		map.setRockColors(prevColors);
+		map.setRockNames(prevNames);
+		map.setSoilMap(prevSoil);
+		map.repaint();
+		
+		// give up our selection
 		map.selectMode(Map.Selection.ANY);
 		map.removeMapListener(this);
+		
+		// close the window
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
@@ -307,8 +316,11 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			// remember the chosen flora palette
+			// remember the chosen flora palette and percentages
 			parms.flora_rules = rock_palette.getText();
+			parms.dRockPct = mineral_pct.getValue();
+			parms.dRockMin = minerals_3.getValue();
+			parms.dRockMax = minerals_3.getUpperValue();
 			
 			// check-point these updates
 			for(int i = 0; i < soilMap.length; i++)
@@ -340,10 +352,6 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			}
 			placer = null;
 		} else if (e.getSource() == cancel) {
-			map.setRockColors(prevColors);
-			map.setRockNames(prevNames);
-			map.setSoilMap(prevSoil);
-			map.repaint();
 			cancelDialog();
 		} else {	// most likely a menu item
 			JMenuItem item = (JMenuItem) e.getSource();

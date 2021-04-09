@@ -269,8 +269,11 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			// remember the chosen flora palette
+			// remember the chosen palette and percentages
 			parms.flora_rules = flora_palette.getText();
+			parms.dFloraPct = flora_pct.getValue();
+			parms.dFloraMin = flora_3.getValue();
+			parms.dFloraMax = flora_3.getUpperValue();
 			
 			// check-point these updates
 			for(int i = 0; i < floraMap.length; i++)

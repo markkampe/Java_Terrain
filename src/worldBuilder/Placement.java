@@ -231,8 +231,9 @@ public class Placement {
 				// gather bidding attributes for this point
 				int alt = (int) parms.altitude(heightMap[i] - erodeMap[i]);
 				double lapse = alt * parms.lapse_rate;
-				double depth = (waterLevel[i] > (heightMap[i] - erodeMap[i])) ?
-								(waterLevel[i] - (heightMap[i] - erodeMap[i])) : 0;
+				double depth = 0;
+				if (waterLevel[i] > (heightMap[i] - erodeMap[i]))
+					depth = parms.height(waterLevel[i] - (heightMap[i] - erodeMap[i]));
 				double rain = rainMap[i];
 				double flux = fluxMap[i];
 				int flora = (int) floraMap[i];

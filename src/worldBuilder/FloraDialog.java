@@ -28,6 +28,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	private double prevFlora[];		// saved flora Map
 	private Color prevColors[];		// saved type to preview color map
 	int classCounts[];				// placement counts by class
+	private int chosen_flora;		// flora type being placed
 	
 	// widgets
 	private JButton accept;			// accept these updates
@@ -36,6 +37,9 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	private JButton chooseFlora;	// browse for flora placement trulesnewColors
 	private JSlider flora_pct;		// fraction of area to be covered
 	private RangeSlider flora_3;	// grass/brush/tree distribution
+	JLabel mode;					// auto/manual mode indication
+	JMenu modeMenu;					// mode selection menu
+	JMenuItem ruleMode;				// automatic (rule-based) selection
 	
 	// selected region info
 	private boolean selected;		// a region has been selected
@@ -44,6 +48,9 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	private double width, height;	// selected area size (in pixels)
 	
 	private boolean progressive;	// multiple selects per accept
+	
+	private static final String AUTO_NAME = "Rule Based";
+	private static final int AUTOMATIC = -1;
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -77,6 +84,28 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		locals.setLayout(new BoxLayout(locals, BoxLayout.PAGE_AXIS));
 		locals.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 15));
 		
+		// manual vs rule-based assignment
+		JPanel mPanel = new JPanel(new GridLayout(1,3));
+		modeMenu = new JMenu("Flora Selection");
+		ruleMode = new JMenuItem(AUTO_NAME);
+		modeMenu.add(ruleMode);
+		ruleMode.addActionListener(this);
+		modeMenu.addSeparator();
+		String[] choices = map.floraNames;
+		for(int i = 0; i < choices.length; i++) 
+			if (choices[i] != null) {
+				JMenuItem item = new JMenuItem(choices[i]);
+				modeMenu.add(item);
+				item.addActionListener(this);
+			}
+		JMenuBar bar = new JMenuBar();
+		bar.add(modeMenu);
+		mPanel.add(bar);
+		mode = new JLabel("");
+		mPanel.add(mode);
+		mPanel.add(new JLabel(" "));
+		locals.add(mPanel);
+
 		// flora rules selection field
 		flora_palette = new JTextField(parms.flora_rules);
 		JLabel fTitle = new JLabel("Flora Palette", JLabel.CENTER);
@@ -162,7 +191,11 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		map.addMapListener(this);	
 		map.selectMode(Map.Selection.RECTANGLE);
 		selected = map.checkSelection(Map.Selection.RECTANGLE);
+		
+		// we start out with rule-based placement
 		progressive = false;
+		chosen_flora = AUTOMATIC;
+		mode.setText(AUTO_NAME);
 	}
 	
 	/**
@@ -200,6 +233,21 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		map.repaint();
 		changes_made = true;
 	}
+	
+	/**
+	 * set all points in the active region to the selected flora type
+	 */
+	private void manualPlacement() {
+		MeshPoint[] points = map.mesh.vertices;
+		for(int i = 0; i < floraMap.length; i++)
+			if (points[i].x >= x0 && points[i].x < x0+width &&
+				points[i].y >= y0 && points[i].y < y0+height) {
+				floraMap[i] = chosen_flora;
+			}
+		
+		map.setFloraMap(floraMap);
+		map.repaint();
+	}
 
 	/**
 	 * called whenever a region selection changes
@@ -225,7 +273,10 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		width = dx;
 		height = dy;
 		if (complete)
-			placeFlora();
+			if (chosen_flora == AUTOMATIC)
+				placeFlora();
+			else
+				manualPlacement();
 		return true;
 	}
 
@@ -278,15 +329,18 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			// check-point these updates
 			for(int i = 0; i < floraMap.length; i++)
 				prevFlora[i] = floraMap[i];
-			prevColors = placer.previewColors();
-			changes_made = false;
 			
-			// report the changes
-			if (parms.debug_level > 0) {
-				System.out.println("Flora Placement (" + ResourceRule.ruleset + 
-								   "): Grass/Brush/Trees = " + classCounts[FLORA_GRASS] + 
-								   "/" + classCounts[FLORA_BRUSH] +
-								   "/" + classCounts[FLORA_TREE]);
+			if (chosen_flora == AUTOMATIC) {
+				prevColors = placer.previewColors();
+				changes_made = false;
+				
+				// report the changes
+				if (parms.debug_level > 0) {
+					System.out.println("Flora Placement (" + ResourceRule.ruleset + 
+									   "): Grass/Brush/Trees = " + classCounts[FLORA_GRASS] + 
+									   "/" + classCounts[FLORA_BRUSH] +
+									   "/" + classCounts[FLORA_TREE]);
+				}
 			}
 		} else if (e.getSource() == chooseFlora) {
 			FileDialog d = new FileDialog(this, "Floral Palette", FileDialog.LOAD);
@@ -302,7 +356,29 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			}
 		} else if (e.getSource() == cancel) {
 			cancelDialog();
+		} else {	// most likely a menu item
+			JMenuItem item = (JMenuItem) e.getSource();
+			String chosen = item.getText();
+			if (item == ruleMode) {
+				// go back to rule-based selection
+				chooseFlora.setEnabled(true);
+				flora_palette.setEnabled(true);
+				flora_pct.setEnabled(true);
+				flora_3.setEnabled(true);
+				chosen_flora = AUTOMATIC;
+				progressive = false;
+			} else {
+				// manual choice and placement
+				chooseFlora.setEnabled(false);
+				flora_palette.setEnabled(false);
+				flora_pct.setEnabled(false);
+				flora_3.setEnabled(false);
+				chosen_flora = map.getFloraType(chosen);
+				progressive = true;
+			}
+			mode.setText(chosen);
 		}
+
 	}
 
 	/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }

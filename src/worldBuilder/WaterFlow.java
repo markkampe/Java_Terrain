@@ -144,7 +144,7 @@ public class WaterFlow {
 				// my net incoming flows to my downhill neightbor
 				fluxMap[d] += fluxMap[x];
 				
-				// calculate the down-hill water velocity
+				// our flow velocity is the fastest of our tributaries
 				double v = velocity(drainage.slopeMap[x]);
 				if (velocityMap[d] < v)
 					velocityMap[d] = v;
@@ -161,41 +161,44 @@ public class WaterFlow {
 					String.format("x=%4d, v=%6.3f, f=%6.3f", x, v, fluxMap[x]);
 				
 				if (v >= Ve) {	
-					// erosion doesn't happen in lakes, and only up to max capacity
+					// maximum carrying capacity (per second) of this river
 					double can_hold = Smax * fluxMap[x];
 					double taken = 0.0;
+					// no erosion if we are in a lake or we are already carrying max
 					if (drainage.outlet[x] == UNKNOWN && suspended[x] < can_hold) {
-						double can_take = erosion((int) soilMap[x], v) * fluxMap[x];
+						// max possible erosion at this point from this water (per second)
+						double can_take = erosion_rate((int) soilMap[x], v) * can_hold;
+						// but we cannot take more than we can hold
 						taken = Math.min(can_take, can_hold - suspended[x]);
-						removal[x] += taken;
+						removal[x] += taken;	// M^3/second of rock removal
 					}
 					
 					// downhill gets our incoming plus our erosion
 					suspended[d] += suspended[x] + taken;
 					
 					// see if this is the worst erosion on the map
-					double delta_z = parms.z(erosion(x));
-					if (erodeMap[x] + delta_z > map.max_erosion)
-						map.max_erosion = erodeMap[x] + delta_z;
+					erodeMap[x] += parms.z(annual_erosion(x));
+					if (erodeMap[x] > map.max_erosion)
+						map.max_erosion = erodeMap[x];
 					
 					if (debug_log != null) {
-						msg += String.format(", e=%6.4f, susp[%4d]=%6.4f", taken, d, suspended[d]);
+						msg += String.format(", e=%.6f, susp[%4d]=%.6f", taken, d, suspended[d]);
 						if (!drainage.oceanic[d])
 							msg += String.format(", vin=%6.3f, vout=%6.3f", velocityMap[x], velocityMap[d]);
 						else	
 							msg += " (flows into the ocean)";
 					}
-				} else if (suspended[x] > 0) {
-					double dropped = precipitation(v) * suspended[x];
+				} else if (suspended[x] > 0) {	// M^3/sec of incoming material
+					double dropped = fraction_dropped(v) * suspended[x];	// M^3/sec
 					removal[x] -= dropped;
 					suspended[d] += suspended[x] - dropped;
 					if (debug_log != null)
 						msg += String.format(", d=%6.4f, susp[%4d]=%6.4f", dropped, d, suspended[d]);
 					
 					// see if this is the deepest sedimentation on the map
-					double delta_z = parms.z(sedimentation(x));
-					if (erodeMap[x] - delta_z < -map.max_deposition)
-						map.max_deposition = -(erodeMap[x] - delta_z);
+					erodeMap[x] -= parms.z(annual_sedimentation(x));
+					if (erodeMap[x] < -map.max_deposition)
+						map.max_deposition = -erodeMap[x];
 				} else
 					msg = null;	// no deposition or erosion
 			}
@@ -211,7 +214,7 @@ public class WaterFlow {
 								parms.height(waterLevel[x]), Parameters.unit_z);
 				} else {	// escape point is trivially under water
 					// FIX water depth at exit point determined by flow
-					waterLevel[x] = heightMap[x] - erodeMap[x] + parms.z(EXIT_DEPTH);
+					waterLevel[x] = heightMap[x] -    erodeMap[x] + parms.z(EXIT_DEPTH);
 					if (debug_log != null)
 						msg += String.format("\n\tflood exit point %d@%.2f%s",
 											x, parms.height(waterLevel[x]), Parameters.unit_z);
@@ -252,7 +255,7 @@ public class WaterFlow {
 	 * @param index of point being checked
 	 * @return meters of erosion
 	 */
-	public double erosion(int index) {
+	public double annual_erosion(int index) {
 		if (removal[index] <= 0)
 			return 0.0;
 		return removal[index] * YEAR / area;
@@ -263,7 +266,7 @@ public class WaterFlow {
 	 * @param index of the point being checked
 	 * @return meters of deposited sediment
 	 */
-	public double sedimentation(int index) {
+	public double annual_sedimentation(int index) {
 		/*
 		 * I do two strange things here:
 		 * 
@@ -281,6 +284,10 @@ public class WaterFlow {
 		 *     always deposits silt in proportion to flux (and inverse
 		 *     proportion to speed).
 		 */
+		// make sure that we have computed sedimentation
+		if (velocityMap == null || fluxMap == null)
+			return 0.0;
+		
 		final double EXAGGERATE = 4.0;	// this looks good :-)
 		
 		double sediment = 0.0;
@@ -363,7 +370,7 @@ public class WaterFlow {
 	 * @param velocity of the water
 	 * @return M^3 of eroded material per M^3 of water
 	 */
-	private double erosion(int mineral, double velocity) {
+	private double erosion_rate(int mineral, double velocity) {
 		
 		if (velocity <= parms.Ve)
 			return 0.0;			// slow water contains no suspended soil
@@ -380,7 +387,7 @@ public class WaterFlow {
 	 * @param velocity of the water
 	 * @return fraction of suspended load that will fall out
 	 */
-	private double precipitation(double velocity) {
+	private double fraction_dropped(double velocity) {
 		if (velocity >= parms.Ve)
 			return 0.0;			// fast water drops nothing
 		double precip = parms.Cd;

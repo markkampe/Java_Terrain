@@ -80,7 +80,7 @@ public class WaterFlow {
 		double[] rainMap = map.getRainMap();
 		double[] incoming = map.getIncoming();
 		double[] soilMap = map.getSoilMap();
-		double[] fluxMap = map.getFluxMap();
+		fluxMap = map.getFluxMap();
 		
 		// allocate our internal maps
 		removal = new double[mesh.vertices.length];
@@ -193,7 +193,7 @@ public class WaterFlow {
 					removal[x] -= dropped;
 					suspended[d] += suspended[x] - dropped;
 					if (debug_log != null)
-						msg += String.format(", d=%6.4f, susp[%4d]=%6.4f", dropped, d, suspended[d]);
+						msg += String.format(", d=%.6f, susp[%4d]=%.6f", dropped, d, suspended[d]);
 					
 					// see if this is the deepest sedimentation on the map
 					erodeMap[x] -= parms.z(annual_sedimentation(x));
@@ -284,10 +284,6 @@ public class WaterFlow {
 		 *     always deposits silt in proportion to flux (and inverse
 		 *     proportion to speed).
 		 */
-		// make sure that we have computed sedimentation
-		if (velocityMap == null || fluxMap == null)
-			return 0.0;
-		
 		final double EXAGGERATE = 4.0;	// this looks good :-)
 		
 		double sediment = 0.0;

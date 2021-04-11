@@ -242,12 +242,12 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 			new_height[i] += delta_z;
 			
 			// perform incremental erosion 
-			double e_meters = e_mult * map.waterflow.erosion(i);
+			double e_meters = e_mult * map.waterflow.annual_erosion(i);
 			if (e_meters > 0)
 				erodeMap[i] = old_erosion[i] + parms.z(e_meters);
 			
 			// perform incremental sediment deposition
-			double d_meters = d_mult * map.waterflow.sedimentation(i);
+			double d_meters = d_mult * map.waterflow.annual_sedimentation(i);
 			if (d_meters > 0)
 				erodeMap[i] = old_erosion[i] - parms.z(d_meters);
 		}

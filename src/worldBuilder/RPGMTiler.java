@@ -363,6 +363,7 @@ public class RPGMTiler implements Exporter {
 
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
+				grid[i][j] = 0;		// start out empty
 				RPGMRule r = winner(level, i, j);
 				if (r != null)
 					grid[i][j] = r.baseTile;

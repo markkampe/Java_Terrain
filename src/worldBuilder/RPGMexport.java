@@ -88,7 +88,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			need_alt_3 = false;
 			need_depths = true;
 			need_slopes = false;
-		} else { // Overworld ... few levels, but more types		// start out with from-the-model hydration
+		} else { // Overworld ... few levels, but more types
 			need_levels = false;
 			need_alt_3 = true;
 			need_alt_n = false;

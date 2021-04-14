@@ -20,6 +20,11 @@ public class RPGMTiler implements Exporter {
 
 	private static final int WATER_SHADE_MIN = 96;	// for previews
 	private static final int WATER_SHADE_DELTA = 80;
+	
+	public static final int FLORA_NONE = 0;
+	public static final int FLORA_GRASS = 1;
+	public static final int FLORA_BRUSH = 2;
+	public static final int FLORA_TREES = 3;
 
 	private Parameters parms;	// general parameters
 	RPGMRule rules;				// tile placement rules 
@@ -51,13 +56,17 @@ public class RPGMTiler implements Exporter {
 	public int[][] floraTypes;
 	/** mapping from levels to TerrainTypes	*/
 	public int[] typeMap;
-	/** map from flora types to class names	*/
+	/** map from ecotope types to names	*/
 	public String[] floraNames;
+	
+	/** fraction of tiles to be covered by each flora class */
+	private double[] floraQuotas;
 
 	private RPGMRule bidders[];		// list of bidders for the current level
 	private	int numRules = 0;		// number of rules eleigible to bid
 
 	private int bidder_ecotope[];	// (integer) ectotope for each bidder
+	private double bidder_quota[];	// (double) max coverage for each bidder
 	private boolean[] floraGreen;	// which ecotope classes support grass
 
 	//private double minHeight;	// lowest altitude in export
@@ -88,6 +97,23 @@ public class RPGMTiler implements Exporter {
 			if (r.terrain == TerrainType.SLOPE)
 				useSLOPE = true;
 		}
+		
+		// default quotas - everyone can bid on every tile
+		floraQuotas = new double[4];
+		for(int i = 0; i < floraQuotas.length; i++)
+			floraQuotas[i] = 1.0;
+	}
+	
+	/**
+	 * set the fraction of tiles for each flora class
+	 * @param grass ... fraction of squares eligible for grass
+	 * @param brush ... fraction of squares eligible for brush
+	 * @param trees ... fraction of squares eligible for trees
+	 */
+	public void floraQuotas(double grass, double brush, double trees) {
+		floraQuotas[FLORA_GRASS] = grass;
+		floraQuotas[FLORA_BRUSH] = brush;
+		floraQuotas[FLORA_TREES] = trees;
 	}
 
 	/**
@@ -197,9 +223,10 @@ public class RPGMTiler implements Exporter {
 
 		bidders = new RPGMRule[MAXRULES];
 		bidder_ecotope = new int[MAXRULES];
+		bidder_quota = new double[MAXRULES];
 		numRules = 0;
 
-		// enumerate all elibible bidding rules
+		// enumerate all eligible bidding rules
 		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
 			RPGMRule r = (RPGMRule) it.next();
 			if (r.level != level)				// rule is not for this level
@@ -227,6 +254,18 @@ public class RPGMTiler implements Exporter {
 							break;
 						}
 			}
+			
+			// get the tile quota for this rule's flora class
+			bidder_quota[numRules] = 1.0;
+			if (r.className != null) {
+				if (r.className.equals("Grass"))
+					bidder_quota[numRules] = floraQuotas[FLORA_GRASS];
+				else if (r.className.equals("Brush"))
+					bidder_quota[numRules] = floraQuotas[FLORA_BRUSH];
+				else if (r.className.equals("Tree"))
+					bidder_quota[numRules] = floraQuotas[FLORA_TREES];
+			}
+
 			numRules++;
 		}
 	}
@@ -254,6 +293,10 @@ public class RPGMTiler implements Exporter {
 
 			// multi-tile rules only bid empty UL group corners
 			if ((row % r.height) != 0 || (col % r.width) != 0)
+				continue;
+			
+			// see if this bidder has a limited quota
+			if (bidder_quota[b] < 1.0 && Math.random() > bidder_quota[b])
 				continue;
 
 			// give this bid a shot at every tile in the group

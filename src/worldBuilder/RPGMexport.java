@@ -28,7 +28,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	private RPGMTiler tiler = null;
 	private boolean exported = false;
 	private boolean levelsChanged;
-	private boolean floraChanged;
 
 	// dialog control options
 	private boolean need_palette; 	// tile palette selection
@@ -37,7 +36,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	private boolean need_alt_n; 	// slider for pit/ground/mound levels
 	private boolean need_slopes; 	// slider for ground/hill/mountain
 	private boolean need_depths; 	// slider for passable/shallow/deep
-	private boolean need_flora_pct;	// slider for percentage plant cover
 	private boolean need_flora_3;	// slider for tall grass/brush/trees
 
 	// control widgets
@@ -45,7 +43,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	private RangeSlider altitudes; // ground, hill, mountain OR pit, ground, mound
 	private RangeSlider slopes; // ground, hill, mountain
 	private RangeSlider depths; // marsh, shallow, deep
-	private JSlider flora_pct;	// percent plant cover
 	private RangeSlider flora_3;	// types of plant cover
 	private JTextField palette; // tile set description file
 	private JButton choosePalette; // select palette file
@@ -96,13 +93,13 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			need_depths = true;
 		}
 		need_palette = true;
-		need_flora_pct = true;
 		need_flora_3 = true;
 
 		// add our controls to those in the base class
 		create_GUI();
 		setVisible(true);
 		
+		colorFlora = map.getFloraColors();
 		if (parms.debug_level >= EXPORT_DEBUG)
 			System.out.println("new RPGMexport(" + format + ")");
 	}
@@ -257,28 +254,8 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			depths.addChangeListener(this);
 		}
 		
-		if (need_flora_pct || need_flora_3)
-			locals.add(new JLabel("     "));
-		
-		if (need_flora_pct) {	// create a plant percentage slider
-			flora_pct = new JSlider(JSlider.HORIZONTAL, 0, 100, parms.dFloraPct);
-			flora_pct.setMajorTickSpacing(10);
-			flora_pct.setMinorTickSpacing(5);
-			flora_pct.setFont(fontSmall);
-			flora_pct.setPaintTicks(true);
-			flora_pct.setPaintLabels(true);
-			JLabel fTitle = new JLabel("Plant Cover (percentage)");
-			fTitle.setFont(fontSmall);
-
-			// add this to the local panel
-			locals.add(new JLabel("    "));
-			locals.add(flora_pct);
-			locals.add(fTitle);
-			
-			flora_pct.addChangeListener(this);
-		}
-		
 		if (need_flora_3) { // create flora RangeSlider
+			locals.add(new JLabel("     "));
 			JPanel fTitle = new JPanel(new GridLayout(1, 3));
 			JLabel fT1 = new JLabel("Tall Grass");
 			fT1.setFont(fontLarge);
@@ -331,9 +308,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	
 		if (source == levels || source == altitudes || source == slopes || source == depths) {
 			levelsChanged = true;
-			floraChanged = true;
-		} else if (source == flora_pct || source == flora_3)
-			floraChanged = true;
+		}
 	}
 	
 	/**
@@ -364,30 +339,25 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 				exported = false;
 		}
 		if (!exported) {
+			double trees = 1.0 - (flora_3.getUpperValue()/100.0);
+			double brush = (flora_3.getUpperValue() - flora_3.getValue())/100.0;
+			tiler.floraQuotas(1.0, brush, trees);
 			export(tiler);
 			
 			exported = true;
 			newSelection = false;
 			levelsChanged = true;
-			floraChanged = need_flora_pct || need_flora_3;
-
 		}
 		
 		if (levelsChanged) {
 			levelMap();
 			levelsChanged = false;
-			floraChanged = need_flora_pct || need_flora_3;
 		}
 		
 		// topo previews do not require hydration and flora updates
 		if (e.getSource() == previewT && selected) {
 			tiler.preview(Exporter.WhichMap.HEIGHTMAP, colorTopo);
 			return;
-		}
-		
-		if (floraChanged) {
-			floraMap();
-			floraChanged = false;
 		}
 		
 		if (e.getSource() == previewF && selected) {
@@ -433,9 +403,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 				if (palette != null)
 					parms.Out_palette = palette.getText();
 				
-				if (flora_pct != null) {
-					parms.dFloraPct = flora_pct.getValue();
-				}
 				if (flora_3 != null) {
 					parms.dFloraMin = flora_3.getValue();
 					parms.dFloraMax = flora_3.getUpperValue();
@@ -601,32 +568,5 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		RPGMLeveler leveler = new RPGMLeveler();
 		int[][] levelMap = leveler.getLevels(tiler, altMap, depthMap, slopeMap);
 		tiler.levelMap(levelMap, typeMap);
-	}
-	
-	/**
-	 * determine the owning plant type for every square
-	 */
-	private void floraMap() {
-		
-		/*
-		if (format.equals("Outside")) {
-			// we have to re-do bidding for each tile
-			RPGMFlora flora = new RPGMFlora(tiler, flora_palette.getText());
-			
-			// set-up the quotas and names
-			String[] floraClasses = {"Tree", "Brush", "Grass" };
-			int quotas[] = new int[3];
-			int total = (tiler.y_points * tiler.x_points * flora_pct.getValue()) / 100;
-			quotas[0] = (total * (100 - flora_3.getUpperValue())) / 100;	// trees
-			quotas[2] = (total * flora_3.getValue()) / 100;				// grasses
-			quotas[1] = total - (quotas[0] + quotas[2]);
-			
-			// assign flora type to every tile
-			tiler.rpgmFloraMap(flora.getFlora(floraClasses, quotas), flora.getFloraNames());
-		} else {
-			// ExportBase has already up-loaded per-tile flora
-		}
-		*/
-		colorFlora = map.getFloraColors();
 	}
 }

@@ -75,7 +75,7 @@ public class FoundationExport extends ExportBase implements ActionListener {
 		if (!exported) {
 			export(exporter);
 			
-			// FIX implement entry/exit point selection
+			// TODO implement entry/exit point selection/dialog
 			exporter.entryPoint(  2,  84,   2,  62);	// bogus value for testing
 			exporter.entryPoint(  2,  18,   2,  40);	// bogus value for testing
 			exporter.entryPoint(100,   2,  31,   2);	// bogus value for testing

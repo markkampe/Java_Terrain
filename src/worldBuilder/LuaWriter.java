@@ -321,10 +321,7 @@ public class LuaWriter {
 			luaFile.write(indent + "{\n");
 			luaFile.write(plus4 + "-- Create " + comment + "\n");
 			luaFile.write(plus4 + "DensityMap = \"" + name + "\",\n");
-			if (density == 1.0)		// FIX - just to make output identical to sample
-				luaFile.write(plus4 + "Density = 1,\n");
-			else
-				luaFile.write(String.format("%sDensity = %3.1f,\n", plus4, density));
+			luaFile.write(String.format("%sDensity = %3.1f,\n", plus4, density));
 			luaFile.write(plus4 + "PrefabConfigList = {\n");
 			for(int i = 0; i < maps.length; i++) {
 				luaFile.write(maps[i].toString(plus8));

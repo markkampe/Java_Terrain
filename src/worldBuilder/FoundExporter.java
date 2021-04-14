@@ -29,8 +29,8 @@ public class FoundExporter implements Exporter {
 	private double[][] fauna;		// per point game IDs
 	private String[] faunaNames;	// per type name strings
 	
-	private double dDecid = 0.9;	// FIX add deciduous density slider
-	private double dConif = 0.9;	// FIX add coniferous density slider
+	private double dDecid = 0.9;	// XXX where to get deciduous density
+	private double dConif = 0.9;	// XXX where to get coniferous density
 	
 	// calculated information for our output
 	private static final int XY_POINTS = 1024;	// Foundation map size
@@ -285,7 +285,7 @@ public class FoundExporter implements Exporter {
 				img.setRGB(x, y, SAND_COLOR);
 		for(int i = 0; i < grass_resources.length; i++)
 			add_to_map(img, flora, grass_resources[i], floraNames, GRASS_COLOR);
-		// FIX - they want a fairly wide brown blurred transition
+		// TODO - they want a fairly wide brown blurred transition
 		ok &= createPng(img, dirname + "/maps/material_mask_" + parms.map_name + ".png");
 		
 		// create the fish map
@@ -505,7 +505,7 @@ public class FoundExporter implements Exporter {
 						img.setRGB(x+j, y+i, rgb);
 						points++;
 					}
-				// FIX see if any of the corners should be rounded
+				// TODO round corners of scaleXscale boxes
 			}
 		}
 		

@@ -24,7 +24,6 @@
 	{ "name": "rocks",	"level": 1, "base": 3680,
 	  "flora": "NON-GREEN",
 	  "terrain": "land",
-	  "soil": { "min": 0.5, "max": 2.5 },
 	  "vigor": 0
 	},
 	{ "name": "snow",	"level": 1, "base": 3968,
@@ -119,7 +118,6 @@
 	{ "name": "mountain",	"level": 2, "base": 3536,
 	  "terrain": "mountain",	"flora": "NON-GREEN",
 	  "temp": { "min": 0 },
-	  "soil": { "max": 0.5 },
 	  "vigor": 16
 	},
 	{ "name": "greenmountain", "level": 2, "base": 3536,
@@ -130,7 +128,6 @@
 	{ "name": "rockmountain", "level": 2, "base": 3152,
 	  "terrain": "mountain",	"flora": "NON-GREEN",
 	  "temp": { "min": 0 },
-	  "soil": { "min": 0.5, "max": 2.5 },
 	  "vigor": 16
 	},
 	{ "name": "snowmountain", "level": 2, "base": 4348,
@@ -143,13 +140,11 @@
 	{ "name": "peak",	"level": 4, "base": 26, "stamp":"2x2", "surround": 42,
 	  "terrain": "mountain",	"flora": "NON-GREEN",
 	  "temp": { "min": 0 },
-	  "soil": { "max": 0.51 },
 	  "vigor": 16
 	},
 	{ "name": "stonepeak",	"level": 4, "base": 283, "stamp":"2x2", "surround": 299,
 	  "terrain": "mountain",	"flora": "NON-GREEN",
 	  "temp": { "min": 0 },
-	  "soil": { "min": 0.49 },
 	  "vigor": 16
 	},
 	{ "name": "greenpeak",	"level": 4, "base": 285, "stamp":"2x2", "surround": 301,

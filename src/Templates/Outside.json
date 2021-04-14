@@ -24,7 +24,6 @@
 	{ "name": "lo-rocks", "level": 1, "base": 3296,
 	  "flora": "NON-GREEN",
 	  "terrain": "lowlands",
-	  "//": "'soil: {'min': 0.5, 'max': 2.5 }",
 	  "vigor": 0
 	},
 	{ "name": "lo-snow", "level": 1, "base": 3968,

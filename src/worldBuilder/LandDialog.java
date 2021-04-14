@@ -252,9 +252,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 				erodeMap[i] = old_erosion[i] - parms.z(d_meters);
 		}
 		
-		// if erosion debug has been enabled, flush the log
-		// map.waterflow.flushLog(); FIX waterflow debug log
-		
 		// instantiate these updates and redraw the map
 		map.setHeightMap(new_height);
 		// no-need to update erodeMap, that being edit-in-place

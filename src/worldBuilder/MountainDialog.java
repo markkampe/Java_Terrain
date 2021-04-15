@@ -15,6 +15,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private Map map;
 	private double[] oldHeight;	// per MeshPoint altitude at entry
 	private double[] newHeight;	// edited per MeshPoint altitude
+	private double[] oldSoil;	// per MeshPoint soil at entry
+	private double[] newSoil;	// edited per MeshPoint soil
 	private Parameters parms;
 	
 	private JCheckBox symmetric;
@@ -75,13 +77,18 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// pick up references
 		this.map = map;
 		this.oldHeight = map.getHeightMap();
+		this.oldSoil = map.getSoilMap();
 		this.parms = Parameters.getInstance();
 
-		// copy the current height map
+		// copy the current height/soil maps
 		this.newHeight = new double[oldHeight.length];
 		for(int i = 0; i < oldHeight.length; i++)
 			newHeight[i] = oldHeight[i];
 		map.setHeightMap(newHeight);
+		this.newSoil = new double[oldSoil.length];
+		for(int i = 0; i < oldSoil.length; i++)
+			newSoil[i] = oldSoil[i];
+		map.setSoilMap(newSoil);
 		
 		// calibrate full scale on the sliders
 		this.a_max = parms.z_range/2;
@@ -312,7 +319,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		// figure out how high it has to be to pierce the sediment
 		Parameters parms = Parameters.getInstance();	// this is a static method
-		double minZ = parms.z(parms.sediment);
 		
 		// see which points are within the scope of this mountain
 		Mesh m = map.getMesh();
@@ -340,8 +346,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			else
 				heights[i] = newZ;
 			
-			// if mountain is tall enough, set the mineral type
-			if (newZ > minZ)
+			// set mineral type for all affected points
+			if (mineral != 0)
 				soil[i] = mineral;
 		}
 	}
@@ -412,8 +418,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			if (d0 + d1 > max)
 				continue;
 			
-			// SOMEDAY add rectangular ridges
-			// SOMEDAY add continued off-map ridges
+			// XXX add rectangular ridges
+			// XXX add continued off-map ridges
 			// 		peak at edge rather than in radius from edge
 			
 			// calculate the deltaH for this point
@@ -434,8 +440,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			else
 				heights[i] = newZ;
 			
-			// if rise pierces the sediment, set mineral type
-			if (newZ > minZ)
+			// set mineral type for all affected points
+			if (mineral != 0)
 				soil[i] = mineral;
 		}
 	}
@@ -451,9 +457,11 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private void redraw() {
 		placed = "";	// reset the debug message
 		
-		// reset to the height map we started with
-		for(int i = 0; i < oldHeight.length; i++)
+		// reset to the height/soil map we started with
+		for(int i = 0; i < oldHeight.length; i++) {
 			newHeight[i] = oldHeight[i];
+			newSoil[i] = oldSoil[i];
+		}
 
 		// turn the diameter into map units
 		double d1 = (double) diameter1.getValue();
@@ -544,6 +552,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		map.selectMode(Map.Selection.NONE);
 		if (oldHeight != null) {
 			map.setHeightMap(oldHeight);
+			map.setSoilMap(oldSoil);
 			map.repaint();
 			oldHeight = null;
 		}
@@ -564,9 +573,11 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		parms.dAltitude = altitude.getValue();
 		parms.dShape = rounding1.getValue();
 		
-		// save a new copy of current height map
-		for(int i = 0; i < oldHeight.length; i++)
+		// save a new copy of current height/soil maps
+		for(int i = 0; i < oldHeight.length; i++) {
 			oldHeight[i] = newHeight[i];
+			oldSoil[i] = newSoil[i];
+		}
 		
 		// clean up the selection graphics
 		map.selectMode(Map.Selection.NONE);

@@ -89,7 +89,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			need_levels = false;
 			need_alt_3 = true;
 			need_alt_n = false;
-			need_slopes = false;	// these eliminate mountains
+			need_slopes = true;	// turn mountains into plateaus
 			need_depths = true;
 		}
 		need_palette = true;

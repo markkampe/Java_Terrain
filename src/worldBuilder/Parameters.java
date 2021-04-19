@@ -238,13 +238,13 @@ public class Parameters {
 		// default export tile size
 		dTileSize = 1000;			// 1km
 		
-		// default altitude/slope/depth thresholds
-		dWaterMin = 1;
-		dWaterMax = 10;
-		dHillMin = 10;
-		dHillMax = 30;
-		dSlopeMin = 10;
-		dSlopeMax = 30;
+		// default ROGNajer altitude/slope/depth thresholds
+		dWaterMin = 1;	// passable/shallow cut-off
+		dWaterMax = 10;	// shallow/deep cut-off
+		dHillMin = 10;	// ground/hill cut-off
+		dHillMax = 30;	// hill/mountain cut-off
+		dSlopeMin = 5;	// shallower than this is ground
+		dSlopeMax = 10;	// shallower than this is hill
 		dGroundMin = 10;
 		dGroundMax = 20;
 		dAltLevels = 6;

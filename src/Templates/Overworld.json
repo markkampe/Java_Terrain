@@ -120,7 +120,7 @@
 	  "temp": { "min": 0 },
 	  "vigor": 16
 	},
-	{ "name": "greenmountain", "level": 2, "base": 3536,
+	{ "name": "greenmountain", "level": 2, "base": 3104,	"//": "NO GREEN MOUNTAIN"
 	  "terrain": "mountain",	"flora": "GREEN",
 	  "temp": { "min": 0 },
 	  "vigor": 64

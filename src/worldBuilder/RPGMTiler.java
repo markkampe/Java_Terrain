@@ -300,12 +300,13 @@ public class RPGMTiler implements Exporter {
 				continue;
 
 			// give this bid a shot at every tile in the group
-			boolean refused = false;
-			for(int dy = 0; dy < r.height && !refused; dy++)
-				for(int dx = 0; dx < r.width && !refused; dx++) {
+			int refused = 0;
+			String tile_info = null;
+			for(int dy = 0; dy < r.height && refused == 0; dy++)
+				for(int dx = 0; dx < r.width && refused == 0; dx++) {
 					// make sure we are entirely within the grid
 					if (row + dy >= y_points || col + dx >= x_points) {
-						refused = true;
+						refused++;
 						continue;
 					}
 					
@@ -325,44 +326,51 @@ public class RPGMTiler implements Exporter {
 
 					// rule/bid debugging will want to know all attributes of this tile
 					if (parms.debug_level >= EXPORT_DEBUG)
-						System.out.println("l" + level + "[" + (row+dy) + "," + (col+dx) + "]: " +
+						tile_info = "l" + level + "[" + (row+dy) + "," + (col+dx) + "]: " +
 								" terrain=" + TerrainType.terrainType(terrain) +
 								", flora=" + floraNames[floraTypes[row][col]] + 
 								", alt=" + alt +
 								String.format(", depth=%.2f", depth) + 
-								String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse)); 
+								String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse); 
 
 					// XXX I once thought it necessary to check whether or not this square is already taken
 					// does our terrain type match the rule
 					if (r.wrongTerrain(terrain)) {
 						r.justification = "terain mismatch";
-						refused = true;
+						refused++;
+						// debug: multi-tile mismatches part way through
+						if (dx + dy > 0 && parms.debug_level >= EXPORT_DEBUG)
+							System.out.println(tile_info + " ... " + r.ruleName + " - TERAIN MISMATCH");
 						continue;
 					}
 					// does our ecotope match the rule
 					if (wrongEcotope(bidder_ecotope[b], floraTypes[row][col])) {
 						r.justification = "ecotope mismatch" + 
 								" (" + r.floraType + "!=" + floraNames[floraTypes[row+dy][col+dx]] + ")";
-						refused = true;
+						refused++;
+						// debug: multi-tile mismatches part way through
+						if (dx + dy > 0 && parms.debug_level >= EXPORT_DEBUG)
+							System.out.println(tile_info + " ... " + r.ruleName + " - ECOTOPE MISMATCH");
 						continue;
 					}
 					else	// if bid fails, it will add its own justification
 						thisBid = r.bid(alt, depth, flux, rain, Tmean - lapse, Tmean - lapse);
 
 					// if full debug is enabled, log every bid for every tile
-					if (r.debug || parms.debug_level >= EXPORT_DEBUG)
-						System.out.println(r.ruleName + "[" + (row+dy) + "," + (col+dx) + "]"+
-								" (" + r.baseTile + ") bids " + thisBid + " (" + r.justification + ")");
+					if (r.debug || parms.debug_level >= EXPORT_DEBUG) {
+						System.out.println(tile_info + " ... " + r.ruleName + 
+									" bids " + thisBid + " (" + r.justification + ")");
+					}
 
 					// tell the tile bidder about each successful bid
 					if (thisBid <= 0)
-						refused = true;
+						refused++;
 					else
 						bid += thisBid;
 				}
 
 			// if every square made a positive bid, record the sum
-			if (bid > best_bid && !refused) {
+			if (bid > best_bid && refused == 0) {
 				best_bid = bid;
 				winning_rule = r;
 			}
@@ -370,7 +378,8 @@ public class RPGMTiler implements Exporter {
 
 		if (winning_rule != null) {
 			if (parms.debug_level >= EXPORT_DEBUG)
-				System.out.println("    winner = " + winning_rule.baseTile);
+				System.out.println("    winner = " + winning_rule.ruleName + 
+								   " (" + winning_rule.baseTile + ")");
 			return winning_rule;
 		}
 

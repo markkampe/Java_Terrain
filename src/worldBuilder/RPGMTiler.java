@@ -737,15 +737,4 @@ public class RPGMTiler implements Exporter {
 		}
 		return Color.BLACK;
 	}
-
-	/**
-	 * Up-load the flora assignments for every tile
-	 * @param flora assignments per point
-	 * @param names of flora classes
-	 * 
-	public void rpgmFloraMap(int[][] flora, String[] names) {
-		this.floraTypes = flora;
-		this.floraNames = names;
-	}
-	 */
 }

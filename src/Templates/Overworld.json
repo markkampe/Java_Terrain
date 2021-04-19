@@ -50,18 +50,18 @@
 	},
 
 
-	{ "//": "L2/4 tiles for flora types in lowlands"},
+	{ "//": "L2 tiles for flora types in lowlands"},
 	{ "name": "tall-grass",	"level": 2, "base": 2864,
 	  "class": "Grass",	"flora": "Grassland",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
-	{ "name": "Berries",	"level": 4, "base": 2864,	"//": "FIND BETTER TILE ?",
+	{ "name": "Berries",	"level": 2, "base": 2864,	"//": "FIND BETTER TILE ?",
 	  "class": "Brush",	"flora": "Riperian",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
-	{ "name": "Brush",	"level": 4, "base": 2864,	"//": "FIND BETTER TILE ?",
+	{ "name": "Brush",	"level": 2, "base": 2864,	"//": "FIND BETTER TILE ?",
 	  "class": "Brush",	"flora": "Brush",
 	  "terrain": "ground",
 	  "vigor": 32

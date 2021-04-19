@@ -34,14 +34,14 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	private boolean need_levels; 	// slider for # levels
 	private boolean need_alt_3; 	// slider for ground/hill/mountain
 	private boolean need_alt_n; 	// slider for pit/ground/mound levels
-	private boolean need_slopes; 	// slider for ground/hill/mountain
+	private boolean need_plateau; 	// slider for plateau slope threshold
 	private boolean need_depths; 	// slider for passable/shallow/deep
 	private boolean need_flora_3;	// slider for tall grass/brush/trees
 
 	// control widgets
 	private JSlider levels; 	// number of height levels
 	private RangeSlider altitudes; // ground, hill, mountain OR pit, ground, mound
-	private RangeSlider slopes; // ground, hill, mountain
+	private JSlider slopes; 	// plateau, hill/mountain
 	private RangeSlider depths; // marsh, shallow, deep
 	private RangeSlider flora_3;	// types of plant cover
 	private JTextField palette; // tile set description file
@@ -84,12 +84,12 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			need_alt_n = true;
 			need_alt_3 = false;
 			need_depths = true;
-			need_slopes = false;
+			need_plateau = false;
 		} else { // Overworld ... few levels, but more types
 			need_levels = false;
 			need_alt_3 = true;
 			need_alt_n = false;
-			need_slopes = true;	// turn mountains into plateaus
+			need_plateau = true;	// turn mountains into plateaus
 			need_depths = true;
 		}
 		need_palette = true;
@@ -188,21 +188,17 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			altitudes.addChangeListener(this);
 		}
 
-		if (need_slopes) { // create slope range slider
+		if (need_plateau) { // create slope range slider
 			JPanel sTitle = new JPanel(new GridLayout(1, 3));
-			JLabel sT1 = new JLabel("Ground");
+			JLabel sT1 = new JLabel("Plateau");
 			sT1.setFont(fontLarge);
 			sTitle.add(sT1);
-			JLabel sT2 = new JLabel("Hills", JLabel.CENTER);
-			sT2.setFont(fontLarge);
-			sTitle.add(sT2);
-			JLabel sT3 = new JLabel("Mountains", JLabel.RIGHT);
+			JLabel sT3 = new JLabel("Hills/Mountains", JLabel.RIGHT);
 			sT3.setFont(fontLarge);
 			sTitle.add(sT3);
 
-			slopes = new RangeSlider(0, 100);
+			slopes = new JSlider(0, 100);
 			slopes.setValue(parms.dSlopeMin);
-			slopes.setUpperValue(parms.dSlopeMax);
 			slopes.setMajorTickSpacing(10);
 			slopes.setMinorTickSpacing(5);
 			slopes.setFont(fontSmall);
@@ -493,17 +489,14 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		// create and initialize the slope percentile->level map
 		if (slopes != null) {
 			slopeMap = new int[100];
-			int low = slopes.getValue();
-			int high = slopes.getUpperValue();
+			int flat = slopes.getValue();
 
 			// figure out the base level for each of the three groups
 			for (int i = 0; i < 100; i++)
-				if (i >= high) // one of the high levels
-					slopeMap[i] = high_base + (((i - high) * highLevels) / (100 - high));
-				else if (i >= low) // one of the mid levels
-					slopeMap[i] = mid_base + (((i - low) * midLevels) / (high - low));
-				else // one of the low levels
-					slopeMap[i] = low_base + ((i * lowLevels) / low);
+				if (i >= flat) 	// too steep for a plateau
+					slopeMap[i] = high_base + (((i - flat) * highLevels) / (100 - flat));
+				else // this is a plateau
+					slopeMap[i] = low_base + ((i * lowLevels) / flat);
 		} else
 			slopeMap = null;
 

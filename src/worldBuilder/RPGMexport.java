@@ -89,7 +89,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			need_levels = false;
 			need_alt_3 = true;
 			need_alt_n = false;
-			need_slopes = true;
+			need_slopes = false;	// these eliminate mountains
 			need_depths = true;
 		}
 		need_palette = true;
@@ -440,12 +440,12 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 
 		// figure out how many levels we have of which types
 		if (levels == null) { // Overworld
-			waterLevels = 3;
-			lowLevels = 1;
-			midLevels = 1;
-			highLevels = 1;
+			waterLevels = 3;// DEEP/SHALLOW/PASSABLE
+			lowLevels = 1;	// GROUND
+			midLevels = 1;	// HILL
+			highLevels = 1;	// MOUNTAIN
 		} else { // Outside
-			waterLevels = 3;
+			waterLevels = 3;// DEEP/SHALLOW/PASSABLE
 			int landLevels = levels.getValue();
 			lowLevels = 0; // TODO - tiler can't yet do PITs
 			midLevels = 1; // all GROUND is at the same level
@@ -512,7 +512,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		colorTopo = new Color[totLevels];
 		int level = water_base;
 
-		// water related types and colors
+		// water related types and colors (shades of blue)
 		int shade = MIN_WATER_SHADE; // currently all shades of blue
 		int delta = SHADE_RANGE;	// big change per level
 		for (int i = 0; i < waterLevels; i++) {
@@ -524,13 +524,13 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 
 		// low-land related types and colors
 		if (lowLevels > 0) {
-			shade = MIN_LOW_SHADE; // currently all dark grey
+			shade = MIN_LOW_SHADE;
 			delta = SHADE_RANGE / lowLevels;
 			for (int i = 0; i < lowLevels; i++) {
-				if (have_pits) {
+				if (have_pits) {	// one dark gray
 					typeMap[level] = TerrainType.PIT;
 					colorTopo[level] = new Color(shade, shade, shade);
-				} else {
+				} else {			// one dark brown
 					typeMap[level] = TerrainType.GROUND;
 					colorTopo[level] = GROUND_COLOR;
 				}
@@ -540,13 +540,13 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 
 		// mid-land related types and colors
-		shade = MIN_MID_SHADE; // currently all shades of green
+		shade = MIN_MID_SHADE;
 		delta = SHADE_RANGE / midLevels;
 		for (int i = 0; i < midLevels; i++) {
-			if (have_pits) {
+			if (have_pits) {	// one dark brown
 				typeMap[level] = TerrainType.GROUND;
 				colorTopo[level] = GROUND_COLOR;
-			} else {
+			} else {			// one dark gray
 				typeMap[level] = TerrainType.HILL;
 				colorTopo[level] = new Color(shade, shade, shade);
 			}
@@ -555,11 +555,11 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 
 		// high-land related types and colors
-		shade = MIN_HIGH_SHADE; // currently all light grey
+		shade = MIN_HIGH_SHADE;
 		delta = SHADE_RANGE / highLevels;
 		for (int i = 0; i < highLevels; i++) {
 			typeMap[level] = have_pits ? TerrainType.HILL : TerrainType.MOUNTAIN;
-			colorTopo[level] = new Color(shade, shade, shade);
+			colorTopo[level] = new Color(shade, shade, shade);	// shades of light gray
 			shade += delta;
 			level++;
 		}

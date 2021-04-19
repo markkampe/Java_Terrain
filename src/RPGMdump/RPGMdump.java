@@ -70,8 +70,10 @@ public class RPGMdump extends JFrame {
 						width = new Integer(args[++i]);
 				} else if (args[i].startsWith("-s")) {
 					suppress = true;
-				} else
+				} else {
 					System.out.println(usage);
+					System.exit(-1);
+				}
 			} else {
 				filename = args[i];
 			}

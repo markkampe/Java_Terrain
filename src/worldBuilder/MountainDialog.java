@@ -317,9 +317,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			Fcyl =	(double) (shape - midscale) / midscale;
 		}
 		
-		// figure out how high it has to be to pierce the sediment
-		Parameters parms = Parameters.getInstance();	// this is a static method
-		
 		// see which points are within the scope of this mountain
 		Mesh m = map.getMesh();
 		double heights[] = map.getHeightMap();
@@ -406,7 +403,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		double minDist = first.distance(second);
 		double maxDist1 = minDist + radius1;
 		double maxDist2 = minDist + radius2;
-		double minZ = parms.z(parms.sediment);
 		
 		for(int i = 0; i < heights.length; i++) {
 			MeshPoint p = m.vertices[i];

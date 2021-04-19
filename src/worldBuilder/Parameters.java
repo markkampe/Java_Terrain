@@ -243,8 +243,8 @@ public class Parameters {
 		dWaterMax = 10;	// shallow/deep cut-off
 		dHillMin = 10;	// ground/hill cut-off
 		dHillMax = 30;	// hill/mountain cut-off
-		dSlopeMin = 5;	// shallower than this is ground
-		dSlopeMax = 10;	// shallower than this is hill
+		dSlopeMin = 2;	// shallower than this is ground
+		dSlopeMax = 5;	// shallower than this is hill
 		dGroundMin = 10;
 		dGroundMax = 20;
 		dAltLevels = 6;

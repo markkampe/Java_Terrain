@@ -1,6 +1,8 @@
 # Compiled class file
 *.class
 worldBuilder.jar
+RPGMdump.jar
+worldMaps.jar
 
 # Log file
 *.log

@@ -151,6 +151,46 @@ $(PACKAGE).App:	$(PACKAGE).jar
 	@echo ... MAYBE codesign -s \"Sagredo Software Application:NameFromCertificate\" $@
 	exit 1
 
+#
+# test/debug tool to pretty-print RPGM level maps
+#
+RPGMdump.jar: bin/RPGMdump/*.class
+	# create an empty working directory
+	rm -rf $(WORK)/$(BINARIES)
+	mkdir -p $(WORK)/$(BINARIES)
+	#
+	# copy in our classes and resources
+	cp -R bin/RPGMdump $(WORK)/$(BINARIES)
+	# copy in the non-standard libraries we need
+	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/javax.json-1.0.2.jar
+	# create a manifest and jar
+	echo "Manifest-Version: 1.0" > $(WORK)/manifest
+	echo "Main-Class: RPGMdump.RPGMdump" >> $(WORK)/manifest
+	jar --create --file $@ --manifest $(WORK)/manifest \
+		-C $(WORK)/$(BINARIES) RPGMdump \
+		-C $(WORK)/$(BINARIES) javax \
+		-C $(WORK)/$(BINARIES) org
+
+#
+# test/debug tool to pretty-print saved WorldBuilder meshes
+#
+worldMaps.jar: bin/worldMaps/*.class
+	# create an empty working directory
+	rm -rf $(WORK)/$(BINARIES)
+	mkdir -p $(WORK)/$(BINARIES)
+	#
+	# copy in our classes and resources
+	cp -R bin/worldMaps $(WORK)/$(BINARIES)
+	# copy in the non-standard libraries we need
+	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/javax.json-1.0.2.jar
+	# create a manifest and jar
+	echo "Manifest-Version: 1.0" > $(WORK)/manifest
+	echo "Main-Class: worldMaps.Tester" >> $(WORK)/manifest
+	jar --create --file $@ --manifest $(WORK)/manifest \
+		-C $(WORK)/$(BINARIES) worldMaps \
+		-C $(WORK)/$(BINARIES) javax \
+		-C $(WORK)/$(BINARIES) org
+
 clobber: clean
 	rm -f $(PACKAGE).jar control rpmspec
 

@@ -7,6 +7,8 @@ BINARIES=bin
 LIBRARIES=lib
 
 PACKAGE=worldBuilder
+RPGMDUMP=RPGMdump
+WORLDMAP=worldMaps
 
 # the program version number is a compiled-in program parameter
 VERSION=$(shell grep "PROGRAM_VERSION =" src/worldBuilder/Parameters.java | cut -d\" -f2 )
@@ -74,7 +76,10 @@ $(PACKAGE).jar: bin/worldBuilder/*.class
 	# copy in the non-standard libraries we need
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/OpenVoronoi.jar
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/javax.json-1.0.2.jar
-	jar --create --file worldBuilder.jar --manifest packaging/manifest \
+	# create a manifest and jar
+	echo "Manifest-Version: 1.0" > $(WORK)/manifest
+	echo "Main-Class: $(PACKAGE).WorldBuilder" >> $(WORK)/manifest
+	jar --create --file worldBuilder.jar --manifest $(WORK)/manifest \
 		-C $(WORK)/$(BINARIES) worldBuilder \
 		-C $(WORK)/$(BINARIES) Templates \
 		-C $(WORK)/$(BINARIES) icons \
@@ -151,21 +156,22 @@ $(PACKAGE).App:	$(PACKAGE).jar
 	@echo ... MAYBE codesign -s \"Sagredo Software Application:NameFromCertificate\" $@
 	exit 1
 
+tools: $(RPGMDUMP).jar $(WORLDMAP).jar
 #
 # test/debug tool to pretty-print RPGM level maps
 #
-RPGMdump.jar: bin/RPGMdump/*.class
+$(RPGMDUMP).jar: bin/$(RPGMDUMP)/*.class
 	# create an empty working directory
 	rm -rf $(WORK)/$(BINARIES)
 	mkdir -p $(WORK)/$(BINARIES)
 	#
 	# copy in our classes and resources
-	cp -R bin/RPGMdump $(WORK)/$(BINARIES)
+	cp -R bin/$(RPGMDUMP) $(WORK)/$(BINARIES)
 	# copy in the non-standard libraries we need
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/javax.json-1.0.2.jar
 	# create a manifest and jar
 	echo "Manifest-Version: 1.0" > $(WORK)/manifest
-	echo "Main-Class: RPGMdump.RPGMdump" >> $(WORK)/manifest
+	echo "Main-Class: $(RPGMDUMP).$(RPGMDUMP)" >> $(WORK)/manifest
 	jar --create --file $@ --manifest $(WORK)/manifest \
 		-C $(WORK)/$(BINARIES) RPGMdump \
 		-C $(WORK)/$(BINARIES) javax \
@@ -174,13 +180,13 @@ RPGMdump.jar: bin/RPGMdump/*.class
 #
 # test/debug tool to pretty-print saved WorldBuilder meshes
 #
-worldMaps.jar: bin/worldMaps/*.class
+$(WORLDMAP).jar: bin/$(WORLDMAP)/*.class
 	# create an empty working directory
 	rm -rf $(WORK)/$(BINARIES)
 	mkdir -p $(WORK)/$(BINARIES)
 	#
 	# copy in our classes and resources
-	cp -R bin/worldMaps $(WORK)/$(BINARIES)
+	cp -R bin/$(WORLDMAP) $(WORK)/$(BINARIES)
 	# copy in the non-standard libraries we need
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/javax.json-1.0.2.jar
 	# create a manifest and jar
@@ -193,6 +199,7 @@ worldMaps.jar: bin/worldMaps/*.class
 
 clobber: clean
 	rm -f $(PACKAGE).jar control rpmspec
+	rm -f $(RPGMDUMP).jar $(WORLDMAP).jar
 
 clean:
 	rm -f $(PACKAGE)-$(VERSION).deb $(PACKAGE).rpm $(PACKAGE).App $(PACKAGE).wnx

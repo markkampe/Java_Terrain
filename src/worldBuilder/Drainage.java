@@ -49,7 +49,7 @@ public class Drainage {
 		// follow the chain of neighbors til we go above sea-level
 		for(int i = 0; i < mesh.vertices[point_index].neighbors; i++) {
 			int x = mesh.vertices[point_index].neighbor[i].index;
-			if (heightMap[x] < parms.sea_level && !oceanic[x])
+			if (heightMap[x] <= parms.sea_level && !oceanic[x])
 				mark_as_oceanic(x);
 		}
 	}
@@ -92,6 +92,10 @@ public class Drainage {
 	}
 	
 	public void recompute() {
+		// reload the maps that are likely to have changed
+		this.heightMap = map.getHeightMap();
+		this.erodeMap = map.getErodeMap();
+
 		// reinitialize the maps we are to create
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			oceanic[i] = false;		// no known ocean points
@@ -112,6 +116,7 @@ public class Drainage {
 		 *    b) any sub-sea-level neighbor of an oceanic point
 		 */
 		landPoints = 0;
+		int seaPoints = 0;
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			if (oceanic[i])		// already known to be oceanic
 				continue;
@@ -121,6 +126,11 @@ public class Drainage {
 		for(int i = 0; i < mesh.vertices.length; i++)
 			if (!oceanic[i])	// anything left is a land point
 				byHeight[landPoints++] = i;
+			else
+				seaPoints++;
+		
+		if (parms.debug_level >= HYDRO_DEBUG)
+			System.out.println("Drainage: land/sea = " + landPoints + "/" + seaPoints);
 
 		/*
 		 * 2. determine the down-hill neighbor of all non-oceanic points

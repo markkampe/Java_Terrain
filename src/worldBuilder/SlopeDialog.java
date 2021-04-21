@@ -23,6 +23,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	
 	private int x0, y0, x1, y1;		// chosen slope axis
 	
+	private static final int SLOPE_DEBUG = 2;
+	
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -139,6 +141,11 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		
 		// get map and display parameters
 		Mesh m = map.getMesh();
+		
+		// note sea level
+		double Zsealevel = parms.sea_level;
+		int above = 0;
+		int below = 0;
 
 		// height of every point is its distance (+/-) from the axis
 		for(int i = 0; i < newHeight.length; i++) {
@@ -156,10 +163,19 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 				newHeight[i] = -Parameters.z_extent/2;
 			else
 				newHeight[i] = newZ;
+			
+			// tally points above and below sea-level
+			if (newZ > Zsealevel)
+				above++;
+			else
+				below++;
 		}
 		
 		// tell the map about the update
 		map.setHeightMap(newHeight);
+		
+		if (parms.debug_level >= SLOPE_DEBUG)
+			System.out.println("Incline: " + above + " points above sea level, " + below + " below");
 	}
 
 	/**

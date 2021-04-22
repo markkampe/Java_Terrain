@@ -197,15 +197,29 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	public void keyTyped(KeyEvent e) {
 		int key = e.getKeyChar();
 		if (key == KeyEvent.VK_ENTER) {
-			// make the new parameters official
-			for(int i = 0; i < incoming.length; i++)
-				previous[i] = incoming[i];
+			accept();
 		} else if (key == KeyEvent.VK_ESCAPE) {
-			// undo any uncommitted updates
-			for(int i = 0; i < incoming.length; i++)
-				incoming[i] = previous[i];
+			undo();
 			map.setIncoming(incoming);
 		}
+	}
+	
+	/**
+	 * make the newly selected entry points official
+	 */
+	private void accept() {
+		for(int i = 0; i < incoming.length; i++)
+			previous[i] = incoming[i];
+		parms.dTribute = (int) flow.getValue();
+	}
+	
+	/**
+	 * back out any uncommitted entry points
+	 */
+	private void undo() {
+		for(int i = 0; i < incoming.length; i++)
+			incoming[i] = previous[i];
+		map.setIncoming(incoming);
 	}
 	
 	/**
@@ -213,16 +227,10 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel && whichPoint >= 0) {
-			// undo any uncommitted updates
-			for(int i = 0; i < incoming.length; i++)
-				incoming[i] = previous[i];
-			map.setIncoming(incoming);
+			undo();
 			cancelDialog();
 		} else if (e.getSource() == accept) {
-			// make the new parameters official
-			for(int i = 0; i < incoming.length; i++)
-				previous[i] = incoming[i];
-			parms.dTribute = (int) flow.getValue();
+			accept();
 		}
 	}
 	

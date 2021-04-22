@@ -155,7 +155,6 @@ public class Parameters {
 	/** default overworld % ground	(by height)	*/	public int dHillMin;
 	/** default overworld % hill (by height)	*/	public int dHillMax;
 	/** default overworld % ground (by slope)	*/	public int dSlopeMin;
-	/** default overworld % hill (by slope)		*/	public int dSlopeMax;
 
 	/** default export outsde palette	*/	public String Out_palette;
 	/** default outside altitude levels	*/	public int dAltLevels;
@@ -243,8 +242,7 @@ public class Parameters {
 		dWaterMax = 10;	// shallow/deep cut-off
 		dHillMin = 10;	// ground/hill cut-off
 		dHillMax = 30;	// hill/mountain cut-off
-		dSlopeMin = 2;	// shallower than this is ground
-		dSlopeMax = 5;	// shallower than this is hill
+		dSlopeMin = 25;	// shallower than this is plateau
 		dGroundMin = 10;
 		dGroundMax = 20;
 		dAltLevels = 6;

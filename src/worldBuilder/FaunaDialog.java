@@ -10,7 +10,7 @@ import javax.swing.event.ChangeListener;
 /**
  * Dialog to enable the distribution of Fauna across MeshPoints
  */
-public class FaunaDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {	
+public class FaunaDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener, KeyListener {	
 	
 	private Map map;
 	private Parameters parms;
@@ -189,6 +189,11 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 		pack();
 		setVisible(true);
 		
+		// get keyboard input
+		addKeyListener(this);
+		map.addKeyListener(this);
+		map.requestFocus();
+		
 		// get region selection input
 		changes_made = false;
 		map.addMapListener(this);	
@@ -254,6 +259,7 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 		
 		map.setFaunaMap(faunaMap);
 		map.repaint();
+		changes_made = true;
 		if (parms.debug_level > 0)
 			System.out.println("Fauna Placement: " + prevNames[chosen_type] + 
 								"(" + chosen_type + ") = " + count);
@@ -302,18 +308,59 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	private void cancelDialog() {
 		// back out any in progress changes
-		map.setFaunaColors(prevColors);
-		map.setFaunaNames(prevNames);
-		map.setFaunaMap(prevFauna);
-		map.repaint();
+		undo();
 		
 		// release our hold on selection
 		map.selectMode(Map.Selection.ANY);
 		map.removeMapListener(this);
+		map.removeKeyListener(this);
 		
 		// and close the window
 		this.dispose();
 		WorldBuilder.activeDialog = false;
+	}
+	
+	/**
+	 * make pending changes official
+	 */
+	private void accept() {
+		// remember the chosen fauna palette/distribution
+		parms.fauna_rules = fauna_palette.getText();
+		parms.dFaunaPct = fauna_pct.getValue();
+		parms.dFaunaMin = fauna_3.getValue();
+		parms.dFaunaMax = fauna_3.getUpperValue();
+		
+		// check-point these updates
+		for(int i = 0; i < faunaMap.length; i++)
+			prevFauna[i] = faunaMap[i];
+		
+		if (chosen_type == AUTOMATIC) {
+			prevColors = placer.previewColors();
+			prevNames = placer.resourceNames();
+			
+			// report the changes
+			if (parms.debug_level > 0) {
+				System.out.println("Fauna Placement (" + ResourceRule.ruleset + 
+								   "): Birds/Small/Large = " + classCounts[FAUNA_BIRDS] + 
+								   "/" + classCounts[FAUNA_SMALL] +
+								   "/" + classCounts[FAUNA_LARGE]);
+			}
+		}
+	}
+	
+	/**
+	 * back out any uncommitted updates
+	 */
+	public void undo() {
+		// return to last committed fauna map
+		for(int i = 0; i < faunaMap.length; i++)
+			faunaMap[i] = prevFauna[i];
+		
+		// update the display accordingly
+		map.setFaunaColors(prevColors);
+		map.setFaunaNames(prevNames);
+		map.setFaunaMap(faunaMap);
+		map.repaint();
 	}
 	
 	/**
@@ -322,36 +369,26 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 	public void windowClosing(WindowEvent e) {
 		cancelDialog();
 	}
+	
+	/**
+	 * ENTER/ESC for accept or undo
+	 */
+	public void keyTyped(KeyEvent e) {
+		int key = e.getKeyChar();
+		if (key == KeyEvent.VK_ENTER)
+			accept();
+		else if (key == KeyEvent.VK_ESCAPE)
+			undo();
+	}
 
 	/**
 	 * click events on one of the buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			// remember the chosen fauna palette/distribution
-			parms.fauna_rules = fauna_palette.getText();
-			parms.dFaunaPct = fauna_pct.getValue();
-			parms.dFaunaMin = fauna_3.getValue();
-			parms.dFaunaMax = fauna_3.getUpperValue();
-			
-			// check-point these updates
-			for(int i = 0; i < faunaMap.length; i++)
-				prevFauna[i] = faunaMap[i];
-			
-			if (chosen_type == AUTOMATIC) {
-				prevColors = placer.previewColors();
-				prevNames = placer.resourceNames();
-				
-				// report the changes
-				if (parms.debug_level > 0) {
-					System.out.println("Fauna Placement (" + ResourceRule.ruleset + 
-									   "): Birds/Small/Large = " + classCounts[FAUNA_BIRDS] + 
-									   "/" + classCounts[FAUNA_SMALL] +
-									   "/" + classCounts[FAUNA_LARGE]);
-				}
-			}
+			accept();
 		} else if (e.getSource() == chooseFauna) {
-			FileDialog d = new FileDialog(this, "Mineral Palette", FileDialog.LOAD);
+			FileDialog d = new FileDialog(this, "Fauna Palette", FileDialog.LOAD);
 			d.setFile(fauna_palette.getText());
 			d.setVisible(true);
 			String palette_file = d.getFile();
@@ -376,6 +413,8 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 				fauna_3.setEnabled(true);
 				chosen_type = AUTOMATIC;
 				progressive = false;
+				if (selected)
+					rulePlacement();
 			} else {
 				// manual choice and placement
 				chooseFauna.setEnabled(false);
@@ -384,8 +423,12 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 				fauna_3.setEnabled(false);
 				chosen_type = map.getFaunaType(chosen);
 				progressive = true;
+				if (selected)
+					manualPlacement();
 			}
 			mode.setText(chosen);
+			
+			map.requestFocus(); 	// keyboard input back to Map
 		}
 	}
 
@@ -397,4 +440,6 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 	/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
+	/** (perfunctory) */ public void keyPressed(KeyEvent arg0) {}
+	/** (perfunctory) */ public void keyReleased(KeyEvent arg0) {}
 }

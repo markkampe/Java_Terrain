@@ -10,7 +10,7 @@ import javax.swing.event.ChangeListener;
 /**
  * Dialog to enable the creation a consistent map of a sub-region of the current world.
  */
-public class MineralDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {	
+public class MineralDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener, KeyListener {	
 	
 	private Map map;
 	private Parameters parms;
@@ -189,6 +189,11 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		pack();
 		setVisible(true);
 		
+		// get keyboard input
+		addKeyListener(this);
+		map.addKeyListener(this);
+		map.requestFocus();
+
 		// get region selection input
 		changes_made = false;
 		map.addMapListener(this);	
@@ -245,6 +250,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		
 		map.setSoilMap(soilMap);
 		map.repaint();
+		changes_made = true;
 	}
 
 	/**
@@ -290,18 +296,59 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	 */
 	private void cancelDialog() {
 		// back out any in-progress changes
-		map.setRockColors(prevColors);
-		map.setRockNames(prevNames);
-		map.setSoilMap(prevSoil);
-		map.repaint();
+		undo();
 		
 		// give up our selection
 		map.selectMode(Map.Selection.ANY);
 		map.removeMapListener(this);
+		map.removeKeyListener(this);
 		
 		// close the window
 		this.dispose();
 		WorldBuilder.activeDialog = false;
+	}
+	
+	/**
+	 * commit pending changes
+	 */
+	public void accept() {
+		// remember the chosen flora palette and percentages
+		parms.mineral_rules = rock_palette.getText();
+		parms.dRockPct = mineral_pct.getValue();
+		parms.dRockMin = minerals_3.getValue();
+		parms.dRockMax = minerals_3.getUpperValue();
+		
+		// check-point these updates
+		for(int i = 0; i < soilMap.length; i++)
+			prevSoil[i] = soilMap[i];
+		
+		if (chosen_mineral == AUTOMATIC) {
+			prevColors = placer.previewColors();
+			prevNames = placer.resourceNames();
+			
+			// report the changes
+			if (parms.debug_level > 0) {
+				System.out.println("Mineral Placement (" + ResourceRule.ruleset + 
+								   "): Stone/Metal/Precious = " + classCounts[MIN_STONE] + 
+								   "/" + classCounts[MIN_METAL] +
+								   "/" + classCounts[MIN_PRECIOUS]);
+			}
+		}
+	}
+
+	/**
+	 * back out any uncommitted updates
+	 */
+	public void undo() {
+		// return to last committed fauna map
+		for(int i = 0; i < soilMap.length; i++)
+			soilMap[i] = prevSoil[i];
+		
+		// update the display accordingly
+		map.setRockColors(prevColors);
+		map.setRockNames(prevNames);
+		map.setSoilMap(soilMap);
+		map.repaint();
 	}
 	
 	/**
@@ -312,32 +359,22 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	}
 
 	/**
+	 * ENTER/ESC for accept or undo
+	 */
+	public void keyTyped(KeyEvent e) {
+		int key = e.getKeyChar();
+		if (key == KeyEvent.VK_ENTER)
+			accept();
+		else if (key == KeyEvent.VK_ESCAPE)
+			undo();
+	}
+
+	/**
 	 * click events on one of the buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			// remember the chosen flora palette and percentages
-			parms.flora_rules = rock_palette.getText();
-			parms.dRockPct = mineral_pct.getValue();
-			parms.dRockMin = minerals_3.getValue();
-			parms.dRockMax = minerals_3.getUpperValue();
-			
-			// check-point these updates
-			for(int i = 0; i < soilMap.length; i++)
-				prevSoil[i] = soilMap[i];
-			
-			if (chosen_mineral == AUTOMATIC) {
-				prevColors = placer.previewColors();
-				prevNames = placer.resourceNames();
-				
-				// report the changes
-				if (parms.debug_level > 0) {
-					System.out.println("Mineral Placement (" + ResourceRule.ruleset + 
-									   "): Stone/Metal/Precious = " + classCounts[MIN_STONE] + 
-									   "/" + classCounts[MIN_METAL] +
-									   "/" + classCounts[MIN_PRECIOUS]);
-				}
-			}
+			accept();
 		} else if (e.getSource() == chooseRocks) {
 			FileDialog d = new FileDialog(this, "Mineral Palette", FileDialog.LOAD);
 			d.setFile(rock_palette.getText());
@@ -364,6 +401,8 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 				minerals_3.setEnabled(true);
 				chosen_mineral = AUTOMATIC;
 				progressive = false;
+				if (selected)
+					rulePlacement();
 			} else {
 				// manual choice and placement
 				chooseRocks.setEnabled(false);
@@ -372,8 +411,11 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 				minerals_3.setEnabled(false);
 				chosen_mineral = map.getSoilType(chosen);
 				progressive = true;
+				if (selected)
+					manualPlacement();
 			}
 			mode.setText(chosen);
+			map.requestFocus();
 		}
 	}
 
@@ -385,4 +427,6 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 	/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
+	/** (perfunctory) */ public void keyPressed(KeyEvent arg0) {}
+	/** (perfunctory) */ public void keyReleased(KeyEvent arg0) {}
 }

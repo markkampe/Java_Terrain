@@ -10,7 +10,7 @@ import javax.swing.event.ChangeListener;
 /**
  * Dialog to enable the creation a consistent map of a sub-region of the current world.
  */
-public class FloraDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {	
+public class FloraDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener, KeyListener {	
 	// flora types (used for quotas)
 	private static final int FLORA_NONE = 0;
 	private static final int FLORA_GRASS = 1;
@@ -186,6 +186,11 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		pack();
 		setVisible(true);
 		
+		// get keyboard input
+		addKeyListener(this);
+		map.addKeyListener(this);
+		map.requestFocus();
+
 		// get region selection input
 		changes_made = false;
 		map.addMapListener(this);	
@@ -247,6 +252,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		
 		map.setFloraMap(floraMap);
 		map.repaint();
+		changes_made = true;
 	}
 
 	/**
@@ -293,21 +299,72 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	private void cancelDialog() {
 		if (changes_made) {
-			// back out any uncommitted changes
-			map.setFloraColors(prevColors);
-			map.setFloraMap(prevFlora);
-			map.repaint();
+			undo();
 		}
 
 		// cease to listen to selection events
 		map.selectMode(Map.Selection.ANY);
 		map.removeMapListener(this);
+		map.removeKeyListener(this);
 
 		// close the window
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
 	
+	/**
+	 * make pending changes official
+	 */
+	private void accept() {
+		// remember the chosen palette and percentages
+		parms.flora_rules = flora_palette.getText();
+		parms.dFloraPct = flora_pct.getValue();
+		parms.dFloraMin = flora_3.getValue();
+		parms.dFloraMax = flora_3.getUpperValue();
+		
+		// check-point these updates
+		for(int i = 0; i < floraMap.length; i++)
+			prevFlora[i] = floraMap[i];
+		
+		if (chosen_flora == AUTOMATIC) {
+			prevColors = placer.previewColors();
+			changes_made = false;
+			
+			// report the changes
+			if (parms.debug_level > 0) {
+				System.out.println("Flora Placement (" + ResourceRule.ruleset + 
+								   "): Grass/Brush/Trees = " + classCounts[FLORA_GRASS] + 
+								   "/" + classCounts[FLORA_BRUSH] +
+								   "/" + classCounts[FLORA_TREE]);
+			}
+		}
+	}
+
+	/**
+	 * back out any uncommitted updates
+	 */
+	public void undo() {
+		// return to last committed fauna map
+		for(int i = 0; i < floraMap.length; i++)
+			floraMap[i] = prevFlora[i];
+		
+		// update the display accordingly
+		map.setFloraColors(prevColors);
+		map.setFloraMap(floraMap);
+		map.repaint();
+	}
+	
+	/**
+	 * ENTER/ESC for accept or undo
+	 */
+	public void keyTyped(KeyEvent e) {
+		int key = e.getKeyChar();
+		if (key == KeyEvent.VK_ENTER)
+			accept();
+		else if (key == KeyEvent.VK_ESCAPE)
+			undo();
+	}
+
 	/**
 	 * Window Close event handler ... implicit CANCEL
 	 */
@@ -320,28 +377,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
-			// remember the chosen palette and percentages
-			parms.flora_rules = flora_palette.getText();
-			parms.dFloraPct = flora_pct.getValue();
-			parms.dFloraMin = flora_3.getValue();
-			parms.dFloraMax = flora_3.getUpperValue();
-			
-			// check-point these updates
-			for(int i = 0; i < floraMap.length; i++)
-				prevFlora[i] = floraMap[i];
-			
-			if (chosen_flora == AUTOMATIC) {
-				prevColors = placer.previewColors();
-				changes_made = false;
-				
-				// report the changes
-				if (parms.debug_level > 0) {
-					System.out.println("Flora Placement (" + ResourceRule.ruleset + 
-									   "): Grass/Brush/Trees = " + classCounts[FLORA_GRASS] + 
-									   "/" + classCounts[FLORA_BRUSH] +
-									   "/" + classCounts[FLORA_TREE]);
-				}
-			}
+			accept();
 		} else if (e.getSource() == chooseFlora) {
 			FileDialog d = new FileDialog(this, "Floral Palette", FileDialog.LOAD);
 			d.setFile(flora_palette.getText());
@@ -367,6 +403,8 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 				flora_3.setEnabled(true);
 				chosen_flora = AUTOMATIC;
 				progressive = false;
+				if (selected)
+					placeFlora();
 			} else {
 				// manual choice and placement
 				chooseFlora.setEnabled(false);
@@ -375,8 +413,11 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 				flora_3.setEnabled(false);
 				chosen_flora = map.getFloraType(chosen);
 				progressive = true;
+				if (selected)
+					manualPlacement();
 			}
 			mode.setText(chosen);
+			map.requestFocus();
 		}
 
 	}
@@ -389,4 +430,6 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	/** (perfunctory) */ public void windowDeiconified(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowIconified(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
+	/** (perfunctory) */ public void keyPressed(KeyEvent arg0) {}
+	/** (perfunctory) */ public void keyReleased(KeyEvent arg0) {}
 }

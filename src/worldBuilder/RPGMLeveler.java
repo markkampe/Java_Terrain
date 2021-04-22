@@ -21,11 +21,12 @@ public class RPGMLeveler {
 	 * 
 	 * @param altMap	altitude pctile to level map
 	 * @param waterMap	depth pctile to level map
-	 * @param slopeMap	slope pctile to level map
+	 * @param plateau	maximum slope for a plateau
+	 * @param typeMap	map from levels to terrain types
 	 * 
 	 * @return int[][]	level of every square
 	 */
-	public int[][] getLevels(RPGMTiler tiler, int[] altMap, int[] waterMap, int[] slopeMap) {
+	public int[][] getLevels(RPGMTiler tiler, int[] altMap, int[] waterMap, double plateau, int typeMap[]) {
 		
 		// figure out the map size
 		int y_points = tiler.heights.length;
@@ -34,8 +35,6 @@ public class RPGMLeveler {
 		// figure out minimum and maximum heights/depths/slopes in the region
 		double minDepth = 666666, maxDepth = 0;
 		double minHeight = 666, maxHeight = 0;
-		double minSlope = 666, maxSlope = 0;
-		double slopes[][] = (slopeMap == null) ? null : new double[y_points][x_points];
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
 				double h = tiler.depths[i][j];
@@ -50,25 +49,19 @@ public class RPGMLeveler {
 					if (tiler.heights[i][j] > maxHeight)
 						maxHeight = tiler.heights[i][j];
 				}
-				
-				if (slopeMap != null) {
-					double m = tiler.slope(i,j);
-					slopes[i][j] = m;
-					if (m < 0)
-						m = -m;
-					if (m < minSlope)
-						minSlope = m;
-					if (m > maxSlope)
-						maxSlope = m;
-				}
 			}
 		
 		// now figure out what the full range is for each characteristic
 		double aRange = (maxHeight > minHeight) ? maxHeight - minHeight : 0.000001;
 		double dRange = (maxDepth > minDepth) ? maxDepth - minDepth : 1;
-		double mRange = (maxSlope > minSlope) ? maxSlope - minSlope : 1;
+		
+		// call plateaus the highest ground level
+		int plateau_level;
+		for (plateau_level = typeMap.length - 1; plateau_level > 0; plateau_level--)
+			if (typeMap[plateau_level] == TerrainType.GROUND)
+				break;
 
-		// convert every alt/depth/slope into a percentile and map those to levels
+		// convert every alt/depth into a percentile and map those to levels
 		int levels[][] = new int[y_points][x_points];
 		for(int i = 0; i < y_points; i++)
 			for(int j = 0; j < x_points; j++) {
@@ -81,14 +74,12 @@ public class RPGMLeveler {
 					double pctile = 99 * (a - minHeight) / aRange;
 					levels[i][j] = altMap[(int) pctile];
 
-					// see if slope would reduce the terrain type
-					if (slopeMap != null) {
-						double m = slopes[i][j];
-						pctile = 99 * (m - minSlope) / mRange;
-						int mLevel = slopeMap[(int) pctile];
-						if (mLevel < levels[i][j])
-							levels[i][j] = mLevel;
-					}
+					// see if slope turns mountain tops into plateaus
+					if (!TerrainType.isHighLand(typeMap[levels[i][j]]))
+						continue;
+					if (tiler.slope(i, j) >= plateau)
+						continue;
+					levels[i][j] = plateau_level;
 				}
 			}
 

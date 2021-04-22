@@ -180,7 +180,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			s[i] = nearest.interpolate(soilMap);
 		}
 		
-		// FIX sometimes arteries enter but don't flow
+		// FIX sometimes arteries enter subregion but don't flow
 		// reproduce all water flows into the new sub-region
 		for (int i = 0; i < mesh.vertices.length; i++) {
 			MeshPoint p = mesh.vertices[i];

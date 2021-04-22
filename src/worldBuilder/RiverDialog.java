@@ -21,8 +21,8 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	private JButton cancel;
 	
 	private double[] incoming;
+	private double[] previous;
 	private int whichPoint = -1;
-	private double oldFlow;
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -32,8 +32,13 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	public RiverDialog(Map map)  {
 		// pick up references
 		this.map = map;
-		this.incoming = map.getIncoming();
 		this.parms = Parameters.getInstance();
+		this.incoming = map.getIncoming();
+		
+		// save the incoming flow before we start messing with it
+		this.previous = new double[this.incoming.length];
+		for(int i = 0; i < incoming.length; i++)
+			previous[i] = incoming[i];
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -106,8 +111,9 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		
-		// see if entry point has already been selected
-		map.checkSelection(Map.Selection.POINT);
+		// wait for a new entry point to be selected
+		map.selectMode(Map.Selection.NONE);
+		map.selectMode(Map.Selection.POINT);
 	}
 
 
@@ -116,14 +122,12 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		// undo any previous selection
-		if (whichPoint >= 0 && incoming != null) {
-			incoming[whichPoint] = oldFlow;
-			map.setIncoming(incoming);
-		}
-		map.removeMapListener(this);
-		WorldBuilder.activeDialog = false;
-		this.dispose();
+		// undo any uncommitted updates
+		for(int i = 0; i < incoming.length; i++)
+			incoming[i] = previous[i];
+		map.setIncoming(incoming);
+
+		cancelDialog();
 	}
 	
 	/**
@@ -135,10 +139,6 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		if (incoming == null)
 			return true;
 		
-		// undo any previous selection
-		if (whichPoint >= 0)
-			incoming[whichPoint] = oldFlow;
-		
 		// choose the new point
 		MeshPoint p = map.mesh.choosePoint(x, y);
 		whichPoint = p.index;
@@ -148,15 +148,20 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		pack();
 		
 		// note the change in flux
-		oldFlow = incoming[whichPoint];
 		incoming[whichPoint] = (int) flow.getValue();
 		map.setIncoming(incoming);
+		
+		// report on the change
+		if (parms.debug_level > 0) {
+			System.out.println("Artial river enters at " + entryPoint.getText() + ", flow=" + (int) incoming[whichPoint] + " " + Parameters.unit_f);
+			map.region_stats();
+		}
 		
 		return true;
 	}
 	
 	/**
-	 * updates to the axis/inclination/profile sliders
+	 * updates to flow slider
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == flow) {
@@ -164,30 +169,39 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 				incoming[whichPoint] = (int) flow.getValue();
 				map.setIncoming(incoming);
 			}
+			// report on the change
+			if (parms.debug_level > 1) {
+				System.out.println("Artial river enters at " + entryPoint.getText() + ", flow=" + (int) incoming[whichPoint] + " " + Parameters.unit_f);
+				map.region_stats();
+			}
 		} 
 	}
-
+	
+	/**
+	 * unregister listener and dispose of our dialog
+	 */
+	private void cancelDialog() {
+		map.removeMapListener(this);
+		WorldBuilder.activeDialog = false;
+		this.dispose();
+	}
+	
 	/**
 	 * click events on ACCEPT/CANCEL buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel && whichPoint >= 0) {
-			incoming[whichPoint] = oldFlow;
+			// undo any uncommitted updates
+			for(int i = 0; i < incoming.length; i++)
+				incoming[i] = previous[i];
 			map.setIncoming(incoming);
+			cancelDialog();
 		} else if (e.getSource() == accept) {
 			// make the new parameters official
+			for(int i = 0; i < incoming.length; i++)
+				previous[i] = incoming[i];
 			parms.dTribute = (int) flow.getValue();
-			if (parms.debug_level > 0) {
-				System.out.println("Artial river enters at " + entryPoint.getText() + ", flow=" + (int) incoming[whichPoint] + " " + Parameters.unit_f);
-				map.region_stats();
-			}
 		}
-			
-		
-		// clean up the graphics
-		map.removeMapListener(this);
-		WorldBuilder.activeDialog = false;
-		this.dispose();
 	}
 	
 	/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }

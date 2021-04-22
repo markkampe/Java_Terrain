@@ -9,7 +9,7 @@ import javax.swing.event.*;
 /**
  * Dialog to define the point at which an arterial river enters the map.
  */
-public class RiverDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {
+public class RiverDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener, KeyListener {
 
 	private Map map;
 	
@@ -110,6 +110,9 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		flow.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
+		addKeyListener(this);
+		map.addKeyListener(this);
+		map.requestFocus();
 		
 		// wait for a new entry point to be selected
 		map.selectMode(Map.Selection.NONE);
@@ -182,8 +185,27 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	private void cancelDialog() {
 		map.removeMapListener(this);
+		map.removeKeyListener(this);
 		WorldBuilder.activeDialog = false;
 		this.dispose();
+	}
+	
+	/**
+	 * ENTER means accept, ESCAPE means cancel
+	 * @param e
+	 */
+	public void keyTyped(KeyEvent e) {
+		int key = e.getKeyChar();
+		if (key == KeyEvent.VK_ENTER) {
+			// make the new parameters official
+			for(int i = 0; i < incoming.length; i++)
+				previous[i] = incoming[i];
+		} else if (key == KeyEvent.VK_ESCAPE) {
+			// undo any uncommitted updates
+			for(int i = 0; i < incoming.length; i++)
+				incoming[i] = previous[i];
+			map.setIncoming(incoming);
+		}
 	}
 	
 	/**
@@ -214,4 +236,6 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	/** (perfunctory) */ public void windowOpened(WindowEvent arg0) {}
 	/** (perfunctory) */ public void mousePressed(MouseEvent arg0) {}
 	/** (perfunctory) */ public void mouseReleased(MouseEvent arg0) {}
+	/** (perfunctory) */ public void keyPressed(KeyEvent arg0) {}
+	/** (perfunctory) */ public void keyReleased(KeyEvent arg0) {}
 }

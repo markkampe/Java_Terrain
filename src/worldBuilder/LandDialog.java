@@ -36,6 +36,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	private JButton cancel;
 	
 	private boolean have_selection;		// there is a selected point set
+	private boolean changes_made;		// we have uncommitted changes
 	private boolean[] selected_points;	// which points are selected
 	
 	//private static final int LAND_DEBUG = 2;
@@ -267,6 +268,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	public boolean groupSelected(boolean[] selected, boolean complete) {
 		selected_points = selected;
 		have_selection = true;
+		changes_made = true;
 		redraw();	// and update the display
 		return true;
 	}
@@ -347,6 +349,9 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		map.selectMode(Map.Selection.NONE);
 		map.selectMode(Map.Selection.POINTS);
 		have_selection = false;
+		
+		// there are no uncommitted changes
+		changes_made = false;
 	}
 				
 	/**
@@ -360,8 +365,11 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	 * updates to the sliders
 	 */
 	public void stateChanged(ChangeEvent e) {
-		if (have_selection)
+		if (have_selection) {
 			redraw();
+			changes_made = true;
+			map.requestFocus();
+		}
 	}
 	
 	/**
@@ -369,7 +377,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	public void keyTyped(KeyEvent e) {
 		int key = e.getKeyChar();
-		if (key == KeyEvent.VK_ENTER && have_selection)
+		if (key == KeyEvent.VK_ENTER && changes_made)
 			acceptChanges();
 		else if (key == KeyEvent.VK_ESCAPE)
 			cancelDialog();	
@@ -381,7 +389,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			cancelDialog();
-		} else if (e.getSource() == accept && have_selection) {
+		} else if (e.getSource() == accept && changes_made) {
 			acceptChanges();
 		}
 	}

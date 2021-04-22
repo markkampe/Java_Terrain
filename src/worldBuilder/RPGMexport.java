@@ -6,6 +6,7 @@ import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.*;
+import java.util.Hashtable;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -41,7 +42,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	// control widgets
 	private JSlider levels; 	// number of height levels
 	private RangeSlider altitudes; // ground, hill, mountain OR pit, ground, mound
-	private JSlider slopes; 	// plateau, hill/mountain
+	private JSlider plateau; 	// plateau, hill/mountain
 	private RangeSlider depths; // marsh, shallow, deep
 	private RangeSlider flora_3;	// types of plant cover
 	private JTextField palette; // tile set description file
@@ -197,24 +198,32 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			sT3.setFont(fontLarge);
 			sTitle.add(sT3);
 
-			slopes = new JSlider(0, 100);
-			slopes.setValue(parms.dSlopeMin);
-			slopes.setMajorTickSpacing(10);
-			slopes.setMinorTickSpacing(5);
-			slopes.setFont(fontSmall);
-			slopes.setPaintTicks(true);
-			slopes.setPaintLabels(true);
+			// trick: I want values from 0-10.0 in tenths
+			plateau = new JSlider(0, 100);
+			Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
+			for (double d = 0.0; d <= 10.0; d += 1.0) {
+				JLabel n = new JLabel(String.valueOf(d));
+				n.setFont(fontSmall);;
+				labels.put((int) d*10, n);
+			}
+			plateau.setLabelTable(labels);
+			plateau.setValue(parms.dSlopeMin);
+			plateau.setMajorTickSpacing(10);
+			plateau.setMinorTickSpacing(5);
+			plateau.setFont(fontSmall);
+			plateau.setPaintTicks(true);
+			plateau.setPaintLabels(true);
 
-			JLabel l = new JLabel("Terrain Slope (percentile)");
+			JLabel l = new JLabel("Terrain Slope (%)");
 			l.setFont(fontSmall);
 
 			// add this to the local panel
 			locals.add(new JLabel("    "));
 			locals.add(sTitle);
-			locals.add(slopes);
+			locals.add(plateau);
 			locals.add(l);
 			
-			slopes.addChangeListener(this);
+			plateau.addChangeListener(this);
 		}
 
 		if (need_depths) { // create depth RangeSlider
@@ -302,7 +311,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	public void stateChanged(ChangeEvent e) {
 		Object source = e.getSource();
 	
-		if (source == levels || source == altitudes || source == slopes || source == depths) {
+		if (source == levels || source == altitudes || source == plateau || source == depths) {
 			levelsChanged = true;
 		}
 	}
@@ -422,7 +431,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		// maps created by this method
 		int depthMap[]; // depth pctile to terrain level
 		int altMap[]; // alt pctile to terrain level
-		int slopeMap[]; // slope pctile to terrain level
 		int typeMap[]; // terrain level to TerrainType
 
 		// number of levels of each type
@@ -486,20 +494,6 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		} else
 			altMap = null;
 
-		// create and initialize the slope percentile->level map
-		if (slopes != null) {
-			slopeMap = new int[100];
-			int flat = slopes.getValue();
-
-			// figure out the base level for each of the three groups
-			for (int i = 0; i < 100; i++)
-				if (i >= flat) 	// too steep for a plateau
-					slopeMap[i] = high_base + (((i - flat) * highLevels) / (100 - flat));
-				else // this is a plateau
-					slopeMap[i] = low_base + ((i * lowLevels) / flat);
-		} else
-			slopeMap = null;
-
 		// create the terrain level to TerrainType/color maps
 		typeMap = new int[totLevels];
 		colorTopo = new Color[totLevels];
@@ -559,7 +553,8 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 
 		// compute a terrain level for every square
 		RPGMLeveler leveler = new RPGMLeveler();
-		int[][] levelMap = leveler.getLevels(tiler, altMap, depthMap, slopeMap);
+		double threshold = plateau != null ? ((double) plateau.getValue())/100.0 : 0.0;
+		int[][] levelMap = leveler.getLevels(tiler, altMap, depthMap, threshold, typeMap);
 		tiler.levelMap(levelMap, typeMap);
 	}
 }

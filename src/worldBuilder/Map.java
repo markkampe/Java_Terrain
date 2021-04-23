@@ -869,6 +869,17 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			faunaNames[i] = newNames[i];
 	}
 	
+	/**
+	 * record a new point of interest
+	 * @param name
+	 * @param description
+	 * @param x
+	 * @param y
+	 */
+	public void setPOI(String name, String description, double x, double y) {
+		
+	}
+	
 	/*
 	 * these arrays are regularly re-calculated from height/rain
 	 * and so do not need to be explicitly SET

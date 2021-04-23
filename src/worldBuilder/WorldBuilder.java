@@ -67,6 +67,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem editFlora;
 	private JMenuItem editRocks;
 	private JMenuItem editFauna;
+	private JMenuItem editPOI;
 	private JMenuItem editCity;
 	private JMenuItem editRoads;
 	private JMenuItem viewPoints;
@@ -219,6 +220,8 @@ public class WorldBuilder  extends JFrame
 		editFauna.addActionListener(this);
 		editRocks = new JMenuItem("mineral distribution");
 		editRocks.addActionListener(this);
+		editPOI = new JMenuItem("points of interest");
+		editPOI.addActionListener(this);
 		editCity = new JMenuItem("add city");
 		editCity.addActionListener(this);
 		editCity.setEnabled(false);	// SOMEDAY implement city creation
@@ -235,6 +238,7 @@ public class WorldBuilder  extends JFrame
 		editMenu.add(editFlora);
 		editMenu.add(editFauna);
 		editMenu.add(editRocks);
+		editMenu.add(editPOI);
 		editMenu.add(new JSeparator());
 		editMenu.add(editCity);
 		editMenu.add(editRoads);
@@ -568,6 +572,14 @@ public class WorldBuilder  extends JFrame
 				placeDialog(new MineralDialog(map), false);
 				activeDialog = true;
 			}
+		} else if (o == editPOI) {
+			if (activeDialog)
+				twoDialogError();
+			else {
+				placeDialog(new POIDialog(map), false);
+				activeDialog = true;
+			}
+
 		} else if (o == editCity) {
 			System.err.println("implement edit:City");
 		} else if (o == editRoads) {

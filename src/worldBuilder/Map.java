@@ -68,10 +68,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
 	
-	private static final int MAX_POIS = 10;	// TODO make poi_list a list
+	public static final int MAX_POIS = 10;	// TODO make poi_list a list
 	
 	private Color highLights[];		// points to highlight
 	private boolean highlighting;	// are there points to highlight
+	private double highlight_x, highlight_y;	// non-mesh-point highlighting
 	
 	public Drainage drainage;		// drainage calculator
 	public WaterFlow waterflow;		// water-flow calculator
@@ -1429,6 +1430,19 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			highlighting = false;
 		}
 	}
+
+	/**
+	 * highlight non-mesh point
+	 *
+	 * @param x - map X coordinate
+	 * @param y - map Y coordinate
+	 * @param c - color for highlighting
+	 */
+	public void highlight(double x, double y) {
+		highlight_x = x;
+		highlight_y = y;
+		highlighting = true;
+	}
 	
 	/**
 	 * find the mesh point closest to a screen location
@@ -1609,7 +1623,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		}
 		
 		// see if we have points to highlight (debugging, put it on top)
-		if (highlighting)
+		if (highlighting) {
 			for(int i = 0; i < highLights.length; i++)
 				if (highLights[i] != null) {
 					g.setColor(highLights[i]);
@@ -1618,6 +1632,14 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					double y = screen_y(p.y) - LARGE_POINT / 2;
 					g.drawOval((int) x, (int) y, LARGE_POINT, LARGE_POINT);
 				}
+				
+				if (highlight_x != 0 || highlight_y != 0) {
+					g.setColor(SELECT_COLOR);
+					double x = screen_x(highlight_x) - LARGE_POINT / 2;
+					double y = screen_y(highlight_y) - LARGE_POINT / 2;
+					g.drawOval((int) x, (int) y, LARGE_POINT, LARGE_POINT);
+				}
+		}
 	
 		// see if we have a selection area to highlight
 		switch(sel_type) {

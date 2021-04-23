@@ -3,31 +3,35 @@ package worldBuilder;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 
 /**
  * a Dialog to collect information about a Point of Interest
  */
-public class POIDialog extends JFrame implements WindowListener, MapListener, ActionListener {
+public class POIDialog extends JFrame implements WindowListener, MapListener, ActionListener, ListSelectionListener {
 		private Map map;
 		private Parameters parms;
 			
 		private static final int BORDER_WIDTH = 5;
-		private static final Color NEIGHBOR_COLOR = Color.BLACK;
 		
 		private static final long serialVersionUID = 1L;
 		
-		private JLabel infoMap;
-		private JLabel infoWorld;
-		private JLabel infoAlt;
-		private JLabel infoNeighbors;
-		private JTextField poi_name;
-		private JTextField poi_desc;
+		private static final int[] column_widths = new int[] { 100, 180, 60, 60 };
+		private static final String[] column_names = new String[] { "Type", "Name", "Lat", "Lon" };
+		private static final int COL_TYPE = 0;
+		private static final int COL_NAME = 1;
+		private static final int COL_LAT = 2;
+		private static final int COL_LON = 3;
+		
+		Object[][] data;		// the data to be displayed
+		double x[], y[];		// corresponding X/Y coordinates
+		
+		private JTable table;
 		private JButton accept;
 		private JButton cancel;
-		
-		private final double UNKNOWN = 666.0;
-		
-		double point_x, point_y;
 		
 		/** instantiate the POI information collection widgets */
 		public POIDialog(Map map)  {
@@ -35,43 +39,48 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 			this.map = map;
 			this.parms = Parameters.getInstance();
 			
-			point_x = UNKNOWN;
-			point_y = UNKNOWN;
-			
-			// create the dialog box
+			// import the current list of pois
+			POI[] points = map.getPOI();
+			data = new Object[Map.MAX_POIS][4];
+			x = new double[Map.MAX_POIS];
+			y = new double[Map.MAX_POIS];
+			int numPoints = 0;
+			for(int i = 0; i < points.length; i++)
+				if (points[i] != null) {
+					data[numPoints][COL_TYPE] = points[i].type;
+					data[numPoints][COL_NAME] = points[i].name;
+					data[numPoints][COL_LAT] = parms.latitude(points[i].y);
+					data[numPoints][COL_LON] = parms.longitude(points[i].x);
+					y[numPoints] = points[i].y;
+					x[numPoints] = points[i].x;
+					numPoints++;
+				}
+				
+			// label the dialog box
 			Container mainPane = getContentPane();
 			((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, Color.LIGHT_GRAY));
 			setTitle("Points of Interest");
 			addWindowListener( this );
 			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 	
-			infoMap = new JLabel();
-			infoWorld = new JLabel();
-			infoAlt = new JLabel();
-			infoNeighbors = new JLabel();
-			poi_name = new JTextField();
-			poi_desc = new JTextField();
-			int fields = 7;
+			// create a table of points of interest
+			DefaultTableModel model = new DefaultTableModel(data, column_names) {
+				@Override
+				public boolean isCellEditable(int row, int col) {
+					return (col < COL_LAT);
+				}
+				@Override
+				public Class<?> getColumnClass(int col) {
+					return (col < COL_LAT) ? String.class : Double.class;
+				}
+				private static final long serialVersionUID = 1L;
+			};
+			table = new JTable(model);
+			TableColumnModel tcm = table.getColumnModel();
+			for(int i = 0; i < column_widths.length; i++)
+				tcm.getColumn(i).setPreferredWidth(column_widths[i]);
 			
-			JPanel info = new JPanel(new GridLayout(fields, 2));
-			info.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
-			
-			// information about selected point
-			info.add(new JLabel("Map Location:"));
-			info.add(infoMap);
-			info.add(new JLabel("Lat,Lon:"));
-			info.add(infoWorld);
-			info.add(new JLabel("Altitude:"));
-			info.add(infoAlt);
-			info.add(new JLabel("Surrounding:"));
-			info.add(infoNeighbors);
-			info.add(new JLabel(""));
-			info.add(new JLabel(""));
-			info.add(new JLabel("Name:"));
-			info.add(poi_name);
-			info.add(new JLabel("Description:"));
-			info.add(poi_desc);
-			mainPane.add(info,  BorderLayout.CENTER);
+			mainPane.add(table,  BorderLayout.CENTER);
 			
 			// accept/cancel button
 			accept = new JButton("ACCEPT");
@@ -90,6 +99,7 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 			// add the action listeners
 			accept.addActionListener(this);
 			cancel.addActionListener(this);
+			table.getSelectionModel().addListSelectionListener(this);
 			map.addMapListener(this);
 			map.selectMode(Map.Selection.POINT);
 			map.checkSelection(Map.Selection.POINT);
@@ -105,47 +115,46 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 			// cancel all previous highlights
 			map.highlight(-1,  null);
 			
-			// display the info for this point
-			mapPointInfo(map_x, map_y);
+			// update the selected (or first empty) row
+			int row = table.getSelectedRow();
+			if (row < 0) {
+				for(int i = 0; i < data.length; i++)
+					if (data[i][0] == null || data[i][0].equals("")) {
+						row = i;
+						break;
+					}
+			}
+			if (row >= 0) {
+				x[row] = map_x;
+				y[row] = map_y;
+				table.setValueAt(parms.latitude(map_y), row, COL_LAT);
+				table.setValueAt(parms.longitude(map_y), row, COL_LON);
+			}
 			
-			// update the point information pop-up and display the highlights
-			pack();
-			map.repaint();
 			return true;
 		}
 		
+		public void valueChanged(ListSelectionEvent e) {
+			int row = table.getSelectedRow();
+			String type = (String) table.getValueAt(row, COL_TYPE);
+			if (type != null && !type.equals("")) {
+				map.highlight(x[row],  y[row]);	
+				map.repaint();
+			}
+		}
+		
 		/**
-		 * display information about a random map point
-		 * @param map_x
-		 * @param map_y
+		 * commit our changes to the points of interest map
 		 */
-		void mapPointInfo(double map_x, double map_y) {
-			
-			infoMap.setText(String.format("<%.7f, %.7f>", map_x, map_y));
-			infoWorld.setText(String.format("<%.6f, %.6f>", parms.latitude(map_y), parms.longitude(map_x)));
-			
-			// figure out where we are relative to MeshPoints
-			Vicinity vicinity = new Polygon(map.mesh, map_x, map_y);
-			
-			// Cartesian interpolated height
-			double h = parms.altitude(vicinity.interpolate(map.getHeightMap()));
-			String desc = String.format("%.3f%s MSL", h, Parameters.unit_z);
-			infoAlt.setText(desc);
-			
-			// find and highlight our polygon neighbors
-			String neighbors = "";
-			for(int i = 0; i < Vicinity.NUM_NEIGHBORS; i++)
-				if (vicinity.neighbors[i] >= 0) {
-					map.highlight(vicinity.neighbors[i], NEIGHBOR_COLOR);
-					if (neighbors == "")
-						neighbors = String.format("%d", vicinity.neighbors[i]);
-					else
-						neighbors += String.format(", %d", vicinity.neighbors[i]);
-				}
-			infoNeighbors.setText(neighbors);
-			
-			point_x = map_x;
-			point_y = map_y;
+		private void updatePOIs() {
+			POI[] pois = new POI[Map.MAX_POIS];
+			for(int i = 0; i < pois.length; i++) {
+				String type = (String) table.getValueAt(i, 0);
+				if (type == null || type.equals(""))
+					continue;
+				pois[i] = new POI(type, (String) table.getValueAt(i, COL_NAME), x[i], y[i]);
+			}
+			map.setPOI(pois);
 		}
 		
 		/**
@@ -170,34 +179,7 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 		 */
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == accept) {
-				String name = poi_name.getText();
-				if (name.equals("")) {
-					System.err.println("Every Point of Interest must have a name");
-					return;
-				}
-				String desc = poi_desc.getText();
-				if (desc.equals("")) {
-					System.err.println("Every Point of Interest must have a description");
-					return;
-				}
-				
-				if (point_x == UNKNOWN || point_y == UNKNOWN) {
-					System.err.println("A point on the map must be selected");
-					return;
-				}
-				
-				POI points[] = new POI[1];
-				points[0] = new POI(desc, name, point_x, point_y);
-				map.setPOI(points);
-				
-				if (parms.debug_level > 0)
-					System.out.println("Added " + desc + " " + name + " at " + infoWorld.getText());
-				
-				// clear name and description for new entrypoints
-				poi_name.setText("");
-				poi_desc.setText("");
-				point_x = UNKNOWN;
-				point_y = UNKNOWN;
+				updatePOIs();
 			} else if (e.getSource() == cancel) {
 				cancelDialog();
 			}

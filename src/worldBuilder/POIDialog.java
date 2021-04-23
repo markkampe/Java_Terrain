@@ -79,8 +79,7 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 			TableColumnModel tcm = table.getColumnModel();
 			for(int i = 0; i < column_widths.length; i++)
 				tcm.getColumn(i).setPreferredWidth(column_widths[i]);
-			
-			mainPane.add(table,  BorderLayout.CENTER);
+			mainPane.add(new JScrollPane(table),  BorderLayout.CENTER);
 			
 			// accept/cancel button
 			accept = new JButton("ACCEPT");
@@ -150,9 +149,17 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 			POI[] pois = new POI[Map.MAX_POIS];
 			for(int i = 0; i < pois.length; i++) {
 				String type = (String) table.getValueAt(i, 0);
+				// PoI must have a name
 				if (type == null || type.equals(""))
 					continue;
-				pois[i] = new POI(type, (String) table.getValueAt(i, COL_NAME), x[i], y[i]);
+				// PoI must have a position
+				if (x[i] == 0 && y[i] == 0)
+					continue;
+				String name = (String) table.getValueAt(i, COL_NAME);
+				pois[i] = new POI(type, name, x[i], y[i]);
+				if (parms.debug_level > 0)
+					System.out.println("PoI: " + type + "(" + name + ") at <" +
+							parms.latitude(y[i]) + "," + parms.longitude(x[i]) + ">");
 			}
 			map.setPOI(pois);
 		}

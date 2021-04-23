@@ -68,6 +68,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
 	
+	private static final int MAX_POIS = 10;	// TODO make poi_list a list
+	
 	private Color highLights[];		// points to highlight
 	private boolean highlighting;	// are there points to highlight
 	
@@ -95,6 +97,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private Cartesian poly_map;		// interpolation based on surrounding polygon
 	private double tileHeight[][];	// altitude of each screen tile (Z units)
 	private double tileDepth[][];	// depth u/w of each screen tile (meters)
+	
+	private POI[] poi_list;			// list of points of interest
 	
 	/** selection types: points, line, rectangle, ... */
 	public enum Selection {NONE, POINT, POINTS, LINE, RECTANGLE, SQUARE, ANY};
@@ -258,8 +262,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		JsonParser parser = Json.createParser(r);
 		String thisKey = "";		// last key read
 		boolean inPoints = false;	// in points array
+		boolean inPoIs = false;		// in points of interest
 		int length = 0;				// expected number of points
 		int points = 0;				// number of points read	
+		int pois = 0;				// number of points of interest read
 		
 		// per-point parameters we are looking for
 		double z = 0;
@@ -269,6 +275,13 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		int fauna = 0;
 		double influx = 0;
 		isSubRegion = false;
+		double x = 0;
+		double y = 0;
+		String poi_type = "";
+		String poi_name = "";
+		
+		// reallocate this every time
+		this.poi_list = new POI[MAX_POIS];
 		
 		while(parser.hasNext()) {
 			JsonParser.Event e = parser.next();
@@ -279,6 +292,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					if (thisKey.equals("points")) {
 						inPoints = true;
 						points = 0;
+					} else if (thisKey.equals("pois")) {
+						inPoIs = true;
+						pois = 0;
 					} else if (thisKey.equals("mesh"))
 						inPoints = false;
 				}
@@ -293,6 +309,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 						break;
 
 					// per point attributes
+					case "x":
+						x = new Double(parser.getString());
+						break;
+					case "y":
+						y = new Double(parser.getString());
+						break;
 					case "z":
 						z = new Double(parser.getString());
 						break;
@@ -323,6 +345,14 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 						if (u != -1)
 							s = s.substring(0, u);
 						influx = new Double(s);
+						break;
+						
+					case "type":
+						poi_type = parser.getString();
+						break;
+						
+					case "name":
+						poi_name = parser.getString();
 						break;
 						
 					// world attributes
@@ -414,6 +444,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					rainMap[points] = rain;
 					incoming[points] = influx;
 					points++;
+				} else if (inPoIs) {
+					poi_list[pois++] = new POI(poi_type, poi_name, x, y);
 				}
 				break;
 				
@@ -423,6 +455,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			case END_ARRAY:
 				if (inPoints)
 					inPoints = false;
+				else if (inPoIs)
+					inPoIs = false;
 				break;
 				
 			case START_OBJECT:
@@ -433,6 +467,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					fauna = 0;
 					rain = 0;
 					z = 0.0;
+				} else if (inPoIs) {
+					poi_name = "";
+					poi_type = "";
 				}
 			default:
 				break;
@@ -502,6 +539,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			final String M_format = "    \"map_name\": \"%s\",\n";
 			final String P_format = "    \"parent_name\": \"%s\",\n";
 			final String D_format = "    \"description\": \"%s\",\n";
+			final String I_FORMAT = "        { \"x\": %.7f, \"y\": %.7f, \"type\": \"%s\", \"name\": \"%s\" }";
 			
 			output.write( "{   \"length\": " + mesh.vertices.length + ",\n");
 			output.write( String.format(M_format, parms.map_name));
@@ -524,6 +562,26 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			
 			if (parms.description != "")
 				output.write(String.format(D_format,  parms.description));
+			
+			// write out the points of interest
+			int numPoints = 0;
+			if (poi_list != null && poi_list.length > 0) {
+				for(int i = 0; i < poi_list.length; i++)
+					if (poi_list[i] != null)
+						numPoints++;
+			}
+			if (numPoints > 0) {
+				output.write( "    \"pois\": [" );
+				numPoints = 0;
+				for(int i = 0; i < poi_list.length; i++) {
+					POI point = poi_list[i];
+					if (point != null) {
+						output.write((numPoints++ == 0) ? "\n" : ",\n");
+						output.write(String.format(I_FORMAT, point.x, point.y, point.type, point.name ));
+					}
+				}
+				output.write(" ],\n");
+			}
 			
 			// write out the points and per-point attributes
 			output.write( "    \"points\": [" );
@@ -612,6 +670,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.faunaMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
+			this.poi_list = new POI[MAX_POIS];
 			this.drainage = new Drainage(this);
 			this.waterflow = new WaterFlow(this);
 			// these will be created by the first paint()
@@ -631,6 +690,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.floraMap = null;
 			this.faunaMap = null;
 			this.incoming = null;
+			this.poi_list = null;
 			this.highLights = null;
 			this.drainage = null;
 			this.waterflow = null;
@@ -870,14 +930,17 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
-	 * record a new point of interest
-	 * @param name
-	 * @param description
-	 * @param x
-	 * @param y
+	 * update the lists of Points of Interest
 	 */
-	public void setPOI(String name, String description, double x, double y) {
-		
+	public void setPOI(POI[] points) {
+		poi_list = points;
+	}
+	
+	/**
+	 * return the list of Points of Interest
+	 */
+	public POI[] getPOI() {
+		return poi_list;
 	}
 	
 	/*

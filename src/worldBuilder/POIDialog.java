@@ -186,7 +186,9 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 					return;
 				}
 				
-				map.setPOI(name, desc, point_x, point_y);
+				POI points[] = new POI[1];
+				points[0] = new POI(desc, name, point_x, point_y);
+				map.setPOI(points);
 				
 				if (parms.debug_level > 0)
 					System.out.println("Added " + desc + " " + name + " at " + infoWorld.getText());

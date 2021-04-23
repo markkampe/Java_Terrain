@@ -42,7 +42,7 @@ public class FoundExporter implements Exporter {
 	
 	private int[][] ports;			// entry and exit points
 	private int num_ports;			// number reported
-	private static final int MAX_PORTS = 4;
+	public static final int MAX_PORTS = 4;
 	
 	// list of resource bitmaps to be created
 	private static String resource_maps[] = {

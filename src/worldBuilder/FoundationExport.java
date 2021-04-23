@@ -58,6 +58,24 @@ public class FoundationExport extends ExportBase implements ActionListener {
 	}
 
 	/**
+	 * entry and exit points (typically harbors)
+	 */
+	private class Point {
+		public int row;		// export row (/EXPORT_SIZE)
+		public int col;		// export col (/EXPORT SIZE)
+		
+		/**
+		 * convert map <x,y> into <row,col>
+		 */
+		public Point(double x, double y) {
+			double dx = (x - box_x)/box_width;
+			col = (int) (EXPORT_SIZE * dx);
+			double dy = (y - box_y)/box_height;
+			row = (int) (EXPORT_SIZE * dy);
+		}
+	}
+	
+	/**
 	 * process ACCEPT/CANCEL button events
 	 */
 	public void actionPerformed(ActionEvent e) {
@@ -65,7 +83,7 @@ public class FoundationExport extends ExportBase implements ActionListener {
 			windowClosing((WindowEvent) null);
 			return;
 		}
-		
+	
 		// make sure we have an exporter ready
 		if (exporter == null || newSelection) {
 			exporter = new FoundExporter(x_points, y_points);
@@ -74,15 +92,41 @@ public class FoundationExport extends ExportBase implements ActionListener {
 		}
 		if (!exported) {
 			export(exporter);
-			
-			// TODO implement entry/exit point selection/dialog
-			exporter.entryPoint(  2,  84,   2,  62);	// bogus value for testing
-			exporter.entryPoint(  2,  18,   2,  40);	// bogus value for testing
-			exporter.entryPoint(100,   2,  31,   2);	// bogus value for testing
-			exporter.entryPoint(126,  34, 126,  90);	// bogus value for testing
+		
+			// see if there are any defined entry/exit points inside our export
+			POI interest[] = map.getPOI();
+			if (interest != null) {
+				Point[] entrypoints = new Point[FoundExporter.MAX_PORTS];
+				Point[] exitpoints = new Point[FoundExporter.MAX_PORTS];
+				int entrances = 0;
+				int exits = 0;
+				for(int i = 0; i < interest.length; i++) {
+					// is this a defined POI
+					POI poi = interest[i];
+					if (poi == null)
+						continue; 
+					
+					// make sure it is inside the box
+					if (poi.x < box_x || poi.y < box_y)
+						continue;
+					if (poi.x > box_x + box_width || poi.y > box_y + box_height)
+						continue;
+					
+					if (poi.type.equals("ENTRY") && entrances < entrypoints.length)
+						entrypoints[entrances++] = new Point(poi.x, poi.y);
+					else if (poi.type.equals("EXIT") && exits < exitpoints.length)
+						exitpoints[exits++] = new Point(poi.x, poi.y);
+				}
+				
+				// pass them to the exporter
+				for(int i = 0; i < entrances && i < exits; i++)
+					exporter.entryPoint(entrypoints[i].col, entrypoints[i].row, 
+										exitpoints[i].col, exitpoints[i].row);
+			}
+
 			exported = true;
 		}
-		
+	
 		if (e.getSource() == accept && selected) {
 			// create files in a chosen directory
 			JFileChooser d = new JFileChooser(parms.project_dir);

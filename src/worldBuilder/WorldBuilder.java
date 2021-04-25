@@ -174,7 +174,7 @@ public class WorldBuilder  extends JFrame
 		exportRpgmOverworld.addActionListener(this);
 		exportRpgmOutside = new JMenuItem("Outside");
 		exportRpgmOutside.addActionListener(this);
-		exportFoundation = new JMenuItem("Foundation(WIP)");
+		exportFoundation = new JMenuItem("Foundation");
 		exportFoundation.addActionListener(this);
 		exportObject = new JMenuItem("Object Overlay(WIP)");
 		exportObject.addActionListener(this);

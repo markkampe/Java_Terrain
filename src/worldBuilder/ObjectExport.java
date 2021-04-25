@@ -2,6 +2,7 @@ package worldBuilder;
 
 import java.awt.FileDialog;
 import java.awt.event.*;
+import java.io.File;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Dimension;
@@ -10,6 +11,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JTextField;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -109,19 +111,18 @@ public class ObjectExport extends ExportBase implements ActionListener {
 		
 		if (e.getSource() == accept && selected) {
 			// flush the it out to a file
-			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
-			d.setFile(sel_name.getText()+".json");
-			d.setVisible(true);
-			String export_file = d.getFile();
-			if (export_file != null) {
-				String dir = d.getDirectory();
-				if (dir != null)
-					export_file = dir + export_file;
+			JFileChooser c = new JFileChooser();
+			if (parms.export_dir != null)
+				c.setCurrentDirectory(new File(parms.export_dir));
+			c.setSelectedFile(new File(sel_name.getText()+".json"));
+			int retval = c.showSaveDialog(this);
+			if (retval == JFileChooser.APPROVE_OPTION) {
+				File chosen = c.getSelectedFile();
+				exporter.writeFile(chosen.getPath());
 				
-				exporter.writeFile(export_file);
-				
-				// make this the new default output file name
-				parms.map_name = sel_name.getText();
+				// update the defaults
+				parms.map_name = chosen.getName();
+				parms.export_dir = c.getCurrentDirectory().getPath();
 				
 				// discard the window
 				windowClosing((WindowEvent) null);

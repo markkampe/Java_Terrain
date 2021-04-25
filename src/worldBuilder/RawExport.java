@@ -2,16 +2,19 @@ package worldBuilder;
 
 import java.awt.FileDialog;
 import java.awt.event.*;
+import java.io.File;
+
+import javax.swing.JFileChooser;
 
 /**
  * Dialog to collect information for a Raw (JSON) export
  */
 public class RawExport extends ExportBase implements ActionListener {
-	
+
 	private Map map;
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private JsonExporter exporter = null;
 	private boolean exported = false;
 
@@ -23,7 +26,7 @@ public class RawExport extends ExportBase implements ActionListener {
 	public RawExport(Map map) {
 		super("Raw JSON", map, 1, 100000, Map.Selection.RECTANGLE);
 		this.map = map;
-		
+
 		// we handle window and button events
 		previewT.addActionListener(this);
 		previewF.addActionListener(this);
@@ -35,7 +38,7 @@ public class RawExport extends ExportBase implements ActionListener {
 		pack();
 		setVisible(true);
 	}
-	
+
 	/**
 	 * process ACCEPT/CANCEL button events
 	 */
@@ -44,7 +47,7 @@ public class RawExport extends ExportBase implements ActionListener {
 			windowClosing((WindowEvent) null);
 			return;
 		}
-		
+
 		// make sure we have an exporter ready
 		if (exporter == null || newSelection) {
 			exporter = new JsonExporter(x_points, y_points);
@@ -55,26 +58,21 @@ public class RawExport extends ExportBase implements ActionListener {
 			export(exporter);
 			exported = true;
 		}
-		
+
 		if (e.getSource() == accept && selected) {
 			// flush the it out to a file
-			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
-			d.setFile(sel_name.getText()+".json");
+			JFileChooser c = new JFileChooser();
 			if (parms.export_dir != null)
-				d.setDirectory(parms.export_dir);
-			d.setVisible(true);
-			String export_file = d.getFile();
-			if (export_file != null) {
-				String dir = d.getDirectory();
-				if (dir != null) {
-					export_file = dir + export_file;
-					parms.export_dir = dir;
-				}
+				c.setCurrentDirectory(new File(parms.export_dir));
+			c.setSelectedFile(new File(sel_name.getText()+".json"));
+			int retval = c.showSaveDialog(this);
+			if (retval == JFileChooser.APPROVE_OPTION) {
+				File chosen = c.getSelectedFile();
+				exporter.writeFile(chosen.getPath());
 				
-				exporter.writeFile(export_file);
-				
-				// make this the new default output file name
-				parms.map_name = sel_name.getText();
+				// update the defaults
+				parms.map_name = chosen.getName();
+				parms.export_dir = c.getCurrentDirectory().getPath();
 				
 				// discard the window
 				windowClosing((WindowEvent) null);

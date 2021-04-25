@@ -6,12 +6,14 @@ import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.*;
+import java.io.File;
 import java.util.Hashtable;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -371,25 +373,20 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 		
 		if (e.getSource() == accept && selected) {
-			// get the output file name
-			FileDialog d = new FileDialog(this, "Export", FileDialog.SAVE);
-			d.setFile(sel_name.getText() + ".json");
-			if (parms.project_dir != null)
-				d.setDirectory(parms.project_dir);
-			d.setVisible(true);
-			String export_file = d.getFile();
-			if (export_file != null) {
-				String dir = d.getDirectory();
-				if (dir != null) {
-					export_file = dir + export_file;
-					parms.project_dir = dir;
-				}
-
-				// write out the file
-				tiler.writeFile(export_file);
-
-				// make the selected values defaults
-				parms.map_name = sel_name.getText();
+			// flush the it out to a file
+			JFileChooser c = new JFileChooser();
+			if (parms.export_dir != null)
+				c.setCurrentDirectory(new File(parms.export_dir));
+			c.setSelectedFile(new File(sel_name.getText()+".json"));
+			int retval = c.showSaveDialog(this);
+			if (retval == JFileChooser.APPROVE_OPTION) {
+				File chosen = c.getSelectedFile();
+				tiler.writeFile(chosen.getPath());
+				
+				// update the defaults
+				parms.map_name = chosen.getName();
+				parms.export_dir = c.getCurrentDirectory().getPath();
+				
 				if (altitudes != null)
 					if (need_alt_3) {
 						parms.dGroundMin = altitudes.getValue();
@@ -412,6 +409,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 					parms.dFloraMin = flora_3.getValue();
 					parms.dFloraMax = flora_3.getUpperValue();
 				}
+
 			}
 		}
 	}

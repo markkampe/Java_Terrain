@@ -373,9 +373,9 @@ public class ObjectExporter implements Exporter {
 					double z = heights[r][c]-erode[r][c];
 					output.write(String.format(FORMAT_Z, "z", z));
 					double depth = waterDepth[r][c];
-					if (depth < 0) {
+					if (depth > 0) {
 						output.write(COMMA);
-						output.write(String.format(FORMAT_Z, "u/w", parms.z(-depth)));
+						output.write(String.format(FORMAT_Z, "u/w", depth));
 					}
 					output.write(" }");
 				}

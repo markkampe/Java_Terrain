@@ -34,11 +34,12 @@ public class ObjectExporter implements Exporter {
 	private double[][] waterDepth;	// per point water depth (Z units)
 	// private double[][] soil;		// per point soil type
 	private double[][] flora;		// per point flora type
-	private OverlayObjects objSet;	// defined overlay objects
 
 	private double maxHeight;		// highest discovered altitude
 	private double minHeight;		// lowest discovered altitude
 	private double maxDepth;		// deepest discovered water
+	
+	private OverlayRule objects;	// loaded overlay objects
 
 	// brightness constants for preview colors
 	private static final int DIM = 32;
@@ -48,7 +49,7 @@ public class ObjectExporter implements Exporter {
 	private static final int EXPORT_DEBUG = 2;
 
 	/**
-	 * create a new Raw JSON exporter
+	 * create a new Object Exporter exporter
 	 * 
 	 * @param obj_palette name of OverlayObjects definition file
 	 * @param width of the export area (in tiles)
@@ -60,7 +61,8 @@ public class ObjectExporter implements Exporter {
 		parms = Parameters.getInstance();
 
 		if (obj_palette != null && !obj_palette.equals(""))
-			objSet = new OverlayObjects(obj_palette);
+			objects = new OverlayRule("dummy");
+			objects.loadRules(obj_palette);
 			
 		if (parms.debug_level >= EXPORT_DEBUG)
 			System.out.println("new Object exporter (" + height + "x" + width + ")");
@@ -175,14 +177,30 @@ public class ObjectExporter implements Exporter {
 	}
 	
 	/**
+	 * aggregate slope
+	 * @param row (tile) within the export region
+	 * @param col (tile) within the export region
+	 * @return aggregate slope (dZdTILE) of that tile
+	 */
+	private double slope(int row, int col) {
+		double z0 = heights[row][col] - erode[row][col];
+		double zx1 = (col > 0) ? heights[row][col-1] - erode[row][col-1] :
+			heights[row][col+1] - erode[row][col+1];
+		double zy1 = (row > 0) ? heights[row-1][col] - erode[row-1][col] :
+			heights[row+1][col] - erode[row+1][col];
+		double dz = Math.sqrt((z0-zx1)*(z0-zx1) + (z0-zy1)*(z0-zy1));
+		return Math.abs(parms.altitude(dz) / tile_size);
+	}
+	
+	/**
 	 * one object to be overlayed on our export grid
 	 */
 	private class Overlay {
 		public int row;		// Y coordinate (tile offset)
 		public int col;		// X coordinate (tile offset)
-		OverlayObject obj;	// associated Overlay Object
+		OverlayRule obj;	// associated Overlay Object
 		
-		public Overlay(OverlayObject obj, int row, int col) {
+		public Overlay(OverlayRule obj, int row, int col) {
 			this.obj = obj;
 			this.row = row;
 			this.col = col;
@@ -198,21 +216,24 @@ public class ObjectExporter implements Exporter {
 		overlays = new LinkedList<Overlay>();
 		
 		// give each Overlay Object a shot at every tile
-		for( ListIterator<OverlayObject> it = objSet.listIterator(); it.hasNext();) {
-			OverlayObject o = it.next();
+		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
+			OverlayRule o = (OverlayRule) it.next();
 			for(int y = 0; y < y_points - o.height; y++)
 				for(int x = 0; x < x_points - o.width; x++) {
 					// see if every square within meets object requirements
 					boolean ok = true;
+					double slope = slope(y,x);
 					for(int i = 0; ok && i < o.height; i++)
 						for(int j = 0; ok && j < o.width; j++) {
 							// convert the Z altitude into a Z percentage
 							double z = 100 * (heights[y+i][x+j] - erode[y+i][x+j]);
 							if (taken[y+i][x+j])
 								ok = false;
-							else if (waterDepth[y+i][x+j] > 0)
+							else if (waterDepth[y+i][x+j] > o.maxDepth)
 								ok = false;
 							else if (z < o.z_min || z >= o.z_max)
+								ok = false;
+							else if (slope < o.s_min || slope >= o.s_max)
 								ok = false;
 						}
 				
@@ -327,7 +348,7 @@ public class ObjectExporter implements Exporter {
 					output.write(COMMA);
 					output.write(String.format(FORMAT_D, "y", o.row));
 					output.write(COMMA);
-					output.write(String.format(FORMAT_S, "tile", o.obj.name));
+					output.write(String.format(FORMAT_S, "tile", o.obj.ruleName));
 					output.write(COMMA);
 					output.write(String.format(FORMAT_D, "dx", o.obj.width));
 					output.write(COMMA);
@@ -397,7 +418,7 @@ public class ObjectExporter implements Exporter {
 					}
 			
 			// add any overlayed icons
-			PreviewMap preview = new PreviewMap("Export Preview (terrain)", map, objSet.tileSize);
+			PreviewMap preview = new PreviewMap("Export Preview (terrain)", map, OverlayRule.tile_size);
 			if (overlays != null && overlays.size() > 0)
 				for( ListIterator<Overlay> it = overlays.listIterator(); it.hasNext();) {
 					Overlay o = it.next();
@@ -414,7 +435,7 @@ public class ObjectExporter implements Exporter {
 							map[i][j] = new Color(NORMAL, NORMAL, NORMAL);
 					}
 			
-			new PreviewMap("Export Preview (flora)", map, objSet.tileSize);
+			new PreviewMap("Export Preview (flora)", map, OverlayRule.tile_size);
 		}
 	}
 }

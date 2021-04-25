@@ -59,7 +59,6 @@ public class OverlayObjects {
 		
 		// accumulated object attributes
 		String thisName = "", thisIcon = "";
-		String thisID = "";
 		int thisHeight = NO_VALUE, thisWidth = NO_VALUE, 
 			thisZmin = NO_VALUE, thisZmax = NO_VALUE;
 		double thisMmin = NO_VALUE, thisMmax = NO_VALUE;
@@ -83,8 +82,6 @@ public class OverlayObjects {
 				
 				if (!thisName.equals("") && thisHeight != NO_VALUE && thisWidth != NO_VALUE) {
 					OverlayObject newObj = new OverlayObject(thisName, thisHeight, thisWidth);
-					if (!thisID.equals(""))
-						newObj.id = thisID;
 					if (thisZmin != NO_VALUE)
 						newObj.z_min = thisZmin;
 					if (thisZmax != NO_VALUE)
@@ -150,9 +147,6 @@ public class OverlayObjects {
 					break;
 				case "icon":
 					thisIcon = parser.getString();
-					break;
-				case "id":
-					thisID = parser.getString();
 					break;
 				}
 				thisKey = "";

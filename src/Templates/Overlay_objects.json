@@ -1,8 +1,12 @@
 {  "tile_size": 4,
    "Test Overlays": [
-	{ "name": "peak",	"height": 6, "width": 6, "z_min": 60, "z_max": 100, "icon": "WIP_mountain_6x6.bmp" },
-	{ "name": "mountain",	"height": 4, "width": 4, "z_min": 20, "z_max":  60, "icon": "WIP_mountain_4x4.bmp" },
-	{ "name": "hill",	"height": 4, "width": 4, "z_min": 10, "z_max":  20, "icon": "WIP_hill_4x4.bmp" },
-	{ "name": "knoll",	"height": 2, "width": 2, "z_min":  2, "z_max":  10, "icon": "WIP_hill_2x2.bmp" }
+	{ "name": "peak", "icon": "WIP_mountain_6x6.bmp", "height": 6, "width": 6, 
+	  "z_min": 60, "z_max": 100, "s_min": 0.0, "s_max": 10.0 },
+	{ "name": "mountain", "icon": "WIP_mountain_4x4.bmp", "height": 4, "width": 4, 
+	  "z_min": 20, "z_max":  60, "s_min": 0.0, "s_max": 10.0 },
+	{ "name": "hill", "icon": "WIP_hill_4x4.bmp", "height": 4, "width": 4, 
+	  "z_min": 10, "z_max": 20 , "s_min": 0.0, "s_max": 10.0},
+	{ "name": "knoll", "icon": "WIP_hill_2x2.bmp", "height": 2, "width": 2, 
+	  "z_min":  2, "z_max": 10, "s_min": 0.0, "s_max": 10.0 }
    ]
 }

@@ -1,22 +1,28 @@
 {  "tile_size": 4,	"//": "pixels per tile in Topo previews",
    "Test Overlays": [
+	{ "name": "hi-plateau", "icon": "WIP_plateau_6x6.bmp", "stamp": "6x6",
+	  "z": { "min": 40, "max": 100 }, "slope": { "max": 0.05 },
+	  "order": 1
+	},
 	{ "name": "peak", "icon": "WIP_mountain_6x6.bmp", "stamp": "6x6",
-	  "z": { "min": 60, "max": 100 }, "slope": { "min": 0.10 }, "depth": { "max": 0 }
-	},
-	{ "name": "hi-plateau", "icon": "WIP_plateau_4x4.bmp", "stamp": "4x4",
-	  "z": { "min": 60, "max": 100 }, "slope": { "max": 0.10 }, "depth": { "max": 0 }
-	},
-	{ "name": "mountain", "icon": "WIP_mountain_4x4.bmp", "stamp": "4x4",
-	  "z": { "min": 20, "max": 60 }, "slope": { "min": 0.10 }, "depth": { "max": 0 }
+	  "z": { "min": 40, "max": 100 },
+	  "order": 2
 	},
 	{ "name": "mid-plateau", "icon": "WIP_plateau_4x4.bmp", "stamp": "4x4",
-	  "z": { "min": 20, "max": 60 }, "slope": { "max": 0.10 }, "depth": { "max": 0 }
+	  "z": { "min": 20, "max": 40 }, "slope": { "max": 0.05 },
+	  "order": 1
+	},
+	{ "name": "mountain", "icon": "WIP_mountain_4x4.bmp", "stamp": "4x4",
+	  "z": { "min": 20, "max": 40 },
+	  "order": 2
 	},
 	{ "name": "hill", "icon": "WIP_hill_4x4.bmp", "stamp": "4x4",
-	  "z": { "min": 10, "max": 20 }, "slope": { "min": 0.05 }, "depth": { "max": 0 }
+	  "z": { "min": 10, "max": 20 }, "slope": { "min": 0.02 },
+	  "order": 3
 	},
 	{ "name": "knoll", "icon": "WIP_hill_2x2.bmp", "stamp": "2x2",
-	  "z": { "min": 2, "max": 10 }, "slope": { "min": 0.05 }, "depth": { "max": 0 }
+	  "z": { "min": 2, "max": 10 }, "slope": { "min": 0.02 },
+	  "order": 3
    	}
    ]
 }

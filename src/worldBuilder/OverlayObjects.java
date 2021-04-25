@@ -22,8 +22,8 @@ public class OverlayObjects {
 	private static final String DEFAULT_ICONS = "/icons";
 	private static final int NO_VALUE = 666666;
 	
-	/** name of this set of objects	*/	public String setName;
-	/** (preview) width of a tile	*/	public int tileSize;
+	/** name of this set of objects	  */	public String setName;
+	/** (preview) unit width (pixels) */	public int tileSize;
 	
 	/** list of accumulated objects	*/
 	private LinkedList<OverlayObject> objects;
@@ -59,8 +59,10 @@ public class OverlayObjects {
 		
 		// accumulated object attributes
 		String thisName = "", thisIcon = "";
+		String thisID = "";
 		int thisHeight = NO_VALUE, thisWidth = NO_VALUE, 
 			thisZmin = NO_VALUE, thisZmax = NO_VALUE;
+		double thisMmin = NO_VALUE, thisMmax = NO_VALUE;
 		
 		parser = Json.createParser(r);
 		while (parser.hasNext()) {
@@ -77,14 +79,20 @@ public class OverlayObjects {
 				if (!inList)
 					break;
 				
-				tile_number++;
+				tile_number++;	// so we can talk about them
 				
 				if (!thisName.equals("") && thisHeight != NO_VALUE && thisWidth != NO_VALUE) {
 					OverlayObject newObj = new OverlayObject(thisName, thisHeight, thisWidth);
+					if (!thisID.equals(""))
+						newObj.id = thisID;
 					if (thisZmin != NO_VALUE)
 						newObj.z_min = thisZmin;
 					if (thisZmax != NO_VALUE)
 						newObj.z_max = thisZmax;
+					if (thisMmin != NO_VALUE)
+						newObj.slope_min = thisMmin;
+					if (thisMmax != NO_VALUE)
+						newObj.slope_max = thisMmax;
 					if (thisIcon != "") {
 						String icon_file = thisIcon;
 						try {
@@ -143,6 +151,9 @@ public class OverlayObjects {
 				case "icon":
 					thisIcon = parser.getString();
 					break;
+				case "id":
+					thisID = parser.getString();
+					break;
 				}
 				thisKey = "";
 				break;
@@ -162,6 +173,14 @@ public class OverlayObjects {
 					break;
 				case "z_max":
 					thisZmax = parser.getInt();
+					thisKey = "";
+					break;
+				case "s_min":
+					thisMmin = new Double(parser.getString());
+					thisKey = "";
+					break;
+				case "s_max":
+					thisMmax = new Double(parser.getString());
 					thisKey = "";
 					break;
 				case "tile_size":

@@ -13,9 +13,6 @@ import java.util.ListIterator;
 public class ObjectExporter implements Exporter {	
 
 	private Parameters parms;
-	// private static final String soilTypes[] = {
-	// 		"sedimentary", "metamorphic", "igneous", "alluvial"
-	// };
 
 	private int x_points;			// width of map (in points)
 	private int y_points;			// height of map (in points)
@@ -39,7 +36,8 @@ public class ObjectExporter implements Exporter {
 	private double minHeight;		// lowest discovered altitude
 	private double maxDepth;		// deepest discovered water
 	
-	private OverlayRule objects;	// loaded overlay objects
+	private int firstPass;			// lowest rule order
+	private int lastPass;			// highest rule order
 
 	// brightness constants for preview colors
 	private static final int DIM = 32;
@@ -60,12 +58,25 @@ public class ObjectExporter implements Exporter {
 		this.y_points = height;
 		parms = Parameters.getInstance();
 
-		if (obj_palette != null && !obj_palette.equals(""))
-			objects = new OverlayRule("dummy");
-			objects.loadRules(obj_palette);
+		int overlays = 0;
+		firstPass = 666;
+		lastPass = -1;
+		if (obj_palette != null && !obj_palette.equals("")) {
+			OverlayRule dummy = new OverlayRule("dummy");
+			dummy.loadRules(obj_palette);
+			// extract the bidding orders
+			for (ListIterator<ResourceRule> it = OverlayRule.iterator(); it.hasNext();) {
+				OverlayRule r = (OverlayRule) it.next();
+				if (r.order < firstPass)
+					firstPass = r.order;
+				if (r.order > lastPass)
+					lastPass = r.order;
+				overlays++;
+			}
+		}
 			
 		if (parms.debug_level >= EXPORT_DEBUG)
-			System.out.println("new Object exporter (" + height + "x" + width + ")");
+			System.out.println("new Object exporter (" + height + "x" + width + ") w/" + overlays + " overlays");
 	}
 
 	/**
@@ -180,16 +191,21 @@ public class ObjectExporter implements Exporter {
 	 * aggregate slope
 	 * @param row (tile) within the export region
 	 * @param col (tile) within the export region
-	 * @return aggregate slope (dZdTILE) of that tile
+	 * @return aggregate slope (dZdXY) of that tile
 	 */
 	private double slope(int row, int col) {
 		double z0 = heights[row][col] - erode[row][col];
+		// compute the east/west dZ/dTile
 		double zx1 = (col > 0) ? heights[row][col-1] - erode[row][col-1] :
 			heights[row][col+1] - erode[row][col+1];
+		double dzx = (z0 > zx1) ? z0 - zx1 : zx1 - z0;
+		// compute the north/south dZ/dTile
 		double zy1 = (row > 0) ? heights[row-1][col] - erode[row-1][col] :
 			heights[row+1][col] - erode[row+1][col];
-		double dz = Math.sqrt((z0-zx1)*(z0-zx1) + (z0-zy1)*(z0-zy1));
-		return Math.abs(parms.altitude(dz) / tile_size);
+		double dzy = (z0 > zy1) ? z0 - zy1 : zy1 - z0;
+		// turn that into a slope
+		double dz = dzx > dzy ? dzx: dzy;
+		return parms.height(dz) / tile_size;
 	}
 	
 	/**
@@ -214,36 +230,73 @@ public class ObjectExporter implements Exporter {
 	void chooseOverlays() {
 		boolean[][] taken = new boolean[y_points][x_points];
 		overlays = new LinkedList<Overlay>();
-		
+
 		// give each Overlay Object a shot at every tile
-		for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
-			OverlayRule o = (OverlayRule) it.next();
-			for(int y = 0; y < y_points - o.height; y++)
-				for(int x = 0; x < x_points - o.width; x++) {
-					// see if every square within meets object requirements
-					boolean ok = true;
-					double slope = slope(y,x);
-					for(int i = 0; ok && i < o.height; i++)
-						for(int j = 0; ok && j < o.width; j++) {
-							// convert the Z altitude into a Z percentage
-							double z = 100 * (heights[y+i][x+j] - erode[y+i][x+j]);
-							if (taken[y+i][x+j])
-								ok = false;
-							else if (waterDepth[y+i][x+j] > o.maxDepth)
-								ok = false;
-							else if (z < o.z_min || z >= o.z_max)
-								ok = false;
-							else if (slope < o.s_min || slope >= o.s_max)
-								ok = false;
-						}
+		for(int order = firstPass; order <= lastPass; order++) {
+			int bidders = 0;
+			int assigned = 0;
+			for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
+				// find the rules for this pass
+				OverlayRule o = (OverlayRule) it.next();
+				if (o.order != order)
+					continue;
 				
-					if (ok) {
-						overlays.add(new Overlay(o, y, x));
+				// offer it every square starting at every tile
+				bidders++;
+				for(int y = 0; y < y_points - o.height; y++)
+					for(int x = 0; x < x_points - o.width; x++) {
+						boolean ok = true;
 						for(int i = 0; ok && i < o.height; i++)
-							for(int j = 0; ok && j < o.width; j++)
-								taken[y+i][x+j] = true;
+							for(int j = 0; ok && j < o.width; j++) {
+								if (taken[y+i][x+j]) {
+									ok = false;
+									continue;
+								}
+								// get the attributes we will match on
+								double z_pct = 100 * (heights[y+i][x+j] - erode[y+i][x+j]);
+								double d = waterDepth[y+i][x+j];
+								int d_pct = (int) (100.0 * d / maxDepth);
+								double slope = slope(y+i,x+j);
+
+								// see if we meet this rule's criteria
+								String problem = "";
+								if (d > 0 && o.maxDepth == 0) {
+									ok = false;
+									problem += problem.equals("") ? "u/w" : ",u/w";
+								} else if (d_pct > o.maxDepth || d_pct < o.minDepth) {
+									ok = false;
+									problem += problem.equals("") ? "depth" : ",depth";
+								}
+								if (z_pct < o.z_min || z_pct >= o.z_max) {
+									ok = false;
+									problem += problem.equals("") ? "z" : ",z";
+								}
+								if (slope < o.s_min || slope >= o.s_max) {
+									ok = false;
+									problem += problem.equals("") ? "slope" : ",slope";
+								}
+
+								if (parms.debug_level > EXPORT_DEBUG && !ok) {
+									String where =  String.format("tile[%d,%d]", y+i, x+j) +
+											String.format(" (z=%d%%", (int) z_pct) + 
+											String.format(", depth=%d%%", d_pct) +
+											String.format(", slope=%.3f", slope) + ")";
+									System.out.println(where + ": " + o.ruleName + " NOBID(" + problem + ")");
+								}
+							}
+
+						if (ok) {
+							overlays.add(new Overlay(o, y, x));
+							for(int i = 0; ok && i < o.height; i++)
+								for(int j = 0; ok && j < o.width; j++) {
+									taken[y+i][x+j] = true;
+									assigned++;
+								}
+						}
 					}
-				}
+			}
+			if (parms.debug_level >= EXPORT_DEBUG)
+				System.out.println("ObjectExporter pass " + order + ": assigned " + assigned + " tiles to " + bidders + " bidders");
 			
 		}
 	}

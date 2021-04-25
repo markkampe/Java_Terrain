@@ -210,7 +210,7 @@ public class ObjectExporter implements Exporter {
 							double z = 100 * (heights[y+i][x+j] - erode[y+i][x+j]);
 							if (taken[y+i][x+j])
 								ok = false;
-							else if (waterDepth[y+i][x+j] < 0)
+							else if (waterDepth[y+i][x+j] > 0)
 								ok = false;
 							else if (z < o.z_min || z >= o.z_max)
 								ok = false;

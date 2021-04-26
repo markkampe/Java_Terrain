@@ -1,6 +1,5 @@
 package worldBuilder;
 
-import java.awt.FileDialog;
 import java.awt.event.*;
 import java.io.File;
 

@@ -419,8 +419,7 @@ public class RPGMTiler implements Exporter {
 				RPGMRule r = winner(level, i, j);
 				if (r != null)
 					grid[i][j] = r.baseTile;
-				else if (level == 5) {
-					// TODO ... should these be Outside (useSLOPE) only?
+				else if (useSLOPE && level == 5) {
 					int terrain = typeMap[levels[i][j]];
 					if (TerrainType.isWater(terrain))
 						continue;			// no shadows on water

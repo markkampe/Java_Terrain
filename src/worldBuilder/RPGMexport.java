@@ -421,8 +421,12 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	 *                 passable/shallow/deep altitudes ground/hill/mountain
 	 *                 (Overworld) or pit/ground/mound (Outside) slopes
 	 *                 ground/hill/mountain (Overworld)
-	 *
-	 *       TODO: better color ranges for terrain types		
+	 * 
+	 *  We also generate the color maps:
+	 *	  - DEEP/SHLLOW/FORDABLE water are BLUE (dark to light)
+	 *	  - PITs are dark gray
+	 *	  - GROUND is dark brown
+	 *	  - higher elevations are shades of gray 
 	 */
 	void levelMap() {
 
@@ -449,7 +453,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		} else { // Outside
 			waterLevels = 3;// DEEP/SHALLOW/PASSABLE
 			int landLevels = levels.getValue();
-			lowLevels = 0; // TODO - tiler can't yet do PITs
+			lowLevels = 1; // PIT
 			midLevels = 1; // all GROUND is at the same level
 			highLevels = landLevels - (lowLevels + midLevels);
 
@@ -540,6 +544,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 
 		// high-land related types and colors
+		// TODO should highlands be lighter brown->yellow
 		shade = MIN_HIGH_SHADE;
 		delta = SHADE_RANGE / highLevels;
 		for (int i = 0; i < highLevels; i++) {

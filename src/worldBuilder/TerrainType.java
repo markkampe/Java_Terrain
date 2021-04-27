@@ -85,9 +85,9 @@ public class TerrainType {
 	public static boolean isLowLand(int type) {
 		switch(type) {
 		case GROUND:
-		case PIT:
 			return true;
 			
+		// things that grow on ground don't grow in pits
 		default:
 			return false;
 		}

@@ -6,3 +6,4 @@ To make things simpler, I have simply included their jars in this repo.
    randomly placed points that are interconnected in a Voronoi mesh (where each point is 
    connected to three neighbors.  Defining such a mesh turns out to be a problem that people
    found interesting and solved long ago.  The _OpenVoronoi_ library does this for me.
+ - **commons-math3.jar** ... the _OpenVoronoi_ library needs some non-pedestrian math functions.

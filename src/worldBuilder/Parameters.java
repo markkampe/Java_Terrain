@@ -133,9 +133,8 @@ public class Parameters {
 	/** default river flow (m^3/s)x		*/	public int dTribute;
 
 	/** default export tile size (m)	*/	public int dTileSize;
-
-	// RPGMaker export sliders
 	
+	// Export sliders
 	/** default export % marsh			*/	public int dWaterMin;
 	/** default export % shallow		*/	public int dWaterMax;
 
@@ -151,6 +150,7 @@ public class Parameters {
 	/** default export % structural		*/	public int dFaunaMin;
 	/** default export % metal			*/	public int dFaunaMax;
 
+	// RPGMaker export sliders
 	/** default export overworld palette*/	public String OW_palette;
 	/** default overworld % ground	(by height)	*/	public int dHillMin;
 	/** default overworld % hill (by height)	*/	public int dHillMax;
@@ -243,8 +243,8 @@ public class Parameters {
 		dHillMin = 10;	// ground/hill cut-off
 		dHillMax = 30;	// hill/mountain cut-off
 		dSlopeMin = 25;	// shallower than this is plateau
-		dGroundMin = 10;
-		dGroundMax = 20;
+		dGroundMin = 0;	// PIT/GROUND cut-off
+		dGroundMax = 20;// GROUND/HILL cut-off
 		dAltLevels = 6;
 		// default plant distribution thresholds
 		dFloraPct = 50;

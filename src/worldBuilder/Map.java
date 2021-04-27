@@ -1,6 +1,7 @@
 package worldBuilder;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.*;
 import java.io.BufferedReader;
@@ -1488,8 +1489,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		super.paintComponent(g);
 		int height = getHeight();
 		int width = getWidth();
-		final int charWidth = 7;	// XXX get actual character width
-		final int charHeight = 12;	// XXX get actual character height
 		
 		// make sure we have something to display
 		if (mesh == null || mesh.vertices.length == 0) {
@@ -1610,15 +1609,22 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		
 		// see if we are rendering point indices (debugging, put it on top)
 		if ((display & SHOW_POINTS) != 0) {
+			// figure out how large our labels will be
+			FontMetrics m = g.getFontMetrics();
+			int h_offset = m.stringWidth("0000")/2;
+			int v_offset = m.getHeight()/2;
+			
+			// put a label on every point
 			g.setColor(POINT_COLOR);
 			MeshPoint[] points = mesh.vertices;
 			for (int i = 0; i < points.length; i++) {
 				MeshPoint p = points[i];
 				double x = screen_x(p.x) - SMALL_POINT / 2;
 				double y = screen_y(p.y) - SMALL_POINT / 2;
-				if (x >= 0 && y >= 0)
+				if (x >= 0 && y >= 0) {
 					g.drawString(Integer.toString(p.index), 
-								 (int) (x - 2*charWidth), (int) (y + charHeight/2));
+								 (int) (x - h_offset), (int) (y + v_offset));
+				}
 			}
 		}
 		

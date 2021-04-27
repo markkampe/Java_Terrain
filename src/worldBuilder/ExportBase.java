@@ -228,6 +228,10 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	/**
 	 * create a full set of per-tile maps and pass them to the Exporter
 	 * @param export - Exporter for the selected format
+	 * 
+	 * We need to re-call export whenever the Cartesian changes
+	 *  - selected region changes
+	 *  - tile size (number of tiles) changes
 	 */
 	protected void export(Exporter export) {
 
@@ -242,11 +246,6 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		double lat = parms.latitude(box_y + box_height/2);
 		double lon = parms.longitude(box_x + box_width/2);
 		export.position(lat, lon);
-	
-		// TODO lose gratuitous interpolates
-		//		only need to redo these if the region changes
-		//		this might save a lot of time, and might enable
-		//		continuous previews
 
 		// get Cartesian interpolations of tile characteristics
 		Cartesian cart = new Cartesian(map.getMesh(), 

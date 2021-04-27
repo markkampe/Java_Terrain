@@ -171,8 +171,8 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			aTitle.add(aT3);
 
 			altitudes = new RangeSlider(0, 100);
-			altitudes.setValue(need_alt_3 ? parms.dGroundMin : parms.dHillMin);
-			altitudes.setUpperValue(need_alt_3 ? parms.dGroundMax : parms.dHillMax);
+			altitudes.setValue(need_alt_n ? parms.dGroundMin : parms.dHillMin);
+			altitudes.setUpperValue(need_alt_n ? parms.dGroundMax : parms.dHillMax);
 			altitudes.setMajorTickSpacing(10);
 			altitudes.setMinorTickSpacing(5);
 			altitudes.setFont(fontSmall);
@@ -427,6 +427,11 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	 *	  - PITs are dark gray
 	 *	  - GROUND is dark brown
 	 *	  - higher elevations are shades of gray 
+	 *
+	 * We can use the MountainDialog to create depressions, and this
+	 * module would recognize them as PITs, for which appropriate 
+	 * tiles would be chosen.  But those would be much larger (kM
+	 * on a side) than reasonable PITs ... so I don't enable them.
 	 */
 	void levelMap() {
 
@@ -442,22 +447,25 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		int midLevels; // # of ground/hill levels
 		int highLevels; // # of mound/mountain levels
 
-		boolean have_pits = false;
+		boolean have_pits;
+		boolean outside;
 
 		// figure out how many levels we have of which types
-		if (levels == null) { // Overworld
-			waterLevels = 3;// DEEP/SHALLOW/PASSABLE
-			lowLevels = 1;	// GROUND
-			midLevels = 1;	// HILL
-			highLevels = 1;	// MOUNTAIN
-		} else { // Outside
-			waterLevels = 3;// DEEP/SHALLOW/PASSABLE
+		if (levels == null) {
+			outside = false;	// Overworld
+			have_pits = false;	// no PITs in Overworld
+			waterLevels = 3;	// DEEP/SHALLOW/PASSABLE
+			lowLevels = 1;		// GROUND
+			midLevels = 1;		// HILL
+			highLevels = 1;		// MOUNTAIN
+		} else {
+			outside = true;		// Outside
+			have_pits = false;	// XXX PITs come out badly
+			waterLevels = 3;	// DEEP/SHALLOW/PASSABLE
+			lowLevels = have_pits ? 1 : 0;	// PIT (or nothing)
+			midLevels = 1;		// one GROUND level
 			int landLevels = levels.getValue();
-			lowLevels = 1; // PIT
-			midLevels = 1; // all GROUND is at the same level
-			highLevels = landLevels - (lowLevels + midLevels);
-
-			have_pits = true; // at least in principle
+			highLevels = landLevels - (lowLevels + midLevels);	// HILL
 		}
 		totLevels = waterLevels + lowLevels + midLevels + highLevels;
 
@@ -468,7 +476,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		int high_base = mid_base + midLevels;
 
 		// create and initialize the depth percentile->level map
-		// NOTE: everything assumes ONLY three depth levels
+		// NOTE: everything assumes ONLY three water depth levels
 		if (depths != null) {
 			depthMap = new int[100];
 			int low = depths.getValue();
@@ -511,7 +519,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			level++;
 		}
 
-		// low-land related types and colors
+		// there is (at most) one low-land level: PIT or GROUND
 		if (lowLevels > 0) {
 			shade = MIN_LOW_SHADE;
 			delta = SHADE_RANGE / lowLevels;
@@ -528,11 +536,11 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			}
 		}
 
-		// mid-land related types and colors
+		// there is one mid-land level: GROUND or HILL
 		shade = MIN_MID_SHADE;
 		delta = SHADE_RANGE / midLevels;
 		for (int i = 0; i < midLevels; i++) {
-			if (have_pits) {	// one dark brown
+			if (outside) {	// one dark brown
 				typeMap[level] = TerrainType.GROUND;
 				colorTopo[level] = GROUND_COLOR;
 			} else {			// one dark gray
@@ -548,7 +556,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		shade = MIN_HIGH_SHADE;
 		delta = SHADE_RANGE / highLevels;
 		for (int i = 0; i < highLevels; i++) {
-			typeMap[level] = have_pits ? TerrainType.HILL : TerrainType.MOUNTAIN;
+			typeMap[level] = outside ? TerrainType.HILL : TerrainType.MOUNTAIN;
 			colorTopo[level] = new Color(shade, shade, shade);	// shades of light gray
 			shade += delta;
 			level++;

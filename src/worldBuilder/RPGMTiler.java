@@ -333,7 +333,6 @@ public class RPGMTiler implements Exporter {
 								String.format(", depth=%.2f", depth) + 
 								String.format(", temp=%.1f-%.1f", Twinter - lapse, Tsummer - lapse); 
 
-					// XXX I once thought it necessary to check whether or not this square is already taken
 					// does our terrain type match the rule
 					if (r.wrongTerrain(terrain)) {
 						r.justification = "terain mismatch";

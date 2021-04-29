@@ -1,4 +1,4 @@
-{  "tile_siz%e": 4,	"//": "pixels per tile in Topo previews",
+{  "tile_size": 4,	"//": "pixels per tile in Topo previews",
    "Test Overlays": [
 	{ "name": "hi-plateau", "icon": "WIP_plateau_6x6.bmp", "stamp": "6x6",
 	  "a%": { "min": 40, "max": 100 }, "slope": { "max": 0.05 },

@@ -141,7 +141,7 @@ public class OverlayRule extends ResourceRule {
 	 */
 	public void set_range(String name, String limit, double value) {
 		switch(name) {
-		case "z%":
+		case "a%":
 			if (limit.equals("max"))
 				n_a_max = (int) value;
 			else

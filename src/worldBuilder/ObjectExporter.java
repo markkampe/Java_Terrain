@@ -252,9 +252,9 @@ public class ObjectExporter implements Exporter {
 									ok = false;
 									continue;
 								}
-								// get the attributes we will match on
-								// FIX this is not a %, it can be negative
-								double z_pct = 100 * (heights[y+i][x+j] - erode[y+i][x+j]);
+								// get altitude and depth percentiles for this point
+								double a = (heights[y+i][x+j] - erode[y+i][x+j]) - parms.sea_level;
+								int a_pct = Math.max(0, (int) (100 * a / (maxHeight - parms.sea_level)));
 								double d = waterDepth[y+i][x+j];
 								int d_pct = (int) (100.0 * d / maxDepth);
 								double slope = slope(y+i,x+j);
@@ -268,7 +268,7 @@ public class ObjectExporter implements Exporter {
 									ok = false;
 									problem += problem.equals("") ? "depth" : ",depth";
 								}
-								if (z_pct < o.a_min || z_pct >= o.a_max) {
+								if (a_pct < o.a_min || a_pct >= o.a_max) {
 									ok = false;
 									problem += problem.equals("") ? "z" : ",z";
 								}
@@ -279,8 +279,8 @@ public class ObjectExporter implements Exporter {
 
 								if (parms.debug_level > EXPORT_DEBUG && !ok) {
 									String where =  String.format("tile[%d,%d]", y+i, x+j) +
-											String.format(" (z=%d%%", (int) z_pct) + 
-											String.format(", depth=%d%%", d_pct) +
+											String.format(" (a%%=%d%%", a_pct) + 
+											String.format(", d%%=%d%%", d_pct) +
 											String.format(", slope=%.3f", slope) + ")";
 									System.out.println(where + ": " + o.ruleName + " NOBID(" + problem + ")");
 								}

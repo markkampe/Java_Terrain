@@ -260,10 +260,10 @@ public class ObjectExporter implements Exporter {
 
 								// see if we meet this rule's criteria
 								String problem = "";
-								if (d > 0 && o.maxDepth == 0) {
+								if (d > 0 && o.d_max == 0) {
 									ok = false;
 									problem += problem.equals("") ? "u/w" : ",u/w";
-								} else if (d_pct > o.maxDepth || d_pct < o.minDepth) {
+								} else if (d_pct > o.d_max || d_pct < o.d_min) {
 									ok = false;
 									problem += problem.equals("") ? "depth" : ",depth";
 								}

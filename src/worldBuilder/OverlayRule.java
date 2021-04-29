@@ -20,6 +20,8 @@ public class OverlayRule extends ResourceRule {
 	public int height, width;
 	/** range of acceptable Z percentages	*/
 	public int z_min, z_max;
+	/** range of acceptable depth percentages	*/
+	public int d_min, d_max;
 	/** range of acceptable slopes	*/
 	public double s_min, s_max;
 	/** preview icon image	*/
@@ -28,6 +30,7 @@ public class OverlayRule extends ResourceRule {
 	// save extended parameters to store in next factory-instantiated object
 	private static int n_height = 1, n_width = 1;
 	private static int n_z_min = 0, n_z_max = 100;
+	private static int n_d_min = 0, n_d_max = 0;
 	private static double n_s_min = 0.0, n_s_max = MAX_SLOPE;
 	private static String n_icon_file = null;
 
@@ -42,6 +45,7 @@ public class OverlayRule extends ResourceRule {
 		this.height = 1; this.width = 1;
 		this.z_min = 0; this.z_max = 100;
 		this.s_min = 0.0; this.s_max = MAX_SLOPE;
+		this.d_min = 0; this.d_max = 0;
 		this.icon = null;
 	}
 	
@@ -64,6 +68,8 @@ public class OverlayRule extends ResourceRule {
 		newRule.z_max = n_z_max;
 		newRule.s_min = n_s_min;
 		newRule.s_max = n_s_max;
+		newRule.d_min = n_d_min;
+		newRule.d_max = n_d_max;
 		
 		// if there is an icon file, read it in
 		if (n_icon_file != null && !n_icon_file.equals("")) {
@@ -86,6 +92,7 @@ public class OverlayRule extends ResourceRule {
 		// reset their values for the next rule
 		n_height = 1; n_width = 1;
 		n_z_min = 0; n_z_max = 100;
+		n_d_min = 0; n_d_max = 0;
 		n_s_min = 0.0; n_s_max = MAX_SLOPE;
 		n_icon_file = null;
 		
@@ -140,6 +147,12 @@ public class OverlayRule extends ResourceRule {
 			else
 				n_z_min = (int) value;
 			return;
+		case "d":
+			if (limit.equals("max"))
+				n_d_max = (int) value;
+			else
+				n_d_min = (int) value;
+			return;
 		case "slope":
 			if (limit.equals("max"))
 				n_s_max = value;
@@ -160,6 +173,8 @@ public class OverlayRule extends ResourceRule {
 		
 		if (z_min > 0 || z_max < 100)
 			System.out.println(prefix + indent + "z:       " + z_min + "-" + z_max);
+		if (d_min > 0 || d_max < 100)
+			System.out.println(prefix + indent + "d:       " + d_min + "-" + d_max);
 		if (s_min > 0 || s_max < MAX_SLOPE)
 			System.out.println(prefix + indent + "slope:   " + s_min + "-" + s_max);
 		if (height > 1 || width > 1)

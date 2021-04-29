@@ -586,11 +586,11 @@ public class Parameters {
 		System.out.println("World Configuration");
 		System.out.println("   mapped area: " + xy_range + "x" + xy_range + unit_xy2 + ", max altitude "
 				+ z_range / 2 + unit_z);
-		System.out.println("   planetary:   lat=" + latitude + unit_d + ", lon=" + longitude + unit_d 
-				+ ", radius=" + radius + unit_xy + ", tilt=" + tilt + unit_d);
-		System.out.println("                Tmean=" + String.format("%.1f", meanTemp()) + unit_t + ", Tsummer="
-				+ String.format("%.1f", meanSummer()) + unit_t + ", Twinter=" + String.format("%.1f", meanWinter())
-				+ unit_t);
+		System.out.println(String.format("   planetary:   lat=%.5f%s, lon=%.5f%s, radius=%d%s, tilt=%.1f%s",
+							latitude, unit_d, longitude, unit_d,
+							radius, unit_xy, tilt, unit_d));
+		System.out.println(String.format("                Tmean=%.1f%s, Tsummer=%.1f%s, Twinter=%.1f%s",
+							meanTemp(), unit_t, meanSummer(), unit_t, meanWinter(), unit_t));
 		System.out.println("   topo maps:   " + topo_minor + unit_z + "/line, " + topo_major + " minors/major");
 		System.out.println("   region:      " + region_name + 
 						   " (" + getDescription() +")" + 

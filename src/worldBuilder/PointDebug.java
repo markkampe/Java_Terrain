@@ -175,7 +175,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			else
 				infoIndex.setText(String.format("%d", point.index));
 			infoMap.setText(String.format("<%.7f, %.7f>", point.x, point.y));
-			infoWorld.setText(String.format("<%.6f, %.6f>", parms.latitude(point.y), parms.longitude(point.x)));
+			infoWorld.setText(String.format("<%.5f, %.5f>", parms.latitude(point.y), parms.longitude(point.x)));
 			
 			double heightMap[] = map.getHeightMap();
 			double v = parms.altitude(heightMap[point.index]);

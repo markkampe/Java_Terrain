@@ -141,19 +141,19 @@ public class OverlayRule extends ResourceRule {
 	 */
 	public void set_range(String name, String limit, double value) {
 		switch(name) {
-		case "a%":
+		case "a%":	// altitude percentile
 			if (limit.equals("max"))
 				n_a_max = (int) value;
 			else
 				n_a_min = (int) value;
 			return;
-		case "d%":
+		case "d%":	// depth percentile
 			if (limit.equals("max"))
 				n_d_max = (int) value;
 			else
 				n_d_min = (int) value;
 			return;
-		case "slope":
+		case "slope":	// already a percentage
 			if (limit.equals("max"))
 				n_s_max = value;
 			else

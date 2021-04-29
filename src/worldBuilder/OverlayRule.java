@@ -19,7 +19,7 @@ public class OverlayRule extends ResourceRule {
 	/** dimensions (if this is a stamp)	*/
 	public int height, width;
 	/** range of acceptable Z percentages	*/
-	public int z_min, z_max;
+	public int a_min, a_max;
 	/** range of acceptable depth percentages	*/
 	public int d_min, d_max;
 	/** range of acceptable slopes	*/
@@ -29,7 +29,7 @@ public class OverlayRule extends ResourceRule {
 
 	// save extended parameters to store in next factory-instantiated object
 	private static int n_height = 1, n_width = 1;
-	private static int n_z_min = 0, n_z_max = 100;
+	private static int n_a_min = 0, n_a_max = 100;
 	private static int n_d_min = 0, n_d_max = 0;
 	private static double n_s_min = 0.0, n_s_max = MAX_SLOPE;
 	private static String n_icon_file = null;
@@ -43,7 +43,7 @@ public class OverlayRule extends ResourceRule {
 		
 		// initialize our extended attributes
 		this.height = 1; this.width = 1;
-		this.z_min = 0; this.z_max = 100;
+		this.a_min = 0; this.a_max = 100;
 		this.s_min = 0.0; this.s_max = MAX_SLOPE;
 		this.d_min = 0; this.d_max = 0;
 		this.icon = null;
@@ -64,8 +64,8 @@ public class OverlayRule extends ResourceRule {
 		// copy extended attributes into the new rule
 		newRule.height = n_height;
 		newRule.width = n_width;
-		newRule.z_min = n_z_min;
-		newRule.z_max = n_z_max;
+		newRule.a_min = n_a_min;
+		newRule.a_max = n_a_max;
 		newRule.s_min = n_s_min;
 		newRule.s_max = n_s_max;
 		newRule.d_min = n_d_min;
@@ -91,7 +91,7 @@ public class OverlayRule extends ResourceRule {
 
 		// reset their values for the next rule
 		n_height = 1; n_width = 1;
-		n_z_min = 0; n_z_max = 100;
+		n_a_min = 0; n_a_max = 100;
 		n_d_min = 0; n_d_max = 0;
 		n_s_min = 0.0; n_s_max = MAX_SLOPE;
 		n_icon_file = null;
@@ -141,13 +141,13 @@ public class OverlayRule extends ResourceRule {
 	 */
 	public void set_range(String name, String limit, double value) {
 		switch(name) {
-		case "z":
+		case "z%":
 			if (limit.equals("max"))
-				n_z_max = (int) value;
+				n_a_max = (int) value;
 			else
-				n_z_min = (int) value;
+				n_a_min = (int) value;
 			return;
-		case "d":
+		case "d%":
 			if (limit.equals("max"))
 				n_d_max = (int) value;
 			else
@@ -171,8 +171,8 @@ public class OverlayRule extends ResourceRule {
 		super.dump(prefix);
 		String indent = "      ";
 		
-		if (z_min > 0 || z_max < 100)
-			System.out.println(prefix + indent + "z:       " + z_min + "-" + z_max);
+		if (a_min > 0 || a_max < 100)
+			System.out.println(prefix + indent + "z:       " + a_min + "-" + a_max);
 		if (d_min > 0 || d_max < 100)
 			System.out.println(prefix + indent + "d:       " + d_min + "-" + d_max);
 		if (s_min > 0 || s_max < MAX_SLOPE)

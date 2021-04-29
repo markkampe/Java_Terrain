@@ -253,6 +253,7 @@ public class ObjectExporter implements Exporter {
 									continue;
 								}
 								// get the attributes we will match on
+								// FIX this is not a %, it can be negative
 								double z_pct = 100 * (heights[y+i][x+j] - erode[y+i][x+j]);
 								double d = waterDepth[y+i][x+j];
 								int d_pct = (int) (100.0 * d / maxDepth);
@@ -267,7 +268,7 @@ public class ObjectExporter implements Exporter {
 									ok = false;
 									problem += problem.equals("") ? "depth" : ",depth";
 								}
-								if (z_pct < o.z_min || z_pct >= o.z_max) {
+								if (z_pct < o.a_min || z_pct >= o.a_max) {
 									ok = false;
 									problem += problem.equals("") ? "z" : ",z";
 								}

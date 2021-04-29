@@ -167,9 +167,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		// allocate new attribute maps
 		int newlen = newMesh.vertices.length;
 		double[] h = new double[newlen];	// height map
+		double[] e = new double[newlen];	// erosion map
 		double[] r = new double[newlen];	// rain map
-		double[] s = new double[newlen];	// soil map
-		double[] f = new double[newlen];	// incoming map
+		double[] m = new double[newlen];	// soil/mineral map
+		double[] f = new double[newlen];	// flora map
+		double[] a = new double[newlen];	// fauna map
+		double[] w = new double[newlen];	// incoming map
 
 		// interpolate per-point attributes for each mesh point
 		for(int i = 0; i < newlen; i++) {
@@ -177,13 +180,18 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			double x = (newMesh.vertices[i].x/xScale) + xShift;
 			double y = (newMesh.vertices[i].y/yScale) + yShift;
 			
-			// find nearest points from the previous map
-			Vicinity nearest = new Polygon(mesh, x, y);
+			// find surrounding points from the previous map
+			Vicinity poly = new Polygon(mesh, x, y);
 
-			// interpolate values for height, rain, and soil
-			h[i] = nearest.interpolate(heightMap);
-			r[i] = nearest.interpolate(rainMap);
-			s[i] = nearest.interpolate(soilMap);
+			// interpolate values for height, rain, minerals, flora, fauna
+			h[i] = poly.interpolate(heightMap);
+			e[i] = poly.interpolate(erodeMap);
+			r[i] = poly.interpolate(rainMap);
+			m[i] = poly.nearest(soilMap);
+			f[i] = poly.nearest(floraMap);
+			a[i] = poly.nearest(faunaMap);
+			
+			// FIX incoming water flow
 		}
 		
 		// FIX sometimes arteries enter subregion but don't flow
@@ -199,7 +207,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 						double x = (p2.x - xShift) * xScale;
 						double y = (p2.y - yShift) * yScale;
 						MeshPoint p3 = newMesh.choosePoint(x,y);
-						f[p3.index] += fluxMap[p2.index];
+						w[p3.index] += fluxMap[p2.index];
 						p3.immutable = true;
 					}
 				}
@@ -209,13 +217,16 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		// install and attribute the new mesh
 		setMesh(newMesh);
 		rainMap = r;
-		soilMap = s;
-		incoming = f;
+		soilMap = m;
+		floraMap = f;
+		faunaMap = a;
+		erodeMap = e;
+		setHeightMap(h);
+		// FIX incoming water flow
 		
 		// instantiate a new hydrology calculator and compute the topography
 		drainage = new Drainage(this);
 		waterflow = new WaterFlow(this);
-		setHeightMap(heightMap);
 		
 		if (parms.debug_level > 0) {
 			parms.worldParms();

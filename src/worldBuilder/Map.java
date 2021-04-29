@@ -190,12 +190,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			m[i] = poly.nearest(soilMap);
 			f[i] = poly.nearest(floraMap);
 			a[i] = poly.nearest(faunaMap);
-			
-			// FIX incoming water flow
 		}
 		
-		// FIX sometimes arteries enter subregion but don't flow
-		// reproduce all water flows into the new sub-region
+		// reproduce all water flows INTO the new sub-region
 		for (int i = 0; i < mesh.vertices.length; i++) {
 			MeshPoint p = mesh.vertices[i];
 			if (inTheBox(p.x, p.y)) {
@@ -221,10 +218,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		floraMap = f;
 		faunaMap = a;
 		erodeMap = e;
-		setHeightMap(h);
-		// FIX incoming water flow
+		incoming = w;
+		heightMap = h;
+		tileHeight = null;
+		tileDepth = null;
 		
-		// instantiate a new hydrology calculator and compute the topography
+		// instantiate hydrology engine, recompute drainage and water flow
 		drainage = new Drainage(this);
 		waterflow = new WaterFlow(this);
 		

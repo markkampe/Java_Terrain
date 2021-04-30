@@ -30,6 +30,10 @@ maps and exporting (parts of) them in formats consumable by various FRPGs.
    * MapListener.java ... call-back for point/rectangular selections
    * PointDebug.java ... pop-up for info about one MeshPoint
 
+## Configuration
+   * Parameters.java ... singleton collection of general parameters
+   * ResourceRule.java ... super-class for things that can bid on points/tiles
+
 ## Internal representations and engines
 
    * Parameters.java ... default parameter values
@@ -56,10 +60,8 @@ maps and exporting (parts of) them in formats consumable by various FRPGs.
    * ErodeMap.java ... erosion and deposition
    * WaterMap.java ... lakes and seas
    * RiverMap.java ... rivers
-
    * FloraMap.java ... plant types
-   * FloraRule.java
-
+   * FaunaMap.java ... animal/fish/bird types
    * PreviewMap.java ... simple, color-per-meshpoint maps
 
 ## Classes to export maps in various formats
@@ -67,28 +69,30 @@ maps and exporting (parts of) them in formats consumable by various FRPGs.
    * Exporter.java ... interface for all Exporter entry points
    * TerrainType.java ... types of terrain (mountains, swamps, etc)
 
-   * RawExport.java ... raw JSON export dialog
-   * JsonExporter.java ... simple Cartesian grid of per-point JSON attributes
+   * Raw Jason
+     - RawExport.java ... raw JSON export dialog
+     - JsonExporter.java ... simple Cartesian grid of per-point JSON attributes
 
-   * RPGMexport.java ... RPGM export dialog
-   * RPGMFlora.java ... RPGM flora placement dialog
-   * RuleDebug.java ... RPGM rule debug dialog (for debugging rules)
-   * RPGMTiler.java ... create a grid of RPGM tiles for export
-   * RPGMwriter.java ... write out a set of RPGM level maps
-   * TileRule.java ... description of a single RPGM tile
-   * TileRules.java ... load and search a set of RPGM tiles
-   * RPGMLeveler.java ... map altitudes/depths into RPGM levels
-   * RpgmMap.java ... key attributes of an RPGM map set
-   * MapIndex.java ... load and operate on an RPGM index of maps
+   * RPGMaker Overworld/Outside
+     - RPGMexport.java ... RPGM export dialog
+     - RPGMFlora.java ... RPGM flora placement dialog
+     - RuleDebug.java ... RPGM rule debug dialog (for debugging rules)
+     - RPGMTiler.java ... create a grid of RPGM tiles for export
+     - RPGMwriter.java ... write out a set of RPGM level maps
+     - RPGMRule.java ... ResourceRule sub-class for RPGMaker tiles
+     - RPGMLeveler.java ... map altitudes/depths into RPGM levels
+     - RpgmMap.java ... key attributes of an RPGM map set
+     - MapIndex.java ... load and operate on an RPGM index of maps
 
-   * ObjectExport.java ... WIP object export dialog
-   * ObjectExporter.java ... topographic objects overlayed on a simple Cartesian grid
-   * OverlayObject.java ... a single (overlayable) object	
-   * OverlayObjects.java ... load and search a set of (overlayable) objects
+   * Overlay Objects (WIP)
+     - ObjectExport.java ... object export dialog
+     - ObjectExporter.java ... topographic objects overlayed on a simple Cartesian grid
+     - OverlayRule.java ... ResourceRule sub-class for overlayable objects
 
-   * FoundationExport.java ... Foundation export dialog
-   * FoundExporter.java ... exporter for Foundation maps
-   * LuaWriter.java ... LUA file writer for Foundation exports
+   * Foundation
+     - FoundationExport.java ... Foundation export dialog
+     - FoundExporter.java ... exporter for Foundation maps
+     - LuaWriter.java ... LUA file writer for Foundation exports
 
 
 

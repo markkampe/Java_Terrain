@@ -2,31 +2,31 @@
    "Test Overlays": [
 	{ "name": "hi-plateau", "icon": "WIP_plateau_6x6.bmp", "stamp": "6x6",
 	  "a%": { "min": 40, "max": 100 }, "slope": { "max": 0.05 },
-	  "order": 1
+	  "vigor": 8,	"order": 1
 	},
 	{ "name": "peak", "icon": "WIP_mountain_6x6.bmp", "stamp": "6x6",
 	  "a%": { "min": 40, "max": 100 },
-	  "order": 2
+	  "vigor": 16,	"order": 2
 	},
 	{ "name": "mid-plateau", "icon": "WIP_plateau_4x4.bmp", "stamp": "4x4",
 	  "a%": { "min": 20, "max": 40 }, "slope": { "max": 0.05 },
-	  "order": 1
+	  "vigor": 8,	"order": 1
 	},
 	{ "name": "mountain", "icon": "WIP_mountain_4x4.bmp", "stamp": "4x4",
 	  "a%": { "min": 20, "max": 40 },
-	  "order": 2
+	  "vigor": 16,	"order": 2
 	},
 	{ "name": "hill", "icon": "WIP_hill_4x4.bmp", "stamp": "4x4",
 	  "a%": { "min": 10, "max": 20 }, "slope": { "min": 0.02 },
-	  "order": 3
+	  "vigor": 16,	"order": 3
 	},
 	{ "name": "knoll", "icon": "WIP_hill_2x2.bmp", "stamp": "2x2",
 	  "a%": { "min": 5, "max": 10 }, "slope": { "min": 0.02 },
-	  "order": 3
+	  "vigor": 16,	"order": 3
    	},
    	{ "name": "depths", "icon": "WIP_trident_6x6.bmp", "stamp": "6x6",
 	  "d%": { "min": 75, "max": 100 },
-	  "order": 3
+	  "vigor": 16,	"order": 3
 	}
    ]
 }

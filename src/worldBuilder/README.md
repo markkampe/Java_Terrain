@@ -36,8 +36,6 @@ maps and exporting (parts of) them in formats consumable by various FRPGs.
 
 ## Internal representations and engines
 
-   * Parameters.java ... default parameter values
-
    * MeshPoint.java ... one point in the mesh
    * MeshPointHasher.java ... map coordinates into a MeshPoint
    * Mesh.java ... a mesh of points
@@ -49,6 +47,8 @@ maps and exporting (parts of) them in formats consumable by various FRPGs.
    * Vicinity.java ... a collection of near-by MeshPoints
    * Polygon.java ... a Vicinity defined by an enclosing polygon
    * Proxcimity.java ... a Vicinity defined by nearest neighbors
+
+   * Placement.java ... handle resource bids for MeshPoints
 
 
 ##  Render different parts of the map on display

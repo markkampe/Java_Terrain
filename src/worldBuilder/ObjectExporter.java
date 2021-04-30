@@ -35,9 +35,10 @@ public class ObjectExporter implements Exporter {
 	private double maxHeight;		// highest discovered altitude
 	private double minHeight;		// lowest discovered altitude
 	private double maxDepth;		// deepest discovered water
-	
+
 	private int firstPass;			// lowest rule order
 	private int lastPass;			// highest rule order
+	private static final double IMPOSSIBLE = -666.0;	// Rule rejects this tile
 
 	// brightness constants for preview colors
 	private static final int DIM = 32;
@@ -74,7 +75,7 @@ public class ObjectExporter implements Exporter {
 				overlays++;
 			}
 		}
-			
+
 		if (parms.debug_level >= EXPORT_DEBUG)
 			System.out.println("new Object exporter (" + height + "x" + width + ") w/" + overlays + " overlays");
 	}
@@ -161,7 +162,7 @@ public class ObjectExporter implements Exporter {
 	public void floraMap(double[][] flora, String[] names) {
 		this.flora = flora;
 	}
-	
+
 	/**
 	 * Up-load the fauna type for every tile
 	 * @param fauna - per point fauna type
@@ -186,7 +187,7 @@ public class ObjectExporter implements Exporter {
 					maxDepth = depths[i][j];
 			}
 	}
-	
+
 	/**
 	 * aggregate slope
 	 * @param row (tile) within the export region
@@ -207,7 +208,7 @@ public class ObjectExporter implements Exporter {
 		double dz = dzx > dzy ? dzx: dzy;
 		return parms.height(dz) / tile_size;
 	}
-	
+
 	/**
 	 * one object to be overlayed on our export grid
 	 */
@@ -215,7 +216,7 @@ public class ObjectExporter implements Exporter {
 		public int row;		// Y coordinate (tile offset)
 		public int col;		// X coordinate (tile offset)
 		OverlayRule obj;	// associated Overlay Object
-		
+
 		public Overlay(OverlayRule obj, int row, int col) {
 			this.obj = obj;
 			this.row = row;
@@ -231,75 +232,70 @@ public class ObjectExporter implements Exporter {
 		boolean[][] taken = new boolean[y_points][x_points];
 		overlays = new LinkedList<Overlay>();
 
-		// give each Overlay Object a shot at every tile
+		// go through bidding in ordered passes
 		for(int order = firstPass; order <= lastPass; order++) {
-			int bidders = 0;
-			int assigned = 0;
-			for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
-				// find the rules for this pass
-				OverlayRule o = (OverlayRule) it.next();
-				if (o.order != order)
-					continue;
-				
-				// offer it every square starting at every tile
-				bidders++;
-				for(int y = 0; y < y_points - o.height; y++)
-					for(int x = 0; x < x_points - o.width; x++) {
-						boolean ok = true;
-						for(int i = 0; ok && i < o.height; i++)
-							for(int j = 0; ok && j < o.width; j++) {
+			// collect bids for every tile
+			for(int y = 0; y < y_points; y++)
+				for(int x = 0; x < x_points; x++) {
+					// collect bids from every eligible rule
+					OverlayRule winning_rule = null;
+					double winning_bid = IMPOSSIBLE;
+					for( ListIterator<ResourceRule> it = ResourceRule.iterator(); it.hasNext();) {
+						OverlayRule o = (OverlayRule) it.next();
+						if (o.order != order)
+							continue;		// wrong pass for this rule
+						if (y > y_points - o.height)
+							continue;		// stamp would spill past bottom
+						if (x > x_points - o.width)
+							continue;		// stamp would spill beyond edge
+
+						// consider each tile this stamp would cover
+						double this_bid = 0;
+						for(int i = 0; i < o.height && this_bid >= 0; i++)
+							for(int j = 0; j < o.width && this_bid >= 0; j++) {
 								if (taken[y+i][x+j]) {
-									ok = false;
+									this_bid += IMPOSSIBLE;	// some tiles already taken
 									continue;
 								}
-								// get altitude and depth percentiles for this point
-								double a = (heights[y+i][x+j] - erode[y+i][x+j]) - parms.sea_level;
-								int a_pct = Math.max(0, (int) (100 * a / (maxHeight - parms.sea_level)));
+								// see if we meet the depth percentile requirements
 								double d = waterDepth[y+i][x+j];
 								int d_pct = (int) (100.0 * d / maxDepth);
+								if (d > 0 && o.d_max == 0)
+									this_bid += IMPOSSIBLE;	// land rule and u/w tile
+								else
+									this_bid += o.range_bid(d_pct, o.d_min, o.d_max);
+						
+								// see if we meet the altitude percentile requirements
+								double a = (heights[y+i][x+j] - erode[y+i][x+j]) - parms.sea_level;
+								int a_pct = Math.max(0, (int) (100 * a / (maxHeight - parms.sea_level)));
+								this_bid += o.range_bid(a_pct, o.a_min, o.a_max);
+		
+								// see if we meet the slope requirements
 								double slope = slope(y+i,x+j);
-
-								// see if we meet this rule's criteria
-								String problem = "";
-								if (d > 0 && o.d_max == 0) {
-									ok = false;
-									problem += problem.equals("") ? "u/w" : ",u/w";
-								} else if (d_pct > o.d_max || d_pct < o.d_min) {
-									ok = false;
-									problem += problem.equals("") ? "depth" : ",depth";
-								}
-								if (a_pct < o.a_min || a_pct >= o.a_max) {
-									ok = false;
-									problem += problem.equals("") ? "z" : ",z";
-								}
-								if (slope < o.s_min || slope >= o.s_max) {
-									ok = false;
-									problem += problem.equals("") ? "slope" : ",slope";
-								}
-
-								if (parms.debug_level > EXPORT_DEBUG && !ok) {
-									String where =  String.format("tile[%d,%d]", y+i, x+j) +
-											String.format(" (a%%=%d%%", a_pct) + 
-											String.format(", d%%=%d%%", d_pct) +
-											String.format(", slope=%.3f", slope) + ")";
-									System.out.println(where + ": " + o.ruleName + " NOBID(" + problem + ")");
-								}
+								this_bid += o.range_bid(slope, o.s_min, o.s_max);
+								
+								// XXX enable normal ResourceRule bidding for ObjectExporter.chooseOverlays?
+								// this_bid += (parms.height(a), parms.height(d), flux[tile], rain[tile], Tsummer, Twinter);
+								// we don't yet capture rain, temperatures and water flux
 							}
 
-						if (ok) {
-							overlays.add(new Overlay(o, y, x));
-							for(int i = 0; ok && i < o.height; i++)
-								for(int j = 0; ok && j < o.width; j++) {
-									taken[y+i][x+j] = true;
-									assigned++;
-								}
+						if (this_bid > 0) {	
+							this_bid *= o.vigor;
+							if (this_bid > winning_bid) {
+								winning_bid = this_bid;
+								winning_rule = o;
+							}
 						}
 					}
-			}
-			if (parms.debug_level >= EXPORT_DEBUG)
-				System.out.println("ObjectExporter pass " + order + ": assigned " + assigned + " tiles to " + bidders + " bidders");
-			
-		}
+					// if there was a winning bidder, award it those tiles
+					if (winning_rule != null) {
+						overlays.add(new Overlay(winning_rule, y, x));
+						for(int i = 0; i < winning_rule.height; i++)
+							for(int j = 0; j < winning_rule.width; j++)
+								taken[y+i][x+j] = true;
+					}
+				}	// end of per-tile loop
+		}	// end of per-pass loop
 	}
 
 	/**
@@ -308,11 +304,11 @@ public class ObjectExporter implements Exporter {
 	 * @param filename - name of output file
 	 */
 	public boolean writeFile( String filename ) {
-		
+
 		// make sure we have an overlay list
 		if (overlays == null)
 			chooseOverlays();
-		
+
 		// strip off suffix and leading directories to get base name
 		int dot = filename.lastIndexOf('.');
 		String mapname = (dot == -1) ? filename : filename.substring(0, dot);
@@ -325,7 +321,7 @@ public class ObjectExporter implements Exporter {
 		// generate the output
 		try {
 			FileWriter output = new FileWriter(filename);
-			
+
 			// start with the per-tile info
 			final String FORMAT_S = " \"%s\": \"%s\"";
 			final String FORMAT_D = " \"%s\": %d";
@@ -337,7 +333,7 @@ public class ObjectExporter implements Exporter {
 			final String NEW_POINT = "\n        { ";
 			final String NEWLINE = "\n    ";
 			final String COMMA = ", ";
-			
+
 			// write out the grid wrapper
 			output.write("{");
 			output.write(NEWLINE);
@@ -345,21 +341,21 @@ public class ObjectExporter implements Exporter {
 			output.write(",");
 			output.write(NEWLINE);
 			output.write(String.format(FORMAT_O, "dimensions"));
-				output.write(String.format(FORMAT_D, "height", y_points));
-				output.write(COMMA);
-				output.write(String.format(FORMAT_D, "width", x_points));
-				output.write(" },");
-				output.write(NEWLINE);
+			output.write(String.format(FORMAT_D, "height", y_points));
+			output.write(COMMA);
+			output.write(String.format(FORMAT_D, "width", x_points));
+			output.write(" },");
+			output.write(NEWLINE);
 			output.write(String.format(FORMAT_DM, "tilesize", tile_size));
 			output.write(",");
 			output.write(NEWLINE);
 			output.write(String.format(FORMAT_O, "center"));
-				output.write(String.format(FORMAT_L, "latitude", lat));
-				output.write(COMMA);
-				output.write(String.format(FORMAT_L, "longitude", lon));
-				output.write(" },");
+			output.write(String.format(FORMAT_L, "latitude", lat));
+			output.write(COMMA);
+			output.write(String.format(FORMAT_L, "longitude", lon));
+			output.write(" },");
 			output.write(NEWLINE);
-			
+
 			// write out the per-point altitudes and water depth
 			final String FORMAT_Z = " \"%s\": \"%.8f\"";
 			output.write(String.format(FORMAT_A, "points"));
@@ -383,7 +379,7 @@ public class ObjectExporter implements Exporter {
 			}
 			output.write(NEWLINE);
 			output.write("]");	// end of points
-			
+
 			// write out the overlaid objects
 			int overlay_count = 0;
 			if (overlays.size() > 0) {
@@ -408,13 +404,13 @@ public class ObjectExporter implements Exporter {
 					output.write(COMMA);
 					output.write(String.format(FORMAT_D, "dy", o.obj.height));
 					output.write(" }");
-					
+
 					overlay_count++;
 				}
 				output.write(NEWLINE);
 				output.write("]");	// end of overlays
 			}
-			
+
 			// and close out the grid
 			output.write("\n");
 			output.write( "}\n");
@@ -441,7 +437,7 @@ public class ObjectExporter implements Exporter {
 	 * @param colorMap - palette to be used in preview
 	 */
 	public void preview(WhichMap chosen, Color colorMap[]) {
-		
+
 		// start by laying out the water
 		Color map[][] = new Color[y_points][x_points];
 		for(int i = 0; i < y_points; i++)
@@ -456,7 +452,7 @@ public class ObjectExporter implements Exporter {
 			// make sure we have an overlay list
 			if (overlays == null)
 				chooseOverlays();
-			
+
 			// figure out the (range scaled) altitude to color mapping
 			double aMean = (maxHeight + minHeight)/2;
 			double aScale = BRIGHT - DIM;
@@ -470,7 +466,7 @@ public class ObjectExporter implements Exporter {
 						double h = NORMAL + ((heights[i][j] - aMean) * aScale);
 						map[i][j] = new Color((int)h, (int)h, (int)h);
 					}
-			
+
 			// add any overlayed icons
 			PreviewMap preview = new PreviewMap("Export Preview (terrain)", map, OverlayRule.tile_size);
 			if (overlays != null && overlays.size() > 0)
@@ -488,7 +484,7 @@ public class ObjectExporter implements Exporter {
 						else
 							map[i][j] = new Color(NORMAL, NORMAL, NORMAL);
 					}
-			
+
 			new PreviewMap("Export Preview (flora)", map, OverlayRule.tile_size);
 		}
 	}

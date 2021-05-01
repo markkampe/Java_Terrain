@@ -414,9 +414,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			if (d0 + d1 > max)
 				continue;
 			
-			// XXX add rectangular ridges
-			// XXX add continued off-map ridges
-			// 		peak at edge rather than in radius from edge
+			// XXX rectangular ridges (no taper at end)
+			// 	   these could be used to extend ridges off the map
 			
 			// calculate the deltaH for this point
 			double dist = d0 + d1 - minDist;

@@ -460,7 +460,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 			highLevels = 1;		// MOUNTAIN
 		} else {
 			outside = true;		// Outside
-			have_pits = false;	// XXX PITs come out badly
+			have_pits = false;	// XXX PITs are not what we want
 			waterLevels = 3;	// DEEP/SHALLOW/PASSABLE
 			lowLevels = have_pits ? 1 : 0;	// PIT (or nothing)
 			midLevels = 1;		// one GROUND level
@@ -552,7 +552,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 
 		// high-land related types and colors
-		// TODO should highlands be lighter brown->yellow
+		// XXX should highlands be lighter brown->yellow
 		shade = MIN_HIGH_SHADE;
 		delta = SHADE_RANGE / highLevels;
 		for (int i = 0; i < highLevels; i++) {

@@ -375,7 +375,7 @@ public class WaterFlow {
 		double suspended = parms.Smax;
 		if (velocity < parms.Vmax)
 			suspended *= velocity/parms.Vmax;
-		return parms.Ce * suspended;	// TODO: soil type erosion resistance
+		return parms.Ce * suspended;	// XXX: add per-soiltype erosion resistance
 	}
 	
 	/**

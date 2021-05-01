@@ -505,7 +505,7 @@ public class FoundExporter implements Exporter {
 						img.setRGB(x+j, y+i, rgb);
 						points++;
 					}
-				// TODO round corners of scaleXscale boxes
+				// FIX round corners of scaleXscale boxes
 			}
 		}
 		

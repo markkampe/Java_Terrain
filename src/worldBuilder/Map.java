@@ -69,7 +69,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
 	
-	public static final int MAX_POIS = 10;	// TODO make poi_list a list
+	public static final int MAX_POIS = 10;	// FIX make poi_list a list
 	
 	private Color highLights[];		// points to highlight
 	private boolean highlighting;	// are there points to highlight

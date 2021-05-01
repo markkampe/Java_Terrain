@@ -11,6 +11,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -69,8 +72,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private static final Color POINT_COLOR = Color.PINK;
 	private static final Color MESH_COLOR = Color.GREEN;
 	
-	public static final int MAX_POIS = 10;	// FIX make poi_list a list
-	
 	private Color highLights[];		// points to highlight
 	private boolean highlighting;	// are there points to highlight
 	private double highlight_x, highlight_y;	// non-mesh-point highlighting
@@ -100,7 +101,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double tileHeight[][];	// altitude of each screen tile (Z units)
 	private double tileDepth[][];	// depth u/w of each screen tile (meters)
 	
-	private POI[] poi_list;			// list of points of interest
+	private LinkedList<POI> poi_list;	// list of points of interest
 	
 	/** selection types: points, line, rectangle, ... */
 	public enum Selection {NONE, POINT, POINTS, LINE, RECTANGLE, SQUARE, ANY};
@@ -277,7 +278,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		boolean inPoIs = false;		// in points of interest
 		int length = 0;				// expected number of points
 		int points = 0;				// number of points read	
-		int pois = 0;				// number of points of interest read
 		
 		// per-point parameters we are looking for
 		double z = 0;
@@ -293,7 +293,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		String poi_name = "";
 		
 		// reallocate this every time
-		this.poi_list = new POI[MAX_POIS];
+		this.poi_list = new LinkedList<POI>();
 		
 		while(parser.hasNext()) {
 			JsonParser.Event e = parser.next();
@@ -303,15 +303,17 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				if (length > 0) {
 					if (thisKey.equals("points")) {
 						inPoints = true;
+						inPoIs = false;
 						points = 0;
 					} else if (thisKey.equals("pois")) {
 						inPoIs = true;
-						pois = 0;
-					} else if (thisKey.equals("mesh"))
 						inPoints = false;
+					} else if (thisKey.equals("mesh")) {
+						inPoints = false;
+						inPoIs = false;
+					}
 				}
 				break;
-				
 
 			case VALUE_STRING:
 			case VALUE_NUMBER:
@@ -457,7 +459,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					incoming[points] = influx;
 					points++;
 				} else if (inPoIs) {
-					poi_list[pois++] = new POI(poi_type, poi_name, x, y);
+					poi_list.add(new POI(poi_type, poi_name, x, y));
 				}
 				break;
 				
@@ -576,21 +578,13 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				output.write(String.format(D_format,  parms.description));
 			
 			// write out the points of interest
-			int numPoints = 0;
-			if (poi_list != null && poi_list.length > 0) {
-				for(int i = 0; i < poi_list.length; i++)
-					if (poi_list[i] != null)
-						numPoints++;
-			}
-			if (numPoints > 0) {
+			if (poi_list.size() > 0) {
 				output.write( "    \"pois\": [" );
-				numPoints = 0;
-				for(int i = 0; i < poi_list.length; i++) {
-					POI point = poi_list[i];
-					if (point != null) {
-						output.write((numPoints++ == 0) ? "\n" : ",\n");
-						output.write(String.format(I_FORMAT, point.x, point.y, point.type, point.name ));
-					}
+				int numPoints = 0;
+				for(Iterator<POI> it = poi_list.iterator(); it.hasNext();) {
+					POI point = it.next();
+					output.write((numPoints++ == 0) ? "\n" : ",\n");
+					output.write(String.format(I_FORMAT, point.x, point.y, point.type, point.name ));
 				}
 				output.write(" ],\n");
 			}
@@ -682,7 +676,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.faunaMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
-			this.poi_list = new POI[MAX_POIS];
+			this.poi_list = new LinkedList<POI>();
 			this.drainage = new Drainage(this);
 			this.waterflow = new WaterFlow(this);
 			// these will be created by the first paint()
@@ -942,16 +936,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
-	 * update the lists of Points of Interest
-	 */
-	public void setPOI(POI[] points) {
-		poi_list = points;
-	}
-	
-	/**
 	 * return the list of Points of Interest
 	 */
-	public POI[] getPOI() {
+	public LinkedList<POI> getPOI() {
 		return poi_list;
 	}
 	

@@ -2,6 +2,9 @@ package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -33,28 +36,33 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 		private JButton accept;
 		private JButton cancel;
 		
+		private static final int MAX_POIS = 10;
+		
 		/** instantiate the POI information collection widgets */
 		public POIDialog(Map map)  {
 			// pick up references
 			this.map = map;
 			this.parms = Parameters.getInstance();
 			
-			// import the current list of pois
-			POI[] points = map.getPOI();
-			data = new Object[Map.MAX_POIS][4];
-			x = new double[Map.MAX_POIS];
-			y = new double[Map.MAX_POIS];
+			// import the current PoI list into a data table
+			LinkedList<POI> poi_list = map.getPOI();
+			int len = poi_list.size();
+			if (len < MAX_POIS)
+				len = MAX_POIS;
+			data = new Object[len][4];
+			x = new double[len];
+			y = new double[len];
 			int numPoints = 0;
-			for(int i = 0; i < points.length; i++)
-				if (points[i] != null) {
-					data[numPoints][COL_TYPE] = points[i].type;
-					data[numPoints][COL_NAME] = points[i].name;
-					data[numPoints][COL_LAT] = parms.latitude(points[i].y);
-					data[numPoints][COL_LON] = parms.longitude(points[i].x);
-					y[numPoints] = points[i].y;
-					x[numPoints] = points[i].x;
-					numPoints++;
-				}
+			for(Iterator<POI> it = poi_list.iterator(); it.hasNext();) {
+				POI p = it.next();
+				data[numPoints][COL_TYPE] = p.type;
+				data[numPoints][COL_NAME] = p.name;
+				data[numPoints][COL_LAT] = parms.latitude(p.y);
+				data[numPoints][COL_LON] = parms.longitude(p.x);
+				y[numPoints] = p.y;
+				x[numPoints] = p.x;
+				numPoints++;
+			}
 				
 			// label the dialog box
 			Container mainPane = getContentPane();
@@ -146,8 +154,13 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 		 * commit our changes to the points of interest map
 		 */
 		private void updatePOIs() {
-			POI[] pois = new POI[Map.MAX_POIS];
-			for(int i = 0; i < pois.length; i++) {
+			// empty the existing list
+			LinkedList<POI> poi_list = map.getPOI();
+			while(poi_list.size() > 0)
+				poi_list.remove();
+			
+			// copy data from our table back into the list
+			for(int i = 0; i < data.length; i++) {
 				String type = (String) table.getValueAt(i, 0);
 				// PoI must have a name
 				if (type == null || type.equals(""))
@@ -156,12 +169,11 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 				if (x[i] == 0 && y[i] == 0)
 					continue;
 				String name = (String) table.getValueAt(i, COL_NAME);
-				pois[i] = new POI(type, name, x[i], y[i]);
+				poi_list.add(new POI(type, name, x[i], y[i]));
 				if (parms.debug_level > 0)
 					System.out.println("PoI: " + type + "(" + name + ") at <" +
 							parms.latitude(y[i]) + "," + parms.longitude(x[i]) + ">");
 			}
-			map.setPOI(pois);
 		}
 		
 		/**

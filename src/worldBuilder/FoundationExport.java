@@ -1,6 +1,9 @@
 package worldBuilder;
 
 import java.awt.event.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import javax.swing.JFileChooser;
 
 /**
@@ -94,15 +97,14 @@ public class FoundationExport extends ExportBase implements ActionListener {
 			export(exporter);
 		
 			// see if there are any defined entry/exit points inside our export
-			POI interest[] = map.getPOI();
+			LinkedList<POI> interest = map.getPOI();
 			if (interest != null) {
 				Point[] entrypoints = new Point[FoundExporter.MAX_PORTS];
 				Point[] exitpoints = new Point[FoundExporter.MAX_PORTS];
 				int entrances = 0;
 				int exits = 0;
-				for(int i = 0; i < interest.length; i++) {
-					// is this a defined POI
-					POI poi = interest[i];
+				for(Iterator<POI> it = interest.iterator(); it.hasNext();) {
+					POI poi = it.next();
 					if (poi == null)
 						continue; 
 					
@@ -111,13 +113,11 @@ public class FoundationExport extends ExportBase implements ActionListener {
 						continue;
 					if (poi.x > box_x + box_width || poi.y > box_y + box_height)
 						continue;
-					
 					if (poi.type.equals("ENTRY") && entrances < entrypoints.length)
 						entrypoints[entrances++] = new Point(poi.x, poi.y);
 					else if (poi.type.equals("EXIT") && exits < exitpoints.length)
 						exitpoints[exits++] = new Point(poi.x, poi.y);
 				}
-				
 				// pass them to the exporter
 				for(int i = 0; i < entrances && i < exits; i++)
 					exporter.entryPoint(entrypoints[i].col, entrypoints[i].row, 

@@ -12,7 +12,6 @@ import javax.imageio.ImageIO;
 public class OverlayRule extends ResourceRule {
 	
 	private static final String DEFAULT_ICONS = "/icons";
-	private static final double MAX_SLOPE = 10.0;
 
 	/** RPGMaker tile set	*/
 	public static int tile_size;
@@ -22,8 +21,7 @@ public class OverlayRule extends ResourceRule {
 	public int a_min, a_max;
 	/** range of acceptable depth percentages	*/
 	public int d_min, d_max;
-	/** range of acceptable slopes	*/
-	public double s_min, s_max;
+
 	/** preview icon image	*/
 	public BufferedImage icon;
 
@@ -31,7 +29,6 @@ public class OverlayRule extends ResourceRule {
 	private static int n_height = 1, n_width = 1;
 	private static int n_a_min = 0, n_a_max = 100;
 	private static int n_d_min = 0, n_d_max = 0;
-	private static double n_s_min = 0.0, n_s_max = MAX_SLOPE;
 	private static String n_icon_file = null;
 
 	/**
@@ -44,7 +41,6 @@ public class OverlayRule extends ResourceRule {
 		// initialize our extended attributes
 		this.height = 1; this.width = 1;
 		this.a_min = 0; this.a_max = 100;
-		this.s_min = 0.0; this.s_max = MAX_SLOPE;
 		this.d_min = 0; this.d_max = 0;
 		this.icon = null;
 	}
@@ -66,8 +62,6 @@ public class OverlayRule extends ResourceRule {
 		newRule.width = n_width;
 		newRule.a_min = n_a_min;
 		newRule.a_max = n_a_max;
-		newRule.s_min = n_s_min;
-		newRule.s_max = n_s_max;
 		newRule.d_min = n_d_min;
 		newRule.d_max = n_d_max;
 		
@@ -93,7 +87,6 @@ public class OverlayRule extends ResourceRule {
 		n_height = 1; n_width = 1;
 		n_a_min = 0; n_a_max = 100;
 		n_d_min = 0; n_d_max = 0;
-		n_s_min = 0.0; n_s_max = MAX_SLOPE;
 		n_icon_file = null;
 		
 		// and return the newly fabricated object (to ResourceRule.read)
@@ -153,12 +146,6 @@ public class OverlayRule extends ResourceRule {
 			else
 				n_d_min = (int) value;
 			return;
-		case "slope":	// already a percentage
-			if (limit.equals("max"))
-				n_s_max = value;
-			else
-				n_s_min = value;
-			return;
 		}
 		System.err.println(ruleFile + ": Unrecognized RPGMRule attribute (" + name + "." + limit + "=" + value + ")");
 	}
@@ -175,8 +162,6 @@ public class OverlayRule extends ResourceRule {
 			System.out.println(prefix + indent + "z:       " + a_min + "-" + a_max);
 		if (d_min > 0 || d_max < 100)
 			System.out.println(prefix + indent + "d:       " + d_min + "-" + d_max);
-		if (s_min > 0 || s_max < MAX_SLOPE)
-			System.out.println(prefix + indent + "slope:   " + s_min + "-" + s_max);
 		if (height > 1 || width > 1)
 			System.out.println(prefix + indent + "stamp:   " + width + "x" + height);
 	}

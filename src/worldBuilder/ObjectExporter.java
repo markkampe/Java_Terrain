@@ -272,7 +272,7 @@ public class ObjectExporter implements Exporter {
 		
 								// see if we meet the slope requirements
 								double slope = slope(y+i,x+j);
-								this_bid += o.range_bid(slope, o.s_min, o.s_max);
+								this_bid += o.range_bid(slope, o.minSlope, o.maxSlope);
 								
 								// XXX enable normal ResourceRule bidding for ObjectExporter.chooseOverlays?
 								// this_bid += (parms.height(a), parms.height(d), flux[tile], rain[tile], Tsummer, Twinter);

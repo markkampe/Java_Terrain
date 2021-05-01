@@ -35,6 +35,8 @@ public class ResourceRule {
 
 	/** Altitude ranges for this rule	*/
 	public int minAltitude, maxAltitude;
+	/** slope ranges for this rule		*/
+	public double minSlope, maxSlope;
 	/** water-depth ranges for this rule	*/
 	public double minDepth, maxDepth;
 	/** Temperature range for this rule	*/
@@ -84,6 +86,8 @@ public class ResourceRule {
 		// default values will meet any terrestrial conditions
 		minAltitude = -parms.alt_max;
 		maxAltitude = parms.alt_max;
+		minSlope = 0.0;
+		maxSlope = 10.0;
 		minDepth = 0;
 		maxDepth = 0;
 		minTemp = -60;
@@ -159,6 +163,7 @@ public class ResourceRule {
 		
 		int	   numRules = 0;
 		int    aMin = NO_VALUE, aMax = NO_VALUE;	// altitude
+		double sMin = NO_VALUE, sMax = NO_VALUE;	// slope
 		double dMin = NO_VALUE, dMax = NO_VALUE;	// depth
 		double tMin = NO_VALUE, tMax = NO_VALUE;	// temperature
 		double rMin = NO_VALUE, rMax = NO_VALUE;	// rainfall
@@ -209,6 +214,8 @@ public class ResourceRule {
 						thisRule.floraType = floraType;
 					if (aMin != NO_VALUE)
 						thisRule.minAltitude = aMin;
+					if (sMin != NO_VALUE)
+						thisRule.minSlope = sMin;
 					if (dMin != NO_VALUE)
 						thisRule.minDepth = dMin;
 					if (tMin != NO_VALUE)
@@ -219,6 +226,8 @@ public class ResourceRule {
 						thisRule.minFlux = fMin;
 					if (aMax != NO_VALUE)
 						thisRule.maxAltitude = aMax;
+					if (sMax != NO_VALUE)
+						thisRule.maxSlope = sMax;
 					if (dMax != NO_VALUE)
 						thisRule.maxDepth = dMax;
 					if (tMax != NO_VALUE)
@@ -240,6 +249,7 @@ public class ResourceRule {
 					
 					// now reset all the parameters for the next rule
 					aMin = NO_VALUE; aMax = NO_VALUE;
+					sMin = NO_VALUE; sMax = NO_VALUE;
 					dMin = NO_VALUE; dMax = NO_VALUE;
 					tMin = NO_VALUE; tMax = NO_VALUE;
 					rMin = NO_VALUE; rMax = NO_VALUE;
@@ -341,6 +351,9 @@ public class ResourceRule {
 					case "alt":
 						aMin = Integer.parseInt(thisValue);
 						break;
+					case "slope":
+						sMin = Double.parseDouble(thisValue);
+						break;
 					case "temp":
 						tMin = Double.parseDouble(thisValue);
 						break;
@@ -365,6 +378,9 @@ public class ResourceRule {
 					switch(thisObject) {
 					case "alt":
 						aMax = Integer.parseInt(thisValue);
+						break;
+					case "slope":
+						sMax = Double.parseDouble(thisValue);
 						break;
 					case "temp":
 						tMax = Double.parseDouble(thisValue);
@@ -419,7 +435,8 @@ public class ResourceRule {
 		if (className != null)
 			System.out.println(prefix + "      " + "class:   " + className);
 		System.out.println(prefix + "      " + "alt:     " + minAltitude + "-" + maxAltitude);
-		System.out.println(prefix + "      " + "depth:   " + String.format("%.2f", minDepth) + "-" + String.format("%.2f", maxDepth));
+		System.out.println(prefix + "      " + "slope:   " + String.format("%.2f", minSlope) + "-" + String.format("%.2f", maxDepth));
+		System.out.println(prefix + "      " + "depth:   " + String.format("%.2f", minDepth) + "-" + String.format("%.2f", maxSlope));
 		System.out.println(prefix + "      " + "flux:    " + String.format("%.2f", minFlux) + "-" + String.format("%.2f", maxFlux));
 		System.out.println(prefix + "      " + "rain:    " + String.format("%.1f", minRain) + "-" + String.format("%.1f", maxRain));
 		System.out.println(prefix + "      " + "temp:    " + minTemp + "-" + maxTemp);

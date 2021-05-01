@@ -213,7 +213,7 @@ public class WaterFlow {
 								x, parms.altitude(heightMap[x] - erodeMap[x]),
 								parms.height(waterLevel[x]), Parameters.unit_z);
 				} else {	// escape point is trivially under water
-					// TODO water depth at exit point determined by flow
+					// XXX water depth at exit point determined by flow?
 					waterLevel[x] = heightMap[x] -    erodeMap[x] + parms.z(EXIT_DEPTH);
 					if (debug_log != null)
 						msg += String.format("\n\tflood exit point %d@%.2f%s",

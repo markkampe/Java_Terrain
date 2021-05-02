@@ -742,6 +742,7 @@ public class WorldBuilder  extends JFrame
 		String filename = null;
 		String configname = null;
 		String project_dir = null;
+		Script run = null;
 		int debug = 0;
 		for( int i = 0; i < args.length; i++ ) {
 			if (args[i].startsWith(SWITCH_CHAR)) {	
@@ -761,11 +762,10 @@ public class WorldBuilder  extends JFrame
 					else
 						project_dir = args[++i];
 				} else if (args[i].startsWith("-s")) {
-					if (args[i].length() > 2)
-						new Script(args[i].substring(2));
-					else
+					run = (args[i].length() > 2) ?
+						new Script(args[i].substring(2)) :
 						new Script(args[++i]);
-				}else if (args[i].startsWith("-v")) {
+				} else if (args[i].startsWith("-v")) {
 					debug = 1;
 				} else
 					System.out.println(usage);
@@ -786,5 +786,12 @@ public class WorldBuilder  extends JFrame
 		// initialize the display type and options menus
 		w.map.setDisplay(parms.display_options, true);
 		w.updateDisplayMenus(parms.display_options);
+		
+		// see if we were given a script to run
+		if (run != null) {
+			int result = run.process(w.map);
+			if (result != Script.DO_NOT_EXIT)
+				System.exit(result);
+		}
 	}
 }

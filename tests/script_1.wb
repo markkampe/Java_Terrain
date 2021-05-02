@@ -1,0 +1,32 @@
+# 
+# sample WorldBuilder test script
+#
+
+# input/output
+load "tests/test_world_2.json"
+save "/tmp/test_2.json"
+
+# world parameters
+set size 200km
+set max_altitude 2500m
+set region "None Such"
+set description "Unit Testing Session"
+set lat_lon 38.5 140.0
+
+
+# vertical adjustments
+slope   	0.0025	-20
+mountain	<x1,y1>-<x2,y2>, 1250m
+canyon		<x1,y1>-<x2,y2>, -200m
+
+# resource placement
+river		<x1,y1> 200m3/s
+rainfall	<x1,y1> <x2,y2>	100cm/y
+minerals	<x1,y1> <x2,y2>	Iron
+flora		<x1,y1> <x2,y2>	Riperian
+fauna		<x1,y1> <x2,y2> Fish
+
+# points of interest
+PoI		<x1,y1>	ENTRY "Plymouth Harbor"
+
+exit	-1

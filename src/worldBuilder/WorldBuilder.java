@@ -22,7 +22,7 @@ public class WorldBuilder  extends JFrame
 	private static final String author = "Author: Mark Kampe (mark.kampe@gmail.com)";
 	private static final String credit = "Inspired by Martin O'Leary's Uncharted Atlas terrain generator (mewo2.com)";
 	private static final String license = "";	// TBD
-	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [-p projectdir] [mesh file]";
+	private static final String usage = "Usage: cmd [-v] [-d debuglevel] [-c configfile] [-s script] [-p projectdir] [mesh file]";
 	
 	/** active mouse-hogging dialog (for serialization)	*/
 	protected static boolean activeDialog;
@@ -760,6 +760,11 @@ public class WorldBuilder  extends JFrame
 						project_dir = args[i].substring(2);
 					else
 						project_dir = args[++i];
+				} else if (args[i].startsWith("-s")) {
+					if (args[i].length() > 2)
+						new Script(args[i].substring(2));
+					else
+						new Script(args[++i]);
 				}else if (args[i].startsWith("-v")) {
 					debug = 1;
 				} else

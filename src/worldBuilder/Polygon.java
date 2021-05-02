@@ -136,7 +136,8 @@ public class Polygon extends Vicinity {
 		if (mean_radius > (y_max - y_min))
 			return true;
 
-		// TODO Polygon.outsideMesh within square but outside polygon?
+		// XXX Polygon.outsideMesh within square but outside polygon?
+		//	I do not handle this case correctly, but does it matter?
 		return false;
 	}
 }

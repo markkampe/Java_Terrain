@@ -491,7 +491,11 @@ public class FoundExporter implements Exporter {
 			return false;
 		
 		int scale = XY_POINTS/x_points;
+		int starts[] = new int[scale];	// pixel on which each row starts)
+		int ends[] = new int[scale];	// pixel on which each row ends
 		int points = 0;
+		
+		// fill in every tile with the desired class
 		for(int y = 0; y < XY_POINTS; y += scale) {
 			int y_in = y/scale;
 			for(int x = 0; x < XY_POINTS; x += scale) {
@@ -499,13 +503,50 @@ public class FoundExporter implements Exporter {
 				if (tileValues[y_in][x_in] != desired)
 					continue;
 				
+				// start out assuming we will fill the entire box
+				for(int i = 0; i < scale; i++) {
+					starts[i] = 0;
+					ends[i] = scale;
+				}
+				
+				// should we round the top left corner
+				if (x_in > 0 && y_in > 0 && 
+						tileValues[y_in-1][x_in] != desired &&
+						tileValues[y_in][x_in-1] != desired)
+					starts[0] = 1;
+				else
+					starts[0] = 0;
+					
+				// should we round the bottom left corner
+				if (x_in > 0 && y_in < y_points - 1 && 						
+						tileValues[y_in+1][x_in] != desired &&
+						tileValues[y_in][x_in-1] != desired)
+					starts[scale-1] = 1;
+				else
+					starts[scale-1] = 0;
+
+				// should we round the top right corner
+				if (x_in < x_points - 1 && y_in > 0 && 						
+						tileValues[y_in-1][x_in] != desired &&
+						tileValues[y_in][x_in+1] != desired)
+					ends[0] = scale - 1;
+				else
+					ends[0] = scale;
+				
+				// should we round the bottom right corner
+				if (x_in < x_points - 1 && y_in < y_points - 1 && 						
+						tileValues[y_in+1][x_in] != desired &&
+						tileValues[y_in][x_in+1] != desired)
+					ends[scale-1] = scale - 1;
+				else
+					ends[scale-1] = scale;
+				
 				// fill in the entire box
 				for(int i = 0; i < scale; i++)
-					for(int j = 0; j < scale; j++) {
-						img.setRGB(x+j, y+i, rgb);
-						points++;
+					for(int j = starts[i]; j < ends[i]; j++) {
+						img.setRGB(x+j,  y+i,  rgb);
+						points++;	
 					}
-				// FIX round corners of scaleXscale boxes
 			}
 		}
 		

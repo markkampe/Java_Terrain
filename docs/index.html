@@ -90,7 +90,7 @@ To greatly over-simplify, this program can be divided into:
 	<li>a collection of graphical renderers to display 2D maps to illustrate
 	    those attributes (e.g. topography and water, erosion and deposition, etc.).</li>
 	<li>a collection of exporters, to translate such maps into a form that can be
-	    imported into another program (e.g. RPG Maker).</li>
+	    imported into another program (e.g. RPGMaker, Foundation).</li>
 	<li>a collection of dialogs and editors for changing the attributes (e.g.
 	    creating mountains or changing water flow) of map points.</li>
 	<li>a collection of menus and dialog widgets for accepting and executing commands.</li>
@@ -110,24 +110,35 @@ all of which are accessed through their common <em>MeshPoint index</em>.
 <P>
 There are several different map renderers, one for each major attribute:
 <ul>
-    <li> <a Href="JavaDoc/worldBuilder/AltitudeMap.html">AltitudeMap.java</a>,</li>
-    <li> <a Href="JavaDoc/worldBuilder/TopoMap.html">TopoMap.java</a>,</li>
-    <li> <a Href="JavaDoc/worldBuilder/WaterMap.html">WaterMap.java</a>,</li>
-    <li> <a Href="JavaDoc/worldBuilder/RiverMap.html">RiverMap.java</a>,</li>
-    <li> <a Href="JavaDoc/worldBuilder/RainMap.html">RainMap.java</a>,</li>
-    <li> <a Href="JavaDoc/worldBuilder/ErodeMap.html">ErodeMap.java</a>,</li>
-    <li> <a Href="JavaDoc/worldBuilder/SoilMap.html">SoilMap.java</a>.</li>
+    <li> <a Href="JavaDoc/worldBuilder/AltitudeMap.html">AltitudeMap.java</a>, rendering altitudes as shades of gray</li>
+    <li> <a Href="JavaDoc/worldBuilder/TopoMap.html">TopoMap.java</a>, rendering topographic lines</li>
+    <li> <a Href="JavaDoc/worldBuilder/WaterMap.html">WaterMap.java</a>, rendering water and shorelines</li>
+    <li> <a Href="JavaDoc/worldBuilder/RiverMap.html">RiverMap.java</a>, tracing rivers/streams through MeshPoints</li>
+    <li> <a Href="JavaDoc/worldBuilder/RainMap.html">RainMap.java</a>, showing regional rainfall</li>
+    <li> <a Href="JavaDoc/worldBuilder/ErodeMap.html">ErodeMap.java</a>, showing erosion and sedimentation</li>
+    <li> <a Href="JavaDoc/worldBuilder/SoilMap.html">SoilMap.java</a>, showing soil types and mineral deposits</li>
+    <li> <a Href="JavaDoc/worldBuilder/FloraMap.html">FloraMap.java</a>, showing plant distributions</li>
+    <li> <a Href="JavaDoc/worldBuilder/FaunaMap.html">FaunaMap.java</a>, showing animal/fish distributions</li>
 </ul>
 The mapping from a (sparse and irregular) Voronoi mesh to a 
 (dense and continuous) 2D map is greatly facilitated by the
 <a Href="JavaDoc/worldBuilder/Cartesian.html">Cartesian.java</a>
 interpolation of values from surrounding <em>MeshPoints</em>
-as chosen by
+as chosen by (sub-classes of)
 <a Href="JavaDoc/worldBuilder/Vicinity.html">Vicinity.java</a>.
 
 The overall orchestration of creating a display from all of these
 independent layers is managed by (the largest and most important class in the program)
 <a Href="JavaDoc/worldBuilder/Map.html">Map.java</a>.
+</P>
+<P>
+Many decisions about resource placement or which (exporter) tiles to use to represent a region are
+based on MeshPoint (or tile) based bidding rules.  The base class for these rules (used for
+Mineral and Flora placement) is 
+<a Href="JavaDoc/worldBuilder/ResourceRule.html">ResourceRule.java</a>,
+which can be extended by exporter-specific sub-classes like
+<a Href="JavaDoc/worldBuilder/RPGMRule.html">RPGMRule.java</a> and
+<a Href="JavaDoc/worldBuilder/OverlayRule.html">OverlayRule.java</a>.
 </P>
 <P>
 All Exporters implement a 
@@ -141,14 +152,13 @@ output-format-specific implementations.
 	<a Href="JavaDoc/worldBuilder/RawExport.html">RawExport.java</a>
 	and 
 	<a Href="JavaDoc/worldBuilder/JsonExporter.html">JsonExporter.java</a>,
-	simply create a collection of per-point attribute descriptions.
+	simply write (and read) a collection of per-point attribute descriptions.
 	</li>
 
 	<li> More interesting is
 	<a Href="JavaDoc/worldBuilder/RPGMexport.html">RPGMexport.java</a>,
 	which uses tile placement rules (managed by
-	<a Href="JavaDoc/worldBuilder/TileRule.html">TileRule.java</a> and
-	<a Href="JavaDoc/worldBuilder/TileRules.html">TileRules.java</a>)
+	<a Href="JavaDoc/worldBuilder/RPGMRule.html">RPGMRule.java</a>)
 	to drive a very <em>RPG-Maker</em>-savvy
 	<a Href="JavaDoc/worldBuilder/RPGMTiler.html">RPGMTiler.java</a>
 	to reproduce the map in tiles, and cause the (<em>RPG Maker map</em>) output to be written by
@@ -169,9 +179,10 @@ output-format-specific implementations.
 	examine the topography and choose hill/mountain tiles, and then 
 	outputs a simple json description of per-tile altitudes
 	and water depth, followed by a list of larger (e.g. hill/mountain) tiles
+	(chosen by
+	<a Href="JavaDoc/worldBuilder/OverlayRule.html">OverlayRule.java</a>)
 	to be overlayed on that simple map.
 	</li>
-	
 </ul>
 </P>
 <P>
@@ -189,8 +200,12 @@ interactive dialogs in one of the sub-dialog managers:
    <li> <a Href="JavaDoc/worldBuilder/RainDialog.html">RainDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/RegionDialog.html">RegionDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/RiverDialog.html">RiverDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/MineralDialog.html">MineralDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/FloraDialog.html">FloraDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/FaunaDialog.html">FaunaDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/PointDebug.html">PointDebug.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/SlopeDialog.html">SlopeDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/POIDialog.html">POIDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/ZoomDialog.html">ZoomDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/RuleDebug.html">RuleDebug.java</a>.</li>
 </ul>
@@ -205,9 +220,10 @@ for each <em>MeshPoint</em>) and calling <em>set</em> functions
 in the <em>Map</em> class.
 </P>
 <P>
-The most complex module is probably the 
-<a Href="JavaDoc/worldBuilder/Hydrology.html">Hydrology</a> class,
-which uses rainfall and topology to compute water flow, erosion, 
+The most complex modules are probably the 
+<a Href="JavaDoc/worldBuilder/Drainage.html">Drainage</a> and
+<a Href="JavaDoc/worldBuilder/WaterFlow.html">WaterFlow</a> classes,
+which use rainfall and topology to compute water flow, erosion, 
 deposition, and lake boundaries.
 </P>
 <P>
@@ -217,9 +233,6 @@ implemented by
 <br>
 When a map is read in (or written out), this is done by
 <a Href="JavaDoc/worldBuilder/Map.html">Map.java</a>.
-<br> 
-<em>RPG Maker</em> tile placement rules are read in by 
-<a Href="JavaDoc/worldBuilder/TileRules.html">TileRules.java</a>.
 </P>
 
 <a name="drilldowns">
@@ -308,16 +321,21 @@ attributes are stored in series of parallel arrays:
 <ul>
 	<li><tt>heightMap</tt> stores the altitude (in -0.5 to +0.5 map coordinates) 
 	     of each <em>MeshPoint</em></li>
-	<li><tt>soilMap</tt> stores the mineral type (sedimentary, metamorphic, igneous, alluvial)
+	<li><tt>waterLevel</tt> stores the altitude (in -0.5 to +0.5 map coordinates) 
+	     of the nearest water level to each <em>MeshPoint</em></li>
+	<li><tt>soilMap</tt> stores the soil and mineral types
+	     (sedimentary, metamorphic, igneous, alluvial, iron, copper, precious, ...)
 	     of each <em>MeshPoint</em></li>
 	<li><tt>rainMap</tt> stores the annual rainfal (in cm)
 	     for each <em>MeshPoint</em></li>
-	<li><tt>hydrationMap</tt> stores the depth (in meters) of water
-	     on top of  each <em>MeshPoint</em></li>
 	<li><tt>fluxMap</tt> stores the flow of water (in cubic meters/year) 
 	     into each <em>MeshPoint</em></li>
 	<li><tt>erodeMap</tt> stores the net (negative) erosion or (positive) sedimentation
 	     of each <em>MeshPoint</em></li>
+	<li><tt>floraMap</tt> stores a flora <em>ecotope</em> class
+	     for each <em>MeshPoint</em></li>
+	<li><tt>faunaMap</tt> stores a dominant animal (including birds and fish) class
+	     for each <em>MeshPoint</em></li>
 </ul>
 The attribute editing dialogs load the appropriate attribute maps from the <em>Map</em>
 class, update them according to the user's instructions, and then pass the
@@ -361,10 +379,9 @@ The final class diagram shows the <em>Export</em> related classes.
 </P>
 <H3>Notes on hydrological simulations</H3>
 <P>
-The most important methods in the
-<a Href="JavaDoc/worldBuilder/Hydrology.html">Hydrology</a> class are:
+The classes involved in hydrological simulation are:
 <ul>
-    <li> <em>drainage</em> ... figure out how water would flow between the mesh points:
+    <li> <em>Drainage</em> ... figure out how water would flow between the mesh points:
         <ol type="1">
 	    <li> mark all sub-sea-level points on the edge of the map as oceanic.</li>
 	    <li> determine the most down-hill (steepest) neighbor or each land point.</li>
@@ -377,7 +394,7 @@ The most important methods in the
     </li>
     <P>
     </P>
-    <li> <em>waterFlow</em> ... compute water velocity, erosion, deposition, and lake boundaries:
+    <li> <em>WaterFlow</em> ... compute water velocity, erosion, deposition, and lake boundaries:
         <ol type="1">
 	    <li> compute the incoming rainfall and flow, vs evaporation to determine
 	         whether or not there is net water (flowing or lake) on each point.</li>
@@ -491,32 +508,32 @@ function of altitude).  For these, a better result is obtained
 by using those MeshPoints that define the Voronoi polygon within 
 which the Cartesian point lies.  But, sadly, values inferred
 from the enclosing polygon experience significant discontinuities
-at the polygon boundaries.  I finally decided to:
+at the polygon boundaries.  After considerable frustration I
+decided to:
 <ul>
    <li>Make
        <a Href="JavaDoc/worldBuilder/Vicinity.html">Vicinity</a> a 
        super-class that implements interpolation but does not
        actually decide which the neighboring <em>MeshPoint</em>s are.</li>
    <li>Create a
-       <a Href="JavaDoc/worldBuilder/Proxcimity.html">Proxcimity</a>
-       sub-class that attempts to find the nearest surrounding
-       <em>MeshPoint</em>s to the North-East, North-West, 
-       South-East, and South-West.</li>
-   <li>Create a
        <a Href="JavaDoc/worldBuilder/Polygon.html">Polygon</a>
        sub-class that attempts to enumerate the <em>MeshPoint</em>s
-       that define the enclosing Voronoi polygon.</li>
-   <li>Update the <em>Cartesian</em> constructor to take a final
-       parameter specifying whether the interpolations should be
-       done using a <em>Proxcimity</em> or <em>Polygon</em>
-       <em>Vicinity</em>.
+       that define the enclosing Voronoi polygon ... starting
+       with the nearest.</li>
+   <li>Provide two means of using a <em>Vicinity</em> to 
+       populate a <em>Cartesian</em> map:
+       <ul>
+       	    <li><em>interpolate</em> using the inverse-distance-weighted
+	    	values of all points in the surrounding <em>Polygon</em>.</li>
+	    <li><em>nearestValid</em> using the value of the nearest 
+	        MeshPoint</em>.
+       </ul>
+       The <em>interpolate</em> method works well for relatively continuous
+       attributes like altitude or rainfall.  The <em>nearestValid</em> method
+       is more appropriate for discrete attributes (like mineral and flora
+       classes).
+   </li>
 </ul>
-People who care about the difference (e.g. the <em>Foundation</em>
-exporter which creates high resolution altitude maps) allocate
-two distinct <em>Cartesian</em>s and decide which to use 
-based on the output details being rendered
-(e.g. <em>Polygon</em> for lakes and <em>Proxcimity</em>
-for everything else).
 </P>
 <P>
 The <em>Polygon</em> constructor and <em>nextPoint</em> methods
@@ -576,8 +593,75 @@ unlikely to notice it.  But, in the interests of correctness ...
 
 <H2>Musings</H2>
 <P>
-TO BE CONTINUED
+A reasonable map will be based on thousands of <em>MeshPoint</em>s.
+Computations on those (relatively few) points are simple and efficient
+(thank you Martin O'Leary). But ...
+<ul>
+   <li> creating the (much larger) Cartesian grids for display and export,
+        where many contenders bid on every tile is much more expensive.</li>
+   <li> for reasons having to do with zooming and exports of bordering
+   	regions, I wanted the derivation of sub-maps to be a deterministic
+	function of the MeshPoint attributes ... so that all maps would
+	agree where the hills, creeks (and even trees) were.</li>
+   <li> Chris asked for affinity/antipathy rules to create realistic
+        flora clustering.  I had simiilar thoughts about resources,
+	population, and trade routes.  These would easily add another
+	order of magnitude to those computations, and (to my mind)
+	best have been implemented as multi-generational evolutionary
+	sequences.  A very compelling approach, that would surely
+	yield interesting worlds ... but very expensive.</li>
+</ul>
+A lesson I seem to have learned (from a cruel Hydrological master) is
+that more realistic world simulations add a level of detail that will
+(in most cases) never be noticed when the resulting world is exported
+for use in an RPG.  Would this really justify another few thousand lines of
+code, making the rule-sets even more complicated, and making rendering
+and export even slower?  The answer surely depends on our audience and
+their goals ... which at the moment, are purely hypothetical :-)
 </P>
-
+<P>
+My greatest regret about the current code is the combination of
+complexity and difficulty of testing ... which often results in
+unexpected consequences of seemingly simple changes:
+<ul>
+    <li> a map is comprised of thousands of <em>MeshPoint</em>s,
+   	each of which has a dozen floating-point attributes.</li>
+    <li> any operation on the map (e.g. change of rain-fall or
+	creation of a new ridge) will have complex implications
+	for many attributes of many points.</li>
+    <li>it is not practical to compute or confirm correct values
+	for a few thousand point-attributes.</li>
+    <li>we have always tested new features by
+	performing operations on a few different maps and seeing
+	if the resulting changes "looked right".</li>
+</ul>
+The testing difficulty may be further complicated by the fact that
+all map-editing operations were implmented as part of editing 
+dialogs.  The only way to cause them is through (moving sliders
+and clicking buttons).
+In retrospect, a more reasonable approach would be:
+<ul>
+   <li>	provide APIs for all map-update operations, and update
+        the editing dialogs to call them to translate slider
+	motion and button pushes into map updates.</li>
+   <li> provide CLI options to perform any update or sequence
+        of updates ... a scripting language would probably be
+	useful for many purposes.</li>
+   <li> implement <em>MeshPoint</em> editing test suites as
+   	scripts that start from known input, perform a series
+	of operations, and output an updated set of <em>MeshPoint</em>s
+	and attributes.  Verify correctness of each operation
+	by comparing the output with (manually approved)
+	golden results.</li>
+   <li> implement Export test suites by reading a known map,
+        and doing a file-by-file comparison of the (should
+	be deterministic) output for every tile.
+	A raw JSON export will test the basic Cartesian
+	translation process, and format-specific exports 
+	can exercise the proper representation of all
+	map features.
+	</li>
+</ul>
+</P>
 </body>
 </html>

@@ -52,6 +52,7 @@ public class WorldBuilder  extends JFrame
 	private JMenuItem fileSaveAs;
 	private JMenuItem fileClose;
 	private JMenuItem fileProject;
+	private JMenuItem fileRun;
 	private JMenuItem exportRaw;
 	private JMenuItem exportRpgmOverworld;
 	private JMenuItem exportRpgmOutside;
@@ -167,6 +168,8 @@ public class WorldBuilder  extends JFrame
 		fileClose.addActionListener(this);
 		fileProject = new JMenuItem("Project dir");
 		fileProject.addActionListener(this);
+		fileRun = new JMenuItem("Run (script)");
+		fileRun.addActionListener(this);
 
 		exportRaw = new JMenuItem("Raw JSON");
 		exportRaw.addActionListener(this);
@@ -199,6 +202,7 @@ public class WorldBuilder  extends JFrame
 		fileMenu.add(fileProject);
 		fileMenu.add(fileExport);
 		fileMenu.add( new JSeparator() );
+		fileMenu.add(fileRun);
 		fileMenu.add(fileExit);
 		
 		// create our edit menu
@@ -477,6 +481,19 @@ public class WorldBuilder  extends JFrame
 			if (d.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				parms.project_dir = d.getSelectedFile().getPath();
 				new MapIndex(parms.project_dir);
+			}
+		} else if (o == fileRun) {
+			JFileChooser d = new JFileChooser();
+			d.setDialogTitle("Run Script");
+			d.setCurrentDirectory(new File(parms.world_dir));
+			d.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			if (d.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				filename = d.getSelectedFile().getPath();
+				Script run = new Script(filename);
+				run.process(map);
+				// XXX support exit from a manually run script?
+				//if (ret != Script.DO_NOT_EXIT)
+				// 	System.exit(ret);
 			}
 		} else if (o == exportRaw) {
 			if (activeDialog)

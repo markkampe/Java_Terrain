@@ -76,15 +76,24 @@ public class Script {
 					case "description":
 						parms.description = tokens[2];
 						break;
-					case "size":
-						// FIX parse size (km) and set parms.xy_range
-					case "max_altitude":
-						// FIX parse altitude (m) and set parms.z_range
+					case "author":
+						parms.author_name = tokens[2];
+						break;
+					case "xy_scale":
+						double km = numeric(tokens[2], "km", tokens[1]);
+						parms.xy_range = (int) km;
+						break;
+					case "z_scale":
+						double m = numeric(tokens[2], "m", tokens[1]);
+						parms.z_range = (int) m;
+						break;
 					case "lat":
-						// FIX parse latitude and set parms.latitude
+						double lat = numeric(tokens[2], null, tokens[1]);
+						parms.latitude = lat;
+						break;
 					case "lon":
-						// FIX parse longitude and set parms.longitude
-						System.err.println("set " + tokens[1] + " not yet implemented");
+						double lon = numeric(tokens[2], null, tokens[1]);
+						parms.longitude = lon;
 						break;
 						
 					default:
@@ -188,5 +197,38 @@ public class Script {
 		// null out all remaining tokens
 		while(token < MAX_TOKENS)
 			tokens[token++] = null;
+	}
+	
+	/**
+	 * lex off a numeric value
+	 * @param value	string for the value
+	 * @param unit	expected (optional) unit
+	 * @param attribute name of the attribute (for error messages)
+	 * @return
+	 */
+	private double numeric(String value, String unit, String attribute) {
+		// see if there is a suffix
+		String number = value;
+		String suffix = null;
+		for(int pos = 0; pos < value.length(); pos++) {
+			char c = value.charAt(pos);
+			if (Character.isDigit(c) || c == '.' || c == '-')
+				continue;
+			number = value.substring(0,pos);
+			suffix = value.substring(pos);
+			break;
+		}
+		double retval = 0;
+		try {
+			retval = Double.parseDouble(number);
+		} catch (NumberFormatException e) {
+			System.err.println(attribute + " Non-numeric value: " + number);
+		}
+		
+		// check the suffix
+		if (suffix != null && !suffix.equals(unit))
+			System.err.println(attribute + " Unit Error: got " + suffix + ", expected " + unit);
+	
+		return retval;
 	}
 }

@@ -3,16 +3,17 @@
 #
 
 # input/output
-load "tests/test_world_2.json"
-save "/tmp/test_2.json"
+// load "tests/test_world_2.json"
+// save "/tmp/test_2.json"
 
 # world parameters
-set size 200km
-set max_altitude 2500m
+set xy_scale 250km
+set z_scale 4000m
 set region "None Such"
 set description "Unit Testing Session"
-set lat	38.0
-set lon 120.0
+set author "script_1.wb"
+set lat	38.123
+set lon 120.246
 // set bogus "does not matter"
 // set onlyone
 // set

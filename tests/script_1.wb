@@ -14,14 +14,21 @@ set description "Unit Testing Session"
 set author "script_1.wb"
 set lat	38.123
 set lon 120.246
-// set bogus "does not matter"
-// set onlyone
-// set
+// set bogus "does not matter"	(ERROR: unknown attribute)
+// set onlyone			(ERROR: no value)
+// set				(ERROR: no attribute or value)
 
 # vertical adjustments
+sealevel	-100m
+// sealevel	0.001	(Z value rather than meters)
+// sealevel	2km	(ERROR: illegal value)
+// sealevel		(ERROR: missing argument)
+
 slope   	0.0025	-20
 mountain	<x1,y1>-<x2,y2>, 1250m
 canyon		<x1,y1>-<x2,y2>, -200m
+
+repaint
 
 # resource placement
 river		<x1,y1> 200m3/s

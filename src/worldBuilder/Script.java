@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class Script {
+	private Parameters parms;	// configuration singleton
 	private BufferedReader r;	// open file being processed
 	private String filename;	// name of script being processed
 	private int lineNum;		// line number being processed
@@ -32,7 +33,7 @@ public class Script {
 	 * @return anything other than DO_NOT_EXIT is an exit code
 	 */
 	public int process(Map map) {
-		Parameters parms = Parameters.getInstance();
+		parms = Parameters.getInstance();
 
 		tokens = new String[MAX_TOKENS];
 		lineNum = 0;
@@ -80,22 +81,22 @@ public class Script {
 						parms.author_name = tokens[2];
 						break;
 					case "xy_scale":
-						double km = numeric(tokens[2], "km", tokens[1]);
+						double km = num_w_unit(tokens[2], "km", tokens[1]);
 						parms.xy_range = (int) km;
 						break;
 					case "z_scale":
-						double m = numeric(tokens[2], "m", tokens[1]);
+						double m = num_w_unit(tokens[2], "m", tokens[1]);
 						parms.z_range = (int) m;
 						break;
 					case "lat":
-						double lat = numeric(tokens[2], null, tokens[1]);
+						double lat = num_w_unit(tokens[2], null, tokens[1]);
 						parms.latitude = lat;
 						break;
 					case "lon":
-						double lon = numeric(tokens[2], null, tokens[1]);
+						double lon = num_w_unit(tokens[2], null, tokens[1]);
 						parms.longitude = lon;
 						break;
-						
+
 					default:
 						System.err.println("set of unrecognized parameter: " + tokens[1]);
 						break;
@@ -116,6 +117,13 @@ public class Script {
 					map.write(tokens[1]);
 				break;
 
+			case "sealevel":	// set the sea level
+				if (tokens[1] == null)
+					System.err.println(String.format("Error: %s[%d] %s - s.b. sealevel z/height", filename, lineNum, line));
+				else
+					parms.sea_level = z_value(tokens[1], tokens[0]);
+				break;
+					
 			case "slope":
 			case "mountain":
 			case "canyon":
@@ -198,15 +206,47 @@ public class Script {
 		while(token < MAX_TOKENS)
 			tokens[token++] = null;
 	}
-	
+
 	/**
-	 * lex off a numeric value
-	 * @param value	string for the value
-	 * @param unit	expected (optional) unit
-	 * @param attribute name of the attribute (for error messages)
+	 * lex off a numeric value with an optional unit
+	 * @param value	string to be lexed
+	 * @param unit	expected (optional) unit string
+	 * @param attribute name (for error messages)
 	 * @return
 	 */
-	private double numeric(String value, String unit, String attribute) {
+	private double num_w_unit(String value, String unit, String attribute) {
+		// see if there is a suffix
+		String number = value;
+		String suffix = null;
+		for(int pos = 0; pos < value.length(); pos++) {
+			char c = value.charAt(pos);
+			if (Character.isDigit(c) || c == '.' || c == '-')
+				continue;
+			number = value.substring(0,pos);
+			suffix = value.substring(pos);
+			break;
+		}
+		double retval = 0;
+		try {
+			retval = Double.parseDouble(number);
+		} catch (NumberFormatException e) {
+			System.err.println(attribute + " Non-numeric value: " + number);
+		}
+
+		// check the suffix
+		if (suffix != null && !suffix.equals(unit))
+			System.err.println(attribute + " Unit Error: got " + suffix + ", expected " + unit);
+
+		return retval;
+	}
+
+	/**
+	 * lex off a numeric value that might be in Z units or meters
+	 * @param value string to be lexed
+	 * @param attribute name for error messages
+	 * @return
+	 */
+	private double z_value(String value, String attribute) {
 		// see if there is a suffix
 		String number = value;
 		String suffix = null;
@@ -225,10 +265,16 @@ public class Script {
 			System.err.println(attribute + " Non-numeric value: " + number);
 		}
 		
-		// check the suffix
-		if (suffix != null && !suffix.equals(unit))
-			System.err.println(attribute + " Unit Error: got " + suffix + ", expected " + unit);
-	
-		return retval;
+		// no suffix ... it is already a Z value
+		if (suffix == null)
+			return retval;
+
+		// in meters ... convert to Z value
+		if (suffix.equals("m"))
+			return parms.z(retval);
+		
+		// unrecognized unit
+		System.err.println(attribute + " Unit Error: got: " + suffix + ", expected: m");
+		return(0);
 	}
 }

@@ -66,6 +66,15 @@ public class Script {
 
 			// process the command
 			switch(tokens[0]) {
+			case "sleep":
+				int seconds = (tokens[1] == null) ? 5 : (int) num_w_unit(tokens[1], "s", "sleep");
+				try {
+					Thread.sleep(seconds * 1000);
+				} catch (InterruptedException e) {
+					// no difference
+				}
+				break;
+				
 			case "set":
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] %s - s.b. set parameter value", filename, lineNum, line));
@@ -122,6 +131,16 @@ public class Script {
 					System.err.println(String.format("Error: %s[%d] %s - s.b. sealevel z/height", filename, lineNum, line));
 				else
 					parms.sea_level = z_value(tokens[1], tokens[0]);
+				break;
+				
+			case "display":		// update the display
+				if (tokens[1] != null) {
+					map.display = 0;
+					map.setDisplay(displayOptions(tokens[1]), true);
+				} else {
+					map.repaint();
+				}
+				
 				break;
 					
 			case "slope":
@@ -276,5 +295,40 @@ public class Script {
 		// unrecognized unit
 		System.err.println(attribute + " Unit Error: got: " + suffix + ", expected: m");
 		return(0);
+	}
+	
+	/**
+	 * turn letters into Map display options
+	 * 
+	 * @param list string of display options
+	 */
+	private int displayOptions(String list) {
+		int options = 0;
+		for(int i = 0; i < list.length(); i++) {
+			switch(list.charAt(i)) {
+			case 't': case 'T':
+				options |= Map.SHOW_TOPO;
+				break;
+			case 'r': case 'R':
+				options |= Map.SHOW_RAIN;
+				break;
+			case 'w': case 'W':
+				options |= Map.SHOW_WATER;
+				break;
+			case 'e': case 'E':
+				options |= Map.SHOW_ERODE;
+				break;
+			case 'm': case 'M':
+				options |= Map.SHOW_ROCKS;
+				break;
+			case 'f': case 'F':
+				options |= Map.SHOW_FLORA;
+				break;
+			case 'a': case 'A':
+				options |= Map.SHOW_FAUNA;
+				break;
+			}
+		}
+		return options;
 	}
 }

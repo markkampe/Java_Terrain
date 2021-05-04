@@ -27,6 +27,21 @@ public class Script {
 	}
 
 	/**
+	 * XY_positions are the (-0.5-0.5) coordiantes of a point
+	 */
+	private class XY_pos {
+		public double x;	// starting x coordinate (map units)
+		public double y; 	// starting y coordinate (map units)
+		public double x2;	// Ending x coordinate (map units)
+		public double y2;	// Ending y coordinate (map units)
+		
+		public XY_pos(double x, double y) {
+			this.x = x;
+			this.y = y;
+		}
+	};
+	
+	/**
 	 * process this script
 	 * @param map current Map
 	 * 
@@ -77,7 +92,7 @@ public class Script {
 				
 			case "set":
 				if (tokens[1] == null || tokens[2] == null)
-					System.err.println(String.format("Error: %s[%d] %s - s.b. set parameter value", filename, lineNum, line));
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. set parameter value", filename, lineNum, line));
 				else
 					switch(tokens[1]) {
 					case "region":
@@ -114,21 +129,21 @@ public class Script {
 
 			case "load":	// load the specified map
 				if (tokens[1] == null)
-					System.err.println(String.format("Error: %s[%d] %s - s.b. load filename", filename, lineNum, line));
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. load filename", filename, lineNum, line));
 				else
 					map.read(tokens[1]);
 				break;
 
 			case "save":	// save map to specified file
 				if (tokens[1] == null)
-					System.err.println(String.format("Error: %s[%d] %s - s.b. save filename", filename, lineNum, line));
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. save filename", filename, lineNum, line));
 				else
 					map.write(tokens[1]);
 				break;
 
 			case "sealevel":	// set the sea level
 				if (tokens[1] == null)
-					System.err.println(String.format("Error: %s[%d] %s - s.b. sealevel z/height", filename, lineNum, line));
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. sealevel z/height", filename, lineNum, line));
 				else
 					parms.sea_level = z_value(tokens[1], tokens[0]);
 				break;
@@ -140,19 +155,85 @@ public class Script {
 				} else {
 					map.repaint();
 				}
-				
 				break;
 					
 			case "slope":
+				if (tokens[1] == null || tokens[2] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. slope angle fraction", filename, lineNum, line));
+				else {
+					int axis = (int) num_w_unit(tokens[1], null, "slope axis");
+					double slope = num_w_unit(tokens[2], null, "slope (dz/dx)");
+					System.out.println("slope: axis=" + axis + ", dz/dx=" + slope);	// FIX implement Vertical.slope()
+				}
+				break;
+				
+			case "river":
+				if (tokens[1] == null || tokens[2] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. river <x,y> #m3/s", filename, lineNum, line));
+				else {
+					XY_pos xy = position(tokens[1], "river entry point");
+					double flow = num_w_unit(tokens[2], "m3/s", "River flow");
+					System.out.println("River: loc=<" + xy.x +"," + xy.y + ">, flux=" + flow);	// FIX place river
+				}
+				break;
+				
+			case "rainfall":
+				if (tokens[1] == null || tokens[2] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. rainfall <x,y> #cm/y", filename, lineNum, line));
+				else {
+					XY_pos xy = position(tokens[1], "Rainfall region");
+					double rain = num_w_unit(tokens[2], "cm/y", "Annual Rainfall");
+					System.out.println("RainFall: loc=<" + xy.x + "," + xy.y + ">-<" +
+									   xy.x2 + "," + xy.y2 + ">, flux=" + rain);	// FIX place rain
+				}
+				break;
 			case "mountain":
 			case "canyon":
-			case "river":
-			case "rainfall":
-			case "minerals":
-			case "flora":
-			case "fauna":
-			case "PoI":
 				System.err.println(tokens[0] + " command not yet implemented");
+				break;
+				
+			case "minerals":
+				if (tokens[1] == null || tokens[2] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. minerals <x,y> type", filename, lineNum, line));
+				else {
+					XY_pos xy = position(tokens[1], "mineral region");
+					String type = tokens[2];
+					System.out.println("Minerals: loc=<" + xy.x + "," + xy.y + ">-<" +
+									   xy.x2 + "," + xy.y2 + ">, type=" + type);	// FIX place minerals
+				}
+				break;
+				
+			case "flora":
+				if (tokens[1] == null || tokens[2] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. flora <x,y> type", filename, lineNum, line));
+				else {
+					XY_pos xy = position(tokens[1], "flora region");
+					String type = tokens[2];
+					System.out.println("Flora: loc=<" + xy.x + "," + xy.y + ">-<" +
+									   xy.x2 + "," + xy.y2 + ">, type=" + type);	// FIX place flora
+				}
+				break;
+				
+			case "fauna":
+				if (tokens[1] == null || tokens[2] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. fauna <x,y> type", filename, lineNum, line));
+				else {
+					XY_pos xy = position(tokens[1], "fauna region");
+					String type = tokens[2];
+					System.out.println("Fauna: loc=<" + xy.x + "," + xy.y + ">-<" +
+									   xy.x2 + "," + xy.y2 + ">, type=" + type);	// FIX place fauna
+				}
+				break;
+				
+			case "PoI":
+				if (tokens[1] == null || tokens[2] == null || tokens[3] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. PoI <x,y> type name", filename, lineNum, line));
+				else {
+					XY_pos xy = position(tokens[1], "POI location");
+					String type = tokens[2];
+					String name = tokens[3];
+					System.out.println("POI: loc=<" + xy.x + "," + xy.y + ">, type=" + type + ", name=" + name);	// FIX place PoI
+				}
 				break;
 
 			case "exit":	// optional exit code argument
@@ -295,6 +376,63 @@ public class Script {
 		// unrecognized unit
 		System.err.println(attribute + " Unit Error: got: " + suffix + ", expected: m");
 		return(0);
+	}
+	
+	/**
+	 * lex x/y coordinates
+	 * @param string of the form <x,y> or <x,y>-<x,y>
+	 * @param attribute being read (for error messages)
+	 * @return XY_pos
+	 */
+	private XY_pos position(String string, String attribute) {
+		// figure out where the <> delimiters are
+		if (string.charAt(0) != '<') {
+			System.err.println(attribute + " position: does not begin with '<'");
+			return new XY_pos(0, 0);
+		}
+		int comma = string.indexOf(',', 1);
+		int end = string.indexOf('>', 1);
+		if (end < 4 || comma < 2 || comma > end) {
+			System.err.println(attribute + " position: not of the form '<x,y>'");
+			return new XY_pos(0, 0);
+		}
+		String x1 = string.substring(1,comma);
+		String y1 = string.substring(comma+1,end);
+		XY_pos pos = null;
+		try {
+			double x = Double.parseDouble(x1);
+			double y = Double.parseDouble(y1);
+			pos = new XY_pos(x, y);
+		} catch (NumberFormatException e) {
+			System.err.println(attribute + " position: \"<" + x1 + "," + y1 + ">\": non-numeric x/y");
+			return new XY_pos(0, 0);
+		}
+		
+		// see if there is a second position
+		pos.x2 = -1;
+		pos.y2 = -1;
+		if (string.length() == end+1)
+			return pos;
+		
+		// second < should be two bytes past the first >
+		int start2 = end + 2;
+		comma = string.indexOf(',', start2);
+		end = string.indexOf('>', start2);
+		if (string.length() < start2 + 5 || comma < 0 || end < 0 ||
+				string.charAt(start2 - 1) != '-' || string.length() < start2 + 1 ||
+				string.charAt(start2) != '<' || end < start2+4 || 
+				comma < start2 + 2 || comma > end) {
+			System.err.println(attribute + " positions: \"" + string + "\": not of the form <x1,y1>-<x2,y2>");
+			return pos;
+		}
+		try {
+			pos.x2 = Double.parseDouble(string.substring(start2+1, comma));
+			pos.y2 = Double.parseDouble(string.substring(comma+1, end));
+		} catch (NumberFormatException e) {
+			System.err.println(attribute + " position2: \"" + string.substring(start2) + "\": non-numeric x/y");
+		}
+		
+		return pos;
 	}
 	
 	/**

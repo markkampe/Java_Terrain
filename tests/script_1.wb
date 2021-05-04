@@ -20,24 +20,44 @@ set lon 120.246
 // set onlyone			(ERROR: no value)
 // set				(ERROR: no attribute or value)
 
-# vertical adjustments
+# land adjustments
 sealevel	-100m
 // sealevel	0.001	(Z value rather than meters)
 // sealevel	2km	(ERROR: illegal value)
 // sealevel		(ERROR: missing argument)
 
-slope   	0.0025	-20
+slope   	-20 0.0025
+// slope	0	(ERROR, missing argument)
+// slope		(EROR, missing arguments)
+
 mountain	<x1,y1>-<x2,y2>, 1250m
 canyon		<x1,y1>-<x2,y2>, -200m
 
-# resource placement
-river		<x1,y1> 200m3/s
-rainfall	<x1,y1> <x2,y2>	100cm/y
-minerals	<x1,y1> <x2,y2>	Iron
-flora		<x1,y1> <x2,y2>	Riperian
-fauna		<x1,y1> <x2,y2> Fish
+river		<0.1,0.2> 200m3/s
+river		<0.3,0.4> 100
+// river	<x1,y1>		(ERROR, missing argument)
+// river	<0.5,0.6> 300X	(ERROR, incorrect unit)
+// river	<x1,y1>, 400m3/s (ERROR, non-numeric values)
+// river	<0.5>, 0	(ERROR, missing y-value)
+
+rainfall	<-0.5,-0.5>-<0.5,0.5>	100cm/y
+rainfall	<-0.25,-0.25>-<0.25,0.25> 200
+// rainfall	<0,0>			(ERROR, missing argument)
+// rainfall	<0,0><1,1>	0	(ERROR, missing dash)
+// rainfall	<0,0>-		0	(ERROR, no second position)
+// rainfall	<0,0>-<		0	(ERROR, unclosed pair>
+// rainfall	<0,0>-<>	0	(ERROR, no contents)
+// rainfall	<0,0>-<,>	0	(ERROR, no contents)
+// rainfall	<0,0>-<1,>	0	(ERROR, missing Y)
+// rainfall	<0,0>-<1>	0	(ERROR, missing Y)
+// rainfall	<0,0>-<1,y>	0	(ERROR, non-numeric values)
+
+minerals	<-0.1,-0.1>-<0.1,0.1>	Iron
+flora		<-0.2,-0.2>-<0.2,0.2>	Riperian
+fauna		<-0.3,-0.3>-<0.3,0.3>	Fish
 
 # points of interest
-PoI		<x1,y1>	ENTRY "Plymouth Harbor"
+PoI		<-0.1,-0.1>	ENTRY "Plymouth Harbor"
+PoI		<0.1,-0.1>	EXIT "Plymouth Gate"
 
 exit	-1

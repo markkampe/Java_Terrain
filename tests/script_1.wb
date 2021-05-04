@@ -4,6 +4,8 @@
 
 # input/output
 // load "tests/test_world_2.json"
+// display TW			// Topo lines and Water
+// sleep 10s			// pause to look at the map
 // save "/tmp/test_2.json"
 
 # world parameters
@@ -27,8 +29,6 @@ sealevel	-100m
 slope   	0.0025	-20
 mountain	<x1,y1>-<x2,y2>, 1250m
 canyon		<x1,y1>-<x2,y2>, -200m
-
-repaint
 
 # resource placement
 river		<x1,y1> 200m3/s

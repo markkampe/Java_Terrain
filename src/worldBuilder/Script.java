@@ -50,6 +50,7 @@ public class Script {
 	public int process(Map map) {
 		parms = Parameters.getInstance();
 		TerrainEngine t = new TerrainEngine(map);
+		AttributeEngine a = new AttributeEngine(map);
 
 		tokens = new String[MAX_TOKENS];
 		lineNum = 0;
@@ -185,8 +186,8 @@ public class Script {
 				else {
 					XY_pos xy = position(tokens[1], "Rainfall region");
 					double rain = num_w_unit(tokens[2], "cm/y", "Annual Rainfall");
-					System.out.println("RainFall: loc=<" + xy.x + "," + xy.y + ">-<" +
-									   xy.x2 + "," + xy.y2 + ">, flux=" + rain);	// FIX place rain
+					a.setRegion(xy.x, xy.y, xy.x2, xy.y2, AttributeEngine.WhichMap.RAIN, rain);
+					a.commit();
 				}
 				break;
 			case "mountain":

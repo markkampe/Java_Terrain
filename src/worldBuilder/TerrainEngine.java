@@ -56,7 +56,7 @@ public class TerrainEngine {
 		Mesh m = map.getMesh();
 		
 		// note sea level
-		double Zsealevel = parms.sea_level;
+		double Zsealevel = map.getSeaLevel();
 		above = 0;
 		below = 0;
 

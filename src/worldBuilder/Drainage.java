@@ -13,6 +13,7 @@ public class Drainage {
 	// maps that we import/export from/to Map
 	private double heightMap[];		// Z value of each MeshPoint (from Map)
 	private double erodeMap[];		// Z erosion of each MeshPoint (from Map)
+	private double sea_level;		// Z value of sea level
 	
 	
 	// per Meshpoint maps we create for use by WaterFlow
@@ -49,7 +50,7 @@ public class Drainage {
 		// follow the chain of neighbors til we go above sea-level
 		for(int i = 0; i < mesh.vertices[point_index].neighbors; i++) {
 			int x = mesh.vertices[point_index].neighbor[i].index;
-			if (heightMap[x] <= parms.sea_level && !oceanic[x])
+			if (heightMap[x] <= sea_level && !oceanic[x])
 				mark_as_oceanic(x);
 		}
 	}
@@ -65,6 +66,7 @@ public class Drainage {
 		this.mesh = map.getMesh();
 		this.heightMap = map.getHeightMap();
 		this.erodeMap = map.getErodeMap();
+		this.sea_level = map.getSeaLevel();
 		
 		// make sure we have heights to work with
 		if (mesh == null || mesh.vertices.length == 0 || heightMap == null)
@@ -120,7 +122,7 @@ public class Drainage {
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			if (oceanic[i])		// already known to be oceanic
 				continue;
-			if (heightMap[i] < parms.sea_level && mesh.vertices[i].neighbors < 3)
+			if (heightMap[i] < sea_level && mesh.vertices[i].neighbors < 3)
 				mark_as_oceanic(i);		// recurses for all sub-sea-level neighbors
 		}
 		for(int i = 0; i < mesh.vertices.length; i++)

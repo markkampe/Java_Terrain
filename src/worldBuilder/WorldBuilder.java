@@ -461,7 +461,7 @@ public class WorldBuilder  extends JFrame
 					parms.world_dir = dir;
 				
 				// newly loaded map may have changed the sea-level
-				seaLevel.setValue((int)(parms.sea_level * parms.z_range));
+				seaLevel.setValue((int)(map.getSeaLevel() * parms.z_range));
 				modified = false;
 			}
 		} else if (o == fileSave) {
@@ -670,8 +670,7 @@ public class WorldBuilder  extends JFrame
 	public void stateChanged(ChangeEvent e) {
 		Object o = e.getSource();
 		if (o == seaLevel) {
-			parms.sea_level = ((double) seaLevel.getValue()) / parms.z_range;
-			map.setSeaLevel();
+			map.setSeaLevel(((double) seaLevel.getValue()) / parms.z_range);
 		}
 	}
 	

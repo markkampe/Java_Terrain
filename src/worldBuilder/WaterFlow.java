@@ -80,6 +80,7 @@ public class WaterFlow {
 		double[] rainMap = map.getRainMap();
 		double[] incoming = map.getIncoming();
 		double[] soilMap = map.getSoilMap();
+		double sea_level = map.getSeaLevel();
 		fluxMap = map.getFluxMap();
 		
 		// allocate our internal maps
@@ -94,7 +95,7 @@ public class WaterFlow {
 			removal[i] = 0.0;
 			suspended[i] = 0.0;
 			velocityMap[i] = 0.0;
-			waterLevel[i] = drainage.oceanic[i] ? parms.sea_level : UNKNOWN;
+			waterLevel[i] = drainage.oceanic[i] ? sea_level : UNKNOWN;
 		}
 		
 		// if no incoming rivers or rain, we are done

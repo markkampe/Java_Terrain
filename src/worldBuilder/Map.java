@@ -748,12 +748,21 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	
 	/**
 	 * record a change in sea level
+	 * @param z_value new sea level
 	 */
-	public void setSeaLevel() {
+	public void setSeaLevel(double z_value) {
+		parms.sea_level = z_value;
 		drainage.recompute();
 		waterflow.recompute();
 		tileDepth = null;
 		repaint();
+	}
+	
+	/**
+	 * return the current sea level Z-value
+	 */
+	public double getSeaLevel() {
+		return parms.sea_level;
 	}
 	
 	/**

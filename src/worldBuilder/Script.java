@@ -149,7 +149,7 @@ public class Script {
 				if (tokens[1] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. sealevel z/height", filename, lineNum, line));
 				else
-					parms.sea_level = z_value(tokens[1], tokens[0]);
+					map.setSeaLevel(z_value(tokens[1], tokens[0]));
 				break;
 				
 			case "display":		// display-options

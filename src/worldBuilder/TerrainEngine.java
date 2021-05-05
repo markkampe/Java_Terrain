@@ -65,7 +65,7 @@ public class TerrainEngine {
 	 */
 	public boolean abort() {
 		// fall back to the last committed map
-		map.setHeightMap(thisHeight);
+		map.setHeightMap(prevHeight);
 		return true;
 	}
 }

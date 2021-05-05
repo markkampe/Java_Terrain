@@ -16,29 +16,18 @@ set description "Unit Testing Session"
 set author "script_1.wb"
 set lat	38.123
 set lon 120.246
-// set bogus "does not matter"	(ERROR: unknown attribute)
-// set onlyone			(ERROR: no value)
-// set				(ERROR: no attribute or value)
 
 # land adjustments
 sealevel	-100m
-// sealevel	0.001	(Z value rather than meters)
-// sealevel	2km	(ERROR: illegal value)
-// sealevel		(ERROR: missing argument)
+sealevel	0.001	(Z value rather than meters)
 
 slope   	-20 0.0025
-// slope	0	(ERROR, missing argument)
-// slope		(EROR, missing arguments)
 
 mountain	<x1,y1>-<x2,y2>, 1250m
 canyon		<x1,y1>-<x2,y2>, -200m
 
 river		<0.1,0.2> 200m3/s
 river		<0.3,0.4> 100
-// river	<x1,y1>		(ERROR, missing argument)
-// river	<0.5,0.6> 300X	(ERROR, incorrect unit)
-// river	<x1,y1>, 400m3/s (ERROR, non-numeric values)
-// river	<0.5>, 0	(ERROR, missing y-value)
 
 # stripes of rainfall
 rainfall	<-0.5,-0.5>-<0.5,-0.4>	50
@@ -46,26 +35,73 @@ rainfall	<-0.5,-0.4>-<0.5,-0.3>	100
 rainfall	<-0.5,-0.3>-<0.5,-0.2>	200cm/y
 rainfall	<-0.5,-0.2>-<0.5,-0.1>	300cm/y
 rainfall	<-0.5,-0.1>-<0.5,-0.0>	400cm/y
+//display	TR
+//sleep 5
 
-display	TR
-sleep 5
+# squares of stone
+minerals	<-0.5,-0.1>-<-0.4,-0.0>	"Alluvial"
+minerals	<-0.4,-0.1>-<-0.3,-0.0>	"Sand Stone"
+minerals	<-0.3,-0.1>-<-0.2,-0.0>	"Granite"
+minerals	<-0.2,-0.1>-<-0.1,-0.0>	"Basalt"
+minerals	<-0.1,-0.1>-<-0.0,-0.0>	"Lime Stone"
+minerals	<0.0,-0.1>-<0.1,-0.0>	"Marble"
+minerals	<0.1,-0.1>-<0.2,-0.0>	"Copper Ore"
+minerals	<0.2,-0.1>-<0.3,-0.0>	"Iron Ore"
+minerals	<0.3,-0.1>-<0.4,-0.0>	"Silver"
+minerals	<0.4,-0.1>-<0.5,-0.0>	"Gold"
+//display TM
+//sleep 5
 
-// rainfall	<0,0>			(ERROR, missing argument)
-// rainfall	<0,0><1,1>	0	(ERROR, missing dash)
-// rainfall	<0,0>-		0	(ERROR, no second position)
-// rainfall	<0,0>-<		0	(ERROR, unclosed pair>
-// rainfall	<0,0>-<>	0	(ERROR, no contents)
-// rainfall	<0,0>-<,>	0	(ERROR, no contents)
-// rainfall	<0,0>-<1,>	0	(ERROR, missing Y)
-// rainfall	<0,0>-<1>	0	(ERROR, missing Y)
-// rainfall	<0,0>-<1,y>	0	(ERROR, non-numeric values)
+# squares of floral ecotopes
+flora	<-0.5,-0.0>-<-0.4,0.1>	"Alpine"
+flora	<-0.4,-0.0>-<-0.3,0.1>	"Desert"
+flora	<-0.3,-0.0>-<-0.2,0.1>	"Grassland"
+flora	<-0.2,-0.0>-<-0.1,0.1>	"Brush"
+flora	<-0.1,0.0>-<0.0,0.1>	"Marsh"
+flora	<0.0,-0.0>-<0.1,0.1>	"Riperian"
+flora	<0.1,-0.0>-<0.2,0.1>	"Palms"
+flora	<0.2,-0.0>-<0.3,0.1>	"Jungle"
+flora	<0.3,-0.0>-<0.4,0.1>	"Broadleaf"
+flora	<0.4,-0.0>-<0.5,0.1>	"Conifers"
+//display TF
+//sleep 5
 
-minerals	<-0.1,-0.1>-<0.1,0.1>	Iron
-flora		<-0.2,-0.2>-<0.2,0.2>	Riperian
-fauna		<-0.3,-0.3>-<0.3,0.3>	Fish
+# squares of fauna types
+fauna	<-0.5,0.1>-<-0.4,0.2>	"Fish"
+fauna	<-0.4,0.1>-<-0.3,0.2>	"Birds"
+fauna	<-0.3,0.1>-<-0.2,0.2>	"Rabbits"
+fauna	<-0.2,0.1>-<-0.1,0.2>	"Foxes"
+fauna	<-0.1,0.1>-<0.0,0.2>	"Deer"
+fauna	<-0.1,0.0>-<0.1,0.2>	"Bear"
+//display TA
+//sleep 5
 
 # points of interest
 PoI		<-0.1,-0.1>	ENTRY "Plymouth Harbor"
 PoI		<0.1,-0.1>	EXIT "Plymouth Gate"
 
+# comment out to exercise the error cases
 exit	-1
+
+# test cases to generate lexing errors
+set bogus "does not matter"		// ERROR: unknown attribute
+set onlyone				// ERROR: no value
+set					// ERROR: no attribute or value
+sealevel	2km			// ERROR: illegal value
+sealevel				// ERROR: missing argument
+rainfall	<0,0>			// ERROR: missing argument
+rainfall	<0,0><1,1>	0	// ERROR: missing dash
+rainfall	<0,0>-		0	// ERROR: no second position
+rainfall	<0,0>-<		0	// ERROR: unclosed pair
+rainfall	<0,0>-<>	0	// ERROR: no contents
+rainfall	<0,0>-<,>	0	// ERROR: no contents
+rainfall	<0,0>-<1,>	0	// ERROR: missing Y
+rainfall	<0,0>-<1>	0	// ERROR: missing Y
+rainfall	<0,0>-<1,y>	0	// ERROR: non-numeric values
+river	<x1,y1>			// ERROR: missing argument
+river	<0.5,0.6> 300X		// ERROR: incorrect unit
+river	<x1,y1>, 400m3/s 	// ERROR: non-numeric values)
+river	<0.5>, 0		// ERROR: missing y-value)
+slope	0			// ERROR: missing argument)
+slope				// ERROR: missing arguments)
+

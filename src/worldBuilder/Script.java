@@ -83,7 +83,7 @@ public class Script {
 
 			// process the command
 			switch(tokens[0]) {
-			case "sleep":
+			case "sleep":	// seconds
 				int seconds = (tokens[1] == null) ? 5 : (int) num_w_unit(tokens[1], "s", "sleep");
 				try {
 					Thread.sleep(seconds * 1000);
@@ -92,7 +92,7 @@ public class Script {
 				}
 				break;
 				
-			case "set":
+			case "set":		// attribute value
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. set parameter value", filename, lineNum, line));
 				else
@@ -129,28 +129,28 @@ public class Script {
 					}
 				break;
 
-			case "load":	// load the specified map
+			case "load":	// filename
 				if (tokens[1] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. load filename", filename, lineNum, line));
 				else
 					map.read(tokens[1]);
 				break;
 
-			case "save":	// save map to specified file
+			case "save":	// filename
 				if (tokens[1] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. save filename", filename, lineNum, line));
 				else
 					map.write(tokens[1]);
 				break;
 
-			case "sealevel":	// set the sea level
+			case "sealevel":	// z-value (or height)
 				if (tokens[1] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. sealevel z/height", filename, lineNum, line));
 				else
 					parms.sea_level = z_value(tokens[1], tokens[0]);
 				break;
 				
-			case "display":		// update the display
+			case "display":		// display-options
 				if (tokens[1] != null) {
 					map.display = 0;
 					map.setDisplay(displayOptions(tokens[1]), true);
@@ -159,7 +159,7 @@ public class Script {
 				}
 				break;
 					
-			case "slope":
+			case "slope":	// angle fraction
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. slope angle fraction", filename, lineNum, line));
 				else {
@@ -170,7 +170,7 @@ public class Script {
 				}
 				break;
 				
-			case "river":
+			case "river":	// <x,y> flow
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. river <x,y> #m3/s", filename, lineNum, line));
 				else {
@@ -180,7 +180,7 @@ public class Script {
 				}
 				break;
 				
-			case "rainfall":
+			case "rainfall":	// <x1,y1>-<x2,y2> rainfall
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. rainfall <x,y> #cm/y", filename, lineNum, line));
 				else {
@@ -190,45 +190,46 @@ public class Script {
 					a.commit();
 				}
 				break;
+				
 			case "mountain":
 			case "canyon":
 				System.err.println(tokens[0] + " command not yet implemented");
 				break;
 				
-			case "minerals":
+			case "minerals":	// <x1,y1>-<x2,y2> type
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. minerals <x,y> type", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "mineral region");
-					String type = tokens[2];
-					System.out.println("Minerals: loc=<" + xy.x + "," + xy.y + ">-<" +
-									   xy.x2 + "," + xy.y2 + ">, type=" + type);	// FIX place minerals
+					double type = map.getSoilType(tokens[2]);
+					a.setRegion(xy.x, xy.y, xy.x2, xy.y2, AttributeEngine.WhichMap.MINERAL, type);
+					a.commit();
 				}
 				break;
 				
-			case "flora":
+			case "flora":	// <x1,y1>-<x2,y2> type
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. flora <x,y> type", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "flora region");
-					String type = tokens[2];
-					System.out.println("Flora: loc=<" + xy.x + "," + xy.y + ">-<" +
-									   xy.x2 + "," + xy.y2 + ">, type=" + type);	// FIX place flora
+					double type = map.getFloraType(tokens[2]);
+					a.setRegion(xy.x, xy.y, xy.x2, xy.y2, AttributeEngine.WhichMap.FLORA, type);
+					a.commit();
 				}
 				break;
 				
-			case "fauna":
+			case "fauna":	// <x1,y1>-<x2,y2> type
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. fauna <x,y> type", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "fauna region");
-					String type = tokens[2];
-					System.out.println("Fauna: loc=<" + xy.x + "," + xy.y + ">-<" +
-									   xy.x2 + "," + xy.y2 + ">, type=" + type);	// FIX place fauna
+					double type = map.getFaunaType(tokens[2]);
+					a.setRegion(xy.x, xy.y, xy.x2, xy.y2, AttributeEngine.WhichMap.FAUNA, type);
+					a.commit();
 				}
 				break;
 				
-			case "PoI":
+			case "PoI":	// <x1,y1>-<x2,y2> type name
 				if (tokens[1] == null || tokens[2] == null || tokens[3] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. PoI <x,y> type name", filename, lineNum, line));
 				else {
@@ -239,7 +240,7 @@ public class Script {
 				}
 				break;
 
-			case "exit":	// optional exit code argument
+			case "exit":	// [optional code]
 				if (parms.debug_level > 0)
 					System.out.println("Processed " + cmdNum + " commands from " + filename + " (and exiting)");
 				if (tokens[1] != null)
@@ -276,6 +277,10 @@ public class Script {
 				in_token = false;
 				continue;
 			}
+			
+			// slash-slash ends a line
+			if (c == '/' && line.charAt(pos+1) == '/' && !in_token)
+				break;
 
 			// closing quotes end a token
 			if (quote == c) {

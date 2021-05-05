@@ -169,10 +169,7 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 				if (x[i] == 0 && y[i] == 0)
 					continue;
 				String name = (String) table.getValueAt(i, COL_NAME);
-				poi_list.add(new POI(type, name, x[i], y[i]));
-				if (parms.debug_level > 0)
-					System.out.println("PoI: " + type + "(" + name + ") at <" +
-							parms.latitude(y[i]) + "," + parms.longitude(x[i]) + ">");
+				map.addPOI(new POI(type, name, x[i], y[i]));
 			}
 		}
 		

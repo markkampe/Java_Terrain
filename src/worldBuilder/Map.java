@@ -950,6 +950,18 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		return poi_list;
 	}
 	
+	/**
+	 * add a POI
+	 * @param point new POI to be added
+	 */
+	public void addPOI(POI point) {
+		poi_list.add(point);
+		if (parms.debug_level > 0)
+			System.out.println(String.format("POI: %s(%s) at <%.6f,%.6f>",
+							point.type, point.name,
+							parms.latitude(point.y), parms.longitude(point.x)));
+	}
+	
 	/*
 	 * these arrays are regularly re-calculated from height/rain
 	 * and so do not need to be explicitly SET

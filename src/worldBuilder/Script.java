@@ -236,9 +236,7 @@ public class Script {
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. PoI <x,y> type name", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "POI location");
-					String type = tokens[2];
-					String name = tokens[3];
-					System.out.println("POI: loc=<" + xy.x + "," + xy.y + ">, type=" + type + ", name=" + name);	// FIX place PoI
+					map.addPOI(new POI(tokens[2], tokens[3], xy.x, xy.y));
 				}
 				break;
 

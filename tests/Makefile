@@ -2,6 +2,7 @@
 # unit test cases
 #
 JAR = ../worldBuilder.jar
+MESH = ../src/Templates/default_1024.json
 
 all:	load_save sealevel
 
@@ -34,7 +35,7 @@ sealevel: $(JAR)
 	@echo "save /tmp/$@-b.json"		>> /tmp/$@
 	@echo "exit 0"				>> /tmp/$@
 	@rm -f /tmp/$@-?.json
-	@java -jar $(JAR) -s /tmp/$@
+	@java -jar $(JAR) -s /tmp/$@ $(MESH)
 	@v=`grep sealevel /tmp/$@-a.json | cut -d: -f2 | cut -d\" -f2`; \
 	if [ $$v="-100m" ];			\
 	then					\

@@ -73,6 +73,18 @@ public class AttributeEngine {
 			return(false);
 		}
 		
+		// ensure <x1,y1> and <x2,y2> are in the right order
+		if (x2 < x1) {
+			double temp = x1;
+			x1 = x2;
+			x2 = temp;
+		}
+		if (y2 < y1) {
+			double temp = y1;
+			y1 = y2;
+			y2 = temp;
+		}
+		
 		// set this attribute for every point in the box
 		for(int i = 0; i < map.mesh.vertices.length; i++) {
 			MeshPoint m = map.mesh.vertices[i];
@@ -81,6 +93,22 @@ public class AttributeEngine {
 			if (m.y < y1 || m.y > y2)
 				continue;
 			thisMap[i] = value;
+		}
+		
+		// tell the map about the changes
+		switch(whichmap) {
+		case RAIN:
+			map.setRainMap(thisRain);
+			break;
+		case MINERAL:
+			map.setSoilMap(thisRock);
+			break;
+		case FLORA:
+			map.setFloraMap(thisFlora);
+			break;
+		case FAUNA:
+			map.setFaunaMap(thisFauna);
+			break;
 		}
 		
 		return true;
@@ -109,18 +137,26 @@ public class AttributeEngine {
 	 * fall back to the last committed values (only for changed maps)
 	 */
 	public boolean abort() {
-		if (prevRain != null)
+		if (prevRain != null) {
 			for(int i = 0; i < prevRain.length; i++)
 				thisRain[i] = prevRain[i];
-		if (prevRock != null)
+			map.setRainMap(thisRain);
+		}
+		if (prevRock != null) {
 			for(int i = 0; i < prevRock.length; i++)
 				thisRock[i] = prevRock[i];
-		if (prevFlora != null)
+			map.setSoilMap(thisRock);
+		}
+		if (prevFlora != null) {
 			for(int i = 0; i < prevRain.length; i++)
 				thisFlora[i] = prevFlora[i];
-		if (prevFauna != null)
+			map.setFloraMap(thisFlora);
+		}
+		if (prevFauna != null) {
 			for(int i = 0; i < prevFauna.length; i++)
 				thisFauna[i] = prevFauna[i];
+			map.setFaunaMap(thisFauna);
+		}
 		return true;
 	}
 }

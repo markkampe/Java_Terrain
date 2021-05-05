@@ -125,7 +125,7 @@ public class AttributeEngine {
 			for(int i = 0; i < prevRock.length; i++)
 				prevRock[i] = thisRock[i];
 		if (prevFlora != null)
-			for(int i = 0; i < prevRain.length; i++)
+			for(int i = 0; i < prevFlora.length; i++)
 				prevFlora[i] = thisFlora[i];
 		if (prevFauna != null)
 			for(int i = 0; i < prevFauna.length; i++)

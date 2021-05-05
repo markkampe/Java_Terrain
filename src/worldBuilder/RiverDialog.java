@@ -14,15 +14,14 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	private Map map;
 	
 	private Parameters parms;
+	TerrainEngine t;
 	
 	private JSlider flow;
 	private JLabel entryPoint;
 	private JButton accept;
 	private JButton cancel;
 	
-	private double[] incoming;
-	private double[] previous;
-	private int whichPoint = -1;
+	private MeshPoint whichPoint;
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -33,12 +32,6 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		// pick up references
 		this.map = map;
 		this.parms = Parameters.getInstance();
-		this.incoming = map.getIncoming();
-		
-		// save the incoming flow before we start messing with it
-		this.previous = new double[this.incoming.length];
-		for(int i = 0; i < incoming.length; i++)
-			previous[i] = incoming[i];
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -105,6 +98,9 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		pack();
 		setVisible(true);
 		
+		// instantiate the engine that will do the actual updates
+		t = new TerrainEngine(map);
+		
 		// add the action listeners
 		map.addMapListener(this);
 		flow.addChangeListener(this);
@@ -126,10 +122,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void windowClosing(WindowEvent e) {
 		// undo any uncommitted updates
-		for(int i = 0; i < incoming.length; i++)
-			incoming[i] = previous[i];
-		map.setIncoming(incoming);
-
+		t.abort();
 		cancelDialog();
 	}
 	
@@ -139,27 +132,9 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 * @param y		(map coordinate)
 	 */
 	public boolean pointSelected(double x, double y) {
-		if (incoming == null)
-			return true;
-		
 		// choose the new point
-		MeshPoint p = map.mesh.choosePoint(x, y);
-		whichPoint = p.index;
-		double lat = parms.latitude(p.x);
-		double lon = parms.longitude(p.y);
-		entryPoint.setText(String.format("<%.6f, %.6f>", lat, lon));
-		pack();
-		
-		// note the change in flux
-		incoming[whichPoint] = (int) flow.getValue();
-		map.setIncoming(incoming);
-		
-		// report on the change
-		if (parms.debug_level > 0) {
-			System.out.println("Artial river enters at " + entryPoint.getText() + ", flow=" + (int) incoming[whichPoint] + " " + Parameters.unit_f);
-			map.region_stats();
-		}
-		
+		whichPoint = map.mesh.choosePoint(x, y);
+		t.setIncoming(whichPoint, (int) flow.getValue());
 		return true;
 	}
 	
@@ -168,15 +143,8 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == flow) {
-			if (whichPoint >= 0 && incoming != null) {
-				incoming[whichPoint] = (int) flow.getValue();
-				map.setIncoming(incoming);
-			}
-			// report on the change
-			if (parms.debug_level > 1) {
-				System.out.println("Artial river enters at " + entryPoint.getText() + ", flow=" + (int) incoming[whichPoint] + " " + Parameters.unit_f);
-				map.region_stats();
-			}
+			if (whichPoint != null)
+				t.setIncoming(whichPoint, (int) flow.getValue());
 		} 
 	}
 	
@@ -184,6 +152,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 * unregister listener and dispose of our dialog
 	 */
 	private void cancelDialog() {
+		t.abort();
 		map.removeMapListener(this);
 		map.removeKeyListener(this);
 		WorldBuilder.activeDialog = false;
@@ -200,7 +169,6 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 			accept();
 		} else if (key == KeyEvent.VK_ESCAPE) {
 			undo();
-			map.setIncoming(incoming);
 		}
 	}
 	
@@ -208,8 +176,7 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 * make the newly selected entry points official
 	 */
 	private void accept() {
-		for(int i = 0; i < incoming.length; i++)
-			previous[i] = incoming[i];
+		t.commit();
 		parms.dTribute = (int) flow.getValue();
 	}
 	
@@ -217,16 +184,14 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 * back out any uncommitted entry points
 	 */
 	private void undo() {
-		for(int i = 0; i < incoming.length; i++)
-			incoming[i] = previous[i];
-		map.setIncoming(incoming);
+		t.abort();
 	}
 	
 	/**
 	 * click events on ACCEPT/CANCEL buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == cancel && whichPoint >= 0) {
+		if (e.getSource() == cancel && whichPoint != null) {
 			undo();
 			cancelDialog();
 		} else if (e.getSource() == accept) {

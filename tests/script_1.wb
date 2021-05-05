@@ -26,8 +26,8 @@ slope   	-30 0.001	// WSW, 1m/km
 mountain	<x1,y1>-<x2,y2>, 1250m
 canyon		<x1,y1>-<x2,y2>, -200m
 
-river		<0.1,0.2> 200m3/s
-river		<0.3,0.4> 100
+river		<-0.25,-0.5> 200m3/s
+river		<0.25,-0.5> 100
 
 # stripes of rainfall
 rainfall	<-0.5,-0.5>-<0.5,-0.4>	50

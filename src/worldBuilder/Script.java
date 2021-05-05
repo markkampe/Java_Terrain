@@ -178,7 +178,9 @@ public class Script {
 				else {
 					XY_pos xy = position(tokens[1], "river entry point");
 					double flow = num_w_unit(tokens[2], "m3/s", "River flow");
-					System.out.println("River: loc=<" + xy.x +"," + xy.y + ">, flux=" + flow);	// FIX place river
+					MeshPoint p = map.mesh.choosePoint(xy.x, xy.y);
+					t.setIncoming(p, flow);
+					t.commit();
 				}
 				break;
 				

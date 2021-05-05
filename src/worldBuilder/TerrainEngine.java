@@ -11,10 +11,14 @@ public class TerrainEngine {
 	private Map map;				// map on which we are operating
 	
 	private double thisHeight[];	// currently active per MeshPoint Z values
-	private double prevHeight[];	// last committed per MesshPoint Z values
+	private double prevHeight[];	// last committed per MeshPoint Z values
+	private double thisRivers[];	// currently active per MeshPoint incoming flux
+	private double prevRivers[];	// last committed per MeshPoint incoming flux
 	private int axis;				// last used slope axis
 	private double inclination;		// last used slope inclination
 	private int above, below;		// above/below sea-level relocations
+	private double lastFlux;		// last added river flux
+	private MeshPoint lastRiver;	// MeshPoint of last added river
 	
 	private static final int TERRAIN_DEBUG = 2;
 
@@ -28,6 +32,11 @@ public class TerrainEngine {
 		for(int i = 0; i < prevHeight.length; i++)
 			thisHeight[i] = prevHeight[i];
 		
+		// save the incoming river flux
+		prevRivers = map.getIncoming();
+		thisRivers = new double[prevRivers.length];
+		for(int i = 0; i < prevRivers.length; i++)
+			thisRivers[i] = prevRivers[i];
 	}
 	
 	/**
@@ -90,6 +99,24 @@ public class TerrainEngine {
 	}
 	
 	/**
+	 * set the incoming river flux for the specified MeshPoint
+	 * @param MeshPointoint to be updated
+	 * @param flux for this MeshPoint
+	 */
+	public boolean setIncoming(MeshPoint p, double flux) {
+		thisRivers[p.index] = flux;
+		map.setIncoming(thisRivers);
+		lastRiver = p;
+		lastFlux = flux;
+		
+		if (parms.debug_level >= TERRAIN_DEBUG) {
+			System.out.println(String.format("Arterial river enters at <%.6f,%.6f>, flow=%.1f%s",
+					parms.latitude(p.y), parms.longitude(p.x), flux, Parameters.unit_f));
+		}
+		return true;
+	}
+	
+	/**
 	 * place a mountain, ridge, pit or valley on the map
 	 * @param x1	starting x
 	 * @param y1	starting y
@@ -112,20 +139,33 @@ public class TerrainEngine {
 		// make the this our fall-back
 		for(int i = 0; i < prevHeight.length; i++)
 			prevHeight[i] = thisHeight[i];
+		for(int i = 0; i < prevRivers.length; i++)
+			prevRivers[i] = thisRivers[i];
 		
-		if (parms.debug_level > 0)
+		if (parms.debug_level > 0) {
 			if (inclination != 0)
 				System.out.println(String.format("Slope axis=%d\u00B0, incline=%.1fcm/km: %d points above sea level, %d below",
 								axis, inclination*100000, above, below));
+			if (lastRiver != null) {
+				System.out.println(String.format("Arterial river enters at <%.6f,%.6f>, flow=%.1f%s",
+						parms.latitude(lastRiver.y), parms.longitude(lastRiver.x), lastFlux, Parameters.unit_f));
+				lastRiver = null;
+			}
+		}
 		return true;
 	}
 
 	/**
-	 * revert heightMap to last committed values
+	 * revert maps to last committed values
 	 */
 	public boolean abort() {
-		// fall back to the last committed map
+		for(int i = 0; i < prevHeight.length; i++)
+			thisHeight[i] = prevHeight[i];
 		map.setHeightMap(prevHeight);
+		
+		for(int i = 0; i < prevRivers.length; i++)
+			thisRivers[i] = prevRivers[i];
+		map.setIncoming(prevRivers);
 		return true;
 	}
 }

@@ -163,7 +163,7 @@ public class Script {
 					
 			case "slope":	// angle fraction
 				if (tokens[1] == null || tokens[2] == null)
-					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. slope angle fraction", filename, lineNum, line));
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. slope angle inclineG", filename, lineNum, line));
 				else {
 					int axis = (int) num_w_unit(tokens[1], null, "slope axis");
 					double slope = num_w_unit(tokens[2], null, "slope (dz/dx)");

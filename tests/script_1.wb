@@ -19,9 +19,9 @@ set lon 120.246
 
 # land adjustments
 sealevel	-100m
-sealevel	0.001	(Z value rather than meters)
-
-slope   	-20 0.0025
+sealevel	0.000		// (Z value rather than meters)
+slope   	-30 0.001	// WSW, 1m/km
+//display TW
 
 mountain	<x1,y1>-<x2,y2>, 1250m
 canyon		<x1,y1>-<x2,y2>, -200m

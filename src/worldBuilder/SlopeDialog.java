@@ -10,9 +10,8 @@ import javax.swing.event.*;
  */
 public class SlopeDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
 	private Map map;
-	private double[] oldHeight;	// per MeshPoint altitude at entry
-	private double[] newHeight;	// edited per MeshPoint altitude
 	private Parameters parms;
+	TerrainEngine t;
 	
 	private int i_max;			// maximum inclination
 	
@@ -23,8 +22,6 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	
 	private int x0, y0, x1, y1;		// chosen slope axis
 	
-	private static final int SLOPE_DEBUG = 2;
-	
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -33,14 +30,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	public SlopeDialog(Map map)  {
 		// pick up references
 		this.map = map;
-		this.oldHeight = map.getHeightMap();
 		this.parms = Parameters.getInstance();
-		
-		// copy the incoming height map
-		this.newHeight = new double[oldHeight.length];
-		for(int i = 0; i < oldHeight.length; i++)
-			newHeight[i] = oldHeight[i];
-		map.setHeightMap(newHeight);
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -120,11 +110,16 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		
+		// initialize the TerrainEngine
+		t = new TerrainEngine(map);
+		
 		// disable selection
 		map.selectMode(Map.Selection.NONE);
 		
 		// initialize the slope axis
 		setAxis(0);
+		
+
 	}
 	
 	/**
@@ -133,49 +128,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 * @param inclination (cm/km)
 	 */
 	public void incline(double inclination) {
-		// convert inclination from word to map units
-		double Zscale = inclination;
-		Zscale *= parms.xy_range;	// slope times distance
-		Zscale /= 100;				// cm->m
-		Zscale /= parms.z_range;	// scaled to Z range
-		
-		// get map and display parameters
-		Mesh m = map.getMesh();
-		
-		// note sea level
-		double Zsealevel = parms.sea_level;
-		int above = 0;
-		int below = 0;
-
-		// height of every point is its distance (+/-) from the axis
-		for(int i = 0; i < newHeight.length; i++) {
-			double X0 = map.map_x(x0);
-			double Y0 = map.map_y(y0);
-			double X1 = map.map_x(x1);
-			double Y1 = map.map_y(y1);
-			double d = m.vertices[i].distanceLine(X0, Y0, X1, Y1);
-			
-			// make sure the new height is legal
-			double newZ = Zscale * d + oldHeight[i];
-			if (newZ > Parameters.z_extent/2)
-				newHeight[i] = Parameters.z_extent/2;
-			else if (newZ < -Parameters.z_extent/2)
-				newHeight[i] = -Parameters.z_extent/2;
-			else
-				newHeight[i] = newZ;
-			
-			// tally points above and below sea-level
-			if (newZ > Zsealevel)
-				above++;
-			else
-				below++;
-		}
-		
-		// tell the map about the update
-		map.setHeightMap(newHeight);
-		
-		if (parms.debug_level >= SLOPE_DEBUG)
-			System.out.println("Incline: " + above + " points above sea level, " + below + " below");
+		// slope wants inclination in meters/meter
+		t.slope(axis.getValue(), inclination /100000);
 	}
 
 	/**
@@ -219,10 +173,8 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void windowClosing(WindowEvent e) {
 		map.selectMode(Map.Selection.ANY);
-		if (oldHeight != null) {
-			map.setHeightMap(oldHeight);
-			map.repaint();
-		}
+		t.abort();
+		map.repaint();
 		this.dispose();
 	}
 	
@@ -243,22 +195,17 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			map.selectMode(Map.Selection.ANY);
-			map.setHeightMap(oldHeight);
+			t.abort();
 			map.repaint();
-			oldHeight = null;
 			this.dispose();
 		} else if (e.getSource() == accept) {
 			map.selectMode(Map.Selection.ANY);
-			int dir = axis.getValue();
-			int slope = inclination.getValue();
-			oldHeight = null;	// don't need this anymore
+			t.commit();
 			this.dispose();
 			
-			if (parms.debug_level > 0)
-				System.out.println("Incline continent: axis=" + dir + Parameters.unit_d + 
-						", slope=" + slope + Parameters.unit_s);
-			
 			// convert direction so that default slope is always positive
+			int dir = axis.getValue();
+			int slope = inclination.getValue();
 			if (dir >= 0)
 				if (slope >= 0)
 					parms.dDirection = dir - 180;
@@ -269,7 +216,6 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 					parms.dDirection = dir + 180;
 				else
 					parms.dDirection = dir;
-			
 		}
 	}
 

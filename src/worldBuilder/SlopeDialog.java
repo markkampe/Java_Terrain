@@ -198,15 +198,15 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 			y0 = map.getHeight()/8;
 			y1 = map.getHeight()*7/8;
 		} else {
-			double radians = Math.PI * ((double) degrees)/180;
+			double radians = Math.toRadians(degrees);
 			double sin = Math.sin(radians);
 			double cos = Math.cos(radians);
 			double dy = sin * y_len / 2;
 			double dx = cos * x_len / 2;
 			x0 = x_center - (int) dx;
-			y0 = y_center - (int) dy;
+			y0 = y_center + (int) dy;
 			x1 = x_center + (int) dx;
-			y1 = y_center + (int) dy;
+			y1 = y_center - (int) dy;
 		}
 		
 		// display the slope axis

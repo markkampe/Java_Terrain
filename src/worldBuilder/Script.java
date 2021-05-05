@@ -49,6 +49,7 @@ public class Script {
 	 */
 	public int process(Map map) {
 		parms = Parameters.getInstance();
+		TerrainEngine t = new TerrainEngine(map);
 
 		tokens = new String[MAX_TOKENS];
 		lineNum = 0;
@@ -163,7 +164,8 @@ public class Script {
 				else {
 					int axis = (int) num_w_unit(tokens[1], null, "slope axis");
 					double slope = num_w_unit(tokens[2], null, "slope (dz/dx)");
-					System.out.println("slope: axis=" + axis + ", dz/dx=" + slope);	// FIX implement Vertical.slope()
+					t.slope(axis, slope);
+					t.commit();
 				}
 				break;
 				

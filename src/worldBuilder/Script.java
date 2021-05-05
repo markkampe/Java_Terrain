@@ -38,6 +38,8 @@ public class Script {
 		public XY_pos(double x, double y) {
 			this.x = x;
 			this.y = y;
+			this.x2 = x;
+			this.y2 = y;
 		}
 	};
 	
@@ -416,9 +418,9 @@ public class Script {
 			return new XY_pos(0, 0);
 		}
 		
+		// FIX allow points to be described in km
+		
 		// see if there is a second position
-		pos.x2 = -1;
-		pos.y2 = -1;
 		if (string.length() == end+1)
 			return pos;
 		
@@ -440,6 +442,7 @@ public class Script {
 			System.err.println(attribute + " position2: \"" + string.substring(start2) + "\": non-numeric x/y");
 		}
 		
+		// FIX allow points to be described in km
 		return pos;
 	}
 	

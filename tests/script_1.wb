@@ -21,11 +21,16 @@ set lon 120.246
 sealevel	-100m
 sealevel	0.000		// (Z value rather than meters)
 slope   	-30 0.001	// WSW, 1m/km
-//display TW
+raise		<-0.5,-0.5>-<-0.4,-0.4> 1000m
+lower		<-0.3,-0.4>-<-0.2,-0.3> 0.1	// Z value rather than meters
+exaggerate	<-0.45,-0.45>-<-0.35,-0.35> 0.5
+exaggerate	<-0.25,-0.35>-<-0.15,-0.25> 2.0
+//display T
 
 mountain	<x1,y1>-<x2,y2>, 1250m
 canyon		<x1,y1>-<x2,y2>, -200m
 
+# adding rivers
 river		<-0.25,-0.5> 200m3/s
 river		<0.25,-0.5> 100
 

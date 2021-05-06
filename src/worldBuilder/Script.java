@@ -195,6 +195,32 @@ public class Script {
 				}
 				break;
 				
+			case "raise":	// <x1,y1>-<x2,y2> height
+			case "lower":	// <x1,y1>-<x2,y2> height
+				if (tokens[1] == null || tokens[2] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. raise/lower <x,y>-<x,y> height", filename, lineNum, line));
+				else {
+					XY_pos xy = position(tokens[1], "Raise/Lower region");
+					double deltaZ = z_value(tokens[2], "Raise/Lower height");
+					if (tokens[0].equals("lower"))
+						deltaZ *= -1;
+					t.raise(xy.x, xy.y, xy.x2, xy.y2, deltaZ);
+					t.commit();
+				}
+				break;
+				
+			case "exaggerate":	// <x1,y1>-<x2,y2> multiple
+				if (tokens[1] == null || tokens[2] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. exaggerate <x,y>-<x,y> multiple", filename, lineNum, line));
+				else {
+					XY_pos xy = position(tokens[1], "Exaggeration region");
+					double zMultiple = num_w_unit(tokens[2], null, "Exaggeration factor");
+					t.exaggerate(xy.x, xy.y, xy.x2, xy.y2, zMultiple);
+					t.commit();
+				}
+				break;
+				
+				
 			case "mountain":
 			case "canyon":
 				System.err.println(tokens[0] + " command not yet implemented");

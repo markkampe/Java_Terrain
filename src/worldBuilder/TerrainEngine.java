@@ -19,6 +19,9 @@ public class TerrainEngine {
 	private int above, below;		// above/below sea-level relocations
 	private double lastFlux;		// last added river flux
 	private MeshPoint lastRiver;	// MeshPoint of last added river
+	private double deltaZ;			// last used raise/lower distance
+	private double zMultiple;		// last used exaggerate/compress factor
+	private int adjusted;			// number of points raised/lowered
 	
 	private static final int TERRAIN_DEBUG = 2;
 
@@ -99,6 +102,93 @@ public class TerrainEngine {
 	}
 	
 	/**
+	 * raise or lower all points in a box
+	 * @param x1 left-most x coordinate
+	 * @param y1 upper-most y coordinate
+	 * @param x2 right-most x coordinate
+	 * @param y2 lower-most y coordinate
+	 * @param deltaZ amount to add to each MeshPoint
+	 */
+	public boolean raise(double x1, double y1, double x2, double y2, double deltaZ) {
+		this.deltaZ = deltaZ;
+		
+		// adjust the height of every point in the box
+		int points = 0;
+		for(int i = 0; i < map.mesh.vertices.length; i++) {
+			MeshPoint m = map.mesh.vertices[i];
+			if (m.x < x1 || m.x > x2)
+				continue;
+			if (m.y < y1 || m.y > y2)
+				continue;
+			thisHeight[i] += deltaZ;
+			points++;
+		}
+
+		// tell the map about the update
+		map.setHeightMap(thisHeight);
+		
+		this.adjusted = points;
+		if (parms.debug_level >= TERRAIN_DEBUG)
+			System.out.println(String.format("Adjusted heights of %d points by %d%s", 
+								this.adjusted, (int) parms.height(deltaZ), Parameters.unit_z));
+		return true;
+	}
+	
+	/**
+	 * exaggerate/compress delta Z for all points in a box
+	 * @param x1 left-most x coordinate
+	 * @param y1 upper-most y coordinate
+	 * @param x2 right-most x coordinate
+	 * @param y2 lower-most y coordinate
+	 * @param deltaZ amount to add to each MeshPoint
+	 */
+	public boolean exaggerate(double x1, double y1, double x2, double y2, double zMultiple) {
+		this.zMultiple = zMultiple;
+		
+		// find the mean altitude for the box
+		int points = 0;
+		double zMin = 666, zMax = -666;
+		for(int i = 0; i < map.mesh.vertices.length; i++) {
+			MeshPoint m = map.mesh.vertices[i];
+			if (m.x < x1 || m.x > x2)
+				continue;
+			if (m.y < y1 || m.y > y2)
+				continue;
+			if (prevHeight[i] > zMax)
+				zMax = prevHeight[i];
+			if (prevHeight[i] < zMin)
+				zMin = prevHeight[i];
+			points++;
+		}
+		
+		if (points == 0)
+			return false;
+		else
+			adjusted = points;
+		
+		// exaggerate all those points by the specified amount
+		double zMean = (zMax + zMin)/2;
+		for(int i = 0; i < map.mesh.vertices.length; i++) {
+			MeshPoint m = map.mesh.vertices[i];
+			if (m.x < x1 || m.x > x2)
+				continue;
+			if (m.y < y1 || m.y > y2)
+				continue;
+			double delta = prevHeight[i] - zMean;
+			thisHeight[i] = zMean + (delta * zMultiple);
+		}
+
+		// tell the map about the update
+		map.setHeightMap(thisHeight);
+		
+		this.adjusted = points;
+		if (parms.debug_level >= TERRAIN_DEBUG)
+			System.out.println(String.format("Exaggerated heights of %d points by %f", 
+								this.adjusted, this.zMultiple));
+		return true;
+	}
+	
+	/**
 	 * set the incoming river flux for the specified MeshPoint
 	 * @param MeshPointoint to be updated
 	 * @param flux for this MeshPoint
@@ -142,10 +232,23 @@ public class TerrainEngine {
 		for(int i = 0; i < prevRivers.length; i++)
 			prevRivers[i] = thisRivers[i];
 		
+		// log the most recent changes being committed
 		if (parms.debug_level > 0) {
-			if (inclination != 0)
+			if (deltaZ != 0) {
+				System.out.println(String.format("Adjusted heights of %d points by %d%s", 
+						this.adjusted, (int) parms.height(deltaZ), Parameters.unit_z));
+				deltaZ = 0;
+			}
+			if (zMultiple != 0) {
+				System.out.println(String.format("Exaggerated heights of %d points by %f", 
+						this.adjusted, this.zMultiple));
+				zMultiple = 0;
+			}
+			if (inclination != 0) {
 				System.out.println(String.format("Slope axis=%d\u00B0, incline=%.1fcm/km: %d points above sea level, %d below",
 								axis, inclination*100000, above, below));
+				inclination = 0;
+			}
 			if (lastRiver != null) {
 				System.out.println(String.format("Arterial river enters at <%.6f,%.6f>, flow=%.1f%s",
 						parms.latitude(lastRiver.y), parms.longitude(lastRiver.x), lastFlux, Parameters.unit_f));

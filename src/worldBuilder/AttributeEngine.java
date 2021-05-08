@@ -100,19 +100,19 @@ public class AttributeEngine {
 		switch(whichmap) {
 		case RAIN:
 			map.setRainMap(thisRain);
-			newRain = adjusted > 0;
+			newRain = (adjusted > 0);
 			break;
 		case MINERAL:
 			map.setSoilMap(thisRock);
-			newRock = adjusted > 0;
+			newRock = (adjusted > 0);
 			break;
 		case FLORA:
 			map.setFloraMap(thisFlora);
-			newFlora = adjusted > 0;
+			newFlora = (adjusted > 0);
 			break;
 		case FAUNA:
 			map.setFaunaMap(thisFauna);
-			newFauna = adjusted > 0;
+			newFauna = (adjusted > 0);
 			break;
 		}
 		

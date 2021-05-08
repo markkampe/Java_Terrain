@@ -189,8 +189,9 @@ public class Script {
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. rainfall <x,y> #cm/y", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "Rainfall region");
+					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
 					double rain = num_w_unit(tokens[2], "cm/y", "Annual Rainfall");
-					a.setRegion(xy.x, xy.y, xy.x2, xy.y2, AttributeEngine.WhichMap.RAIN, rain);
+					a.setRegion(selected, AttributeEngine.WhichMap.RAIN, rain);
 					a.commit();
 				}
 				break;
@@ -231,8 +232,9 @@ public class Script {
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. minerals <x,y> type", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "mineral region");
+					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
 					double type = map.getSoilType(tokens[2]);
-					a.setRegion(xy.x, xy.y, xy.x2, xy.y2, AttributeEngine.WhichMap.MINERAL, type);
+					a.setRegion(selected, AttributeEngine.WhichMap.MINERAL, type);
 					a.commit();
 				}
 				break;
@@ -242,8 +244,9 @@ public class Script {
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. flora <x,y> type", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "flora region");
+					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
 					double type = map.getFloraType(tokens[2]);
-					a.setRegion(xy.x, xy.y, xy.x2, xy.y2, AttributeEngine.WhichMap.FLORA, type);
+					a.setRegion(selected, AttributeEngine.WhichMap.FLORA, type);
 					a.commit();
 				}
 				break;
@@ -253,8 +256,9 @@ public class Script {
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. fauna <x,y> type", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "fauna region");
+					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
 					double type = map.getFaunaType(tokens[2]);
-					a.setRegion(xy.x, xy.y, xy.x2, xy.y2, AttributeEngine.WhichMap.FAUNA, type);
+					a.setRegion(selected, AttributeEngine.WhichMap.FAUNA, type);
 					a.commit();
 				}
 				break;
@@ -470,6 +474,28 @@ public class Script {
 		
 		// FIX allow points to be described in km
 		return pos;
+	}
+	
+	/**
+	 * construct an array of booleans for which MeshPoints are in a box
+	 * @param x
+	 * @param y
+	 * @param x2
+	 * @param y2
+	 * @return
+	 */
+	boolean[] pointsInBox(Map map, double x, double y, double x2, double y2) {
+		double xMin = (x < x2) ? x : x2;
+		double xMax = (x2 > x) ? x2 : x;
+		double yMin = (y < y2) ? y : y2;
+		double yMax = (y2 > y) ? y2 : y;
+		
+		boolean[] selected = new boolean[map.mesh.vertices.length];
+		for(int i = 0; i < selected.length; i++) {
+			MeshPoint p = map.mesh.vertices[i];
+			selected[i] = (p.x >= xMin && p.x <= xMax && p.y >= yMin && p.y <= yMax);
+		}
+		return selected;
 	}
 	
 	/**

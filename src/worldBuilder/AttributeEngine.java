@@ -7,31 +7,36 @@ package worldBuilder;
 public class AttributeEngine {
 
 	private Map map;
-	// private Parameters parms;
+	private Parameters parms;
 	
+	// current and last committed attribute maps
 	private double thisRain[], prevRain[];
 	private double thisRock[], prevRock[];
 	private double thisFlora[], prevFlora[];
 	private double thisFauna[], prevFauna[];
+
+	// changes since the last commit
+	boolean newRain, newRock, newFlora, newFauna;
+	private int adjusted;
+	
+	private static final int ATTRIBUTE_DEBUG = 2;
 	
 	public enum WhichMap {RAIN, MINERAL, FLORA, FAUNA};
 	
 	public AttributeEngine(Map map) {
 		this.map = map;
-		// this.parms = Parameters.getInstance();
+		this.parms = Parameters.getInstance();
 	}
 	
 	/**
-	 * update the MeshPoint attributes for every point in the box
-	 * @param x1	lowest x
-	 * @param y1	lowest y
-	 * @param x2	highest x
-	 * @param y2	highest y
+	 * update the MeshPoint attributes for every selected
+	 * @param selected array of per-MeshPoint booleans, True->selected
 	 * @param whichmap	RAIN, MINERAL, FLORA< FAUNA
 	 * @param value	new attribute value
 	 */
-	public boolean setRegion(double x1, double y1, double x2, double y2, WhichMap whichmap, double value) {
+	public boolean setRegion(boolean[] selected, WhichMap whichmap, double value) {
 		double thisMap[];
+		String mapName = null;
 		switch(whichmap) {
 		case RAIN:
 			if (thisRain == null) {
@@ -41,6 +46,7 @@ public class AttributeEngine {
 					prevRain[i] = thisRain[i];
 			}
 			thisMap = thisRain;
+			mapName = "rainfall";
 			break;
 		case MINERAL:
 			if (thisRock== null) {
@@ -50,6 +56,7 @@ public class AttributeEngine {
 					prevRock[i] = thisRock[i];
 			}
 			thisMap = thisRock;
+			mapName = "mineral";
 			break;
 		case FLORA:
 			if (thisFlora== null) {
@@ -59,6 +66,7 @@ public class AttributeEngine {
 					prevFlora[i] = thisFlora[i];
 			}
 			thisMap = thisFlora;
+			mapName = "flora";
 			break;
 		case FAUNA:
 			if (thisFauna == null) {
@@ -68,46 +76,43 @@ public class AttributeEngine {
 					prevFauna[i] = thisFauna[i];
 			}
 			thisMap = thisFauna;
+			mapName = "fauna";
 			break;
 		default:
 			return(false);
 		}
 		
-		// ensure <x1,y1> and <x2,y2> are in the right order
-		if (x2 < x1) {
-			double temp = x1;
-			x1 = x2;
-			x2 = temp;
-		}
-		if (y2 < y1) {
-			double temp = y1;
-			y1 = y2;
-			y2 = temp;
-		}
-		
 		// set this attribute for every point in the box
+		this.adjusted = 0;
 		for(int i = 0; i < map.mesh.vertices.length; i++) {
 			MeshPoint m = map.mesh.vertices[i];
-			if (m.x < x1 || m.x > x2)
-				continue;
-			if (m.y < y1 || m.y > y2)
-				continue;
-			thisMap[i] = value;
+			if (selected[m.index]) {
+				thisMap[i] = value;
+				this.adjusted++;
+			}
+		}
+		
+		if (parms.debug_level >= ATTRIBUTE_DEBUG) {
+			System.out.println(String.format("Updated %s for %d points to %f", mapName, this.adjusted, value));
 		}
 		
 		// tell the map about the changes
 		switch(whichmap) {
 		case RAIN:
 			map.setRainMap(thisRain);
+			newRain = adjusted > 0;
 			break;
 		case MINERAL:
 			map.setSoilMap(thisRock);
+			newRock = adjusted > 0;
 			break;
 		case FLORA:
 			map.setFloraMap(thisFlora);
+			newFlora = adjusted > 0;
 			break;
 		case FAUNA:
 			map.setFaunaMap(thisFauna);
+			newFauna = adjusted > 0;
 			break;
 		}
 		
@@ -118,18 +123,35 @@ public class AttributeEngine {
 	 * make the current values the fall-backs (in case of abort)
 	 */
 	public boolean commit() {
-		if (prevRain != null)
+		if (prevRain != null) {
 			for(int i = 0; i < prevRain.length; i++)
 				prevRain[i] = thisRain[i];
-		if (prevRock != null)
+			if (newRain && parms.debug_level > 0)
+				System.out.println(String.format("Updated rain map for %d points", this.adjusted));
+			newRain = false;
+		}
+		if (prevRock != null) {
 			for(int i = 0; i < prevRock.length; i++)
 				prevRock[i] = thisRock[i];
-		if (prevFlora != null)
+			if (newRock && parms.debug_level > 0)
+				System.out.println(String.format("Updated mineral types for %d points", this.adjusted));
+			newRock = false;
+		}
+		if (prevFlora != null) {
 			for(int i = 0; i < prevFlora.length; i++)
 				prevFlora[i] = thisFlora[i];
-		if (prevFauna != null)
+			if (newFlora && parms.debug_level > 0)
+				System.out.println(String.format("Updated flora ecotopes for %d points", this.adjusted));
+			newFlora = false;
+		}
+		if (prevFauna != null) {
 			for(int i = 0; i < prevFauna.length; i++)
 				prevFauna[i] = thisFauna[i];
+			if (newFauna && parms.debug_level > 0)
+				System.out.println(String.format("Updated fauna distribution for %d points", this.adjusted));
+			newFauna = false;
+		}
+		adjusted = 0;
 		return true;
 	}
 	
@@ -141,22 +163,27 @@ public class AttributeEngine {
 			for(int i = 0; i < prevRain.length; i++)
 				thisRain[i] = prevRain[i];
 			map.setRainMap(thisRain);
+			newRain = false;
 		}
 		if (prevRock != null) {
 			for(int i = 0; i < prevRock.length; i++)
 				thisRock[i] = prevRock[i];
 			map.setSoilMap(thisRock);
+			newRock = false;
 		}
 		if (prevFlora != null) {
 			for(int i = 0; i < prevRain.length; i++)
 				thisFlora[i] = prevFlora[i];
 			map.setFloraMap(thisFlora);
+			newFlora = false;
 		}
 		if (prevFauna != null) {
 			for(int i = 0; i < prevFauna.length; i++)
 				thisFauna[i] = prevFauna[i];
 			map.setFaunaMap(thisFauna);
+			newFauna = false;
 		}
+		adjusted = 0;
 		return true;
 	}
 }

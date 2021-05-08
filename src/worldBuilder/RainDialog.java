@@ -13,8 +13,7 @@ import javax.swing.event.*;
  */
 public class RainDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {	
 	private Map map;
-	private double[] oldRain;	// per MeshPoint rainfall at entry
-	private double[] newRain;	// edited per MeshPoint rainfall
+	private AttributeEngine a;
 	
 	private Parameters parms;
 	
@@ -23,11 +22,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	private JButton cancel;
 	
 	// selected region info
-	private boolean selected;		// a region has been selected
-	private double x0, y0;			// upper left hand corner
-	private double width, height;	// selected area size (in pixels)
-	private int numPoints;			// selected area size (in MeshPoints)
-	private boolean changes_made;	// we have displayed updates
+	private boolean selected;		// a selection has been made
+	private boolean[] whichPoints;	// which points have been selected
 
 	// 0-100 amount slider should be vaguely logarithmic
 	private static final int amounts[] = {0, 10, 25, 50, 100, 150, 200, 250, 300, 400, 500};
@@ -35,22 +31,15 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final int RAIN_DEBUG = 2;
-	
+	private static final int RAIN_DEBUG = 2;	
 	/**
 	 * instantiate the widgets and register the listeners
 	 */
 	public RainDialog(Map map)  {
 		// pick up references
 		this.map = map;
-		this.oldRain = map.getRainMap();
+		this.a = new AttributeEngine(map);
 		this.parms = Parameters.getInstance();
-		
-		// copy current rain map
-		this.newRain = new double[oldRain.length];
-		for(int i = 0; i < oldRain.length; i++)
-			newRain[i] = oldRain[i];
-		map.setRainMap(newRain);
 
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -116,14 +105,13 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		cancel.addActionListener(this);
 		map.addMapListener(this);
 		
-		// get region selection input
-		changes_made = false;
-		map.addMapListener(this);	
-		map.selectMode(Map.Selection.RECTANGLE);
-		selected = map.checkSelection(Map.Selection.RECTANGLE);
-		
 		// initialize the rainfall to default values
 		rainFall(slider2rainfall(amount.getValue()));
+		
+		// get region selection input
+		map.addMapListener(this);	
+		map.selectMode(Map.Selection.POINTS);
+		map.checkSelection(Map.Selection.POINTS);
 	}
 	
 	/**
@@ -168,44 +156,18 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 * @param incoming (rain density, cm/yr)
 	 */
 	private void rainFall(int incoming) {
-		
-		// count and initialize the points to be populated
-		numPoints = 0;
-		MeshPoint[] points = map.mesh.vertices;
-		for(int i = 0; i < newRain.length; i++)
-			if (points[i].x >= x0 && points[i].x < x0+width &&
-				points[i].y >= y0 && points[i].y < y0+height) {
-				newRain[i] = incoming;
-				numPoints += 1;
-				}
-
-		// tell the map about the update
-		map.setRainMap(newRain);
-		map.repaint();
+		if (selected)
+			a.setRegion(whichPoints, AttributeEngine.WhichMap.RAIN, incoming);
 	}
 
-	/**
-	 * @return mean rainfall over the entire map
-	 */
-	private double meanRain() {
-		double mean = 0;
-		for(int i = 0; i < newRain.length; i++) {
-			mean += newRain[i];
-		}
-		mean /= newRain.length;
-		return mean;
-	}
 	
 	/**
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		// clear selected points and updated rainfall
+		// clear selected points and uncommitted rainfall
 		map.selectMode(Map.Selection.NONE);
-		if (oldRain != null) {
-			map.setRainMap(oldRain);
-			oldRain = null;
-		}
+		a.abort();
 		cancelDialog();
 	}
 	
@@ -219,28 +181,15 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	}
 	
 	/**
-	 * called whenever a region selection changes
-	 * @param mx0	left most point (map coordinate)
-	 * @param my0	upper most point (map coordinate)
-	 * @param dx	width (in map units)
-	 * @param dy	height (in map units)
-	 * @param complete	boolean, has selection completed
-	 * 
-	 * @return	boolean	(should selection continue)
+	 * called when a group of map points is selected
+	 * @param selected	array of per point booleans (true=>selected)
+	 * @param complete	mouse button has been released
+	 * @return boolean	should selection continue?
 	 */
-	public boolean regionSelected(double mx0, double my0, 
-								  double dx, double dy, boolean complete) {		
-		if (changes_made) {
-			// undo any uncommitted placements
-			for(int i = 0; i < oldRain.length; i++)
-				newRain[i] = oldRain[i];
-			changes_made = false;
-		}
-		selected = complete;
-		x0 = mx0;
-		y0 = my0;
-		width = dx;
-		height = dy;
+	public boolean groupSelected(boolean[] selected, boolean complete) {
+		this.whichPoints = selected;
+		this.selected = complete;
+			
 		if (complete)
 			rainFall(slider2rainfall(amount.getValue()));
 		return true;
@@ -254,11 +203,6 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		map.removeMapListener(this);
 		this.dispose();
 		WorldBuilder.activeDialog = false;
-		
-		if (parms.debug_level > 0) {
-			System.out.println("Mean rainfall: " + (int) meanRain() + Parameters.unit_r);
-			map.region_stats();
-		}
 	}
 	
 	/**
@@ -266,28 +210,18 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
-			// revert to previous rain map
-			map.setRainMap(oldRain);
-			map.repaint();
-			oldRain = null;
+			a.abort();
 			cancelDialog();
 		} else if (e.getSource() == accept && selected) {
 			// checkpoint these updates
-			for(int i = 0; i < oldRain.length; i++)
-				oldRain[i] = newRain[i];
+			a.commit();
 			
 			// make the latest rainfall the default
 			parms.dAmount = slider2rainfall(amount.getValue());
-			
-			// report the committed changes
-			if (parms.debug_level >= RAIN_DEBUG) {
-				System.out.println("Updated fainfall for " + numPoints +
-									" points to " + parms.dAmount + Parameters.unit_r);
-			}
 		}
 	}
 	
-	/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }
+	/** (perfunctory) */ public boolean regionSelected(double mx0, double my0, double dx, double dy, boolean complete) {return false;}
 	/** (perfunctory) */ public boolean pointSelected(double x, double y) {return false;}
 	/** (perfunctory) */ public void mouseMoved(MouseEvent arg0) {}
 	/** (perfunctory) */ public void mouseEntered(MouseEvent arg0) {}

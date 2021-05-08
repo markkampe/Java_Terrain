@@ -202,10 +202,11 @@ public class Script {
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. raise/lower <x,y>-<x,y> height", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "Raise/Lower region");
+					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
 					double deltaZ = z_value(tokens[2], "Raise/Lower height");
 					if (tokens[0].equals("lower"))
 						deltaZ *= -1;
-					t.raise(xy.x, xy.y, xy.x2, xy.y2, deltaZ);
+					t.raise(selected, deltaZ);
 					t.commit();
 				}
 				break;
@@ -215,8 +216,9 @@ public class Script {
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. exaggerate <x,y>-<x,y> multiple", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "Exaggeration region");
+					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
 					double zMultiple = num_w_unit(tokens[2], null, "Exaggeration factor");
-					t.exaggerate(xy.x, xy.y, xy.x2, xy.y2, zMultiple);
+					t.exaggerate(selected, zMultiple);
 					t.commit();
 				}
 				break;

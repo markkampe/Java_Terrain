@@ -11,7 +11,7 @@ import javax.swing.event.*;
 /**
  * a Dialog to control the direction and amount of rainfall on the world map.
  */
-public class RainDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener {	
+public class RainDialog extends JFrame implements ActionListener, ChangeListener, MapListener, KeyListener, WindowListener {	
 	private Map map;
 	private AttributeEngine a;
 	
@@ -22,6 +22,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	private JButton cancel;
 	
 	// selected region info
+	private boolean changes_made;	// we have updated our maps
 	private boolean selected;		// a selection has been made
 	private boolean[] whichPoints;	// which points have been selected
 
@@ -104,6 +105,9 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		map.addMapListener(this);
+		addKeyListener(this);
+		map.addKeyListener(this);
+		map.requestFocus();
 		
 		// initialize the rainfall to default values
 		rainFall(slider2rainfall(amount.getValue()));
@@ -156,8 +160,10 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 * @param incoming (rain density, cm/yr)
 	 */
 	private void rainFall(int incoming) {
-		if (selected)
+		if (selected) {
 			a.setRegion(whichPoints, AttributeEngine.WhichMap.RAIN, incoming);
+			changes_made = true;
+		}
 	}
 
 	
@@ -177,7 +183,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == amount) {
 			rainFall(slider2rainfall(amount.getValue()));	
-		} 
+		}
+		map.requestFocus();
 	}
 	
 	/**
@@ -194,7 +201,23 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			rainFall(slider2rainfall(amount.getValue()));
 		return true;
 	}
+	
+	/**
+	 * look for ENTER or ESC
+	 */
+	public void keyTyped(KeyEvent e) {
+		int key = e.getKeyChar();
+		if (key == KeyEvent.VK_ENTER && changes_made)
+			a.commit();
+		else if (key == KeyEvent.VK_ESCAPE) {
+			a.abort();
+			// and clear the current selection
+			map.selectMode(Map.Selection.NONE);
+			map.selectMode(Map.Selection.POINTS);
+		}
 
+		changes_made = false;
+	}
 	/**
 	 * unregister our map listener and close the dialog
 	 */
@@ -212,9 +235,11 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		if (e.getSource() == cancel) {
 			a.abort();
 			cancelDialog();
-		} else if (e.getSource() == accept && selected) {
+		} else if (e.getSource() == accept && changes_made) {
 			// checkpoint these updates
 			a.commit();
+			changes_made = false;
+			map.requestFocus();
 			
 			// make the latest rainfall the default
 			parms.dAmount = slider2rainfall(amount.getValue());
@@ -226,6 +251,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	/** (perfunctory) */ public void mouseMoved(MouseEvent arg0) {}
 	/** (perfunctory) */ public void mouseEntered(MouseEvent arg0) {}
 	/** (perfunctory) */ public void mouseExited(MouseEvent arg0) {}
+	/** (perfunctory) */ public void keyPressed(KeyEvent arg0) {}
+	/** (perfunctory) */ public void keyReleased(KeyEvent arg0) {}
 	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}

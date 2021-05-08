@@ -13,20 +13,8 @@ import javax.swing.event.*;
 public class LandDialog extends JFrame implements ActionListener, ChangeListener, MapListener, KeyListener, WindowListener {	
 	
 	private Map map;
+	private TerrainEngine t;
 	private Parameters parms;
-	
-	/*
-	 * The old maps are the last accepted versions.
-	 * The new maps start out as copies of the old maps, but are updated
-	 * to reflect the requested changes.  During the editing process, it
-	 * is these new maps that are loaded into the displayed Map.
-	 *
-	 * If changes are rejected, the old maps are reinstantiated.
-	 * When changes are accepted, the new map values are copied to
-	 * the old maps.
-	 */
-	private double[] old_height, new_height;
-	private double[] old_erosion, erodeMap;
 	
 	private JSlider altitude;
 	private JSlider flatness;
@@ -52,23 +40,13 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		
 		// pick up references current maps
 		this.map = map;
-		this.old_height = map.getHeightMap();
-		this.erodeMap = map.getErodeMap();	// erodeMap is edit-in-place
-		
-		// make new (WIP) copies of each
-		int points = old_height.length;
-		new_height = new double[points];
-		old_erosion = new double[points];
-		for(int i = 0; i < points; i++) {
-			new_height[i] = old_height[i];
-			old_erosion[i] = erodeMap[i];
-		}
+		this.t = new TerrainEngine(map);
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
 		int border = parms.dialogBorder;
 		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
-		setTitle("Edit soil, height, erosion/deposition");
+		setTitle("Edit height, erosion/deposition");
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
@@ -115,6 +93,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		erosion.setPaintTicks(true);
 		erosion.setLabelTable(labels);
 		erosion.setPaintLabels(true);
+		erosion.setEnabled(false);	// FIX implement erosion slider
 		JLabel erosionLabel = new JLabel("High Flow Erosion", JLabel.CENTER);
 		erosionLabel.setFont(fontLarge);
 		
@@ -124,6 +103,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		deposition.setPaintTicks(true);
 		deposition.setLabelTable(labels);
 		deposition.setPaintLabels(true);
+		deposition.setEnabled(false);	// FIX implement deposition slider
 		JLabel depositionLabel = new JLabel("Low Flow Deposition", JLabel.CENTER);
 		depositionLabel.setFont(fontLarge);
 		
@@ -201,62 +181,21 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	}
 
 	/**
-	 * update the WIP map display to reflect current slider settings
+	 * update the WIP topology
 	 */
-	void redraw() {
-		// get the parameters
-		int points = selected_points.length;
-		double delta_z = parms.z(altitude.getValue());
-		
-		// figure out the vertical range of the selected points
-		double z_min = 666.0, z_max = -666.0;
-		for(int i = 0; i < points; i++)
-			if (selected_points[i]) {
-				if (old_height[i] < z_min)
-					z_min = old_height[i];
-				if (old_height[i] > z_max)
-					z_max = old_height[i];
-			}
-		double z_mid = (z_min + z_max)/2;
+	void update() {
+		// TerrainEngine can raise/lower or exaggerate, but not both
 		double z_mult = multiplier(flatness.getValue());
-		
-		int v = erosion.getValue();
-		double e_mult = (v == 0) ? 1.0 : multiplier(v);
-		v = deposition.getValue();
-		double d_mult = (v == 0) ? 1.0 : multiplier(v);
-		
-		map.max_erosion = 0.0;
-		map.max_deposition = 0.0;
-		// go through and update all of the selected points
-		for(int i = 0; i < points; i++) {
-			if (!selected_points[i])
-				continue;
-
-			// see if we need to expand/compress height
-			if (z_mult != 1.0) {
-				double my_delta = old_height[i] - z_mid;
-				new_height[i] = z_mid + (z_mult * my_delta);
-			} else
-				new_height[i] = old_height[i];
-		
-			// apply the general altitude shift
-			new_height[i] += delta_z;
-			
-			// perform incremental erosion 
-			double e_meters = e_mult * map.waterflow.annual_erosion(i);
-			if (e_meters > 0)
-				erodeMap[i] = old_erosion[i] + parms.z(e_meters);
-			
-			// perform incremental sediment deposition
-			double d_meters = d_mult * map.waterflow.annual_sedimentation(i);
-			if (d_meters > 0)
-				erodeMap[i] = old_erosion[i] - parms.z(d_meters);
+		double delta_z = parms.z(altitude.getValue());
+		if (delta_z != 0) {
+			t.raise(selected_points, delta_z);
+			changes_made = true;
+			altitude.setValue(0);	// reset slider after the change
+		} else if (z_mult != 1.0) {
+			t.exaggerate(selected_points, z_mult);
+			changes_made = true;
+			flatness.setValue(0);	// reset slider after the change
 		}
-		
-		// instantiate these updates and redraw the map
-		map.setHeightMap(new_height);
-		// no-need to update erodeMap, that being edit-in-place
-		map.repaint();
 	}
 	
 	/**
@@ -268,8 +207,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	public boolean groupSelected(boolean[] selected, boolean complete) {
 		selected_points = selected;
 		have_selection = true;
-		changes_made = true;
-		redraw();	// and update the display
+		update();
 		return true;
 	}
 
@@ -277,14 +215,13 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	 * restore previous height map and exit dialog
 	 */
 	private void cancelDialog() {
+		// abort any in-progress changes
+		t.abort();
+		
 		// disable any in-progress selection
 		map.selectMode(Map.Selection.NONE);
 		
-		// restore the old height and erosion maps
-		map.setHeightMap(old_height);
-		for(int i = 0; i < erodeMap.length; i++)
-			erodeMap[i] = old_erosion[i];
-		
+		// delete listeners and lose the dialog
 		map.removeMapListener(this);
 		map.removeKeyListener(this);
 		map.selectMode(Map.Selection.ANY);
@@ -296,43 +233,9 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	 * make the most recently created changes official
 	 */
 	private void acceptChanges() {
-		// make the current height, erosion, and soil-maps official
-		int points = new_height.length;
-		for(int i = 0; i < points; i++) {
-			old_height[i] = new_height[i];
-			old_erosion[i] = erodeMap[i];
-		}
-		
-		// describe what we have just done
-		if (selected_points != null && parms.debug_level >= 0) {
-			points = 0;
-			for(int i = 0; i < selected_points.length; i++)
-				if (selected_points[i])
-					points++;
-			String descr = String.format("Updated %d points", points);
-			
-			int v = altitude.getValue();
-			if (v != 0)
-				descr += String.format(", deltaH=%d%s", v, Parameters.unit_z);
-			
-			v = flatness.getValue();
-			if (v > 1)
-				descr += String.format(", vertical=*%d", v);
-			else if (v < -1)
-				descr += String.format(", vertical=/%d", -v);
-			
-			v = erosion.getValue();
-			if (v > 0)
-				descr += String.format(", erosion=*%d", v);
-			else if (v < 0)
-				descr += String.format(", erosion=/%d", -v);
-			
-			v = deposition.getValue();
-			if (v > 0)
-				descr += String.format(", deposition=*%d", v);
-			else if (v < 0)
-				descr += String.format(", deposition=/%d", -v);
-			System.out.println(descr);
+		// make the current maps official
+		if (changes_made) {
+			t.commit();
 			map.region_stats();
 		}
 		
@@ -358,6 +261,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
+		t.abort();
 		cancelDialog();
 	}
 	
@@ -366,8 +270,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (have_selection) {
-			redraw();
-			changes_made = true;
+			update();
 			map.requestFocus();
 		}
 	}
@@ -379,8 +282,12 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		int key = e.getKeyChar();
 		if (key == KeyEvent.VK_ENTER && changes_made)
 			acceptChanges();
-		else if (key == KeyEvent.VK_ESCAPE)
-			cancelDialog();	
+		else if (key == KeyEvent.VK_ESCAPE) {
+			t.abort();
+			map.selectMode(Map.Selection.NONE);	// undo current selection
+			map.selectMode(Map.Selection.POINTS);
+		}
+		changes_made = false;
 	}
 
 	/**
@@ -388,6 +295,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
+			t.abort();
 			cancelDialog();
 		} else if (e.getSource() == accept && changes_made) {
 			acceptChanges();

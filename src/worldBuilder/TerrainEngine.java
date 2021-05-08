@@ -103,25 +103,20 @@ public class TerrainEngine {
 	
 	/**
 	 * raise or lower all points in a box
-	 * @param x1 left-most x coordinate
-	 * @param y1 upper-most y coordinate
-	 * @param x2 right-most x coordinate
-	 * @param y2 lower-most y coordinate
+	 * @param selected ... per point selected/not booleans
 	 * @param deltaZ amount to add to each MeshPoint
 	 */
-	public boolean raise(double x1, double y1, double x2, double y2, double deltaZ) {
+	public boolean raise(boolean[] selected, double deltaZ) {
 		this.deltaZ = deltaZ;
 		
 		// adjust the height of every point in the box
 		int points = 0;
 		for(int i = 0; i < map.mesh.vertices.length; i++) {
 			MeshPoint m = map.mesh.vertices[i];
-			if (m.x < x1 || m.x > x2)
-				continue;
-			if (m.y < y1 || m.y > y2)
-				continue;
-			thisHeight[i] += deltaZ;
-			points++;
+			if (selected[i]) {
+				thisHeight[i] += deltaZ;
+				points++;
+			}
 		}
 
 		// tell the map about the update
@@ -136,13 +131,10 @@ public class TerrainEngine {
 	
 	/**
 	 * exaggerate/compress delta Z for all points in a box
-	 * @param x1 left-most x coordinate
-	 * @param y1 upper-most y coordinate
-	 * @param x2 right-most x coordinate
-	 * @param y2 lower-most y coordinate
+	 * @param selected ... per point selected/not booleans
 	 * @param deltaZ amount to add to each MeshPoint
 	 */
-	public boolean exaggerate(double x1, double y1, double x2, double y2, double zMultiple) {
+	public boolean exaggerate(boolean[] selected, double zMultiple) {
 		this.zMultiple = zMultiple;
 		
 		// find the mean altitude for the box
@@ -150,15 +142,13 @@ public class TerrainEngine {
 		double zMin = 666, zMax = -666;
 		for(int i = 0; i < map.mesh.vertices.length; i++) {
 			MeshPoint m = map.mesh.vertices[i];
-			if (m.x < x1 || m.x > x2)
-				continue;
-			if (m.y < y1 || m.y > y2)
-				continue;
-			if (prevHeight[i] > zMax)
-				zMax = prevHeight[i];
-			if (prevHeight[i] < zMin)
-				zMin = prevHeight[i];
-			points++;
+			if (selected[i]) {
+				if (prevHeight[i] > zMax)
+					zMax = prevHeight[i];
+				if (prevHeight[i] < zMin)
+					zMin = prevHeight[i];
+				points++;
+			}
 		}
 		
 		if (points == 0)
@@ -170,12 +160,11 @@ public class TerrainEngine {
 		double zMean = (zMax + zMin)/2;
 		for(int i = 0; i < map.mesh.vertices.length; i++) {
 			MeshPoint m = map.mesh.vertices[i];
-			if (m.x < x1 || m.x > x2)
-				continue;
-			if (m.y < y1 || m.y > y2)
-				continue;
-			double delta = prevHeight[i] - zMean;
-			thisHeight[i] = zMean + (delta * zMultiple);
+			if (selected[i]) {
+				double delta = prevHeight[i] - zMean;
+				thisHeight[i] = zMean + (delta * zMultiple);
+				points++;
+			}
 		}
 
 		// tell the map about the update

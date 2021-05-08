@@ -32,7 +32,6 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final int RAIN_DEBUG = 2;	
 	/**
 	 * instantiate the widgets and register the listeners
 	 */

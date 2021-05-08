@@ -112,7 +112,6 @@ public class TerrainEngine {
 		// adjust the height of every point in the box
 		int points = 0;
 		for(int i = 0; i < map.mesh.vertices.length; i++) {
-			MeshPoint m = map.mesh.vertices[i];
 			if (selected[i]) {
 				thisHeight[i] += deltaZ;
 				points++;
@@ -141,7 +140,6 @@ public class TerrainEngine {
 		int points = 0;
 		double zMin = 666, zMax = -666;
 		for(int i = 0; i < map.mesh.vertices.length; i++) {
-			MeshPoint m = map.mesh.vertices[i];
 			if (selected[i]) {
 				if (prevHeight[i] > zMax)
 					zMax = prevHeight[i];
@@ -159,7 +157,6 @@ public class TerrainEngine {
 		// exaggerate all those points by the specified amount
 		double zMean = (zMax + zMin)/2;
 		for(int i = 0; i < map.mesh.vertices.length; i++) {
-			MeshPoint m = map.mesh.vertices[i];
 			if (selected[i]) {
 				double delta = prevHeight[i] - zMean;
 				thisHeight[i] = zMean + (delta * zMultiple);

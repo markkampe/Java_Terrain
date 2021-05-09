@@ -1,7 +1,7 @@
 package worldBuilder;
 
 /**
- * Dialog to enable to populate MeshPoint floral attributes
+ * Dialog to enable to populate MeshPoint Fauna attributes
  */
 public class FaunaDialog extends ResourceDialog {
 	private static final String[] faunaClasses = {"None", "Birds", "Small Game", "Large Game"};

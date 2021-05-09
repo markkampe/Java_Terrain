@@ -1,7 +1,7 @@
 package worldBuilder;
 
 /**
- * Dialog to enable to populate MeshPoint floral attributes
+ * Dialog to enable to populate MeshPoint Mineral attributes
  */
 public class MineralDialog extends ResourceDialog {
 	private static final String[] rockClasses = {"None", "Stone", "Metal", "Precious"};

@@ -11,49 +11,41 @@ import javax.swing.event.ChangeListener;
  * Dialog to enable the creation a consistent map of a sub-region of the current world.
  */
 public class MineralDialog extends JFrame implements ActionListener, ChangeListener, MapListener, WindowListener, KeyListener {	
+	// flora types (used for quotas)
+	private static final int MIN_NONE = 0;
+	private static final int MIN_STONE = 1;
+	private static final int MIN_METAL = 2;
+	private static final int MIN_PRECIOUS = 3;
+	private static final int MAX_CLASSES = 4;
+	private static final String[] mineralClasses = {"None", "Stone", "Metal", "Precious"};
 	
 	private Map map;
 	private Parameters parms;
-	private Placement placer;		// placement engine
+	private AttributeEngine a;		// attribute placement engine
+	private boolean rules_loaded;	// auto-placement rules have been loaded
 	
 	// placement information
-	private double soilMap[];		// per mesh-point soil/mineral types
-	private double prevSoil[];		// saved soil Map
-	private Color prevColors[];		// saved type to preview color map
-	private String prevNames[];		// saved type to name map
-	private int classCounts[];		// returned placements per class
-	private int chosen_mineral;		// mineral type being placed
+	private int chosen_type;		// mineral type being placed
+	private static final int AUTOMATIC = -1;
 	
 	// widgets
-	private JLabel mode;			// auto/manual mode
-	private JMenu modeMenu;			// mode selection menu
-	private JMenuItem ruleMode;		// automatic (rule based) selection
 	private JButton accept;			// accept these updates
 	private JButton cancel;			// cancel dialog, no updates
 	private JTextField rock_palette;	// mineral placement rules
-	private JButton chooseRocks;	// browse for flora placement trulesnewColors
-	private JSlider mineral_pct;	// fraction of area to be covered
-	private RangeSlider minerals_3;	// relative mineral distribution
-
+	private JButton chooseRocks;	// browse for mineral placement rules
+	private JSlider rocks_pct;		// fraction of area to be covered
+	private RangeSlider rocks_3;	// stone/metal/precious
+	JLabel mode;					// auto/manual mode indication
+	JMenu modeMenu;					// mode selection menu
+	JMenuItem ruleMode;				// automatic (rule-based) selection
+	
 	// selected region info
-	private boolean selected;		// a region has been selected
-	private double x0, y0;			// upper left hand corner
-	private double width, height;	// selected area size (in pixels)
-	private boolean changes_made;	// we have displayed updates
-
-	private static final int MIN_NONE = 0;		// merely soil
-	private static final int MIN_STONE = 1;		// sand-stone, granite, etc
-	private static final int MIN_METAL = 2;		// copper, iron, etc
-	private static final int MIN_PRECIOUS = 3;	// gold, silver, etc
-	private static final int MAX_TYPES = 4;
-	private static final String[] mineralClasses = {"None", "Stone", "Metal", "Precious" };
+	private boolean changes_made;	// we have displayed uncommitted updates
+	private boolean[] whichPoints;	// which points have been selected
 	
 	private static final String AUTO_NAME = "Rule Based";
-	private static final int AUTOMATIC = -1;
 	
-	// multiple selections are additive (vs replacement)
-	private boolean progressive = false;
-
+	
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -63,20 +55,13 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		// pick up references
 		this.map = map;
 		this.parms = Parameters.getInstance();
-		
-		// get incoming Flora Map and its preview colors
-		prevSoil = map.getSoilMap();
-		prevColors = map.getRockColors();
-		prevNames = map.getRockNames();
-		soilMap = new double[prevSoil.length];
-		for(int i = 0; i < prevSoil.length; i++)
-			soilMap[i] = prevSoil[i];
+		this.a = new AttributeEngine(map);
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
 		int border = parms.dialogBorder;
 		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
-		setTitle("Mineral Placement");
+		setTitle("Mineral Deposits");
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
@@ -108,7 +93,7 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		mPanel.add(mode);
 		mPanel.add(new JLabel(" "));
 		locals.add(mPanel);
-		
+
 		// flora rules selection field
 		rock_palette = new JTextField(parms.mineral_rules);
 		JLabel fTitle = new JLabel("Mineral Palette", JLabel.CENTER);
@@ -126,47 +111,47 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		locals.add(fPanel);
 		chooseRocks.addActionListener(this);
 	
-		// mineral coverage slider
-		mineral_pct = new JSlider(JSlider.HORIZONTAL, 0, 100, parms.dRockPct);
-		mineral_pct.setMajorTickSpacing(10);
-		mineral_pct.setMinorTickSpacing(5);
-		mineral_pct.setFont(fontSmall);
-		mineral_pct.setPaintTicks(true);
-		mineral_pct.setPaintLabels(true);
-		fTitle = new JLabel("Mineral Deposits (percentage)");
+		// plant coverage slider
+		rocks_pct = new JSlider(JSlider.HORIZONTAL, 0, 100, parms.dFloraPct);
+		rocks_pct.setMajorTickSpacing(10);
+		rocks_pct.setMinorTickSpacing(5);
+		rocks_pct.setFont(fontSmall);
+		rocks_pct.setPaintTicks(true);
+		rocks_pct.setPaintLabels(true);
+		fTitle = new JLabel("Minderal Deposits (percentage)");
 		fTitle.setFont(fontSmall);
 		locals.add(new JLabel("    "));
-		locals.add(mineral_pct);
+		locals.add(rocks_pct);
 		locals.add(fTitle);
-		mineral_pct.addChangeListener(this);
+		rocks_pct.addChangeListener(this);
 
 		// flora type slider
 		fPanel = new JPanel(new GridLayout(1, 3));
-		JLabel fT1 = new JLabel("Stone");
+		JLabel fT1 = new JLabel(mineralClasses[1]);
 		fT1.setFont(fontLarge);
 		fPanel.add(fT1);
-		JLabel fT2 = new JLabel("Metals", JLabel.CENTER);
+		JLabel fT2 = new JLabel(mineralClasses[2], JLabel.CENTER);
 		fT2.setFont(fontLarge);
 		fPanel.add(fT2);
-		JLabel fT3 = new JLabel("Precious", JLabel.RIGHT);
+		JLabel fT3 = new JLabel(mineralClasses[3], JLabel.RIGHT);
 		fT3.setFont(fontLarge);
 		fPanel.add(fT3);
-		minerals_3 = new RangeSlider(0, 100);
-		minerals_3.setValue(parms.dRockMin);
-		minerals_3.setUpperValue(parms.dRockMax);
-		minerals_3.setMajorTickSpacing(10);
-		minerals_3.setMinorTickSpacing(5);
-		minerals_3.setFont(fontSmall);
-		minerals_3.setPaintTicks(true);
-		minerals_3.setPaintLabels(true);
+		rocks_3 = new RangeSlider(0, 100);
+		rocks_3.setValue(parms.dFloraMin);
+		rocks_3.setUpperValue(parms.dFloraMax);
+		rocks_3.setMajorTickSpacing(10);
+		rocks_3.setMinorTickSpacing(5);
+		rocks_3.setFont(fontSmall);
+		rocks_3.setPaintTicks(true);
+		rocks_3.setPaintLabels(true);
 
-		fTitle = new JLabel("Relative Abundance (percentile)");
+		fTitle = new JLabel("Mineral Distribution (percentile)");
 		fTitle.setFont(fontSmall);
 		locals.add(new JLabel("    "));
 		locals.add(fPanel);
-		locals.add(minerals_3);
+		locals.add(rocks_3);
 		locals.add(fTitle);
-		minerals_3.addChangeListener(this);
+		rocks_3.addChangeListener(this);
 		
 		// put all the sliders in the middle of the pane
 		mainPane.add(locals);
@@ -197,167 +182,106 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 		// get region selection input
 		changes_made = false;
 		map.addMapListener(this);	
-		map.selectMode(Map.Selection.RECTANGLE);
-		selected = map.checkSelection(Map.Selection.RECTANGLE);
+		map.selectMode(Map.Selection.POINTS);
+		map.checkSelection(Map.Selection.POINTS);
 		
 		// we start out with rule-based placement
-		chosen_mineral = AUTOMATIC;
+		chosen_type = AUTOMATIC;
 		mode.setText(AUTO_NAME);
 	}
 	
 	/**
-	 * (re-)determine the mineral types of each selected mesh point
+	 * (re-)determine the plant coverage of each selected mesh point
 	 */
-	private void rulePlacement() {
-		if (placer == null)
-			placer = new Placement(rock_palette.getText(), map, soilMap);
+	private void placeMinerals() {
+		// compute the per-class fractional quotas
+		double[] quotas = new double[MAX_CLASSES];
+		quotas[MIN_NONE] = 1.0;
+		double density = rocks_pct.getValue()/100.0;
+		quotas[MIN_STONE] = density * rocks_3.getValue() / 100.0;
+		quotas[MIN_PRECIOUS] = density * (1.0 - (rocks_3.getUpperValue()/100.0));
+		quotas[MIN_METAL] = density * (rocks_3.getUpperValue() - rocks_3.getValue())/100.0;
 		
-		// count and initialize the points to be populated
-		int point_count = 0;
-		MeshPoint[] points = map.mesh.vertices;
-		for(int i = 0; i < soilMap.length; i++)
-			if (points[i].x >= x0 && points[i].x < x0+width &&
-				points[i].y >= y0 && points[i].y < y0+height) {
-				soilMap[i] = MIN_NONE;
-				point_count++;
-			}
+		// let the attribute auto-placement engine do the work
+		if (!rules_loaded)
+			rules_loaded = a.placementRules(rock_palette.getText(), mineralClasses, AttributeEngine.WhichMap.MINERAL);
+		a.autoPlacement(whichPoints,  quotas, AttributeEngine.WhichMap.MINERAL);
+	}
 
-		// figure out the per-class quotas (in MeshPoints)
-		int quotas[] = new int[MAX_TYPES];
-		point_count = (point_count * mineral_pct.getValue())/100;
-		quotas[MIN_PRECIOUS] = (point_count * (100 - minerals_3.getUpperValue()))/100;
-		quotas[MIN_STONE] = (point_count * minerals_3.getValue())/100;
-		quotas[MIN_METAL] = point_count - (quotas[MIN_PRECIOUS] + quotas[MIN_STONE]);
-		
-		// assign flora types for each MeshPoint
-		classCounts = placer.update(x0, y0, height, width, quotas, mineralClasses);
-	
-		// instantiate (and display) the updated flora map
-		map.setRockColors(placer.previewColors());
-		map.setRockNames(placer.resourceNames());
-		map.setSoilMap(soilMap);
-		map.repaint();
-		changes_made = true;
-	}
-	
-	private void manualPlacement() {
-		MeshPoint[] points = map.mesh.vertices;
-		for(int i = 0; i < soilMap.length; i++)
-			if (points[i].x >= x0 && points[i].x < x0+width &&
-				points[i].y >= y0 && points[i].y < y0+height) {
-				soilMap[i] = chosen_mineral;
-			}
-		
-		map.setSoilMap(soilMap);
-		map.repaint();
-		changes_made = true;
-	}
 
 	/**
-	 * called whenever a region selection changes
-	 * @param mx0	left most point (map coordinate)
-	 * @param my0	upper most point (map coordinate)
-	 * @param dx	width (in map units)
-	 * @param dy	height (in map units)
-	 * @param complete	boolean, has selection completed
-	 * 
-	 * @return	boolean	(should selection continue)
+	 * called when map points are selected
+	 * @param selected boolean per MeshPoint selected or not
+	 * @param selection complete (mouse button no longer down)
 	 */
-	public boolean regionSelected(double mx0, double my0, 
-								  double dx, double dy, boolean complete) {		
-		if (changes_made && !progressive) {
-			for(int i = 0; i < soilMap.length; i++)
-				soilMap[i] = prevSoil[i];
-			changes_made = false;
-		}
-		selected = complete;
-		x0 = mx0;
-		y0 = my0;
-		width = dx;
-		height = dy;
-		if (complete)
-			if (chosen_mineral == AUTOMATIC)
-				rulePlacement();
+	public boolean groupSelected(boolean[] selected, boolean complete) {
+		whichPoints = selected;
+		if (complete) {
+			if (chosen_type == AUTOMATIC)
+				placeMinerals();
 			else
-				manualPlacement();
+				a.placement(whichPoints, AttributeEngine.WhichMap.MINERAL, chosen_type);
+			changes_made = true;
+		}
 		return true;
 	}
-
+	
 	/**
 	 * Slider changes
 	 */
 	public void stateChanged(ChangeEvent e) {
-		if (selected)
-			rulePlacement();
+		// if we have selected points, make it so
+		if (whichPoints != null) {
+			if (e.getSource() == rocks_pct) {
+				placeMinerals();
+			} else if (e.getSource() == rocks_3) {
+				placeMinerals();
+			}
+		}
+		map.requestFocus();
 	}
 	
 	/**
 	 * unregister our map listener and close the dialog
 	 */
 	private void cancelDialog() {
-		// back out any in-progress changes
-		undo();
-		
-		// give up our selection
+		if (changes_made) {
+			undo();
+		}
+
+		// cease to listen to selection events
 		map.selectMode(Map.Selection.ANY);
 		map.removeMapListener(this);
 		map.removeKeyListener(this);
-		
+
 		// close the window
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
 	
 	/**
-	 * commit pending changes
+	 * make pending changes official
 	 */
-	public void accept() {
-		// remember the chosen flora palette and percentages
+	private void accept() {
+		// tell attribute engine to make it so
+		a.commit();
+		changes_made = false;
+		
+		// remember the chosen palette and percentages
 		parms.mineral_rules = rock_palette.getText();
-		parms.dRockPct = mineral_pct.getValue();
-		parms.dRockMin = minerals_3.getValue();
-		parms.dRockMax = minerals_3.getUpperValue();
-		
-		// check-point these updates
-		for(int i = 0; i < soilMap.length; i++)
-			prevSoil[i] = soilMap[i];
-		
-		if (chosen_mineral == AUTOMATIC) {
-			prevColors = placer.previewColors();
-			prevNames = placer.resourceNames();
-			
-			// report the changes
-			if (parms.debug_level > 0) {
-				System.out.println("Mineral Placement (" + ResourceRule.ruleset + 
-								   "): Stone/Metal/Precious = " + classCounts[MIN_STONE] + 
-								   "/" + classCounts[MIN_METAL] +
-								   "/" + classCounts[MIN_PRECIOUS]);
-			}
-		}
+		parms.dRockPct = rocks_pct.getValue();
+		parms.dRockMin = rocks_3.getValue();
+		parms.dRockMax = rocks_3.getUpperValue();
 	}
 
 	/**
 	 * back out any uncommitted updates
 	 */
 	public void undo() {
-		// return to last committed fauna map
-		for(int i = 0; i < soilMap.length; i++)
-			soilMap[i] = prevSoil[i];
-		
-		// update the display accordingly
-		map.setRockColors(prevColors);
-		map.setRockNames(prevNames);
-		map.setSoilMap(soilMap);
-		map.repaint();
+		// return to last committed flora map
+		a.abort();
 	}
 	
-	/**
-	 * Window Close event handler ... implicit CANCEL
-	 */
-	public void windowClosing(WindowEvent e) {
-		cancelDialog();
-	}
-
 	/**
 	 * ENTER/ESC for accept or undo
 	 */
@@ -367,14 +291,27 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 			accept();
 		else if (key == KeyEvent.VK_ESCAPE)
 			undo();
+		
+		// clear the (just committed) selection
+		map.selectMode(Map.Selection.NONE);
+		whichPoints = null;
+		map.selectMode(Map.Selection.POINTS);
+	}
+
+	/**
+	 * Window Close event handler ... implicit CANCEL
+	 */
+	public void windowClosing(WindowEvent e) {
+		cancelDialog();
 	}
 
 	/**
 	 * click events on one of the buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == accept && selected) {
-			accept();
+		if (e.getSource() == accept) {
+			if (changes_made)
+				accept();
 		} else if (e.getSource() == chooseRocks) {
 			FileDialog d = new FileDialog(this, "Mineral Palette", FileDialog.LOAD);
 			d.setFile(rock_palette.getText());
@@ -385,9 +322,8 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 				if (dir != null)
 					palette_file = dir + palette_file;
 				rock_palette.setText(palette_file);
-				placer = null;
+				rules_loaded = false;	// this will need to be re-loaded
 			}
-			placer = null;
 		} else if (e.getSource() == cancel) {
 			cancelDialog();
 		} else {	// most likely a menu item
@@ -397,29 +333,29 @@ public class MineralDialog extends JFrame implements ActionListener, ChangeListe
 				// go back to rule-based selection
 				chooseRocks.setEnabled(true);
 				rock_palette.setEnabled(true);
-				mineral_pct.setEnabled(true);
-				minerals_3.setEnabled(true);
-				chosen_mineral = AUTOMATIC;
-				progressive = false;
-				if (selected)
-					rulePlacement();
+				rocks_pct.setEnabled(true);
+				rocks_3.setEnabled(true);
+				chosen_type = AUTOMATIC;
+				if (whichPoints != null)
+					placeMinerals();
 			} else {
 				// manual choice and placement
 				chooseRocks.setEnabled(false);
 				rock_palette.setEnabled(false);
-				mineral_pct.setEnabled(false);
-				minerals_3.setEnabled(false);
-				chosen_mineral = map.getSoilType(chosen);
-				progressive = true;
-				if (selected)
-					manualPlacement();
+				rocks_pct.setEnabled(false);
+				rocks_3.setEnabled(false);
+				chosen_type = map.getSoilType(chosen);
+				if (whichPoints != null) {
+					a.placement(whichPoints, AttributeEngine.WhichMap.MINERAL, chosen_type);
+					changes_made = true;
+				}
 			}
 			mode.setText(chosen);
-			map.requestFocus();
 		}
+		map.requestFocus();
 	}
 
-	/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }
+	/** (perfunctory)*/ public boolean regionSelected(double mx0, double my0, double dx, double dy, boolean complete) {	return false;}
 	/** (perfunctory) */ public boolean pointSelected(double x, double y) {return false;}
 	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}

@@ -61,7 +61,7 @@ public class FaunaDialog extends JFrame implements ActionListener, ChangeListene
 		Container mainPane = getContentPane();
 		int border = parms.dialogBorder;
 		((JComponent) mainPane).setBorder(BorderFactory.createMatteBorder(border, border, border, border, Color.LIGHT_GRAY));
-		setTitle("Flora Placement");
+		setTitle("Fauna Placement");
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		

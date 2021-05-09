@@ -191,7 +191,7 @@ public class Script {
 					XY_pos xy = position(tokens[1], "Rainfall region");
 					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
 					double rain = num_w_unit(tokens[2], "cm/y", "Annual Rainfall");
-					a.setRegion(selected, AttributeEngine.WhichMap.RAIN, rain);
+					a.placement(selected, AttributeEngine.WhichMap.RAIN, rain);
 					a.commit();
 				}
 				break;
@@ -236,7 +236,7 @@ public class Script {
 					XY_pos xy = position(tokens[1], "mineral region");
 					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
 					double type = map.getSoilType(tokens[2]);
-					a.setRegion(selected, AttributeEngine.WhichMap.MINERAL, type);
+					a.placement(selected, AttributeEngine.WhichMap.MINERAL, type);
 					a.commit();
 				}
 				break;
@@ -248,7 +248,7 @@ public class Script {
 					XY_pos xy = position(tokens[1], "flora region");
 					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
 					double type = map.getFloraType(tokens[2]);
-					a.setRegion(selected, AttributeEngine.WhichMap.FLORA, type);
+					a.placement(selected, AttributeEngine.WhichMap.FLORA, type);
 					a.commit();
 				}
 				break;
@@ -260,7 +260,7 @@ public class Script {
 					XY_pos xy = position(tokens[1], "fauna region");
 					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
 					double type = map.getFaunaType(tokens[2]);
-					a.setRegion(selected, AttributeEngine.WhichMap.FAUNA, type);
+					a.placement(selected, AttributeEngine.WhichMap.FAUNA, type);
 					a.commit();
 				}
 				break;

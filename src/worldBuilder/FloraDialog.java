@@ -127,13 +127,13 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 
 		// flora type slider
 		fPanel = new JPanel(new GridLayout(1, 3));
-		JLabel fT1 = new JLabel("Tall Grass");
+		JLabel fT1 = new JLabel(floraClasses[1]);
 		fT1.setFont(fontLarge);
 		fPanel.add(fT1);
-		JLabel fT2 = new JLabel("Brush", JLabel.CENTER);
+		JLabel fT2 = new JLabel(floraClasses[2], JLabel.CENTER);
 		fT2.setFont(fontLarge);
 		fPanel.add(fT2);
-		JLabel fT3 = new JLabel("Trees", JLabel.RIGHT);
+		JLabel fT3 = new JLabel(floraClasses[3], JLabel.RIGHT);
 		fT3.setFont(fontLarge);
 		fPanel.add(fT3);
 		flora_3 = new RangeSlider(0, 100);

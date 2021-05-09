@@ -160,7 +160,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	private void rainFall(int incoming) {
 		if (selected) {
-			a.setRegion(whichPoints, AttributeEngine.WhichMap.RAIN, incoming);
+			a.placement(whichPoints, AttributeEngine.WhichMap.RAIN, incoming);
 			changes_made = true;
 		}
 	}

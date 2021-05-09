@@ -132,6 +132,16 @@ public class Placement {
 		}
 	}
 
+	public int[] update(double x0, double y0, double height, double width, int quotas[], String classNames[]) {
+		boolean[] selected = new boolean[map.mesh.vertices.length];
+		for(int i = 0; i < selected.length; i++) {
+			MeshPoint p = map.mesh.vertices[i];
+			selected[i] = (p.x >= x0 && p.x <= x0+width && p.y >= y0 && p.y <= y0+height);
+		}
+		
+		return update(selected, quotas, classNames);
+	}
+	
 	/**
 	 * populate the selected region w/resources based on our rules
 	 * 
@@ -144,7 +154,7 @@ public class Placement {
 	 * 
 	 * @return array of (per-class) point placements
 	 */
-	public int[] update(double x0, double y0, double height, double width, int quotas[], String classNames[]) {
+	public int[] update(boolean[] selected, int quotas[], String classNames[]) {
 
 		int counts[] = new int[MAX_RULES];	// allocated points (vs quotas)
 		
@@ -185,12 +195,10 @@ public class Placement {
 			floraGreen[i] = true;
 		}
 		
-		// initialize the points to be populated
+		// initialize the points to be unpopulated
 		for(int i = 0; i < points.length; i++)
-			if (points[i].x >= x0 && points[i].x < x0+width &&
-				points[i].y >= y0 && points[i].y < y0+height) {
+			if (selected[i])
 				resources[i] = NONE;
-			}
 
 		// sub-types bid for mesh points in specified order
 		for(int pass = firstPass; pass <= lastPass; pass++) {
@@ -220,8 +228,7 @@ public class Placement {
 			PointBid winners = null;
 			for(int i = 0; i < points.length; i++) {
 				// make sure it is in selected area
-				if (points[i].x < x0 || points[i].x >= x0+width ||
-						points[i].y < y0 || points[i].y >= y0+height)
+				if (!selected[i])
 					continue;
 
 				// make sure it is not yet occupied

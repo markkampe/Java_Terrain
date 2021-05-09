@@ -16,19 +16,17 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	private static final int FLORA_GRASS = 1;
 	private static final int FLORA_BRUSH = 2;
 	private static final int FLORA_TREE = 3;
-	private static final int MAX_TYPES = 4;		// number of flora classes
+	private static final int MAX_CLASSES = 4;
 	private static final String[] floraClasses = {"Barren", "Grass", "Brush", "Tree"};
 	
 	private Map map;
 	private Parameters parms;
-	private Placement placer;		// placement engine
+	private AttributeEngine a;		// attribute placement engine
+	private boolean rules_loaded;	// auto-placement rules have been loaded
 	
 	// placement information
-	private double floraMap[];		// per mesh-point plant types
-	private double prevFlora[];		// saved flora Map
-	private Color prevColors[];		// saved type to preview color map
-	int classCounts[];				// placement counts by class
 	private int chosen_flora;		// flora type being placed
+	private static final int AUTOMATIC = -1;
 	
 	// widgets
 	private JButton accept;			// accept these updates
@@ -42,15 +40,11 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	JMenuItem ruleMode;				// automatic (rule-based) selection
 	
 	// selected region info
-	private boolean selected;		// a region has been selected
 	private boolean changes_made;	// we have displayed uncommitted updates
-	private double x0, y0;			// upper left hand corner
-	private double width, height;	// selected area size (in pixels)
-	
-	private boolean progressive;	// multiple selects per accept
+	private boolean[] whichPoints;	// which points have been selected
 	
 	private static final String AUTO_NAME = "Rule Based";
-	private static final int AUTOMATIC = -1;
+	
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -61,13 +55,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		// pick up references
 		this.map = map;
 		this.parms = Parameters.getInstance();
-		
-		// get incoming Flora Map and its preview colors
-		prevFlora = map.getFloraMap();
-		prevColors = map.getFloraColors();
-		floraMap = new double[prevFlora.length];
-		for(int i = 0; i < prevFlora.length; i++)
-			floraMap[i] = prevFlora[i];
+		this.a = new AttributeEngine(map);
 		
 		// create the dialog box
 		Container mainPane = getContentPane();
@@ -194,11 +182,10 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 		// get region selection input
 		changes_made = false;
 		map.addMapListener(this);	
-		map.selectMode(Map.Selection.RECTANGLE);
-		selected = map.checkSelection(Map.Selection.RECTANGLE);
+		map.selectMode(Map.Selection.POINTS);
+		map.checkSelection(Map.Selection.POINTS);
 		
 		// we start out with rule-based placement
-		progressive = false;
 		chosen_flora = AUTOMATIC;
 		mode.setText(AUTO_NAME);
 	}
@@ -207,91 +194,51 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	 * (re-)determine the plant coverage of each selected mesh point
 	 */
 	private void placeFlora() {
-		if (placer == null)
-			placer = new Placement(flora_palette.getText(), map, floraMap);
+		// compute the per-class fractional quotas
+		double[] quotas = new double[MAX_CLASSES];
+		quotas[FLORA_NONE] = 1.0;
+		double density = flora_pct.getValue()/100.0;
+		quotas[FLORA_GRASS] = density * flora_3.getValue() / 100.0;
+		quotas[FLORA_TREE] = density * (1.0 - (flora_3.getUpperValue()/100.0));
+		quotas[FLORA_BRUSH] = density * (flora_3.getUpperValue() - flora_3.getValue())/100.0;
 		
-		// count and initialize the points to be populated
-		int point_count = 0;
-		MeshPoint[] points = map.mesh.vertices;
-		for(int i = 0; i < floraMap.length; i++)
-			if (points[i].x >= x0 && points[i].x < x0+width &&
-				points[i].y >= y0 && points[i].y < y0+height) {
-				floraMap[i] = FLORA_NONE;
-				point_count++;
-			}
-
-		// figure out the per-class quotas (in MeshPoints)
-		int quotas[] = new int[MAX_TYPES];
-		quotas[FLORA_NONE] = point_count;	// no quotas imposed on barrens
-		point_count = (point_count * flora_pct.getValue())/100;
-		quotas[FLORA_TREE] = (point_count * (100 - flora_3.getUpperValue()))/100;
-		quotas[FLORA_GRASS] = (point_count * flora_3.getValue())/100;
-		quotas[FLORA_BRUSH] = point_count - (quotas[FLORA_GRASS] + quotas[FLORA_TREE]);
-		
-		// assign flora types for each MeshPoint
-		classCounts = placer.update(x0, y0, height, width, quotas, floraClasses);
-	
-		// instantiate (and display) the updated flora map
-		map.setFloraColors(placer.previewColors());
-		map.setFloraNames(placer.resourceNames());
-		map.setFloraMap(floraMap);
-		map.repaint();
-		changes_made = true;
-	}
-	
-	/**
-	 * set all points in the active region to the selected flora type
-	 */
-	private void manualPlacement() {
-		MeshPoint[] points = map.mesh.vertices;
-		for(int i = 0; i < floraMap.length; i++)
-			if (points[i].x >= x0 && points[i].x < x0+width &&
-				points[i].y >= y0 && points[i].y < y0+height) {
-				floraMap[i] = chosen_flora;
-			}
-		
-		map.setFloraMap(floraMap);
-		map.repaint();
-		changes_made = true;
+		// let the attribute auto-placement engine do the work
+		if (!rules_loaded)
+			rules_loaded = a.placementRules(flora_palette.getText(), floraClasses, AttributeEngine.WhichMap.FLORA);
+		a.autoPlacement(whichPoints,  quotas, AttributeEngine.WhichMap.FLORA);
 	}
 
+
 	/**
-	 * called whenever a region selection changes
-	 * @param mx0	left most point (map coordinate)
-	 * @param my0	upper most point (map coordinate)
-	 * @param dx	width (in map units)
-	 * @param dy	height (in map units)
-	 * @param complete	boolean, has selection completed
-	 * 
-	 * @return	boolean	(should selection continue)
+	 * called when map points are selected
+	 * @param selected boolean per MeshPoint selected or not
+	 * @param selection complete (mouse button no longer down)
 	 */
-	public boolean regionSelected(double mx0, double my0, 
-								  double dx, double dy, boolean complete) {	
-		// undo any uncommitted placements
-		if (changes_made && !progressive) {
-			for(int i = 0; i < floraMap.length; i++)
-				floraMap[i] = prevFlora[i];
-			changes_made = false;
-		}
-		selected = complete;
-		x0 = mx0;
-		y0 = my0;
-		width = dx;
-		height = dy;
-		if (complete)
+	public boolean groupSelected(boolean[] selected, boolean complete) {
+		whichPoints = selected;
+		if (complete) {
 			if (chosen_flora == AUTOMATIC)
 				placeFlora();
 			else
-				manualPlacement();
+				a.placement(whichPoints, AttributeEngine.WhichMap.FLORA, chosen_flora);
+			changes_made = true;
+		}
 		return true;
 	}
-
+	
 	/**
 	 * Slider changes
 	 */
 	public void stateChanged(ChangeEvent e) {
-		if (selected)
-			placeFlora();
+		// if we have selected points, make it so
+		if (whichPoints != null) {
+			if (e.getSource() == flora_pct) {
+				placeFlora();
+			} else if (e.getSource() == flora_3) {
+				placeFlora();
+			}
+		}
+		map.requestFocus();
 	}
 	
 	/**
@@ -316,42 +263,23 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	 * make pending changes official
 	 */
 	private void accept() {
+		// tell attribute engine to make it so
+		a.commit();
+		changes_made = false;
+		
 		// remember the chosen palette and percentages
 		parms.flora_rules = flora_palette.getText();
 		parms.dFloraPct = flora_pct.getValue();
 		parms.dFloraMin = flora_3.getValue();
 		parms.dFloraMax = flora_3.getUpperValue();
-		
-		// check-point these updates
-		for(int i = 0; i < floraMap.length; i++)
-			prevFlora[i] = floraMap[i];
-		
-		if (chosen_flora == AUTOMATIC) {
-			prevColors = placer.previewColors();
-			changes_made = false;
-			
-			// report the changes
-			if (parms.debug_level > 0) {
-				System.out.println("Flora Placement (" + ResourceRule.ruleset + 
-								   "): Grass/Brush/Trees = " + classCounts[FLORA_GRASS] + 
-								   "/" + classCounts[FLORA_BRUSH] +
-								   "/" + classCounts[FLORA_TREE]);
-			}
-		}
 	}
 
 	/**
 	 * back out any uncommitted updates
 	 */
 	public void undo() {
-		// return to last committed fauna map
-		for(int i = 0; i < floraMap.length; i++)
-			floraMap[i] = prevFlora[i];
-		
-		// update the display accordingly
-		map.setFloraColors(prevColors);
-		map.setFloraMap(floraMap);
-		map.repaint();
+		// return to last committed flora map
+		a.abort();
 	}
 	
 	/**
@@ -363,6 +291,11 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 			accept();
 		else if (key == KeyEvent.VK_ESCAPE)
 			undo();
+		
+		// clear the (just committed) selection
+		map.selectMode(Map.Selection.NONE);
+		whichPoints = null;
+		map.selectMode(Map.Selection.POINTS);
 	}
 
 	/**
@@ -376,8 +309,9 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 	 * click events on one of the buttons
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == accept && selected) {
-			accept();
+		if (e.getSource() == accept) {
+			if (changes_made)
+				accept();
 		} else if (e.getSource() == chooseFlora) {
 			FileDialog d = new FileDialog(this, "Floral Palette", FileDialog.LOAD);
 			d.setFile(flora_palette.getText());
@@ -388,7 +322,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 				if (dir != null)
 					palette_file = dir + palette_file;
 				flora_palette.setText(palette_file);
-				placer = null;
+				rules_loaded = false;	// this will need to be re-loaded
 			}
 		} else if (e.getSource() == cancel) {
 			cancelDialog();
@@ -402,8 +336,7 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 				flora_pct.setEnabled(true);
 				flora_3.setEnabled(true);
 				chosen_flora = AUTOMATIC;
-				progressive = false;
-				if (selected)
+				if (whichPoints != null)
 					placeFlora();
 			} else {
 				// manual choice and placement
@@ -412,17 +345,17 @@ public class FloraDialog extends JFrame implements ActionListener, ChangeListene
 				flora_pct.setEnabled(false);
 				flora_3.setEnabled(false);
 				chosen_flora = map.getFloraType(chosen);
-				progressive = true;
-				if (selected)
-					manualPlacement();
+				if (whichPoints != null) {
+					a.placement(whichPoints, AttributeEngine.WhichMap.FLORA, chosen_flora);
+					changes_made = true;
+				}
 			}
 			mode.setText(chosen);
-			map.requestFocus();
 		}
-
+		map.requestFocus();
 	}
 
-	/** (perfunctory) */ public boolean groupSelected(boolean[] selected, boolean complete) { return false; }
+	/** (perfunctory)*/ public boolean regionSelected(double mx0, double my0, double dx, double dy, boolean complete) {	return false;}
 	/** (perfunctory) */ public boolean pointSelected(double x, double y) {return false;}
 	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}

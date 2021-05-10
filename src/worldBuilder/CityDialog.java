@@ -206,6 +206,7 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 */
 		private void confirmPoint() {
 			nameMap[chosenPoint] = String.format("%s: %s - %s", type.getText(), name.getText(), descr.getText());
+			map.repaint();
 		}
 		
 		/**
@@ -213,6 +214,7 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 */
 		private void deletePoint() {
 			nameMap[chosenPoint] = null;
+			map.repaint();
 		}
 		
 		/**

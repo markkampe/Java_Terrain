@@ -1621,6 +1621,17 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			r.paint(g, width, height, TOPO_CELL);
 		}
 		
+		// add capital/city/town/village icons
+		if ((display & SHOW_CITY) != 0) {
+			for(int i = 0; i < mesh.vertices.length; i++) {
+				if (nameMap[i] != null) {
+					String s = nameMap[i];
+					System.out.println(
+							CityDialog.lexType(s) + ": " + CityDialog.lexName(s) + " - " + CityDialog.lexDesc(s));
+				}
+			}
+		}
+		
 		// see if we are rendering the mesh (debugging, put it on top)
 		if ((display & SHOW_MESH) != 0) {
 			g.setColor(MESH_COLOR);

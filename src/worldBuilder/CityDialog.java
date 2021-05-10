@@ -151,7 +151,9 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			lon.setText(String.format("%.5f", parms.longitude(point.x)));
 			String d = nameMap[chosenPoint];
 			if (d != null) {
-				parseName(d);
+				type.setText(lexType(d));
+				name.setText(lexName(d));
+				descr.setText(lexDesc(d));
 			} else {
 				type.setText("");
 				descr.setText("");
@@ -161,6 +163,49 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			// and enable the next selection
 			map.selectMode(Map.Selection.POINT);
 			return true;
+		}
+		
+		/**
+		 * lex the type field off of a nameMap attribute
+		 * @param s
+		 */
+		public static String lexType(String s) {
+			// type: name - description
+			int colon = s.indexOf(':');
+			if (colon > 1)
+				return s.substring(0, colon);
+			else
+				return("");
+		}
+		
+		/**
+		 * lex the name field off of a nameMap attribute
+		 * @param s
+		 */
+		public static String lexName(String s) {
+			// type: name - description
+			int dash = s.indexOf('-');
+			if (dash > 1) {
+				int colon = s.indexOf(':');
+				if (colon > 0 && dash > colon)
+					return s.substring(colon + 2, dash - 1);
+				else
+					return s.substring(0, dash - 1);
+			} else
+				return("");
+		}
+		
+		/**
+		 * lex the description field off of a nameMap attribute
+		 * @param s
+		 */
+		public static String lexDesc(String s) {
+			// type: name - description
+			int dash = s.indexOf('-');
+			if (dash > 1)
+				return s.substring(dash + 2);
+			else
+				return s;
 		}
 		
 		/**
@@ -175,29 +220,6 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 */
 		private void deletePoint() {
 			nameMap[chosenPoint] = null;
-		}
-		
-		/**
-		 * lex off the type, name, and description fields
-		 * @param n - name field to be lexed
-		 */
-		private void parseName(String n) {
-			// start with simple defaults
-			type.setText("");
-			name.setText("");
-			descr.setText(n);
-			
-			// type is the field before the colon
-			int blank = n.indexOf(' ');
-			int colon = n.indexOf(':');
-			if (colon > 0 && colon < blank) {
-				type.setText(n.substring(0, colon));
-				int dash = n.indexOf('-', colon+2);
-				if (dash > 0) {
-					name.setText(n.substring(colon+2, dash));
-					descr.setText(n.substring(dash + 2));
-				}
-			}
 		}
 		
 		/**

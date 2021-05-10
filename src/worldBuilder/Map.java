@@ -4,7 +4,9 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -14,6 +16,7 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import javax.imageio.ImageIO;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 import javax.swing.*;
@@ -124,6 +127,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	/** rainfall	*/
 	public double min_rain,			// minimum rainfall (cm/y)
 				  max_rain;			// maximum rainfall (cm/y)
+	
+	// icons to be placed on may (e.g. for cities)
+	private static final String[] iconNames = {"capitol", "city", "town", "village" };
+	private BufferedImage[] iconImages;
 
 	private Parameters parms;
 	
@@ -147,6 +154,24 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		this.addMouseMotionListener(this);
 		this.addMouseListener(this);
 		sel_mode = Selection.ANY;
+		
+		// load the map icons
+		iconImages = new BufferedImage[iconNames.length];
+		for(int i = 0; i < iconNames.length; i++) {
+			String filename = "icons/" + iconNames[i] + ".bmp";
+			try {
+				if (filename.charAt(0) != '/') {
+					InputStream s = getClass().getResourceAsStream(filename);
+					if (s != null)
+						iconImages[i] = ImageIO.read(s);
+					else
+						throw new IOException("nonesuch");
+				} else 
+					iconImages[i] = ImageIO.read(new File(filename));
+			} catch (IOException x) {
+				System.err.println("unable to load map icon file " + filename);
+			}
+		}
 	}
 	
 	/**
@@ -1626,8 +1651,15 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			for(int i = 0; i < mesh.vertices.length; i++) {
 				if (nameMap[i] != null) {
 					String s = nameMap[i];
-					System.out.println(
-							CityDialog.lexType(s) + ": " + CityDialog.lexName(s) + " - " + CityDialog.lexDesc(s));
+					String t = CityDialog.lexType(s);
+					for(int j = 0; j < iconNames.length; j++)
+						if (iconImages[j] != null && iconNames[j].equals(t)) {
+							// adjust <x,y> to center icon on that point
+							int x = screen_x(mesh.vertices[i].x);
+							int y = screen_y(mesh.vertices[i].y);
+							// FIX display this icon at this location
+							break;
+						}
 				}
 			}
 		}

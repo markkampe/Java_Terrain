@@ -60,6 +60,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private static final int SELECT_RADIUS = 6;	// width of a selected point indicator
 	private static final int TOPO_CELL = 5;		// pixels/topographic cell
 												// CODE DEPENDS ON THIS CONSTANT
+	
+	private static final String DEFAULT_ICONS = "/icons";
+	
 	private Dimension size;
 	
 	// displayed window offset and size
@@ -129,7 +132,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				  max_rain;			// maximum rainfall (cm/y)
 	
 	// icons to be placed on may (e.g. for cities)
-	private static final String[] iconNames = {"capitol", "city", "town", "village" };
 	private BufferedImage[] iconImages;
 
 	private Parameters parms;
@@ -156,20 +158,21 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		sel_mode = Selection.ANY;
 		
 		// load the map icons
-		iconImages = new BufferedImage[iconNames.length];
-		for(int i = 0; i < iconNames.length; i++) {
-			String filename = "icons/" + iconNames[i] + ".bmp";
+		iconImages = new BufferedImage[CityDialog.typeList.length];
+		for(int i = 0; i < CityDialog.typeList.length; i++) {
+			String filename = CityDialog.typeList[i] + ".bmp";
 			try {
-				if (filename.charAt(0) != '/') {
-					InputStream s = getClass().getResourceAsStream(filename);
-					if (s != null)
-						iconImages[i] = ImageIO.read(s);
-					else
-						throw new IOException("nonesuch");
-				} else 
+				if (filename.charAt(0) == '/') {	// XXX add icons path to config file
 					iconImages[i] = ImageIO.read(new File(filename));
+				} else {
+					InputStream s = getClass().getResourceAsStream(DEFAULT_ICONS + "/" + filename);
+					if (s == null)
+						throw new IOException("not available to class loader");
+					else
+						iconImages[i] = ImageIO.read(s);
+				}
 			} catch (IOException x) {
-				System.err.println("unable to load map icon file " + filename);
+				System.err.println("unable to open icon image " + filename);
 			}
 		}
 	}
@@ -1648,16 +1651,26 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		
 		// add capital/city/town/village icons
 		if ((display & SHOW_CITY) != 0) {
+			g.setColor(Color.BLACK);
 			for(int i = 0; i < mesh.vertices.length; i++) {
 				if (nameMap[i] != null) {
 					String s = nameMap[i];
 					String t = CityDialog.lexType(s);
-					for(int j = 0; j < iconNames.length; j++)
-						if (iconImages[j] != null && iconNames[j].equals(t)) {
-							// adjust <x,y> to center icon on that point
-							int x = screen_x(mesh.vertices[i].x);
-							int y = screen_y(mesh.vertices[i].y);
-							// FIX display this icon at this location
+					for(int j = 0; j < CityDialog.typeList.length; j++)
+						if (iconImages[j] != null && CityDialog.typeList[j].equals(t)) {
+							// get the pixels
+							BufferedImage img = iconImages[j];
+							int w = img.getWidth();
+							int h = img.getHeight();
+							int[] pixels = new int[w * h];
+							img.getRaster().getPixels(0, 0, w, h, pixels);
+							// over-paint the black pixels
+							int x = screen_x(mesh.vertices[i].x) - w/2;
+							int y = screen_y(mesh.vertices[i].y) - h/2;
+							for(int r = 0; r < h; r++)
+								for(int c = 0; c < w; c++)
+									if (pixels[(r*w) + c] == 0)
+										g.drawLine(x+c, y+r, x+c, y+r);
 							break;
 						}
 				}

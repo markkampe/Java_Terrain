@@ -87,6 +87,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	public String faunaNames[];	// import/export name for each fauna type
 
 	// per MeshPoint information
+	private String nameMap[];	// name/description of each mesh POint
 	private double heightMap[]; // Height of each mesh point
 	private double soilMap[];	// Soil type of each mesh point
 	private double rainMap[];	// Rainfall of each mesh point
@@ -174,6 +175,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		double[] f = new double[newlen];	// flora map
 		double[] a = new double[newlen];	// fauna map
 		double[] w = new double[newlen];	// incoming map
+		String[] n = new String[newlen];	// name Map
 
 		// interpolate per-point attributes for each mesh point
 		for(int i = 0; i < newlen; i++) {
@@ -212,6 +214,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			}
 		}
 		
+		// FIX find named points within subregion
+		
 		// install and attribute the new mesh
 		setMesh(newMesh);
 		rainMap = r;
@@ -221,6 +225,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		erodeMap = e;
 		incoming = w;
 		heightMap = h;
+		nameMap = n;
 		tileHeight = null;
 		tileDepth = null;
 		
@@ -289,6 +294,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		isSubRegion = false;
 		double x = 0;
 		double y = 0;
+		String name = null;
 		String poi_type = "";
 		String poi_name = "";
 		
@@ -366,7 +372,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 						break;
 						
 					case "name":
-						poi_name = parser.getString();
+						if (inPoIs)
+							poi_name = parser.getString();
+						else
+							name = parser.getString();
 						break;
 						
 					// world attributes
@@ -457,6 +466,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					faunaMap[points] = fauna;
 					rainMap[points] = rain;
 					incoming[points] = influx;
+					nameMap[points] = name;
 					points++;
 				} else if (inPoIs) {
 					poi_list.add(new POI(poi_type, poi_name, x, y));
@@ -481,6 +491,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					fauna = 0;
 					rain = 0;
 					z = 0.0;
+					name = null;
 				} else if (inPoIs) {
 					poi_name = "";
 					poi_type = "";
@@ -651,6 +662,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			output.write(String.format(", \"fauna\": \"%s\"", faunaNames[(int) Math.round(faunaMap[x])]));
 		if (incoming[x] != 0)
 			output.write(String.format(", \"influx\": \"%.2f%s\"", incoming[x], Parameters.unit_f));
+		if (nameMap[x] != null)
+			output.write(String.format(", \"name\": \"%s\"",  nameMap[x]));
 		output.write(" }");
 	}
 	
@@ -676,6 +689,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.faunaMap = new double[mesh.vertices.length];
 			this.highLights = new Color[mesh.vertices.length];
 			this.incoming = new double[mesh.vertices.length];
+			this.nameMap = new String[mesh.vertices.length];
 			this.poi_list = new LinkedList<POI>();
 			this.drainage = new Drainage(this);
 			this.waterflow = new WaterFlow(this);
@@ -696,6 +710,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			this.floraMap = null;
 			this.faunaMap = null;
 			this.incoming = null;
+			this.nameMap = null;
 			this.poi_list = null;
 			this.highLights = null;
 			this.drainage = null;
@@ -942,6 +957,13 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		faunaNames = new String[newNames.length];
 		for(int i = 0; i < newNames.length; i++)
 			faunaNames[i] = newNames[i];
+	}
+	
+	/**
+	 * return the list of per-point names/descriptions
+	 */
+	public String[] getNameMap() {
+		return nameMap;
 	}
 	
 	/**

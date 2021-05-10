@@ -20,7 +20,6 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		private static final Color SELECTED_COLOR = Color.MAGENTA;
 
 		private JMenu typeMenu;
-		private JMenuItem none, capitol, city, town, village;
 		private JLabel type;
 		private JTextField name;
 		private JLabel lat;
@@ -29,6 +28,9 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		private JButton accept;
 		private JButton delete;
 		private JButton cancel;
+		
+		public static final String[] typeList = {"capitol", "city", "town", "village" };
+		private JMenuItem typeMenuItems[];
 		
 		private static final long serialVersionUID = 1L;
 		
@@ -52,22 +54,13 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			// type selection menu
 			JMenuBar bar = new JMenuBar();
 			typeMenu = new JMenu("type");
-			none = new JMenuItem("none");
-			typeMenu.add(none);
-			none.addActionListener(this);
-			capitol = new JMenuItem("capitol");
-			typeMenu.add(capitol);
-			capitol.addActionListener(this);
-			city = new JMenuItem("city");
-			typeMenu.add(city);
-			city.addActionListener(this);
-			town = new JMenuItem("town");
-			typeMenu.add(town);
-			town.addActionListener(this);
-			village = new JMenuItem("village");
-			typeMenu.add(village);
-			village.addActionListener(this);
-
+			typeMenu.add("none");
+			typeMenuItems = new JMenuItem[typeList.length];
+			for(int i = 0; i < typeList.length; i++) {
+				typeMenuItems[i] = new JMenuItem(typeList[i]);
+				typeMenu.add(typeMenuItems[i]);
+				typeMenuItems[i].addActionListener(this);
+			}
 			bar.add(typeMenu);
 
 			JPanel info = new JPanel();
@@ -250,16 +243,13 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 				cancelDialog();
 			} else if (e.getSource() == delete) {
 				deletePoint();
-			} else if (e.getSource() == none) {
+			} else {
 				type.setText("");
-			} else if (e.getSource() == capitol) {
-				type.setText("capitol");
-			} else if (e.getSource() == city) {
-				type.setText("city");
-			} else if (e.getSource() == town) {
-				type.setText("town");
-			} else if (e.getSource() == village) {
-				type.setText("village");
+				for(int i = 0; i < typeList.length; i++)
+					if (e.getSource() == typeMenuItems[i]) {
+						type.setText(typeList[i]);
+						break;
+					}
 			}
 		}
 		

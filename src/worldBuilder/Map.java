@@ -1656,23 +1656,35 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				if (nameMap[i] != null) {
 					String s = nameMap[i];
 					String t = CityDialog.lexType(s);
+					int x = screen_x(mesh.vertices[i].x);
+					int y = screen_y(mesh.vertices[i].y);
+					// draw the icon
 					for(int j = 0; j < CityDialog.typeList.length; j++)
 						if (iconImages[j] != null && CityDialog.typeList[j].equals(t)) {
 							// get the pixels
 							BufferedImage img = iconImages[j];
+							// figure out where to put them
 							int w = img.getWidth();
 							int h = img.getHeight();
+							x -= w/2;
+							y -= h/2;
+							// over-paint the black pixels
 							int[] pixels = new int[w * h];
 							img.getRaster().getPixels(0, 0, w, h, pixels);
-							// over-paint the black pixels
-							int x = screen_x(mesh.vertices[i].x) - w/2;
-							int y = screen_y(mesh.vertices[i].y) - h/2;
 							for(int r = 0; r < h; r++)
 								for(int c = 0; c < w; c++)
 									if (pixels[(r*w) + c] == 0)
 										g.drawLine(x+c, y+r, x+c, y+r);
+							
+							x += w;	// name goes after the icon
+							y += h/2;	// letters are painted up, vs icons painted down
 							break;
 						}
+					
+					// put up the name to the right of the icon
+					String n = CityDialog.lexName(s);
+					if (n != null && !n.equals(""))
+						g.drawString(n, x, y);
 				}
 			}
 		}

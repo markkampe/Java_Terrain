@@ -1652,6 +1652,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		// add capital/city/town/village icons
 		if ((display & SHOW_CITY) != 0) {
 			g.setColor(Color.BLACK);
+			FontMetrics m = g.getFontMetrics();
+			int n_height = m.getHeight();
 			for(int i = 0; i < mesh.vertices.length; i++) {
 				if (nameMap[i] != null) {
 					String s = nameMap[i];
@@ -1676,15 +1678,15 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 									if (pixels[(r*w) + c] == 0)
 										g.drawLine(x+c, y+r, x+c, y+r);
 							
-							x += w;	// name goes after the icon
-							y += h/2;	// letters are painted up, vs icons painted down
+							x += w;		// name goes after the icon
+							y += h/2;	// name goes at level of dot
 							break;
 						}
 					
 					// put up the name to the right of the icon
 					String n = CityDialog.lexName(s);
 					if (n != null && !n.equals(""))
-						g.drawString(n, x, y);
+						g.drawString(n, x, y+(n_height/3));
 				}
 			}
 		}

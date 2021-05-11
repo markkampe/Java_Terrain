@@ -40,6 +40,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 		private JLabel labelOutlet;
 		private JLabel infoNeighbors;
 		private JLabel labelNeighbors;
+		private JLabel infoName;
+		private JLabel labelName;
 		private JButton selectMode;
 		
 		private boolean meshMode;
@@ -75,7 +77,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			infoDownhill = new JLabel();
 			infoOutlet = new JLabel();
 			infoNeighbors = new JLabel();
-			int fields = 16;
+			infoName = new JLabel();
+			int fields = 17;
 			
 			JPanel info = new JPanel(new GridLayout(fields, 2));
 			info.setBorder(BorderFactory.createEmptyBorder(20,10,20,10));
@@ -119,11 +122,14 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			labelSuspended = new JLabel("Suspended:");
 			info.add(labelSuspended);
 			info.add(infoSuspended);
+			labelName = new JLabel("Name:");
+			info.add(labelName);
+			info.add(infoName);
 			
 			labelNeighbors = new JLabel("Neighbors (mesh):");
 			info.add(labelNeighbors);
 			info.add(infoNeighbors);
-
+		
 			mainPane.add(info,  BorderLayout.CENTER);
 			
 			pack();
@@ -229,6 +235,9 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			infoOutlet.setText(outlet == Drainage.UNKNOWN ? "NONE" :
 								String.format("%.3fMSL", parms.altitude(outlet)));
 			
+			String[] names = map.getNameMap();
+			infoName.setText((names[point.index] == null) ? "NONE" : names[point.index]);
+			
 			// find and highlight our Mesh neighbors
 			String neighbors = "";
 			for(int i = 0; i < point.neighbors; i++) {
@@ -328,6 +337,8 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 					labelDownhill.setForeground(GRAYED);
 					infoOutlet.setText("");
 					labelOutlet.setForeground(GRAYED);
+					infoName.setText("");
+					labelName.setForeground(GRAYED);
 					labelNeighbors.setText("Neghbors (polygon):");
 				} else {
 					meshMode = true;
@@ -338,6 +349,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 					labelSuspended.setForeground(Color.BLACK);
 					labelDownhill.setForeground(Color.BLACK);
 					labelOutlet.setForeground(Color.BLACK);
+					labelName.setForeground(Color.BLACK);
 					labelNeighbors.setText("Neighbors (mesh):");
 				}
 				selectMode.setText((meshMode ? "Mesh" : "Map") + " Points");

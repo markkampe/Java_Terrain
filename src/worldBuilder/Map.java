@@ -1001,6 +1001,17 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
+	 * assoicate a name with the MeshPoint nearest <x,y>
+	 * @param name new name string
+	 * @param x (map) x coordinate
+	 * @param y (map) y coordinate
+	 */
+	public void addName(String name, double x, double y) {
+		MeshPoint p = mesh.choosePoint(x, y);
+		nameMap[p.index] = name;
+	}
+	
+	/**
 	 * return the list of Points of Interest
 	 */
 	public LinkedList<POI> getPOI() {

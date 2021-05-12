@@ -290,10 +290,11 @@ public class Script {
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. %s <x,y> name [description]", 
 										filename, lineNum, line, tokens[0]));
 				else {
-					String type = tokens[1];
-					String name = tokens[2];
-					String desc = tokens[3];
-					// FIX add city(x, y, type, name, desc)
+					XY_pos xy = position(tokens[1], "location");
+					String entry = tokens[0] + ": " + tokens[2] + " -";
+					if (tokens[3] != null)
+						entry += " " +  tokens[3];
+					map.addName(entry, xy.x, xy.y);
 				}
 				break;
 

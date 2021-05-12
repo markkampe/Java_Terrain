@@ -86,6 +86,10 @@ fauna	<-0.1,0.0>-<0.1,0.2>	"Bear"
 # points of interest
 PoI		<-0.1,-0.1>	ENTRY "Plymouth Harbor"
 PoI		<0.1,-0.1>	EXIT "Plymouth Gate"
+capitol		<-0.1,-0.2>	Veruda
+city		<-0.15,-0.15>	"Port Kess"
+town		<-0.2,-0.1>	"Simpleton"
+village		<-0.3,-0.05>	BoonieVille "just like it sounds"
 
 # comment out to exercise the error cases
 exit	-1

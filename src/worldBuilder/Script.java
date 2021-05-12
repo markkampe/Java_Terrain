@@ -282,10 +282,10 @@ public class Script {
 				}
 				break;
 				
-			case "capitol":	// village <x1,y1> name description
-			case "city":	// village <x1,y1> name description
-			case "town":	// village <x1,y1> name description
-			case "village":	// village <x1,y1> name description
+			case "capitol":	// capitol <x1,y1> name [description]
+			case "city":	// city <x1,y1> name [description]
+			case "town":	// town <x1,y1> name [description]
+			case "village":	// village <x1,y1> name [description]
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. %s <x,y> name [description]", 
 										filename, lineNum, line, tokens[0]));
@@ -295,6 +295,10 @@ public class Script {
 					if (tokens[3] != null)
 						entry += " " +  tokens[3];
 					map.addName(entry, xy.x, xy.y);
+					
+					if (parms.debug_level > 0)
+						System.out.println(String.format("add %s %s (at <%.5f,%.5f>)",
+											tokens[0], tokens[2], parms.latitude(xy.y), parms.longitude(xy.x)));
 				}
 				break;
 

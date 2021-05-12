@@ -223,10 +223,18 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			a[i] = poly.nearest(faunaMap);
 		}
 		
-		// reproduce all water flows INTO the new sub-region
+		// reproduce all cities and water flows INTO the new sub-region
 		for (int i = 0; i < mesh.vertices.length; i++) {
 			MeshPoint p = mesh.vertices[i];
 			if (inTheBox(p.x, p.y)) {
+				// copy name attributes to nearest point in new mesh
+				if (nameMap[i] != null) {
+					double x = (p.x - xShift) * xScale;
+					double y = (p.y - yShift) * yScale;
+					MeshPoint p2 = newMesh.choosePoint(x, y);
+					n[p2.index] = nameMap[i];
+				}
+				// find all water flows ENTERING the box from outside
 				for (int j = 0; j < mesh.vertices.length; j++) {
 					MeshPoint p2 = mesh.vertices[j];
 					if (drainage.downHill[j] == i && !inTheBox(p2.x, p2.y)) {
@@ -241,8 +249,6 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				}
 			}
 		}
-		
-		// FIX find named points within subregion
 		
 		// install and attribute the new mesh
 		setMesh(newMesh);

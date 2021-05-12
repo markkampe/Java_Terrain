@@ -174,6 +174,10 @@ public class TerrainEngine {
 		return true;
 	}
 	
+	public boolean ridge(double x0, double y0, double x1, double y1, double height, double radius) {
+		return false;	// FIX implement TerrainEngine.ridge()
+	}
+	
 	/**
 	 * set the incoming river flux for the specified MeshPoint
 	 * @param MeshPointoint to be updated

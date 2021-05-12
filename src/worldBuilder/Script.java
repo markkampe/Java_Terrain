@@ -223,10 +223,18 @@ public class Script {
 				}
 				break;
 				
-				
-			case "mountain":
-			case "canyon":
-				System.err.println(tokens[0] + " command not yet implemented");
+			case "mountain":	// <x1,y1> radius(m,km) height(m,km) [shape] [mineral]
+			case "ridge":		// <x1,y1>-<x2,y2> radius(m,km) height(m,km) [shape] [mineral]
+				String exp = tokens[0].equals("mountain") ? "mountain <x,y>" : "ridge <x,y>-<x,y>";
+				if (tokens[1] == null || tokens[2] == null || tokens[3] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. %s height radius", filename, lineNum, line, exp));
+				else {
+					XY_pos xy = position(tokens[1], "location");
+					double z = z_value(tokens[2], "altitude");
+					double r = xy_value(tokens[3], "radius");
+					t.ridge(xy.x, xy.y, xy.x2, xy.y2, z, r);
+					t.commit();
+				}
 				break;
 				
 			case "minerals":	// <x1,y1>-<x2,y2> type
@@ -271,6 +279,21 @@ public class Script {
 				else {
 					XY_pos xy = position(tokens[1], "POI location");
 					map.addPOI(new POI(tokens[2], tokens[3], xy.x, xy.y));
+				}
+				break;
+				
+			case "capitol":	// village <x1,y1> name description
+			case "city":	// village <x1,y1> name description
+			case "town":	// village <x1,y1> name description
+			case "village":	// village <x1,y1> name description
+				if (tokens[1] == null || tokens[2] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. %s <x,y> name [description]", 
+										filename, lineNum, line, tokens[0]));
+				else {
+					String type = tokens[1];
+					String name = tokens[2];
+					String desc = tokens[3];
+					// FIX add city(x, y, type, name, desc)
 				}
 				break;
 
@@ -383,6 +406,41 @@ public class Script {
 	}
 
 	/**
+	 * lex off a horizontal distance (radius, km, or m)
+	 * @param value	string to be lexed
+	 * @param attribute name (for error messages)
+	 * @return
+	 */
+	private double xy_value(String value, String attribute) {
+		// see if there is a suffix
+		String number = value;
+		String suffix = null;
+		for(int pos = 0; pos < value.length(); pos++) {
+			char c = value.charAt(pos);
+			if (Character.isDigit(c) || c == '.' || c == '-')
+				continue;
+			number = value.substring(0,pos);
+			suffix = value.substring(pos);
+			break;
+		}
+		double retval = 0;
+		try {
+			retval = Double.parseDouble(number);
+		} catch (NumberFormatException e) {
+			System.err.println(attribute + " Non-numeric value: " + number);
+		}
+
+		// see if this is in km or meters
+		if (suffix != null) 
+			if (suffix.equals("km"))
+				return(parms.x(retval));
+			else if (suffix.equals("m"))
+				return parms.x(retval)/1000.0;
+		// assume it is in map units
+		return retval;
+	}
+	
+	/**
 	 * lex off a numeric value that might be in Z units or meters
 	 * @param value string to be lexed
 	 * @param attribute name for error messages
@@ -414,9 +472,11 @@ public class Script {
 		// in meters ... convert to Z value
 		if (suffix.equals("m"))
 			return parms.z(retval);
+		else if (suffix.equals("km"))
+			return 1000.0 * parms.z(retval);
 		
 		// unrecognized unit
-		System.err.println(attribute + " Unit Error: got: " + suffix + ", expected: m");
+		System.err.println(attribute + " Unit Error: got: " + suffix + ", expected: m/km");
 		return(0);
 	}
 	

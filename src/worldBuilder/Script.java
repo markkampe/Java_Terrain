@@ -297,7 +297,7 @@ public class Script {
 					map.addName(entry, xy.x, xy.y);
 					
 					if (parms.debug_level > 0)
-						System.out.println(String.format("add %s %s (at <%.5f,%.5f>)",
+						System.out.println(String.format("%s: %s at <%.5f,%.5f>",
 											tokens[0], tokens[2], parms.latitude(xy.y), parms.longitude(xy.x)));
 				}
 				break;

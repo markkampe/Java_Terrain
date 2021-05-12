@@ -185,7 +185,7 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 				else
 					return s.substring(0, dash - 1);
 			} else
-				return("");
+				return(s);
 		}
 		
 		/**

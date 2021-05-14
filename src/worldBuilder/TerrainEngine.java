@@ -175,7 +175,46 @@ public class TerrainEngine {
 	}
 	
 	public boolean ridge(double x0, double y0, double x1, double y1, double height, double radius) {
-		return false;	// FIX implement TerrainEngine.ridge()
+		// note the two end-points and how far out the slope extends
+		MeshPoint p0 = new MeshPoint(x0, y0);
+		MeshPoint p1 = new MeshPoint(x1, y1);
+		double minDist = p0.distance(p1);
+		double maxDist = minDist + radius;
+		
+		// update all points within the range of this ridge
+		int points = 0;
+		for(int i = 0; i < thisHeight.length; i++) {
+			// is this point within the slope of this ridge
+			MeshPoint p = map.mesh.vertices[i];
+			double d0 = p0.distance(p);
+			double d1 = p1.distance(p);
+			// double d2 = p.distanceLine(x0, y0, x1, y1);  // which side are we on
+			if (d0 + d1 > maxDist)
+				continue;
+			
+			// calculate the delta-z for this point
+			double d = d0 + d1 - minDist;
+			double dh_cone = (radius - d) * height / radius;
+			double dh = dh_cone;
+			
+			// make sure it is legal
+			double z_new = thisHeight[i] + dh;
+			if (z_new > Parameters.z_extent/2)
+				thisHeight[i] = Parameters.z_extent/2;
+			else if (z_new < -Parameters.z_extent/2)
+				thisHeight[i] = -Parameters.z_extent/2;
+			else
+				thisHeight[i] = z_new;
+			
+			points++;
+		}
+		
+		if (points == 0)
+			return false;
+		
+		map.setHeightMap(thisHeight);
+		adjusted = points;
+		return true;
 	}
 	
 	/**
@@ -194,22 +233,6 @@ public class TerrainEngine {
 					parms.latitude(p.y), parms.longitude(p.x), flux, Parameters.unit_f));
 		}
 		return true;
-	}
-	
-	/**
-	 * place a mountain, ridge, pit or valley on the map
-	 * @param x1	starting x
-	 * @param y1	starting y
-	 * @param x2	ending x
-	 * @param y2	ending y
-	 * @param height maximum z
-	 * @param width	width at base (in x/y units)
-	 * @param shape  (CONICAL-SPHERICAL-CYLINDRICAL)
-	 */
-	public boolean mountain(double x1, double y1, double x2, double y2, double height, double width, int shape) {
-		System.out.println(String.format("Mountain: <%.6f,%.6f>-<%.6f,%.6f>, height=%dM, width=%.6f, shape=%d",
-										x1, y1, x2, y2, width, parms.height(height), shape));
-		return false;
 	}
 	
 	/**

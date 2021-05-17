@@ -21,6 +21,7 @@ public class TerrainEngine {
 	private MeshPoint lastRiver;	// MeshPoint of last added river
 	private double deltaZ;			// last used raise/lower distance
 	private double zMultiple;		// last used exaggerate/compress factor
+	private double ridgeHeight;		// height of last ridge
 	private int adjusted;			// number of points raised/lowered
 	
 	private static final int TERRAIN_DEBUG = 2;
@@ -174,9 +175,18 @@ public class TerrainEngine {
 		return true;
 	}
 	
-	// FIX log ridge formation
 	// FIX add shape
 	// FIX add asymmetry
+	/**
+	 * lay out a mountain/pit or ridge/valley
+	 * @param x0	one end x (map coordinate)
+	 * @param y0	one end y (map coordinate)
+	 * @param x1	other end x (map coordinate)
+	 * @param y1	other end y (map coordinate)
+	 * @param height	height/depth (z units)
+	 * @param radius	width/2 (x/y units)
+	 * @return	boolean (were any points relocated)
+	 */
 	public boolean ridge(double x0, double y0, double x1, double y1, double height, double radius) {
 		// note the two end-points and distance between them
 		MeshPoint p0 = new MeshPoint(x0, y0);
@@ -188,15 +198,17 @@ public class TerrainEngine {
 		for(int i = 0; i < thisHeight.length; i++) {
 			// compute the distance from the ridge line center
 			MeshPoint p = map.mesh.vertices[i];
-			double d0 = p0.distance(p);
-			double d1 = p1.distance(p);
+			double d0 = p.distance(p0);
+			double d1 = p.distance(p1);
 			double d = d0 + d1 - sep;
 			if (d > radius)
 				continue;
 			
 			// calculate the delta-z for this point
 			double dh_cone = (radius - d) * height / radius;
-			double dh = dh_cone;
+			double dh_cyl = height;
+			double dh_circ = Math.cos(Math.PI*d/(4*radius)) * height;
+			double dh = dh_cyl;
 			
 			// make sure it is legal
 			double z_new = thisHeight[i] + dh;
@@ -210,11 +222,12 @@ public class TerrainEngine {
 			points++;
 		}
 		
-		if (points == 0)
+		if (points == 0)	// no points affected
 			return false;
 		
 		map.setHeightMap(thisHeight);
-		adjusted = points;
+		this.adjusted = points;
+		this.ridgeHeight = height;
 		return true;
 	}
 	
@@ -248,6 +261,15 @@ public class TerrainEngine {
 		
 		// log the most recent changes being committed
 		if (parms.debug_level > 0) {
+			if (ridgeHeight > 0) {
+				System.out.println(String.format("Mountain/Ridge (height %d%s) raised %d points",
+						(int) parms.height(ridgeHeight), Parameters.unit_z, adjusted));
+				ridgeHeight = 0;
+			} else if (ridgeHeight < 0) {
+				System.out.println(String.format("Pit/Valley (depth %d%s) lowered %d points",
+						(int) parms.height(ridgeHeight), Parameters.unit_z, adjusted));
+				ridgeHeight = 0;
+			}
 			if (deltaZ != 0) {
 				System.out.println(String.format("Adjusted heights of %d points by %d%s", 
 						this.adjusted, (int) parms.height(deltaZ), Parameters.unit_z));

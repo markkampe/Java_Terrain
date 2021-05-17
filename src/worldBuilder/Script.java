@@ -223,9 +223,9 @@ public class Script {
 				}
 				break;
 				
-			case "mountain":	// <x1,y1> radius(m,km) height(m,km) [shape] [mineral]
+			case "mountain":	// <x1,y1> height(m,km) radius(m,km) [shape] [mineral]
 			case "pit":
-			case "ridge":		// <x1,y1>-<x2,y2> radius(m,km) height(m,km) [shape] [mineral]
+			case "ridge":		// <x1,y1>-<x2,y2> height(m,km) radius(m,km) [shape] [mineral]
 			case "valley":
 				String exp = tokens[0].equals("mountain") ? "mountain <x,y>" : "ridge <x,y>-<x,y>";
 				if (tokens[1] == null || tokens[2] == null || tokens[3] == null)

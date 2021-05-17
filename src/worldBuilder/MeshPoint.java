@@ -74,7 +74,7 @@ public class MeshPoint {
 	}
 	
 	/**
-	 * compute the distance between two points
+	 * compute the (positive) distance between two points
 	 * 
 	 * @param other
 	 * @return distance
@@ -87,6 +87,14 @@ public class MeshPoint {
 	
 	/**
 	 * compute the distance to a specified line
+	 *
+	 *	Notes:
+	 *    - this algorithm computes the area of the triangle
+	 *	    (between the line points and point in question), and
+	 *		divides it by the base (between the line points).
+	 *    - even though end-points are given, this algorithm
+	 *		treates the base-line as infinite, so off the end
+	 *	    can still be very close.
 	 *
 	 * @param x1 map position (-0.5 to 0.5) of one end of line
 	 * @param y1 map position (-0.5 to 0.5) of one end of line

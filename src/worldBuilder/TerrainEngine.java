@@ -174,26 +174,27 @@ public class TerrainEngine {
 		return true;
 	}
 	
+	// FIX log ridge formation
+	// FIX add shape
+	// FIX add asymmetry
 	public boolean ridge(double x0, double y0, double x1, double y1, double height, double radius) {
-		// note the two end-points and how far out the slope extends
+		// note the two end-points and distance between them
 		MeshPoint p0 = new MeshPoint(x0, y0);
 		MeshPoint p1 = new MeshPoint(x1, y1);
-		double minDist = p0.distance(p1);
-		double maxDist = minDist + radius;
+		double sep = p0.distance(p1);
 		
 		// update all points within the range of this ridge
 		int points = 0;
 		for(int i = 0; i < thisHeight.length; i++) {
-			// is this point within the slope of this ridge
+			// compute the distance from the ridge line center
 			MeshPoint p = map.mesh.vertices[i];
 			double d0 = p0.distance(p);
 			double d1 = p1.distance(p);
-			// double d2 = p.distanceLine(x0, y0, x1, y1);  // which side are we on
-			if (d0 + d1 > maxDist)
+			double d = d0 + d1 - sep;
+			if (d > radius)
 				continue;
 			
 			// calculate the delta-z for this point
-			double d = d0 + d1 - minDist;
 			double dh_cone = (radius - d) * height / radius;
 			double dh = dh_cone;
 			

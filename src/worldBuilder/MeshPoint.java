@@ -88,10 +88,10 @@ public class MeshPoint {
 	/**
 	 * compute the distance to a specified line
 	 *
-	 * @param x1 map powition (-0.5 to 0.5) of one end of line
-	 * @param y1 map powition (-0.5 to 0.5) of one end of line
-	 * @param x2 map powition (-0.5 to 0.5) of other end of line
-	 * @param y2 map powition (-0.5 to 0.5) of other end of line
+	 * @param x1 map position (-0.5 to 0.5) of one end of line
+	 * @param y1 map position (-0.5 to 0.5) of one end of line
+	 * @param x2 map position (-0.5 to 0.5) of other end of line
+	 * @param y2 map position (-0.5 to 0.5) of other end of line
 	 * @return distance (which can be positive or negative)
 	 */
 	public double distanceLine(double x1, double y1, double x2, double y2) {

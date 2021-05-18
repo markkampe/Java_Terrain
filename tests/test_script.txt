@@ -28,10 +28,10 @@ exaggerate	<-0.25,-0.35>-<-0.15,-0.25> 2.0
 //display T
 
 # mountains and ridges
-mountain	<0.1,-0.3> 0.1 0.05
-pit		<0.3,-0.3> -0.5km 10000m
-ridge		<0.2,-0.1>-<0.4,-0.1> 500m 5km
-valley		<0.3,0.1>-<0.5,0.1> -500m 5km
+mountain	<0.1,-0.3> 0.1 0.05 flat
+pit		<0.3,-0.3> -0.5km 20000m
+ridge		<0.2,-0.1>-<.35,-0.1> 500m 5km round
+valley		<0.3,0.1>-<0.45,0.1> -500m 10km cone
 
 # adding rivers
 river		<-0.25,-0.5> 200m3/s

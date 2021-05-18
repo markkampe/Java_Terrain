@@ -175,8 +175,11 @@ public class TerrainEngine {
 		return true;
 	}
 	
-	// FIX add shape
-	// FIX add asymmetry
+	// shape coefficients, indexed by shape parameter
+	//								  cone                   sphere                  cylinder
+	private static double[] f_cone = {1.00, 0.75, 0.50, 0.25, 0.00, 0.00, 0.00, 0.00, 0.00};
+	private static double[] f_circ = {0.00, 0.25, 0.50, 0.75, 1.00, 0.75, 0.50, 0.25, 0.00};
+	private static double[] f_cyl =  {0.00, 0.00, 0.00, 0.00, 0.00, 0.25, 0.50, 0.75, 1.00};
 	/**
 	 * lay out a mountain/pit or ridge/valley
 	 * @param x0	one end x (map coordinate)
@@ -185,9 +188,10 @@ public class TerrainEngine {
 	 * @param y1	other end y (map coordinate)
 	 * @param height	height/depth (z units)
 	 * @param radius	width/2 (x/y units)
+	 * @param shape	from Parameters.CONICAL-CYLINDRICAL
 	 * @return	boolean (were any points relocated)
 	 */
-	public boolean ridge(double x0, double y0, double x1, double y1, double height, double radius) {
+	public boolean ridge(double x0, double y0, double x1, double y1, double height, double radius, int shape) {
 		// note the two end-points and distance between them
 		MeshPoint p0 = new MeshPoint(x0, y0);
 		MeshPoint p1 = new MeshPoint(x1, y1);
@@ -196,22 +200,41 @@ public class TerrainEngine {
 		// update all points within the range of this ridge
 		int points = 0;
 		for(int i = 0; i < thisHeight.length; i++) {
-			// compute the distance from the ridge line center
+			// how far is this point from each of the foci
 			MeshPoint p = map.mesh.vertices[i];
 			double d0 = p.distance(p0);
 			double d1 = p.distance(p1);
-			double d = d0 + d1 - sep;
+			
+			// crude/cheap test for being farther than radius from ridgeline
+			double d = (sep > radius) ? 
+					(d0 + d1 - sep) : 	// within elipse defined by foci
+					(d0 + d1)/2;		// within a circle around center
 			if (d > radius)
 				continue;
 			
-			// calculate the delta-z for this point
-			double dh_cone = (radius - d) * height / radius;
-			double dh_cyl = height;
-			double dh_circ = Math.cos(Math.PI*d/(4*radius)) * height;
-			double dh = dh_cyl;
+			// calculate distance from the ridge-line, or the end-points?
+			//  (distanceLine doesn't work for points off the end)
+			// FIX at short radii the hypoteneuse test extends into the ends 
+			double nearest = (d0 < d1) ? d0 : d1;
+			double farthest = (d0 > d1) ? d0 : d1;
+			double hypoteneuse = Math.sqrt((radius*radius) + (sep*sep));
+			if (sep <= radius || (nearest <= radius && farthest >= hypoteneuse))
+				d = nearest;						// point is off one end
+			else {
+				d = p.distanceLine(x0, y0, x1, y1);	// point is to the side
+				if (d < 0)
+					d *= -1;	// high-side vs low side
+			}	
+			if (d >= radius)
+				continue;
+			
+			// calculate the delta-z for this point (based on chosen shape)
+			double dz_cone = f_cone[shape] * (radius - d) * height / radius;
+			double dz_circ = f_circ[shape] * Math.cos(Math.PI*d/(4*radius)) * height;
+			double dz_cyl = f_cyl[shape] * height;
+			double z_new = thisHeight[i] + dz_cone + dz_circ + dz_cyl;
 			
 			// make sure it is legal
-			double z_new = thisHeight[i] + dh;
 			if (z_new > Parameters.z_extent/2)
 				thisHeight[i] = Parameters.z_extent/2;
 			else if (z_new < -Parameters.z_extent/2)

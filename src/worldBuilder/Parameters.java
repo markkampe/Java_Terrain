@@ -21,8 +21,8 @@ import javax.json.stream.JsonParser;
 public class Parameters {
 	// version identification info
 	private static final String PROGRAM_NAME = "WorldBuilder";
-	private static final String PROGRAM_VERSION = "0.1";
-	private static final String VERSION_NAME = "(WIP)";
+	private static final String PROGRAM_VERSION = "0.5";
+	private static final String VERSION_NAME = "(Alpha)";
 
 	// default configuration information
 	/** program name/version*/	public String title = PROGRAM_NAME + " " + PROGRAM_VERSION + " " + VERSION_NAME;

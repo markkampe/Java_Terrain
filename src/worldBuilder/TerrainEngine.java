@@ -24,11 +24,19 @@ public class TerrainEngine {
 	private double ridgeHeight;		// height of last ridge
 	private int adjusted;			// number of points raised/lowered
 	
+	/*
+	 * SQUARE borders parallel the ridge line (at distance r)
+	 * ELIPTICAL radius r at borders, but bulge mid-ridge
+	 */
+	private enum outline {SQUARE, ELIPTICAL};
+	private outline ridge_outline;
+	
 	private static final int TERRAIN_DEBUG = 2;
 
 	public TerrainEngine(Map map) {
 		this.map = map;
 		this.parms = Parameters.getInstance();
+		this.ridge_outline = outline.ELIPTICAL;	// seems more natural
 		
 		// save the incoming heightMap
 		prevHeight = map.getHeightMap();
@@ -214,13 +222,13 @@ public class TerrainEngine {
 			
 			// calculate distance from the ridge-line, or the end-points?
 			//  (distanceLine doesn't work for points off the end)
-			// FIX at short radii the hypoteneuse test extends into the ends 
 			double nearest = (d0 < d1) ? d0 : d1;
 			double farthest = (d0 > d1) ? d0 : d1;
 			double hypoteneuse = Math.sqrt((radius*radius) + (sep*sep));
+			// XXX hypoteneuse value extends this beyond the foci for small radii
 			if (sep <= radius || (nearest <= radius && farthest >= hypoteneuse))
 				d = nearest;						// point is off one end
-			else {
+			else if (ridge_outline == outline.SQUARE) {
 				d = p.distanceLine(x0, y0, x1, y1);	// point is to the side
 				if (d < 0)
 					d *= -1;	// high-side vs low side

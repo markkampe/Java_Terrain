@@ -223,9 +223,9 @@ public class Script {
 				}
 				break;
 				
-			case "mountain":	// <x1,y1> height(m,km) radius(m,km) [shape] [mineral]
+			case "mountain":	// <x1,y1> height(m,km) radius(m,km) [shape]
 			case "pit":
-			case "ridge":		// <x1,y1>-<x2,y2> height(m,km) radius(m,km) [shape] [mineral]
+			case "ridge":		// <x1,y1>-<x2,y2> height(m,km) radius(m,km) [shape]
 			case "valley":
 				String exp = tokens[0].equals("mountain") ? "mountain <x,y>" : "ridge <x,y>-<x,y>";
 				if (tokens[1] == null || tokens[2] == null || tokens[3] == null)
@@ -234,7 +234,23 @@ public class Script {
 					XY_pos xy = position(tokens[1], "location");
 					double z = z_value(tokens[2], "altitude");
 					double r = xy_value(tokens[3], "radius");
-					t.ridge(xy.x, xy.y, xy.x2, xy.y2, z, r);
+					// see if a shape was specified
+					int shape = (Parameters.CONICAL + Parameters.SPHERICAL)/2;
+					if (tokens[4] != null)
+						switch(tokens[4]) {
+						case "flat":
+							shape = Parameters.CYLINDRICAL;
+							break;
+						case "round":
+							shape = Parameters.SPHERICAL;
+							break;
+						case "cone":
+							shape = Parameters.CONICAL;
+							break;
+						default:
+							System.err.println("Unrecognized mountain shape: " + tokens[4]);
+						}
+					t.ridge(xy.x, xy.y, xy.x2, xy.y2, z, r, shape);
 					t.commit();
 				}
 				break;

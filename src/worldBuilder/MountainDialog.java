@@ -259,10 +259,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		if (d1 == 0)
 			d1 = 1;
 		d1 = parms.x(d1);
-		//double d2 = (double) diameter2.getValue();
-		//if (d2 == 0)
-		//	d2 = 1;
-		//d2 = parms.x(d2);
+		double d2 = (double) diameter2.getValue();
+		if (d2 == 0)
+			d2 = 1;
+		d2 = parms.x(d2);
 		
 		// get the height
 		int alt = altitude.getValue();
@@ -270,11 +270,13 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		// get the shape
 		int shape1 = rounding1.getValue();
-		//int shape2 = rounding2.getValue();
+		int shape2 = rounding2.getValue();
 		
+		// tell the TerrainEngine to make it so
 		if (symmetric.isSelected())
 			te.ridge(x_start, y_start, x_end, y_end, z, d1/2, shape1);
-		// FIX asymmetric mountains
+		else
+			te.ridge(x_start, y_start, x_end, y_end, z, d1/2, d2/2, shape1, shape2);
 	}
 	
 	/**
@@ -372,6 +374,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		else if (key == KeyEvent.VK_ESCAPE) {
 			// cancel the last updates
 			te.abort();	
+			selected = false;
 			map.selectMode(Map.Selection.NONE);
 			map.selectMode(Map.Selection.LINE);
 		}

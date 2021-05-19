@@ -88,10 +88,83 @@ mountains: $(JAR) mountain_test.json
 	@cmp /tmp/$@.json mountain_test.json;	\
 	if [ $$? -ne 0 ];			\
 	then					\
-		echo "... $@: /tmp/$@.json does not match expected";\
+		echo "... $@: /tmp/$@.json does not match expected (mountain_test.json)";\
 		false;				\
 	else					\
-		echo "... all heights/depths are as expected";\
+		echo "... all heights/depths are as expected (mountain_test.json)";\
 		rm -f /tmp/$@ /tmp/$@.json;	\
 	fi
 
+attributes: $(JAR) attribute_test.json
+	@echo "creating stripes of rainfall ..."
+	@echo "set z_scale 4000m"				>  /tmp/$@
+	@echo "set xy_scale 200km"				>> /tmp/$@
+	@echo "display TRMFA"					>> /tmp/$@
+	@echo "rainfall <-0.5,-0.5>-<0.5,-0.4>	50"		>> /tmp/$@
+	@echo "rainfall <-0.5,-0.4>-<0.5,-0.3>	100"		>> /tmp/$@
+	@echo "rainfall <-0.5,-0.3>-<0.5,-0.2>	200cm/y"	>> /tmp/$@
+	@echo "rainfall <-0.5,-0.2>-<0.5,-0.1>	300cm/y"	>> /tmp/$@
+	@echo "rainfall <-0.5,-0.1>-<0.5,-0.0>	400cm/y"	>> /tmp/$@
+	@echo "creating blocks of stanard minerals ..."
+	@echo "minerals <-0.5,0.0>-<-0.4,0.1>	Alluvial"	>> /tmp/$@
+	@echo "minerals <-0.4,0.0>-<-0.3,0.1>	\"Sand Stone\""	>> /tmp/$@
+	@echo "minerals <-0.3,0.0>-<-0.2,0.1>	Granite"	>> /tmp/$@
+	@echo "minerals <-0.2,0.0>-<-0.1,0.1>	Basalt"		>> /tmp/$@
+	@echo "minerals <-0.1,0.0>-<-0.0,0.1>	\"Lime Stone\""	>> /tmp/$@
+	@echo "minerals  <0.0,0.0>-<0.1,0.1>	Marble"		>> /tmp/$@
+	@echo "minerals  <0.1,0.0>-<0.2,0.1>	\"Copper Ore\""	>> /tmp/$@
+	@echo "minerals  <0.2,0.0>-<0.3,0.1>	\"Iron Ore\""	>> /tmp/$@
+	@echo "minerals  <0.3,0.0>-<0.4,0.1>	Silver"		>> /tmp/$@
+	@echo "minerals  <0.4,0.0>-<0.5,0.1>	Gold"		>> /tmp/$@
+	@echo "creating blocks of stanard floral ecotopes ..."
+	@echo "flora    <-0.5,0.15>-<-0.4,0.25>	Alpine"		>> /tmp/$@
+	@echo "flora    <-0.4,0.15>-<-0.3,0.25>	Desert"		>> /tmp/$@
+	@echo "flora    <-0.3,0.15>-<-0.2,0.25>	Grassland"	>> /tmp/$@
+	@echo "flora    <-0.2,0.15>-<-0.1,0.25>	Brush"		>> /tmp/$@
+	@echo "flora    <-0.1,0.15>-<0.0,0.25>	Marsh"		>> /tmp/$@
+	@echo "flora     <0.0,0.15>-<0.1,0.25>	Riperian"	>> /tmp/$@
+	@echo "flora     <0.1,0.15>-<0.2,0.25>	Palms"		>> /tmp/$@
+	@echo "flora     <0.2,0.15>-<0.3,0.25>	Jungle"		>> /tmp/$@
+	@echo "flora     <0.3,0.15>-<0.4,0.25>	Broadleaf"	>> /tmp/$@
+	@echo "flora     <0.4,0.15>-<0.5,0.25>	Conifers"	>> /tmp/$@
+	@echo "creating blocks of stanard fauna types ..."
+	@echo "fauna    <-0.5,0.3>-<-0.4,0.4>	Fish"		>> /tmp/$@
+	@echo "fauna    <-0.4,0.3>-<-0.3,0.4>	Birds"		>> /tmp/$@
+	@echo "fauna    <-0.3,0.3>-<-0.2,0.4>	Rabbits"	>> /tmp/$@
+	@echo "fauna    <-0.2,0.3>-<-0.1,0.4>	Foxes"		>> /tmp/$@
+	@echo "fauna    <-0.1,0.3>-<0.0,0.4>	Deer"		>> /tmp/$@
+	@echo "fauna     <0.0,0.3>-<0.1,0.4>	Bear"		>> /tmp/$@
+#	save and compare
+	@echo "save /tmp/$@.json"				>> /tmp/$@
+	@echo "exit 0"						>> /tmp/$@
+	@java -jar $(JAR) -s /tmp/$@ $(MESH)
+	@cmp /tmp/$@.json attribute_test.json;	\
+	if [ $$? -ne 0 ];			\
+	then					\
+		echo "... $@: /tmp/$@.json does not match expected (attribute_test.json)";\
+		false;				\
+	else					\
+		echo "... all point attributes are as expected (attribute_test.json)";\
+		rm -f /tmp/$@ /tmp/$@.json;	\
+	fi
+
+waterflow: $(JAR) waterflow_test.json
+	@echo "set z_scale 4000m"			>  /tmp/$@
+	@echo "set xy_scale 200km"			>> /tmp/$@
+	@echo "display TW"				>> /tmp/$@
+	@echo "creating hills and valleys"
+	@echo "adding rain-fall"
+	@echo "adding arterial rivers"
+#	save and compare
+	@echo "save /tmp/$@.json"			>> /tmp/$@
+	@echo "exit 0"					>> /tmp/$@
+	@java -jar $(JAR) -s /tmp/$@ $(MESH)
+	@cmp /tmp/$@.json waterflow_test.json;	\
+	if [ $$? -ne 0 ];			\
+	then					\
+		echo "... $@: /tmp/$@.json does not match expected";\
+		false;				\
+	else					\
+		echo "... all water depths are as expected";\
+		rm -f /tmp/$@ /tmp/$@.json;	\
+	fi

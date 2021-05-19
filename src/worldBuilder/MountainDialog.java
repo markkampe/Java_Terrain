@@ -89,11 +89,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		symmetric = new JCheckBox("Symmetric");
 		symmetric.setFont(fontLarge);
-		symmetric.setSelected(true);
-		
+	
 		eliptical = new JCheckBox("Eliptical");
 		eliptical.setFont(fontLarge);
-		eliptical.setSelected(true);
 		
 		form = new JComboBox<String>();
 		JLabel formLabel = new JLabel("Land Form", JLabel.CENTER);
@@ -217,15 +215,21 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		formPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 		p7.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 		p8.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
-		controls.add(p0);
+		controls.add(altPanel);
 		controls.add(diaPanel1);
 		controls.add(rndPanel1);
-		controls.add(altPanel);
+		controls.add(p0);
 		controls.add(diaPanel2);
 		controls.add(rndPanel2);
 		controls.add(new JPanel());	// empty space
 		controls.add(p7);
 		controls.add(p8);
+		
+		// default is symmetric with eliptical outlines
+		symmetric.setSelected(true);
+		diameter2.setEnabled(false);
+		rounding2.setEnabled(false);
+		eliptical.setSelected(true);
 		
 		mainPane.add(controls);
 		pack();
@@ -421,9 +425,13 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			if (symmetric.isSelected()) {
 				diameter2.setValue(diameter1.getValue());
 				rounding2.setValue(rounding1.getValue());
-				
+				diameter2.setEnabled(false);
+				rounding2.setEnabled(false);
 				if (selected)
 					redraw();
+			} else {
+				diameter2.setEnabled(true);
+				rounding2.setEnabled(true);
 			}
 		} 
 		map.requestFocus();

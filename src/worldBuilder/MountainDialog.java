@@ -246,12 +246,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 
 	
 	/**
-	 * compute the delta_h associated with this mountain range
-	 * 	1. reset the height map to its initial value
-	 * 	2. figure out how long the mountain range is
-	 * 	3. figure out how many mountains it contains
-	 *  4. place the mountains along the range
-	 *  5. map.repaint
+	 * collect the parameters and construct the selected ridge/valley
 	 */
 	private void redraw() {
 		// turn the diameter into map units
@@ -329,7 +324,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// commit the heightMap updates
 		te.commit();
 		
-		// clean up the selection graphics
+		// reset the selected area
 		map.selectMode(Map.Selection.NONE);
 		x_start = 0; y_start = 0; x_end = 0; y_end = 0;
 		map.selectMode(Map.Selection.LINE);
@@ -374,6 +369,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		else if (key == KeyEvent.VK_ESCAPE) {
 			// cancel the last updates
 			te.abort();	
+			// undo the last region selection
 			selected = false;
 			map.selectMode(Map.Selection.NONE);
 			map.selectMode(Map.Selection.LINE);

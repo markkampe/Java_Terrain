@@ -22,6 +22,8 @@ public class TerrainEngine {
 	private double deltaZ;			// last used raise/lower distance
 	private double zMultiple;		// last used exaggerate/compress factor
 	private double ridgeHeight;		// height of last ridge
+	private double ridgeLength;		// length of last ridge
+	private double ridgeRadius;		// radius of last ridge
 	private int adjusted;			// number of points raised/lowered
 	
 	/*
@@ -200,6 +202,10 @@ public class TerrainEngine {
 	 * @return	boolean (were any points relocated)
 	 */
 	public boolean ridge(double x0, double y0, double x1, double y1, double height, double radius, int shape) {
+		// restore all heights to last committed values
+		for(int i = 0; i < prevHeight.length; i++)
+			thisHeight[i] = prevHeight[i];
+		
 		// note the two end-points and distance between them
 		MeshPoint p0 = new MeshPoint(x0, y0);
 		MeshPoint p1 = new MeshPoint(x1, y1);
@@ -253,13 +259,12 @@ public class TerrainEngine {
 			points++;
 		}
 		
-		if (points == 0)	// no points affected
-			return false;
-		
 		map.setHeightMap(thisHeight);
 		this.adjusted = points;
 		this.ridgeHeight = height;
-		return true;
+		this.ridgeRadius = radius;
+		this.ridgeLength = sep;
+		return points > 0;
 	}
 	
 	/**
@@ -293,13 +298,19 @@ public class TerrainEngine {
 		// log the most recent changes being committed
 		if (parms.debug_level > 0) {
 			if (ridgeHeight > 0) {
-				System.out.println(String.format("Mountain/Ridge (height %d%s) raised %d points",
+				System.out.println(String.format("Mountain/Ridge (length %d%s, width %d%s, height %d%s) raised %d points",
+						(int) parms.km(ridgeLength), Parameters.unit_xy, (int) parms.km(ridgeRadius), Parameters.unit_xy,
 						(int) parms.height(ridgeHeight), Parameters.unit_z, adjusted));
 				ridgeHeight = 0;
+				ridgeLength = 0;
+				ridgeRadius = 0;
 			} else if (ridgeHeight < 0) {
-				System.out.println(String.format("Pit/Valley (depth %d%s) lowered %d points",
-						(int) parms.height(ridgeHeight), Parameters.unit_z, adjusted));
+				System.out.println(String.format("Pit/Valley (length %d%s, width %d%s, depth %d%s) lowered %d points",
+						(int) parms.km(ridgeLength), Parameters.unit_xy, (int) parms.km(ridgeRadius), Parameters.unit_xy,
+						(int) parms.height(-ridgeHeight), Parameters.unit_z, adjusted));
 				ridgeHeight = 0;
+				ridgeLength = 0;
+				ridgeRadius = 0;
 			}
 			if (deltaZ != 0) {
 				System.out.println(String.format("Adjusted heights of %d points by %d%s", 

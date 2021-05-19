@@ -13,10 +13,7 @@ import javax.swing.event.*;
 public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MapListener, ItemListener, KeyListener, WindowListener {	
 	
 	private Map map;
-	private double[] oldHeight;	// per MeshPoint altitude at entry
-	private double[] newHeight;	// edited per MeshPoint altitude
-	private double[] oldSoil;	// per MeshPoint soil at entry
-	private double[] newSoil;	// edited per MeshPoint soil
+	TerrainEngine te;
 	private Parameters parms;
 	
 	private JCheckBox symmetric;
@@ -28,10 +25,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private JSlider rounding2;
 	private JButton accept;
 	private JButton cancel;
-	
-	private JMenu mineralChoice;
-	private JLabel composition;
-	private int mineral;
 	
 	private boolean selected;		// selection completed
 	private double x_start, x_end, y_start, y_end;		// selection start/end coordinates
@@ -65,9 +58,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		new LandForm("canyon",	7,	1,	-300)
 	};
 	
-	private String placed;			// debug message
-	private static final String POS_FMT = "%.6f";
-	
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -76,20 +66,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	public MountainDialog(Map map)  {
 		// pick up references
 		this.map = map;
-		this.oldHeight = map.getHeightMap();
-		this.oldSoil = map.getSoilMap();
 		this.parms = Parameters.getInstance();
 
-		// copy the current height/soil maps
-		this.newHeight = new double[oldHeight.length];
-		for(int i = 0; i < oldHeight.length; i++)
-			newHeight[i] = oldHeight[i];
-		map.setHeightMap(newHeight);
-		this.newSoil = new double[oldSoil.length];
-		for(int i = 0; i < oldSoil.length; i++)
-			newSoil[i] = oldSoil[i];
-		map.setSoilMap(newSoil);
-		
 		// calibrate full scale on the sliders
 		this.a_max = parms.z_range/2;
 		this.d_max = parms.xy_range / parms.m_width_divisor;
@@ -101,12 +79,6 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		setTitle("Add Mountain(s)");
 		addWindowListener( this );
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		
-		// menu for mineral type selection
-		JMenuBar bar = new JMenuBar();
-		mineralChoice = new JMenu("Mineral Composition");
-		bar.add(mineralChoice);
-		composition = new JLabel("None");
 		
 		// create the basic widgets
 		Font fontSmall = new Font("Serif", Font.ITALIC, 10);
@@ -184,17 +156,14 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		 * Then pack all the controls into a 3x3 grid
 		 */
 		JPanel p0 = new JPanel();
-		p0.add(bar);
-		p0.add(composition);
 		
 		JPanel formPanel = new JPanel();
 		formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.PAGE_AXIS));
 		formPanel.add(formLabel);
 		formPanel.add(form);
 		formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 15));
-		JPanel p6 = new JPanel();
-		p6.add(formPanel);
-		p6.add(symmetric);
+		p0.add(formPanel);
+		p0.add(symmetric);
 		
 		JPanel altPanel = new JPanel();
 		altPanel.setLayout(new BoxLayout(altPanel, BoxLayout.PAGE_AXIS));
@@ -244,24 +213,11 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		controls.add(altPanel);
 		controls.add(diaPanel2);
 		controls.add(rndPanel2);
-		controls.add(p6);
+		controls.add(new JPanel());	// empty space
 		controls.add(p7);
 		controls.add(p8);
 		
 		mainPane.add(controls);
-		
-		// add mineral types to the composition menu
-		JMenuItem item = new JMenuItem("None");
-		item.addActionListener(this);
-		mineralChoice.add(item);
-		String[] names = map.getRockNames();
-		for(int i = 0; i < names.length; i++)
-			if (names[i] != null) {
-				item = new JMenuItem(names[i]);
-				item.addActionListener(this);
-				mineralChoice.add(item);
-			}
-		
 		pack();
 		setVisible(true);
 		
@@ -283,164 +239,12 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// set us up for line selection
 		map.selectMode(Map.Selection.LINE);
 		selected = map.checkSelection(Map.Selection.LINE);
+		
+		// instantiate a TerrainEngine
+		te = new TerrainEngine(map);
 	}
 
-	/**
-	 * construct a mountain w/specified parameters
-	 *
-	 * @param map to be updated
-	 * @param x (map) x coordinate
-	 * @param y (map) y coordinate
-	 * @param radius (map) radius (0 = full map)
-	 * @param zMax max (map) z value
-	 * @param shape curvature
-	 *
-	 * compute the delta_h associated with placing one mountain
-	 * 	find all points within the effective diameter
-	 * 	compute the height as a function of the distance from center
-	 * 
-	 * NOTE:
-	 * 	this is a static method, so it can be used w/o the dialog
-	 */
-	public static void placeMountain(Map map, double x, double y, double radius, double zMax, int shape, int mineral) {
-		// figure out the shape coefficients
-		int fullscale = Parameters.CYLINDRICAL;
-		int midscale = fullscale/2;
-		double Fcone, Fcirc, Fcyl;
-		if (shape <= midscale) {
-			Fcone = (double) (midscale - shape) / midscale;
-			Fcirc = (double) shape / midscale;
-			Fcyl = 0;
-		} else {	// circ-flat
-			Fcone = 0;
-			Fcirc = (double) (fullscale - shape) / midscale;
-			Fcyl =	(double) (shape - midscale) / midscale;
-		}
-		
-		// see which points are within the scope of this mountain
-		Mesh m = map.getMesh();
-		double heights[] = map.getHeightMap();
-		double soil[] = map.getSoilMap();
-		MeshPoint centre = new MeshPoint(x,y);
-		for(int i = 0; i < heights.length; i++) {
-			MeshPoint p = m.vertices[i];
-			double d = centre.distance(p);
-			if (d > radius)
-				continue;
-			
-			// calculate the deltaH for this point
-			double dh_cone = (radius - d) * zMax / radius;
-			double dh_circ = Math.cos(Math.PI*d/(4*radius)) * zMax;
-			double dh_cyl = zMax;
-			double delta_h = (Fcone * dh_cone) + (Fcirc * dh_circ) + (Fcyl * dh_cyl);
-			
-			// make sure the new height is legal
-			double newZ = heights[i] + delta_h;
-			if (newZ > Parameters.z_extent/2)
-				heights[i] = Parameters.z_extent/2;
-			else if (newZ < -Parameters.z_extent/2)
-				heights[i] = -Parameters.z_extent/2;
-			else
-				heights[i] = newZ;
-			
-			// set mineral type for all affected points
-			if (mineral != 0)
-				soil[i] = mineral;
-		}
-	}
 	
-	/**
-	 * construct a mountain range w/specified parameters
-	 *
-	 * @param map to be updated
-	 * @param x0 (map) x coordinate of start
-	 * @param y0 (map) y coordinate start
-	 * @param x1 (map) x coordinate of end
-	 * @param y1 (map) y coordinate end
-	 * @param radius1 - left side radius
-	 * @param radius2 - right side radius
-	 * @param zMax max (map) z value
-	 * @param shape1 - shape of left side
-	 * @param shape2 - shape of left side
-	 * @param mineral - soil type
-	 *
-	 * compute the delta_h associated with placing a ridge
-	 * 	find all points within the effective elipse
-	 * 	compute the height as a function of the distance from center
-	 */
-	public void placeRidge(Map map, double x0, double y0, double x1, double y1,
-			double radius1, double radius2, double zMax, 
-			int shape1, int shape2, int mineral) {
-		// figure out the shape coefficients
-		int fullscale = Parameters.CYLINDRICAL;
-		int midscale = fullscale/2;
-		double fCone1, fCone2, fCirc1, fCirc2, fCyl1, fCyl2;
-		if (shape1 <= midscale) {
-			fCone1 = (double) (midscale - shape1) / midscale;
-			fCirc1 = (double) shape1 / midscale;
-			fCyl1 = 0;
-		} else {	// circ-flat
-			fCone1 = 0;
-			fCirc1 = (double) (fullscale - shape1) / midscale;
-			fCyl1 =	(double) (shape1 - midscale) / midscale;
-		}
-		if (shape2 <= midscale) {
-			fCone2 = (double) (midscale - shape2) / midscale;
-			fCirc2 = (double) shape2 / midscale;
-			fCyl2 = 0;
-		} else {	// circ-flat
-			fCone2 = 0;
-			fCirc2 = (double) (fullscale - shape2) / midscale;
-			fCyl2 =	(double) (shape2 - midscale) / midscale;
-		}
-		
-		// see which points are within the scope of this mountain
-		Mesh m = map.getMesh();
-		double heights[] = map.getHeightMap();
-		double soil[] = map.getSoilMap();
-		MeshPoint first = new MeshPoint(x0,y0);
-		MeshPoint second = new MeshPoint(x1,y1);
-		double minDist = first.distance(second);
-		double maxDist1 = minDist + radius1;
-		double maxDist2 = minDist + radius2;
-		
-		for(int i = 0; i < heights.length; i++) {
-			MeshPoint p = m.vertices[i];
-			double d0 = first.distance(p);
-			double d1 = second.distance(p);
-			double d2 = p.distanceLine(x0,  y0,  x1,  y1);
-			double max = (d2 > 0) ? maxDist1 : maxDist2;
-			double radius = (d2 > 0) ? radius1 : radius2;
-			if (d0 + d1 > max)
-				continue;
-			
-			// XXX rectangular ridges (no taper at end)
-			// 	   these could be used to extend ridges off the map
-			
-			// calculate the deltaH for this point
-			double dist = d0 + d1 - minDist;
-			double dh_cone = (radius - dist) * zMax / radius;
-			double dh_circ = Math.cos(Math.PI*dist/(4*radius)) * zMax;
-			double dh_cyl = zMax;
-			double delta_h1 = (fCone1 * dh_cone) + (fCirc1 * dh_circ) + (fCyl1 * dh_cyl);
-			double delta_h2 = (fCone2 * dh_cone) + (fCirc2 * dh_circ) + (fCyl2 * dh_cyl);
-			double delta_h = (d2 > 0) ? delta_h1 : delta_h2;
-
-			// make sure the new height is legal
-			double newZ = heights[i] + delta_h;
-			if (newZ > Parameters.z_extent/2)
-				heights[i] = Parameters.z_extent/2;
-			else if (newZ < -Parameters.z_extent/2)
-				heights[i] = -Parameters.z_extent/2;
-			else
-				heights[i] = newZ;
-			
-			// set mineral type for all affected points
-			if (mineral != 0)
-				soil[i] = mineral;
-		}
-	}
-
 	/**
 	 * compute the delta_h associated with this mountain range
 	 * 	1. reset the height map to its initial value
@@ -450,29 +254,15 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 *  5. map.repaint
 	 */
 	private void redraw() {
-		placed = "";	// reset the debug message
-		
-		// reset to the height/soil map we started with
-		for(int i = 0; i < oldHeight.length; i++) {
-			newHeight[i] = oldHeight[i];
-			newSoil[i] = oldSoil[i];
-		}
-
 		// turn the diameter into map units
 		double d1 = (double) diameter1.getValue();
 		if (d1 == 0)
 			d1 = 1;
 		d1 = parms.x(d1);
-		double d2 = (double) diameter2.getValue();
-		if (d2 == 0)
-			d2 = 1;
-		d2 = parms.x(d2);
-		
-		// figure out how long the mountain range is (in map coordinates)
-		double l = Math.sqrt(((x_end - x_start)*(x_end - x_start)) +
-							 ((y_end - y_start)*(y_end - y_start)));
-		double m = 2 * l/(d1 + d2);
-		int mountains = (int) (m + 0.5);
+		//double d2 = (double) diameter2.getValue();
+		//if (d2 == 0)
+		//	d2 = 1;
+		//d2 = parms.x(d2);
 		
 		// get the height
 		int alt = altitude.getValue();
@@ -480,41 +270,11 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		
 		// get the shape
 		int shape1 = rounding1.getValue();
-		int shape2 = rounding2.getValue();
+		//int shape2 = rounding2.getValue();
 		
-		// how many mountains can we create
-		if (mountains < 2) {
-			// one mountain goes in the center (likely volcanic)
-			placeMountain(map, (x_start + x_end)/2, (y_start + y_end)/2,
-						  d1/2, z, shape1, mineral);
-			String form;
-			if (z < 0)
-				form = "caldera";
-			else if (shape1 >= (Parameters.SPHERICAL + Parameters.CYLINDRICAL)/2)
-				form = "plateau";
-			else
-				form = "mountain";
-			placed = "Placed " + parms.km(d1) + Parameters.unit_xy + " wide, " +
-					alt + Parameters.unit_z + " " + map.rockNames[mineral] + " " + 
-					form + " at <" +
-					String.format(POS_FMT, parms.latitude((x_start+x_end)/2)) + "," +
-					String.format(POS_FMT, parms.longitude((y_start + y_end)/2)) + 
-					"> shape=" + shape1 + "/" + Parameters.CYLINDRICAL + "\n";
-		} else {
-			placeRidge(map, x_start, y_start, x_end, y_end, d1/2, d2/2, z, 
-					   shape1, shape2, mineral);
-			String form = (alt > 0) ? "ridge" : "trench";
-			placed = "Placed " + parms.km(d1+d2)/2 + Parameters.unit_xy + " wide, " +
-					alt + Parameters.unit_z + " " +
-					map.rockNames[mineral] + " " + form + " from <" +
-					String.format(POS_FMT, parms.latitude(x_start)) + "," + 
-					String.format(POS_FMT, parms.longitude(y_start)) + "> to <" +
-					String.format(POS_FMT, parms.latitude(x_end)) + "," + 
-					String.format(POS_FMT, parms.longitude(y_end)) + 
-					"> shape=" + shape1 + "," + shape2 + "/" + Parameters.CYLINDRICAL + "\n";
-		}
-		// tell the map about the update
-		map.setHeightMap(newHeight);
+		if (symmetric.isSelected())
+			te.ridge(x_start, y_start, x_end, y_end, z, d1/2, shape1);
+		// FIX asymmetric mountains
 	}
 	
 	/**
@@ -537,6 +297,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		y_end = map_y + height;
 		selected = complete;
 		redraw();
+		map.requestFocus();
 		return true;
 	}
 
@@ -545,12 +306,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	private void cancelDialog() {
 		map.selectMode(Map.Selection.NONE);
-		if (oldHeight != null) {
-			map.setHeightMap(oldHeight);
-			map.setSoilMap(oldSoil);
-			map.repaint();
-			oldHeight = null;
-		}
+		te.abort();
 		
 		map.removeMapListener(this);
 		map.removeKeyListener(this);
@@ -568,23 +324,14 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		parms.dAltitude = altitude.getValue();
 		parms.dShape = rounding1.getValue();
 		
-		// save a new copy of current height/soil maps
-		for(int i = 0; i < oldHeight.length; i++) {
-			oldHeight[i] = newHeight[i];
-			oldSoil[i] = newSoil[i];
-		}
+		// commit the heightMap updates
+		te.commit();
 		
 		// clean up the selection graphics
 		map.selectMode(Map.Selection.NONE);
 		x_start = 0; y_start = 0; x_end = 0; y_end = 0;
 		map.selectMode(Map.Selection.LINE);
 		selected = false;
-		
-		if (!placed.equals("") && parms.debug_level > 0) {
-			System.out.print(placed);
-			map.region_stats();
-		}
-		placed = "";
 	}
 				
 	/**
@@ -612,6 +359,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			
 			if (selected)
 				redraw();
+			map.requestFocus();
 	}
 	
 	/**
@@ -621,8 +369,12 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		int key = e.getKeyChar();
 		if (key == KeyEvent.VK_ENTER && selected)
 			acceptMountain();
-		else if (key == KeyEvent.VK_ESCAPE)
-			cancelDialog();	
+		else if (key == KeyEvent.VK_ESCAPE) {
+			// cancel the last updates
+			te.abort();	
+			map.selectMode(Map.Selection.NONE);
+			map.selectMode(Map.Selection.LINE);
+		}
 	}
 
 	/**
@@ -633,6 +385,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			cancelDialog();
 		} else if (e.getSource() == accept && selected) {
 			acceptMountain();
+			map.requestFocus();
 		} else if (e.getSource() == form) {
 			int x = form.getSelectedIndex();
 			altitude.setValue(landforms[x].altitude);
@@ -642,14 +395,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			diameter1.setValue(landforms[x].width);
 			if (selected)
 				redraw();
-		} else {	// most likely a mineral selection
-			JMenuItem item = (JMenuItem) e.getSource();
-			String chosen = item.getText();
-			if (chosen.equals("None"))
-				mineral = 0;
-			else
-				mineral = map.getSoilType(chosen);
-			composition.setText(chosen);
+			map.requestFocus();
 		}
 	}
 	
@@ -668,6 +414,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 					redraw();
 			}
 		} 
+		map.requestFocus();
 	}
 	
 	/** (perfunctory) */ public boolean pointSelected(double map_x, double map_y) { return false; }

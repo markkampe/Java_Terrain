@@ -28,7 +28,15 @@ public class TerrainEngine {
 	
 	/*
 	 * SQUARE borders parallel the ridge line (at distance r)
-	 * ELIPTICAL radius r at borders, but bulge mid-ridge
+	 * ELIPTICAL radius r at borders, but bulge mid-ridge.
+	 * 
+	 * Note B
+	 * 		I have code that can implement SQUARE mountain outlines, but 
+	 * 		the (even distorted by the Voronoi mesh) these lines look 
+	 * 		unnaturally straight.  The ELIPTICAL outlines, while they 
+	 * 		take great liberties with the assigned radius, look far
+	 * 		more natural.  But it is trivial to change between the two
+	 * 		models ... or you could even make it a parameter (to ridge?)
 	 */
 	private enum outline {SQUARE, ELIPTICAL};
 	private outline ridge_outline;
@@ -38,7 +46,7 @@ public class TerrainEngine {
 	public TerrainEngine(Map map) {
 		this.map = map;
 		this.parms = Parameters.getInstance();
-		this.ridge_outline = outline.ELIPTICAL;	// seems more natural
+		this.ridge_outline = outline.ELIPTICAL;	// see Note B
 		
 		// save the incoming heightMap
 		prevHeight = map.getHeightMap();
@@ -185,13 +193,8 @@ public class TerrainEngine {
 		return true;
 	}
 	
-	// shape coefficients, indexed by shape parameter
-	//								  cone                   sphere                  cylinder
-	private static double[] f_cone = {1.00, 0.75, 0.50, 0.25, 0.00, 0.00, 0.00, 0.00, 0.00};
-	private static double[] f_circ = {0.00, 0.25, 0.50, 0.75, 1.00, 0.75, 0.50, 0.25, 0.00};
-	private static double[] f_cyl =  {0.00, 0.00, 0.00, 0.00, 0.00, 0.25, 0.50, 0.75, 1.00};
 	/**
-	 * lay out a mountain/pit or ridge/valley
+	 * lay out a symmetric mountain/pit or ridge/valley
 	 * @param x0	one end x (map coordinate)
 	 * @param y0	one end y (map coordinate)
 	 * @param x1	other end x (map coordinate)
@@ -202,6 +205,45 @@ public class TerrainEngine {
 	 * @return	boolean (were any points relocated)
 	 */
 	public boolean ridge(double x0, double y0, double x1, double y1, double height, double radius, int shape) {
+		// pass symmetric parameters to asymmetric ridge builder
+		return ridge(x0, y0, x1, y1, height, radius, radius, shape, shape);
+	}
+	
+	// shape coefficients, indexed by shape parameter
+	//								  cone                   sphere                  cylinder
+	private static double[] f_cone = {1.00, 0.75, 0.50, 0.25, 0.00, 0.00, 0.00, 0.00, 0.00};
+	private static double[] f_circ = {0.00, 0.25, 0.50, 0.75, 1.00, 0.75, 0.50, 0.25, 0.00};
+	private static double[] f_cyl =  {0.00, 0.00, 0.00, 0.00, 0.00, 0.25, 0.50, 0.75, 1.00};
+	/**
+	 * lay out a potentially asymmetric mountain/pit or ridge/valley
+	 * @param x0	one end x (map coordinate)
+	 * @param y0	one end y (map coordinate)
+	 * @param x1	other end x (map coordinate)
+	 * @param y1	other end y (map coordinate)
+	 * @param height	height/depth (z units)
+	 * @param r1	top/right width/2 (x/y units)
+	 * @param r2	bot/left width/2 (x/y units)
+	 * @param shape1 top/right profile (from Parameters.CONICAL-CYLINDRICAL)
+	 * @param shape2 bot/left profile
+	 * @return	boolean (were any points relocated)
+	 * 
+	 * NOTE A:
+	 * 		MeshPoint.distanceLine() behaves badly when the line is of zero
+	 * 		length or the point is beyond one of its end-points.  Radius out
+	 * 		from an end-point works out-side the end-points, but yields incorrectly
+	 * 		small values for points between the two end-points.  Thus it is important
+	 * 		that we be able to distinguish these two cases so we can use the most
+	 * 		appropriate distance formula.  
+	 * 
+	 * 		A point is in the end region if it is within R of an end-point, and
+	 * 		beyond the separation distance from the other end-point.  That separation
+	 * 		distance ranges between sep and sqrt(sep^2 + radius^2) ... depending on
+	 * 		how far away from the center line the point is.  I am currently using
+	 * 		the larger number for the test, but this means that distanceLine is being
+	 * 		used in regions where it yields incorrect values ... resulting in radius
+	 * 		inaccuracies outside the end-points.
+	 */
+	public boolean ridge(double x0, double y0, double x1, double y1, double height, double r1, double r2, int shape1, int shape2) {
 		// restore all heights to last committed values
 		for(int i = 0; i < prevHeight.length; i++)
 			thisHeight[i] = prevHeight[i];
@@ -210,6 +252,7 @@ public class TerrainEngine {
 		MeshPoint p0 = new MeshPoint(x0, y0);
 		MeshPoint p1 = new MeshPoint(x1, y1);
 		double sep = p0.distance(p1);
+		double rMax = (r1 > r2) ? r1 : r2;
 		
 		// update all points within the range of this ridge
 		int points = 0;
@@ -220,25 +263,38 @@ public class TerrainEngine {
 			double d1 = p.distance(p1);
 			
 			// crude/cheap test for being farther than radius from ridgeline
-			double d = (sep > radius) ? 
+			double d = (sep > rMax) ? 
 					(d0 + d1 - sep) : 	// within elipse defined by foci
 					(d0 + d1)/2;		// within a circle around center
-			if (d > radius)
+			if (d > rMax)
 				continue;
+			
+			double radius = r1;			// symmetric or top/right 
+			int shape = shape1;			// symmetric or top/right
 			
 			// calculate distance from the ridge-line, or the end-points?
 			//  (distanceLine doesn't work for points off the end)
+			double dLine = p.distanceLine(x0, y0, x1, y1);
 			double nearest = (d0 < d1) ? d0 : d1;
 			double farthest = (d0 > d1) ? d0 : d1;
-			double hypoteneuse = Math.sqrt((radius*radius) + (sep*sep));
-			// XXX hypoteneuse value extends this beyond the foci for small radii
-			if (sep <= radius || (nearest <= radius && farthest >= hypoteneuse))
-				d = nearest;						// point is off one end
-			else if (ridge_outline == outline.SQUARE) {
-				d = p.distanceLine(x0, y0, x1, y1);	// point is to the side
-				if (d < 0)
-					d *= -1;	// high-side vs low side
-			}	
+			double hypoteneuse = Math.sqrt((rMax*rMax) + (sep*sep));	// TODO see note A
+			if (sep <= rMax || (nearest <= rMax && farthest >= hypoteneuse)) {
+				d = nearest;			// point is off one end
+				if ((p.x <= p0.x && p.x <= p1.x) || (p.y >= p0.y && p.y >= p1.y)) {
+					// below or to the left of the lower left end-point
+					radius = r2;
+					shape = shape2;
+				}
+			} else {					// point is somewhere off the center line
+				if (dLine < 0) {	// below or to the left of the center line
+					radius = r2;
+					shape = shape2;
+				}
+				if (ridge_outline == outline.SQUARE)
+					d = (dLine > 0) ? dLine : -dLine;
+			}
+				
+			// now we have more accurate radius and distance
 			if (d >= radius)
 				continue;
 			
@@ -262,7 +318,7 @@ public class TerrainEngine {
 		map.setHeightMap(thisHeight);
 		this.adjusted = points;
 		this.ridgeHeight = height;
-		this.ridgeRadius = radius;
+		this.ridgeRadius = rMax;
 		this.ridgeLength = sep;
 		return points > 0;
 	}

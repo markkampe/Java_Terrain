@@ -99,6 +99,9 @@ public class Parameters {
 	/** mountain shape: triangular	*/	public static final int CONICAL = 0;
 	/** mountain shape: rounded		*/	public static final int SPHERICAL = 4;
 	/** mountain shape: plauteau	*/	public static final int CYLINDRICAL = 8;
+	
+	/** mountain outline: elipse	*/	public static final int ELIPSE = 0;
+	/** mountain outline: square	*/	public static final int SQUARE = 1;
 
 	/** soil height slider range	*/	public int delta_z_max = 1000;	// m
 
@@ -129,6 +132,7 @@ public class Parameters {
 	/** default mountain diameter		*/	public int dDiameter;
 	/** default mountain altitude		*/	public int dAltitude;
 	/** default mountain shape			*/	public int dShape;
+	/** chosen mountain outline			*/	public int dOutline = ELIPSE;
 
 	/** default river flow (m^3/s)x		*/	public int dTribute;
 
@@ -377,6 +381,13 @@ public class Parameters {
 					break;
 				case "minerals":
 					mineral_rules = parser.getString();
+					break;
+				case "outline":
+					String s = parser.getString();
+					if (s.equals("square"))
+						dOutline = SQUARE;
+					else if (s.equals("elipse"))
+						dOutline = ELIPSE;
 					break;
 				}
 				if (inRules) {

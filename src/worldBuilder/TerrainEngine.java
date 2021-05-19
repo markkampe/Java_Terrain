@@ -26,27 +26,11 @@ public class TerrainEngine {
 	private double ridgeRadius;		// radius of last ridge
 	private int adjusted;			// number of points raised/lowered
 	
-	/*
-	 * SQUARE borders parallel the ridge line (at distance r)
-	 * ELIPTICAL radius r at borders, but bulge mid-ridge.
-	 * 
-	 * Note B
-	 * 		I have code that can implement SQUARE mountain outlines, but 
-	 * 		the (even distorted by the Voronoi mesh) these lines look 
-	 * 		unnaturally straight.  The ELIPTICAL outlines, while they 
-	 * 		take great liberties with the assigned radius, look far
-	 * 		more natural.  But it is trivial to change between the two
-	 * 		models ... or you could even make it a parameter (to ridge?)
-	 */
-	private enum outline {SQUARE, ELIPTICAL};
-	private outline ridge_outline;
-	
 	private static final int TERRAIN_DEBUG = 2;
 
 	public TerrainEngine(Map map) {
 		this.map = map;
 		this.parms = Parameters.getInstance();
-		this.ridge_outline = outline.ELIPTICAL;	// see Note B
 		
 		// save the incoming heightMap
 		prevHeight = map.getHeightMap();
@@ -273,28 +257,34 @@ public class TerrainEngine {
 			int shape = shape1;			// symmetric or top/right
 			
 			// calculate distance from the ridge-line, or the end-points?
-			//  (distanceLine doesn't work for points off the end)
-			double dLine = p.distanceLine(x0, y0, x1, y1);
+			double dLine = p.distanceLine(x0, y0, x1, y1);	// only valid between the foci
 			double nearest = (d0 < d1) ? d0 : d1;
 			double farthest = (d0 > d1) ? d0 : d1;
 			double hypotenuse = Math.sqrt((rMax*rMax) + (sep*sep));	// TODO see note A
-			if (sep <= rMax || (nearest <= rMax && farthest >= hypotenuse)) {
-				d = nearest;			// point is off one end
-				if ((p.x <= p0.x && p.x <= p1.x) || (p.y >= p0.y && p.y >= p1.y)) {
-					// below or to the left of the lower left end-point
+			if (parms.dOutline == Parameters.SQUARE) {
+				if (sep <= rMax || (nearest <= rMax && farthest >= hypotenuse)) {
+					d = nearest;		// this point is outside of the foci
+					if ((p.x <= p0.x && p.x <= p1.x) || (p.y >= p0.y && p.y >= p1.y)) {
+						// below or to the left of the lower left end-point
+						radius = r2;
+						shape = shape2;
+					}
+				} else {				// point is somewhere off the center line
+					if (dLine < 0) {	// negative means left or below center line
+						radius = r2;
+						shape = shape2;
+						d = -dLine;
+					} else
+						d = dLine;
+				}
+			} else {	// ELIPTICAL
+				if (dLine < 0) {	// dLine tells us top/right vs bottom/left
 					radius = r2;
 					shape = shape2;
 				}
-			} else {					// point is somewhere off the center line
-				if (dLine < 0) {	// below or to the left of the center line
-					radius = r2;
-					shape = shape2;
-				}
-				if (ridge_outline == outline.SQUARE)
-					d = (dLine > 0) ? dLine : -dLine;
 			}
 				
-			// now we have more accurate radius and distance
+			// compare (more accurate) distance w/correct radius
 			if (d >= radius)
 				continue;
 			

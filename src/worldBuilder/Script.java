@@ -223,6 +223,22 @@ public class Script {
 				}
 				break;
 				
+			case "outline":		// {square,elipse}
+				if (tokens[1] == null)
+					System.err.println(String.format("Error %s[%d] \"%s\" - s.b. outline {square,elipse}", filename, lineNum, line));
+				else switch(tokens[1]) {
+				case "square":
+					parms.dOutline = Parameters.SQUARE;
+					break;
+				case "elipse":
+					parms.dOutline = Parameters.ELIPSE;
+					break;
+				default: 
+					System.err.println("Unrecognized mountain outline: " + tokens[1]);
+					break;
+				}
+				break;
+				
 			case "mountain":	// <x1,y1> height(m,km) radius(m,km) [shape]
 			case "pit":
 			case "ridge":		// <x1,y1>-<x2,y2> height(m,km) radius(m,km) [shape]

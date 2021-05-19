@@ -17,6 +17,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	private Parameters parms;
 	
 	private JCheckBox symmetric;
+	private JCheckBox eliptical;
 	private JComboBox<String> form;
 	private JSlider altitude;
 	private JSlider diameter1;
@@ -89,6 +90,10 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		symmetric = new JCheckBox("Symmetric");
 		symmetric.setFont(fontLarge);
 		symmetric.setSelected(true);
+		
+		eliptical = new JCheckBox("Eliptical");
+		eliptical.setFont(fontLarge);
+		eliptical.setSelected(true);
 		
 		form = new JComboBox<String>();
 		JLabel formLabel = new JLabel("Land Form", JLabel.CENTER);
@@ -163,7 +168,12 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		formPanel.add(form);
 		formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 15));
 		p0.add(formPanel);
-		p0.add(symmetric);
+		
+		JPanel boxes = new JPanel();
+		boxes.setLayout(new BoxLayout(boxes, BoxLayout.PAGE_AXIS));
+		boxes.add(symmetric);
+		boxes.add(eliptical);
+		p0.add(boxes);
 		
 		JPanel altPanel = new JPanel();
 		altPanel.setLayout(new BoxLayout(altPanel, BoxLayout.PAGE_AXIS));
@@ -266,6 +276,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		// get the shape
 		int shape1 = rounding1.getValue();
 		int shape2 = rounding2.getValue();
+		
+		// get the outline shape
+		parms.dOutline = eliptical.isSelected() ? Parameters.ELIPSE : Parameters.SQUARE;
 		
 		// tell the TerrainEngine to make it so
 		if (symmetric.isSelected())

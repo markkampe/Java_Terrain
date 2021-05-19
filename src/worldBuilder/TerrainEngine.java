@@ -277,8 +277,8 @@ public class TerrainEngine {
 			double dLine = p.distanceLine(x0, y0, x1, y1);
 			double nearest = (d0 < d1) ? d0 : d1;
 			double farthest = (d0 > d1) ? d0 : d1;
-			double hypoteneuse = Math.sqrt((rMax*rMax) + (sep*sep));	// TODO see note A
-			if (sep <= rMax || (nearest <= rMax && farthest >= hypoteneuse)) {
+			double hypotenuse = Math.sqrt((rMax*rMax) + (sep*sep));	// TODO see note A
+			if (sep <= rMax || (nearest <= rMax && farthest >= hypotenuse)) {
 				d = nearest;			// point is off one end
 				if ((p.x <= p0.x && p.x <= p1.x) || (p.y >= p0.y && p.y >= p1.y)) {
 					// below or to the left of the lower left end-point

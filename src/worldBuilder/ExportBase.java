@@ -254,13 +254,21 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		
 		// do the simple interpolations
 		export.rainMap(cart.interpolate(map.getRainMap()));
-		export.soilMap(cart.nearest(map.getSoilMap()), map.rockNames);
 		export.floraMap(cart.nearest(map.getFloraMap()), map.floraNames);
 		export.faunaMap(cart.nearest(map.getFaunaMap()), map.faunaNames);
 		double heights[][] = cart.interpolate(map.getHeightMap());
 		export.heightMap(heights);
 		double erosion[][] = cart.interpolate(map.getErodeMap());
 		export.erodeMap(erosion);
+		
+		// unclassified soil with sedimentation is alluvial
+		int alluvial = map.getSoilType("Alluvial");
+		double soil[][] = cart.nearest(map.getSoilMap());
+		for(int i = 0; i < soil.length; i++)
+			for(int j = 0; j < soil[0].length; j++)
+				if (soil[i][j] == 0 && erosion[i][j] < 0)
+					soil[i][j] = alluvial;
+		export.soilMap(soil, map.rockNames);
 		
 		// per-tile water depth must be computed
 		double[] waterLevel = map.getWaterLevel();

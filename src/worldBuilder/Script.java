@@ -316,6 +316,7 @@ public class Script {
 				}
 				break;
 				
+			case "region":	// region <x,y> name [description]
 			case "capitol":	// capitol <x1,y1> name [description]
 			case "city":	// city <x1,y1> name [description]
 			case "town":	// town <x1,y1> name [description]
@@ -325,9 +326,10 @@ public class Script {
 										filename, lineNum, line, tokens[0]));
 				else {
 					XY_pos xy = position(tokens[1], "location");
-					String entry = tokens[0] + ": " + tokens[2] + " -";
+					String entry = tokens[0].equals("region") ? "" : tokens[0] + ": ";
+					entry += tokens[2];
 					if (tokens[3] != null)
-						entry += " " +  tokens[3];
+						entry += " - " +  tokens[3];
 					map.addName(entry, xy.x, xy.y);
 					
 					if (parms.debug_level > 0)
@@ -625,6 +627,9 @@ public class Script {
 				break;
 			case 'a': case 'A':
 				options |= Map.SHOW_FAUNA;
+				break;
+			case 'c': case 'C':
+				options |= Map.SHOW_CITY;
 				break;
 			}
 		}

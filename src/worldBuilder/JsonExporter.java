@@ -191,9 +191,9 @@ public class JsonExporter implements Exporter {
 			final String FORMAT_S = " \"%s\": \"%s\"";
 			final String FORMAT_D = " \"%s\": %d";
 			final String FORMAT_DM = " \"%s\": \"%dm\"";
-			final String FORMAT_DP = " \"%s\": %.2fm";
-			final String FORMAT_FM = " \"%s\": \"%.2fm\"";
-			final String FORMAT_CM = " \"%s\": \"%.0fcm\"";
+			final String FORMAT_DP = " \"%s\": %.3fm";
+			final String FORMAT_FM = " \"%s\": \"%.3fm\"";
+			final String FORMAT_CM = " \"%s\": \"%.0fcm/y\"";
 			final String FORMAT_L = " \"%s\": %.6f";
 			final String FORMAT_O = " \"%s\": {";
 			final String FORMAT_A = " \"%s\": [";
@@ -242,21 +242,30 @@ public class JsonExporter implements Exporter {
 					else
 						output.write(",");
 					output.write(NEW_POINT);
-					double z = heights[r][c]-erode[r][c];
-					double depth = depths[r][c];
-					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(z)));
-					output.write(COMMA);
-					output.write(String.format(FORMAT_CM, "rainfall", rain[r][c]));
-					if (depth > 0) {
-						output.write(COMMA);
-						output.write(String.format(FORMAT_DP, "depth", parms.height(depth)));
-					}
-					output.write(COMMA);
 					
-					int st = (int) Math.round(soil[r][c]);
-					output.write(String.format(FORMAT_S, "soil", 
-							erode[r][c] < 0 ? "Alluvial" : rockNames[st]));
-
+					double z = heights[r][c]-erode[r][c];
+					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(z)));
+					
+					if (erode[r][c] >= .001 || erode[r][c] <= -.001) {
+						output.write(COMMA);
+						output.write(String.format(FORMAT_FM, "erosion", parms.height(erode[r][c])));
+					}
+					if (rain[r][c] > 0) {
+						output.write(COMMA);
+						output.write(String.format(FORMAT_CM, "rainfall", rain[r][c]));
+					}
+					
+					if (depths[r][c] > 0) {
+						output.write(COMMA);
+						output.write(String.format(FORMAT_FM, "depth", parms.height(depths[r][c])));
+					}
+					
+					int st = (int) soil[r][c];
+					if (st > 0) {
+						output.write(COMMA);
+						output.write(String.format(FORMAT_S, "soil", rockNames[st]));
+					}
+					
 					int f = (int) flora[r][c];
 					if (f > 0) {
 						output.write(COMMA);

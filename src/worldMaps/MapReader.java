@@ -9,7 +9,7 @@ import javax.json.stream.JsonParser;
 /**
  * This class reads the raw JSON output of a worldBuilder map, into
  * a collection of basic (location, scale and temperature) attributes
- * and a set of (per Cartesion point) altitude, rainfall, hydration
+ * and a set of (per Cartesion point) altitude, rainfall, depth
  * and soil type arrays.
  *
  * This class uses a streaming JSON parser to avoid
@@ -18,11 +18,6 @@ import javax.json.stream.JsonParser;
  */
 public class MapReader {
 
-	// returned soil types
-	public enum SoilType {
-			UNKNOWN, IGNEOUS, METAMORPHIC, SEDIMENTARY, ALLUVIAL
-	};
-	
 	// returned directions
 	public enum CompassDirection {
 		NONE, NORTH, NORTH_EAST, EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST, NORTH_WEST
@@ -51,8 +46,8 @@ public class MapReader {
 	// per cell state
 	private double altitude[][];
 	private int rainfall[][];
-	private double hydration[][];
-	private SoilType soil[][];
+	private double depth[][];
+	private String soil[][];
 	
 	public MapReader(String filename) {
 		JsonParser parser;
@@ -74,8 +69,8 @@ public class MapReader {
 				inPoints = true;
 				altitude = new double[height][width];
 				rainfall = new int[height][width];
-				hydration = new double[height][width];
-				soil = new SoilType[height][width];
+				depth = new double[height][width];
+				soil = new String[height][width];
 				break;
 				
 			case KEY_NAME:
@@ -131,32 +126,16 @@ public class MapReader {
 					rainfall[row][col] = new Integer(s);
 					break;
 					
-				case "hydration":
+				case "depth":
 					s = parser.getString();
-					x = s.indexOf('%');
+					x = s.indexOf('m');
 					if (x != -1)
 						s = s.substring(0, x);
-					hydration[row][col] = new Double(s);
+					depth[row][col] = new Double(s);
 					break;
 					
 				case "soil":
-					switch(parser.getString()) {
-					case "igneous":
-						soil[row][col] = SoilType.IGNEOUS;
-						break;
-					case "metamorphic":
-						soil[row][col] = SoilType.METAMORPHIC;
-						break;
-					case "sedimentary":
-						soil[row][col] = SoilType.SEDIMENTARY;
-						break;
-					case "alluvial":
-						soil[row][col] = SoilType.ALLUVIAL;
-						break;
-					default:
-						soil[row][col] = SoilType.UNKNOWN;
-						break;	
-					}
+					soil[row][col] = parser.getString();
 					break;
 					
 				// temperatures
@@ -304,19 +283,16 @@ public class MapReader {
 	}
 	
 	/**
-	 * soil hydration
-	 *	<50%: soil water content by volume
-	 *	>50%: swamp
-	 *  negative: meters under water
+	 * water depth
 	 */
-	public double hydration(int row, int col) {
-		return hydration[row][col];
+	public double depth(int row, int col) {
+		return depth[row][col];
 	}
 	
 	/**
 	 * dominant soil composition
 	 */
-	public SoilType soilType(int row, int col) {
+	public String soilType(int row, int col) {
 		return soil[row][col];
 	}
 	
@@ -326,7 +302,7 @@ public class MapReader {
 	public double meanTemp(int row, int col, Seasons season) {
 		double temp = 0;
 		// if it is not ocean, correct it for altitude
-		if (hydration[row][col] != altitude[row][col])
+		if (depth[row][col] != altitude[row][col])
 			temp = DEGC_PER_KM * altitude[row][col] / 1000;
 		
 		switch(season) {

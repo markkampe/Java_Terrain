@@ -2,7 +2,8 @@
 # unit test cases
 #
 JAR = ../worldBuilder.jar
-MESH = ../src/Templates/default_1024.json
+COARSE = ../src/Templates/default_1024.json
+FINE = ../src/Templates/default_4096.json
 
 all:	load_save sealevel mountains attributes
 
@@ -35,7 +36,7 @@ sealevel: $(JAR)
 	@echo "save /tmp/$@-b.json"		>> /tmp/$@
 	@echo "exit 0"				>> /tmp/$@
 	@rm -f /tmp/$@-?.json
-	@java -jar $(JAR) -s /tmp/$@ $(MESH)
+	@java -jar $(JAR) -s /tmp/$@ $(COARSE)
 	@v=`grep sealevel /tmp/$@-a.json | cut -d: -f2 | cut -d\" -f2`; \
 	if [ $$v="-100m" ];			\
 	then					\
@@ -93,7 +94,7 @@ mountains: $(JAR) mountain_test.json
 	@echo "region <0.025,0.275> \"h=500m, r=5km, elipse\""	>> /tmp/$@
 	@echo "save /tmp/$@.json"				>> /tmp/$@
 	@echo "exit 0"						>> /tmp/$@
-	@java -jar $(JAR) -s /tmp/$@ $(MESH)
+	@java -jar $(JAR) -s /tmp/$@ $(FINE)
 	@cmp /tmp/$@.json mountain_test.json;	\
 	if [ $$? -ne 0 ];			\
 	then					\
@@ -176,7 +177,7 @@ attributes: $(JAR) attribute_test.json
 	@echo "region   <0.025,0.35>		Bear"		>> /tmp/$@
 	@echo "save /tmp/$@.json"				>> /tmp/$@
 	@echo "exit 0"						>> /tmp/$@
-	@java -jar $(JAR) -s /tmp/$@ $(MESH)
+	@java -jar $(JAR) -s /tmp/$@ $(COARSE)
 	@cmp /tmp/$@.json attribute_test.json;	\
 	if [ $$? -ne 0 ];			\
 	then					\
@@ -197,7 +198,7 @@ waterflow: $(JAR) waterflow_test.json
 #	save and compare
 	@echo "save /tmp/$@.json"			>> /tmp/$@
 	@echo "exit 0"					>> /tmp/$@
-	@java -jar $(JAR) -s /tmp/$@ $(MESH)
+	@java -jar $(JAR) -s /tmp/$@ $(FINE)
 	@cmp /tmp/$@.json waterflow_test.json;	\
 	if [ $$? -ne 0 ];			\
 	then					\

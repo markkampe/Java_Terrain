@@ -14,7 +14,7 @@ public class Tester extends JFrame {
 	 *   - a grid of per-point slopes
 	 *   - a grid of per point face (compas) directions
 	 *   - a grid of per-point rainfall
-	 *   - a grid of per-point hydration
+	 *   - a grid of per-point depth
 	 *   - a grid of per-point soil-type
 	 *	 - a grid of per-point mean (Spring) temperatures
 	 */
@@ -115,12 +115,12 @@ public class Tester extends JFrame {
 		}
 		
 		output.println();
-		output.print("hydration");
+		output.print("depth");
 		for(int row = 0; row < r.height(); row++) {
 			output.println();
 			output.print("    ");
 			for(int col = 0; col < r.width(); col++) {
-				output.print(String.format("%6.2f ", r.hydration(row, col)));
+				output.print(String.format("%6.2f ", r.depth(row, col)));
 			}
 		}
 		
@@ -130,15 +130,8 @@ public class Tester extends JFrame {
 			output.println();
 			output.print("    ");
 			for(int col = 0; col < r.width(); col++) {
-				String s = "? ";
-				switch(r.soilType(row, col)) {
-				case UNKNOWN:	s = "   "; break;
-				case IGNEOUS:	s = "I "; break;
-				case METAMORPHIC: s = "M "; break;
-				case SEDIMENTARY: s = "S "; break;
-				case ALLUVIAL: s = "A "; break;
-				}
-				output.print(s);
+				String s = r.soilType(row, col);
+				output.print(s == null ? "---- " : (s.substring(0,4) + " "));
 			}
 		}
 		

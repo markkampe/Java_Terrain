@@ -246,9 +246,12 @@ public class JsonExporter implements Exporter {
 					double z = heights[r][c]-erode[r][c];
 					output.write(String.format(FORMAT_FM, "altitude", parms.altitude(z)));
 					
-					if (erode[r][c] >= .001 || erode[r][c] <= -.001) {
-						output.write(COMMA);
-						output.write(String.format(FORMAT_FM, "erosion", parms.height(erode[r][c])));
+					if (erode[r][c] != 0) {	// only if > 1cm
+						double dz = parms.height(erode[r][c]);
+						if (dz > 0.01 || dz < -0.01) {
+							output.write(COMMA);
+							output.write(String.format(FORMAT_FM, "erosion", parms.height(erode[r][c])));
+						}
 					}
 					if (rain[r][c] > 0) {
 						output.write(COMMA);
@@ -261,7 +264,7 @@ public class JsonExporter implements Exporter {
 					}
 					
 					int st = (int) soil[r][c];
-					if (st > 0) {
+					if (st > 0 && rockNames[st] != null) {
 						output.write(COMMA);
 						output.write(String.format(FORMAT_S, "soil", rockNames[st]));
 					}

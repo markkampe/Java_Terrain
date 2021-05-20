@@ -205,7 +205,11 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 * update the map to name the new city
 		 */
 		private void confirmPoint() {
-			nameMap[chosenPoint] = String.format("%s: %s - %s", type.getText(), name.getText(), descr.getText());
+			String s = type.getText();
+			System.out.println(">" + s + "<"); // FIX
+			nameMap[chosenPoint] = s.equals("") ? 
+					String.format("%s - %s", name.getText(), descr.getText()) :
+					String.format("%s: %s - %s", s, name.getText(), descr.getText());
 			map.repaint();
 		}
 		

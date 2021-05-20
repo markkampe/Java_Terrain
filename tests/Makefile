@@ -1,14 +1,22 @@
 # 
-# unit test cases
+# unit test cases for load, save, and the computational engines
+# (I do not attempt to do automated testing of the Swing GUI)
+#
+#   Most of the tests work by creating a script that will make changes
+#   to a default initial map, saving the result, and comparing it
+#   (either the entire map or selected values) against golden output.
+#   I (somehow) thought it make more sense to generate those scripts
+#   here, than to maintain them in external per-test-case files.
 #
 JAR = ../worldBuilder.jar
 COARSE = ../src/Templates/default_1024.json
 FINE = ../src/Templates/default_4096.json
 
-all:	load_save sealevel mountains attributes
+all:	load_save sealevel attributes mountains waterflow
 
 #
-# load a complex map and then save it ... output should be identical to input
+# load a complex (uses all the features) map and then save it ... 
+#   the output should be identical to input
 #
 load_save: $(JAR) test_world_2.json
 	@echo "loading and saving a complex map"
@@ -27,6 +35,10 @@ load_save: $(JAR) test_world_2.json
 		rm -f /tmp/$@ /tmp/$@.json;	\
 	fi
 
+#
+# this is merely a test of parameter to value translation and
+# representation in a saved map.
+#
 sealevel: $(JAR)
 	@echo changing sea-level with Z and meter values
 	@echo "set z_scale 4000m"		>  /tmp/$@
@@ -50,12 +62,19 @@ sealevel: $(JAR)
 	if [ $$v="4m" ];			\
 	then					\
 		echo "... sealevel 0.001 correctly saved as $$v ";	\
-		rm -f /tmp/$@-a.json;			\
+		rm -f /tmp/$@-b.json;			\
 	else					\
 		echo "... sealevel 0.001 returned $$v";	\
 		false;				\
 	fi
 
+#
+# These are all small and simple enough that I was able to expect the
+# (point-by-point) output by hand ... and both the heights and radii
+# all look reasonable (modulo radius notes in TerrainEngine.ridge).
+# I use a fine (4K) mesh for this test to better show the results
+# of the distance/slope computations.
+#
 mountains: $(JAR) mountain_test.json
 	@echo "creating mountains/ridges/pits/valleys w/height & width in all units"
 	@echo "set z_scale 4000m"				>  /tmp/$@
@@ -65,33 +84,33 @@ mountains: $(JAR) mountain_test.json
 	@echo "outline square"					>> /tmp/$@
 	@echo "mountain <-0.4,-0.3> 0.1 0.05 flat"		>> /tmp/$@
 	@echo "region   <-0.45,-0.45> \"h=0.1, r=0.05, flat\""	>> /tmp/$@
-	@echo "pit <-0.2,-0.3> -0.5km 15000m"			>> /tmp/$@
-	@echo "region   <-0.3,-0.45> \"h=0.5km, r=15000m\""	>> /tmp/$@
-	@echo "ridge <-0.05,-0.4>-<0.15,-0.15> 500m 5km round"	>> /tmp/$@
+	@echo "pit      <-0.2,-0.3> -0.5km 15000m"		>> /tmp/$@
+	@echo "region   <-0.3,-0.45> \"h=-0.5km, r=15000m\""	>> /tmp/$@
+	@echo "ridge    <-0.05,-0.4>-<0.15,-0.15> 500m 5km round">> /tmp/$@
 	@echo "region   <-0.1,-0.45> \"h=500m, r=5km, round\""	>> /tmp/$@
 	@echo "outline elipse"					>> /tmp/$@
-	@echo "valley <0.2,-0.4>-<0.4,-0.15> -500m 5km cone"	>> /tmp/$@
+	@echo "valley   <0.2,-0.4>-<0.4,-0.15> -500m 5km cone"	>> /tmp/$@
 	@echo "region   <0.25,-0.45> \"h=-500m, r=5km, cone\""	>> /tmp/$@
 	@echo "row two: N/S and NE/SW square & elipse..."
 	@echo "outline elipse"					>> /tmp/$@
-	@echo "ridge <-0.4,-0.05>-<-0.4,0.2> 500m 5km"		>> /tmp/$@
+	@echo "ridge    <-0.4,-0.05>-<-0.4,0.2> 500m 5km"	>> /tmp/$@
 	@echo "region   <-0.45,-0.1> \"h=500m, r=5km, elipse\""	>> /tmp/$@
 	@echo "outline square"					>> /tmp/$@
-	@echo "valley <-0.2,-0.05>-<-0.2,0.2> -500m 5km	"	>> /tmp/$@
+	@echo "valley   <-0.2,-0.05>-<-0.2,0.2> -500m 5km"	>> /tmp/$@
 	@echo "region   <-0.25,-0.1> \"h=-500m, r=5km, square\"">> /tmp/$@
 	@echo "outline elipse"					>> /tmp/$@
-	@echo "ridge <0.15,-0.05>-<-0.05,0.2> 500m 5km"		>> /tmp/$@
+	@echo "ridge    <0.15,-0.05>-<-0.05,0.2> 500m 5km"	>> /tmp/$@
 	@echo "region   <-0.05,-0.1> \"h=500m, r=5km, elipse\""	>> /tmp/$@
 	@echo "outline square"					>> /tmp/$@
-	@echo "valley <0.4,-0.05>-<0.2,0.2> -500m 5km"		>> /tmp/$@
+	@echo "valley   <0.4,-0.05>-<0.2,0.2> -500m 5km"	>> /tmp/$@
 	@echo "region   <0.30,-0.1> \"h=-500m, r=5km, square\""	>> /tmp/$@
 	@echo "row three: E/W square & elipse..."
 	@echo "outline square"					>> /tmp/$@
-	@echo "ridge <-0.4,0.35>-<-0.2,0.35> 500m 5km"		>> /tmp/$@
-	@echo "region <-0.45,0.275> \"h=500m, r=5km, square\""	>> /tmp/$@
+	@echo "ridge    <-0.4,0.35>-<-0.2,0.35> 500m 5km"	>> /tmp/$@
+	@echo "region   <-0.45,0.275> \"h=500m, r=5km, square\"">> /tmp/$@
 	@echo "outline elipse"					>> /tmp/$@
-	@echo "valley <0.1,0.35>-<0.3,0.35> -500m 5km"		>> /tmp/$@
-	@echo "region <0.025,0.275> \"h=500m, r=5km, elipse\""	>> /tmp/$@
+	@echo "valley   <0.1,0.35>-<0.3,0.35> -500m 5km"	>> /tmp/$@
+	@echo "region   <0.025,0.275> \"h=500m, r=5km, elipse\"">> /tmp/$@
 	@echo "save /tmp/$@.json"				>> /tmp/$@
 	@echo "exit 0"						>> /tmp/$@
 	@java -jar $(JAR) -s /tmp/$@ $(FINE)
@@ -105,6 +124,14 @@ mountains: $(JAR) mountain_test.json
 		rm -f /tmp/$@ /tmp/$@.json;	\
 	fi
 
+#
+# the colored areas will be irregular (due to the Voronoi mesh), but if
+# you display the mesh, you should see that these are reasoanble 
+# projections of rectangular spaces onto that mesh.
+#
+# The (region) labels are merely comments (in the output) to make
+# it easier to assess its correctness.
+#
 attributes: $(JAR) attribute_test.json
 	@echo "creating stripes of rainfall ..."
 	@echo "set z_scale 4000m"				>  /tmp/$@
@@ -188,16 +215,32 @@ attributes: $(JAR) attribute_test.json
 		rm -f /tmp/$@ /tmp/$@.json;	\
 	fi
 
+#
+# this test case generates water flow from both rainfall and an arterial
+# river.  We expect to see more tributaries and flow in the center (where
+# the rainfall is heavier) and small lakes around the edges of the ridges
+# (in random voronoi low spots).
+#
+# This too is done on a fine mesh, so that we can see more subtle details
+# in the water flow.
+#
 waterflow: $(JAR) waterflow_test.json
-	@echo "set z_scale 4000m"			>  /tmp/$@
-	@echo "set xy_scale 200km"			>> /tmp/$@
-	@echo "display TW"				>> /tmp/$@
-	@echo "creating hills and valleys"
-	@echo "adding rain-fall"
-	@echo "adding arterial rivers"
-#	save and compare
-	@echo "save /tmp/$@.json"			>> /tmp/$@
-	@echo "exit 0"					>> /tmp/$@
+	@echo "set z_scale 4000m"				>  /tmp/$@
+	@echo "set xy_scale 200km"				>> /tmp/$@
+	@echo "display TWE"					>> /tmp/$@
+	@echo "creating slope to the center topology ..."
+	@echo "slope 0 .002"					>> /tmp/$@
+	@echo "ridge <-0.1,-0.5>-<0.1,-0.5> 0.20 0.05 round"	>> /tmp/$@
+	@echo "ridge <-0.35,-0.45>-<-0.2,00.1> 0.10 0.05 round"	>> /tmp/$@
+	@echo "ridge <00.35,-0.45>-<00.2,00.1> 0.10 0.05 round"	>> /tmp/$@
+	@echo "adding arterial river ..."
+	@echo "river <-0.00,-0.5> 500"				>> /tmp/$@
+	@echo "adding rainfall, heavier in center ..."
+	@echo "rainfall <-0.5,-0.45>-<-0.25,0.1> 50"		>> /tmp/$@
+	@echo "rainfall <-0.25,-0.45>-<0.25,0.1> 200"		>> /tmp/$@
+	@echo "rainfall <00.25,-0.45>-<00.5,0.1> 50"		>> /tmp/$@
+	@echo "FIX export raw /tmp/$@.json"			>> /tmp/$@
+	@echo "exit 0"						>> /tmp/$@
 	@java -jar $(JAR) -s /tmp/$@ $(FINE)
 	@cmp /tmp/$@.json waterflow_test.json;	\
 	if [ $$? -ne 0 ];			\

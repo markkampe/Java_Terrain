@@ -4,7 +4,7 @@
 JAR = ../worldBuilder.jar
 MESH = ../src/Templates/default_1024.json
 
-all:	load_save sealevel mountains
+all:	load_save sealevel mountains attributes
 
 #
 # load a complex map and then save it ... output should be identical to input
@@ -57,33 +57,42 @@ sealevel: $(JAR)
 
 mountains: $(JAR) mountain_test.json
 	@echo "creating mountains/ridges/pits/valleys w/height & width in all units"
-	@echo "set z_scale 4000m"			>  /tmp/$@
-	@echo "set xy_scale 200km"			>> /tmp/$@
-	@echo "display T"				>> /tmp/$@
-#	row one: circles and NW/SE
-	@echo "outline square"				>> /tmp/$@
-	@echo "mountain <-0.4,-0.3> 0.1 0.05 flat"	>> /tmp/$@
-	@echo "pit <-0.2,-0.3> -0.5km 15000m"		>> /tmp/$@
+	@echo "set z_scale 4000m"				>  /tmp/$@
+	@echo "set xy_scale 200km"				>> /tmp/$@
+	@echo "display TC"					>> /tmp/$@
+	@echo "row one: circles and NW/SE square & elipse..."
+	@echo "outline square"					>> /tmp/$@
+	@echo "mountain <-0.4,-0.3> 0.1 0.05 flat"		>> /tmp/$@
+	@echo "region   <-0.45,-0.45> \"h=0.1, r=0.05, flat\""	>> /tmp/$@
+	@echo "pit <-0.2,-0.3> -0.5km 15000m"			>> /tmp/$@
+	@echo "region   <-0.3,-0.45> \"h=0.5km, r=15000m\""	>> /tmp/$@
 	@echo "ridge <-0.05,-0.4>-<0.15,-0.15> 500m 5km round"	>> /tmp/$@
-	@echo "outline elipse"				>> /tmp/$@
+	@echo "region   <-0.1,-0.45> \"h=500m, r=5km, round\""	>> /tmp/$@
+	@echo "outline elipse"					>> /tmp/$@
 	@echo "valley <0.2,-0.4>-<0.4,-0.15> -500m 5km cone"	>> /tmp/$@
-#	row two: N/S and NE/SW
-	@echo "outline elipse"				>> /tmp/$@
-	@echo "ridge <-0.4,-0.05>-<-0.4,0.2> 500m 5km"	>> /tmp/$@
-	@echo "outline square"				>> /tmp/$@
-	@echo "valley <-0.2,-0.05>-<-0.2,0.2> -500m 5km"	>> /tmp/$@
-	@echo "outline elipse"				>> /tmp/$@
-	@echo "ridge <0.15,-0.05>-<-0.05,0.2> 500m 5km"	>> /tmp/$@
-	@echo "outline square"				>> /tmp/$@
-	@echo "valley <0.4,-0.05>-<0.2,0.2> -500m 5km"	>> /tmp/$@
-#	row three E/W
-	@echo "outline square"				>> /tmp/$@
-	@echo "ridge <-0.4,0.35>-<-0.2,0.35> 500m 5km"	>> /tmp/$@
-	@echo "outline elipse"				>> /tmp/$@
-	@echo "valley <0.1,0.35>-<0.3,0.35> -500m 5km"	>> /tmp/$@
-#	save and compare
-	@echo "save /tmp/$@.json"			>> /tmp/$@
-	@echo "exit 0"					>> /tmp/$@
+	@echo "region   <0.25,-0.45> \"h=-500m, r=5km, cone\""	>> /tmp/$@
+	@echo "row two: N/S and NE/SW square & elipse..."
+	@echo "outline elipse"					>> /tmp/$@
+	@echo "ridge <-0.4,-0.05>-<-0.4,0.2> 500m 5km"		>> /tmp/$@
+	@echo "region   <-0.45,-0.1> \"h=500m, r=5km, elipse\""	>> /tmp/$@
+	@echo "outline square"					>> /tmp/$@
+	@echo "valley <-0.2,-0.05>-<-0.2,0.2> -500m 5km	"	>> /tmp/$@
+	@echo "region   <-0.25,-0.1> \"h=-500m, r=5km, square\"">> /tmp/$@
+	@echo "outline elipse"					>> /tmp/$@
+	@echo "ridge <0.15,-0.05>-<-0.05,0.2> 500m 5km"		>> /tmp/$@
+	@echo "region   <-0.05,-0.1> \"h=500m, r=5km, elipse\""	>> /tmp/$@
+	@echo "outline square"					>> /tmp/$@
+	@echo "valley <0.4,-0.05>-<0.2,0.2> -500m 5km"		>> /tmp/$@
+	@echo "region   <0.30,-0.1> \"h=-500m, r=5km, square\""	>> /tmp/$@
+	@echo "row three: E/W square & elipse..."
+	@echo "outline square"					>> /tmp/$@
+	@echo "ridge <-0.4,0.35>-<-0.2,0.35> 500m 5km"		>> /tmp/$@
+	@echo "region <-0.45,0.275> \"h=500m, r=5km, square\""	>> /tmp/$@
+	@echo "outline elipse"					>> /tmp/$@
+	@echo "valley <0.1,0.35>-<0.3,0.35> -500m 5km"		>> /tmp/$@
+	@echo "region <0.025,0.275> \"h=500m, r=5km, elipse\""	>> /tmp/$@
+	@echo "save /tmp/$@.json"				>> /tmp/$@
+	@echo "exit 0"						>> /tmp/$@
 	@java -jar $(JAR) -s /tmp/$@ $(MESH)
 	@cmp /tmp/$@.json mountain_test.json;	\
 	if [ $$? -ne 0 ];			\
@@ -165,7 +174,6 @@ attributes: $(JAR) attribute_test.json
 	@echo "region   <-0.1,0.35>		Deer"		>> /tmp/$@
 	@echo "fauna    <0.0,0.3>-<0.1,0.4>	Bear"		>> /tmp/$@
 	@echo "region   <0.025,0.35>		Bear"		>> /tmp/$@
-#	save and compare
 	@echo "save /tmp/$@.json"				>> /tmp/$@
 	@echo "exit 0"						>> /tmp/$@
 	@java -jar $(JAR) -s /tmp/$@ $(MESH)

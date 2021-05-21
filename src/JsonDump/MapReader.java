@@ -1,4 +1,4 @@
-package worldMaps;
+package JsonDump;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -196,7 +196,7 @@ public class MapReader {
 	public int tileSize() {return tileSize; };
 	
 	/**
-	 * altitude above mean sea level
+	 * altitude (meters) above mean sea level
 	 */
 	public double altitude(int row, int col) {
 		return altitude[row][col];

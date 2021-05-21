@@ -8,13 +8,15 @@ LIBRARIES=lib
 
 PACKAGE=worldBuilder
 RPGMDUMP=RPGMdump
-WORLDMAP=worldMaps
+JSONDUMP=JsonDump
 
 # the program version number is a compiled-in program parameter
 VERSION=$(shell grep "PROGRAM_VERSION =" src/worldBuilder/Parameters.java | cut -d\" -f2 )
 
 HERE=$(shell pwd)
 WORK=/tmp/WB_temp
+
+jars: $(PACKAGE).jar $(RPGMDUMP).jar $(JSONDUMP).jar
 
 debian:	$(PACKAGE).jar control
 	# delete any previous package and intermediates
@@ -173,27 +175,27 @@ $(RPGMDUMP).jar: bin/$(RPGMDUMP)/*.class
 	echo "Manifest-Version: 1.0" > $(WORK)/manifest
 	echo "Main-Class: $(RPGMDUMP).$(RPGMDUMP)" >> $(WORK)/manifest
 	jar --create --file $@ --manifest $(WORK)/manifest \
-		-C $(WORK)/$(BINARIES) RPGMdump \
+		-C $(WORK)/$(BINARIES) $(RPGMDUMP) \
 		-C $(WORK)/$(BINARIES) javax \
 		-C $(WORK)/$(BINARIES) org
 
 #
 # test/debug tool to pretty-print saved WorldBuilder meshes
 #
-$(WORLDMAP).jar: bin/$(WORLDMAP)/*.class
+$(JSONDUMP).jar: bin/$(JSONDUMP)/*.class
 	# create an empty working directory
 	rm -rf $(WORK)/$(BINARIES)
 	mkdir -p $(WORK)/$(BINARIES)
 	#
 	# copy in our classes and resources
-	cp -R bin/$(WORLDMAP) $(WORK)/$(BINARIES)
+	cp -R bin/$(JSONDUMP) $(WORK)/$(BINARIES)
 	# copy in the non-standard libraries we need
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/javax.json-1.0.2.jar
 	# create a manifest and jar
 	echo "Manifest-Version: 1.0" > $(WORK)/manifest
-	echo "Main-Class: worldMaps.Tester" >> $(WORK)/manifest
+	echo "Main-Class: $(JSONDUMP).Tester" >> $(WORK)/manifest
 	jar --create --file $@ --manifest $(WORK)/manifest \
-		-C $(WORK)/$(BINARIES) worldMaps \
+		-C $(WORK)/$(BINARIES) $(JSONDUMP) \
 		-C $(WORK)/$(BINARIES) javax \
 		-C $(WORK)/$(BINARIES) org
 

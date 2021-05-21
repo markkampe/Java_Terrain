@@ -239,15 +239,16 @@ waterflow: $(JAR) waterflow_test.json
 	@echo "rainfall <-0.5,-0.45>-<-0.25,0.1> 50"		>> /tmp/$@
 	@echo "rainfall <-0.25,-0.45>-<0.25,0.1> 200"		>> /tmp/$@
 	@echo "rainfall <00.25,-0.45>-<00.5,0.1> 50"		>> /tmp/$@
-	@echo "FIX export raw /tmp/$@.json"			>> /tmp/$@
+	@echo "exporting center in raw json ..."
+	@echo "export <-0.2,-0.3>-<0.2,0.5> /tmp/$@.json raw 0.004"	>> /tmp/$@
 	@echo "exit 0"						>> /tmp/$@
 	@java -jar $(JAR) -s /tmp/$@ $(FINE)
 	@cmp /tmp/$@.json waterflow_test.json;	\
 	if [ $$? -ne 0 ];			\
 	then					\
-		echo "... $@: /tmp/$@.json does not match expected";\
+		echo "... $@: /tmp/$@.json does not match expected (waterflow_test.json)";\
 		false;				\
 	else					\
-		echo "... all water depths are as expected";\
+		echo "... all rivers, erosion and deposition as expected (waterflow_test.json)";\
 		rm -f /tmp/$@ /tmp/$@.json;	\
 	fi

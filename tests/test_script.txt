@@ -92,6 +92,11 @@ city		<0.15,-0.15>	"Port Kess"
 town		<0.2,-0.1>	"Simpleton"
 village		<0.25,-0.05>	BoonieVille "just like it sounds"
 
+export <-0.1,-0.1>-<0.1,0.1> /tmp/test.json raw 0.002
+//export <-0.1,-0.1>-<0.1,0.1> output.xxx overworld 200m
+//export <-0.1,-0.1>-<0.1,0.1> output.xxx outside 200m
+//export <-0.1,-0.1>-<0.1,0.1> output.xxx foundation 200m
+//export <-0.1,-0.1>-<0.1,0.1> output.xxx object 200m
 # comment out to exercise the error cases
 exit	-1
 
@@ -116,4 +121,18 @@ river	<x1,y1>, 400m3/s 	// ERROR: non-numeric values)
 river	<0.5>, 0		// ERROR: missing y-value)
 slope	0			// ERROR: missing argument)
 slope				// ERROR: missing arguments)
+export							// ERROR no parameters
+export not-a-position					// ERROR no position
+export <-0.1,-0.1>-<0.1,0.1>				// ERROR no file name
+export <-0.1,-0.1>-<0.1,0.1> output.xxx			// ERROR no format
+export <-0.1,-0.1>-<0.1,0.1> output.xxx raw		// ERROR no size
+export <-0.1,-0.1>-<0.1,0.1> output.xxx raw non-size	// ERROR non-numeric size
+export <-0.1,-0.1> output.xxx raw 1m			// ERROR no range
+export <-0.1,-0.1>-<-0.1,-0.1> output.xxx raw 1m	// ERROR zero size range
+export <-0.1,-0.1>-<-0.2,0.1> output.xxx raw 1m		// ERROR negative width
+export <-0.1,-0.1>-<0.1,-0.2> output.xxx raw 1m		// ERROR negative height
+export <-0.1,-0.1>-<0.1,0.1> output.xxx raw 1m		// ERROR tile size too small
+export <-0.1,-0.1>-<0.1,0.1> output.xxx raw 100km	// ERROR excessive tile size
+export <-0.1,-0.1>-<0.1,0.1> output.xxx bogus 200m	// ERROR unrecognized format
+
 

@@ -60,6 +60,13 @@ public class JsonExporter implements Exporter {
 	}
 
 	/**
+	 * return list of needed map up-loads
+	 */
+	public int neededInfo() {
+		return(HEIGHT + DEPTH + EROSION + RAINFALL + MINERALS + FLORA + FAUNA);
+	}
+
+	/**
 	 * Set the size of a single tile
 	 * @param meters real-world width of a tile
 	 */

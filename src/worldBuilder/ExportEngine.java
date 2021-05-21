@@ -103,23 +103,25 @@ public class ExportEngine {
 										box_x, box_y, box_x+box_width, box_y+box_height,
 										x_points, y_points, Cartesian.vicinity.POLYGON);
 		
-		// do the simple interpolations
-		exporter.rainMap(cart.interpolate(map.getRainMap()));
-		exporter.floraMap(cart.nearest(map.getFloraMap()), map.floraNames);
-		exporter.faunaMap(cart.nearest(map.getFaunaMap()), map.faunaNames);
+		// figure out which maps we need to up-load
+		int needed = exporter.neededInfo();
 		double heights[][] = cart.interpolate(map.getHeightMap());
 		exporter.heightMap(heights);
+		
 		double erosion[][] = cart.interpolate(map.getErodeMap());
-		exporter.erodeMap(erosion);
+		if ((needed & Exporter.EROSION) != 0)
+			exporter.erodeMap(erosion);
 		
 		// unclassified soil with sedimentation is alluvial
-		int alluvial = map.getSoilType("Alluvial");
-		double soil[][] = cart.nearest(map.getSoilMap());
-		for(int i = 0; i < soil.length; i++)
-			for(int j = 0; j < soil[0].length; j++)
-				if (soil[i][j] == 0 && erosion[i][j] < 0)
-					soil[i][j] = alluvial;
-		exporter.soilMap(soil, map.rockNames);
+		if ((needed & Exporter.MINERALS) != 0) {
+			int alluvial = map.getSoilType("Alluvial");
+			double soil[][] = cart.nearest(map.getSoilMap());
+			for(int i = 0; i < soil.length; i++)
+				for(int j = 0; j < soil[0].length; j++)
+					if (soil[i][j] == 0 && erosion[i][j] < 0)
+						soil[i][j] = alluvial;
+			exporter.soilMap(soil, map.rockNames);
+		}
 		
 		// per-tile water depth must be computed
 		double[] waterLevel = map.getWaterLevel();
@@ -133,6 +135,13 @@ public class ExportEngine {
 			}
 		add_rivers(depth, tile_size);
 		exporter.waterMap(depth);
+		
+		if ((needed & Exporter.RAINFALL) != 0)
+			exporter.rainMap(cart.interpolate(map.getRainMap()));
+		if ((needed & Exporter.FLORA) != 0)
+			exporter.floraMap(cart.nearest(map.getFloraMap()), map.floraNames);
+		if ((needed & Exporter.FAUNA) != 0)
+			exporter.faunaMap(cart.nearest(map.getFaunaMap()), map.faunaNames);
 	}
 	
 	/**

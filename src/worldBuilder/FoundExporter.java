@@ -87,6 +87,13 @@ public class FoundExporter implements Exporter {
 	}
 	
 	/**
+	 * return list of needed map up-loads
+	 */
+	public int neededInfo() {
+		return(HEIGHT + DEPTH + EROSION + MINERALS + FLORA + FAUNA);
+	}
+	
+	/**
 	 * Up-load the altitude of every tile
 	 * @param heights	height (in meters) of every point
 	 */

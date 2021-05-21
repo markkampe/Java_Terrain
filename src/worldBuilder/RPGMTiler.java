@@ -105,6 +105,13 @@ public class RPGMTiler implements Exporter {
 	}
 	
 	/**
+	 * return list of needed map up-loads
+	 */
+	public int neededInfo() {
+		return(HEIGHT + DEPTH + EROSION + MINERALS + FLORA);
+	}
+	
+	/**
 	 * set the fraction of tiles for each flora class
 	 * @param grass ... fraction of squares eligible for grass
 	 * @param brush ... fraction of squares eligible for brush

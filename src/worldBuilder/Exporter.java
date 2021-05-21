@@ -6,6 +6,21 @@ import java.awt.Color;
  * a class to write out a map for importation into other software
  */
 public interface Exporter {
+	
+
+	
+	/**
+	 * return a list of the maps this exporter requires
+	 */
+	int neededInfo();
+	public static final int HEIGHT = 1;
+	public static final int DEPTH = 2;
+	public static final int EROSION = 4;
+	public static final int RAINFALL = 8;
+	public static final int MINERALS = 16;
+	public static final int FLORA = 32;
+	public static final int FAUNA = 64;
+	
 	/**
 	 * Set the size of a single tile
 	 * @param meters real-world width of a tile

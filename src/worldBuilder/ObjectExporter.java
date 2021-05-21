@@ -79,6 +79,13 @@ public class ObjectExporter implements Exporter {
 		if (parms.debug_level >= EXPORT_DEBUG)
 			System.out.println("new Object exporter (" + height + "x" + width + ") w/" + overlays + " overlays");
 	}
+	
+	/**
+	 * return list of needed map up-loads
+	 */
+	public int neededInfo() {
+		return(HEIGHT + DEPTH + EROSION + RAINFALL + MINERALS + FLORA);
+	}
 
 	/**
 	 * Set the size of a single tile

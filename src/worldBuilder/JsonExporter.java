@@ -191,7 +191,7 @@ public class JsonExporter implements Exporter {
 			final String FORMAT_S = " \"%s\": \"%s\"";
 			final String FORMAT_D = " \"%s\": %d";
 			final String FORMAT_DM = " \"%s\": \"%dm\"";
-			final String FORMAT_DP = " \"%s\": %.3fm";
+			//final String FORMAT_DP = " \"%s\": %.3fm";
 			final String FORMAT_FM = " \"%s\": \"%.3fm\"";
 			final String FORMAT_CM = " \"%s\": \"%.0fcm/y\"";
 			final String FORMAT_L = " \"%s\": %.6f";

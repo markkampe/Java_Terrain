@@ -206,7 +206,6 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 */
 		private void confirmPoint() {
 			String s = type.getText();
-			System.out.println(">" + s + "<"); // FIX
 			nameMap[chosenPoint] = s.equals("") ? 
 					String.format("%s - %s", name.getText(), descr.getText()) :
 					String.format("%s: %s - %s", s, name.getText(), descr.getText());

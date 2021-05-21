@@ -16,8 +16,6 @@ public class ExportEngine {
 
 	protected double box_x, box_y;		// selection box map coordinates
 	protected double box_width, box_height;	// selection box size (map units)
-	public double x_km;					// export width (in km)
-	public double y_km;					// export height (in km)
 	public int tile_size;				// size of a tile (in meters)
 	public int x_points;				// export with (in tiles)
 	public int y_points;				// export height (in tiles)
@@ -43,10 +41,6 @@ public class ExportEngine {
 		this.box_y = y;
 		this.box_width = width;
 		this.box_height = height;
-		
-		// size of the export region
-		x_km = parms.km(width);
-		y_km = parms.km(height);
 	}
 	
 	/**
@@ -54,8 +48,8 @@ public class ExportEngine {
 	 * @param meters
 	 */
 	public void tile_size(int meters) {
-		x_points = (int) (x_km * 1000) / meters;
-		y_points = (int) (y_km * 1000) / meters;
+		x_points = (int) (parms.km(box_width) * 1000) / meters;
+		y_points = (int) (parms.km(box_height) * 1000) / meters;
 		tile_size = meters;
 	}
 	

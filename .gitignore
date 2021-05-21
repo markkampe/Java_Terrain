@@ -2,7 +2,7 @@
 *.class
 worldBuilder.jar
 RPGMdump.jar
-worldMaps.jar
+JsonDump.jar
 
 # Log file
 *.log

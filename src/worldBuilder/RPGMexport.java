@@ -62,8 +62,8 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	private static final int SHADE_RANGE = 64; // total range (per TerrainType)
 	
 	// indices into the tileRules list
-	private static final int OW_TILES = 0;
-	private static final int OUT_TILES = 1;
+	public static final int OW_TILES = 0;
+	public static final int OUT_TILES = 1;
 
 	private static final int EXPORT_DEBUG = 2;
 	

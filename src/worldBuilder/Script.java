@@ -57,7 +57,7 @@ public class Script {
 		tokens = new String[MAX_TOKENS];
 		lineNum = 0;
 		int cmdNum = 0;
-		String line;
+		String line, should_be, rules_file;
 		while( true ) {
 			try {
 				line = r.readLine();
@@ -146,9 +146,10 @@ public class Script {
 				break;
 				
 			case "export":	// <x,y>-<x,y> filename format tile-size
+				should_be = "<x,y>-<x,y> output-file format tile-size [rules-file]";
 				if (tokens[1] == null || tokens[2] == null || tokens[3] == null || tokens[4] == null)
-					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. <x,y>-<x,y> filename format tile-size",
-													filename, lineNum, line));
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. %s %s",
+													filename, lineNum, line, tokens[0], should_be));
 				else {
 					// make sure we have a reasonable export reagion
 					XY_pos xy = position(tokens[1], "export region");
@@ -179,15 +180,19 @@ public class Script {
 						exporter = new JsonExporter(width, height);
 						break;
 					case "overworld":
-						exporter = new RPGMTiler(parms.exportRules.get(RPGMexport.OW_TILES), width, height);
+						rules_file = (tokens[5] != null) ? tokens[5] : parms.exportRules.get(RPGMexport.OW_TILES);
+						exporter = new RPGMTiler(rules_file, width, height);
 						break;
 					case "outside":
-						exporter = new RPGMTiler(parms.exportRules.get(RPGMexport.OUT_TILES), width, height);
+						rules_file = (tokens[5] != null) ? tokens[5] : parms.exportRules.get(RPGMexport.OUT_TILES);
+						exporter = new RPGMTiler(rules_file, width, height);
 						break;
 					case "foundation":
 						exporter = new FoundExporter(width, height);
+						break;
 					case "object":
-						exporter = new ObjectExporter(parms.overlay_objects, width, height);
+						rules_file = (tokens[5] != null) ? tokens[5] : parms.overlay_objects;
+						exporter = new ObjectExporter(rules_file, width, height);
 						break;
 					}
 					if (exporter == null)

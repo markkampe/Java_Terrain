@@ -144,6 +144,64 @@ public class Script {
 				else
 					map.write(tokens[1]);
 				break;
+				
+			case "export":	// <x,y>-<x,y> filename format tile-size
+				if (tokens[1] == null || tokens[2] == null || tokens[3] == null || tokens[4] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. <x,y>-<x,y> filename format tile-size",
+													filename, lineNum, line));
+				else {
+					// make sure we have a reasonable export reagion
+					XY_pos xy = position(tokens[1], "export region");
+					double box_width = xy.x2 - xy.x;
+					double box_height = xy.y2 - xy.y;
+					if (box_width <= 0 || box_height <= 0) {
+						System.err.println(String.format("Error: %s[%d] \"%s\" - empty export region", filename, lineNum, line));
+						break;
+					}
+					
+					// check tile size and compute export size
+					double tilesz = xy_value(tokens[4], "tile size");
+					if (tilesz == -1) {
+						System.err.println(String.format("Error: %s[%d] \"%s\" - illegal tilesize", filename, lineNum, line));
+						break;
+					}
+					int width = (int) (box_width / tilesz);
+					int height = (int) (box_height / tilesz);
+					if (width < 10 || height < 10 || width > 1000 || height > 1000) {
+						System.err.println(String.format("Error: %s[%d] \"%s\" - unreasonable tilesize", filename, lineNum, line));
+						break;
+					}
+					
+					// figure out which exporter we need
+					Exporter exporter = null;
+					switch(tokens[3]) {
+					case "raw":
+						exporter = new JsonExporter(width, height);
+						break;
+					case "overworld":
+						exporter = new RPGMTiler(parms.exportRules.get(RPGMexport.OW_TILES), width, height);
+						break;
+					case "outside":
+						exporter = new RPGMTiler(parms.exportRules.get(RPGMexport.OUT_TILES), width, height);
+						break;
+					case "foundation":
+						exporter = new FoundExporter(width, height);
+					case "object":
+						exporter = new ObjectExporter(parms.overlay_objects, width, height);
+						break;
+					}
+					if (exporter == null)
+						System.err.println(String.format("Error: %s[%d] \"%s\" - unrecognized export format: %s",
+								filename, lineNum, line, tokens[3]));
+					else {
+						ExportEngine e = new ExportEngine(map, xy.x, xy.y, box_width, box_height);
+						double meters = parms.km(tilesz) * 1000;
+						e.tile_size((int) meters);
+						e.export(exporter);
+						exporter.writeFile(tokens[2]);
+					}
+				}
+				break;
 
 			case "sealevel":	// z-value (or height)
 				if (tokens[1] == null)
@@ -469,6 +527,7 @@ public class Script {
 			retval = Double.parseDouble(number);
 		} catch (NumberFormatException e) {
 			System.err.println(attribute + " Non-numeric value: " + number);
+			return -1;
 		}
 
 		// see if this is in km or meters

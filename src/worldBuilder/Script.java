@@ -181,11 +181,17 @@ public class Script {
 						break;
 					case "overworld":
 						rules_file = (tokens[5] != null) ? tokens[5] : parms.exportRules.get(RPGMexport.OW_TILES);
-						exporter = new RPGMTiler(rules_file, width, height);
+						RPGMTiler tiler = new RPGMTiler(rules_file, width, height);
+						tiler.floraQuotas(1.0, 0.3, 0.3);	// 30% brush, 30% trees, rest grass
+						tiler.setLevels(false, 1);			// GROUND, HILL, MOUNTAIN)
+						exporter = tiler;
 						break;
 					case "outside":
 						rules_file = (tokens[5] != null) ? tokens[5] : parms.exportRules.get(RPGMexport.OUT_TILES);
-						exporter = new RPGMTiler(rules_file, width, height);
+						tiler = new RPGMTiler(rules_file, width, height);
+						tiler.floraQuotas(1.0, 0.3, 0.3);	// 30% brush, 30% trees, rest grass
+						tiler.setLevels(true, 5);			// PIT/GROUND/5xHILL
+						exporter = tiler;
 						break;
 					case "foundation":
 						// Foundation Export is hard code to 256x256 tiles

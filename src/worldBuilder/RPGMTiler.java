@@ -61,6 +61,11 @@ public class RPGMTiler implements Exporter {
 	
 	/** fraction of tiles to be covered by each flora class */
 	private double[] floraQuotas;
+	
+	/** are we using Outside (vs Overworld) levels */
+	private boolean outsideLevels;
+	/** number of highland (above GROUND) levels */
+	private int highLevels;
 
 	private RPGMRule bidders[];		// list of bidders for the current level
 	private	int numRules = 0;		// number of rules eleigible to bid
@@ -135,6 +140,16 @@ public class RPGMTiler implements Exporter {
 		floraQuotas[FLORA_GRASS] = grass;
 		floraQuotas[FLORA_BRUSH] = brush;
 		floraQuotas[FLORA_TREES] = trees;
+	}
+	
+	/**
+	 * set parameters that define the altitude->level mapping
+	 * @param outside	this is outside (vs overworld)
+	 * @param high_levels	number of above-GROUND levels
+	 */
+	public void setLevels(boolean outside, int high_levels) {
+		this.outsideLevels = outside;
+		this.highLevels = high_levels; 
 	}
 
 	/**

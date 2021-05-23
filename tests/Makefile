@@ -221,6 +221,11 @@ attributes: $(JAR) attribute_test.json
 # the rainfall is heavier) and small lakes around the edges of the ridges
 # (in random voronoi low spots).
 #
+# Erosion and water-flow are computed MeshPoint attributes (rather than
+# loaded and restored), so we cannot see them in a saved map.  But water
+# flow is present in Cartesian exports, so we export this map as Raw JSON
+# in order to examine the water flow and erosion.
+#
 # This too is done on a fine mesh, so that we can see more subtle details
 # in the water flow.
 #
@@ -252,3 +257,41 @@ waterflow: $(JAR) waterflow_test.json
 		echo "... all rivers, erosion and deposition as expected (waterflow_test.json)";\
 		rm -f /tmp/$@ /tmp/$@.json;	\
 	fi
+
+raw_json: $(JAR)
+	@echo "loading a complex map and exporting it in Raw JSON"		> /tmp/$@
+	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
+	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/$@.json raw 200m"		>>/tmp/$@
+#	@echo "exit 0"								>>/tmp/$@
+	@java -jar $(JAR) -s /tmp/$@
+
+overworld: $(JAR)
+	@echo "loading a complex map and exporting it as RPGM.overworld"	> /tmp/$@
+	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
+	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/$@.json overworld 200m /home/git/Java_Terrain/src/Templates/Overworld.json"	>>/tmp/$@
+#	@echo "exit 0"								>>/tmp/$@
+	@java -jar $(JAR) -s /tmp/$@
+	
+
+outside: $(JAR)
+	@echo "loading a complex map and exporting it as RPGM.outside"		> /tmp/$@
+	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
+	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/$@.json outside 200m /home/git/Java_Terrain/src/Templates/Overworld.json"	>>/tmp/$@
+#	@echo "exit 0"								>>/tmp/$@
+	@java -jar $(JAR) -s /tmp/$@
+	
+
+foundation: $(JAR)
+	@echo "loading a complex map and exporting it as Foundation"		> /tmp/$@
+	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
+	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/Export.$@ foundation 200m"	>>/tmp/$@
+#	@echo "exit 0"								>>/tmp/$@
+	@java -jar $(JAR) -s /tmp/$@
+	
+object: $(JAR)
+	@echo "loading a complex map and exporting it as Object Overlay"	> /tmp/$@
+	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
+	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/$@.json object 200m"		>>/tmp/$@
+#	@echo "exit 0"								>>/tmp/$@
+	@java -jar $(JAR) -s /tmp/$@
+	

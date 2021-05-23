@@ -48,8 +48,6 @@ public class ExportEngine {
 	 * @param meters
 	 */
 	public void tile_size(int meters) {
-		x_points = (int) (parms.km(box_width) * 1000) / meters;
-		y_points = (int) (parms.km(box_height) * 1000) / meters;
 		tile_size = meters;
 	}
 	
@@ -87,6 +85,9 @@ public class ExportEngine {
 	 *  - tile size (number of tiles) changes
 	 */
 	protected void export(Exporter exporter) {
+		// get the export region size
+		x_points = exporter.export_width();
+		y_points = exporter.export_height();
 
 		// tell the exporter the new tilesize
 		exporter.tileSize(tile_size);

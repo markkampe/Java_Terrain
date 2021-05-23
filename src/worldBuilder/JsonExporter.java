@@ -65,6 +65,20 @@ public class JsonExporter implements Exporter {
 	public int neededInfo() {
 		return(HEIGHT + DEPTH + EROSION + RAINFALL + MINERALS + FLORA + FAUNA);
 	}
+	
+	/**
+	 * return the export width (in tiles)
+	 */
+	public int export_width() {
+		return this.x_points;
+	}
+
+	/**
+	 * return the export height (in tiles)
+	 */
+	public int export_height() {
+		return this.y_points;
+	}
 
 	/**
 	 * Set the size of a single tile

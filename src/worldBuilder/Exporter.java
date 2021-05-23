@@ -26,6 +26,12 @@ public interface Exporter {
 	 * @param meters real-world width of a tile
 	 */
 	void tileSize(int meters);
+	
+	/**
+	 * return the region width/height (in tiles)
+	 */
+	int export_width();
+	int export_height();
 
 	/**
 	 * Set the lat/lon of the region being exported

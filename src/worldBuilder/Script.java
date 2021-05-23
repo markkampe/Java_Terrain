@@ -188,7 +188,10 @@ public class Script {
 						exporter = new RPGMTiler(rules_file, width, height);
 						break;
 					case "foundation":
-						exporter = new FoundExporter(width, height);
+						// Foundation Export is hard code to 256x256 tiles
+						exporter = new FoundExporter(256, 256);
+						tilesz = parms.km(box_width)*1000/256;
+						System.out.println("tile size = " + tilesz);
 						break;
 					case "object":
 						rules_file = (tokens[5] != null) ? tokens[5] : parms.overlay_objects;

@@ -94,6 +94,20 @@ public class FoundExporter implements Exporter {
 	}
 	
 	/**
+	 * return the export width (in tiles)
+	 */
+	public int export_width() {
+		return this.x_points;
+	}
+
+	/**
+	 * return the export height (in tiles)
+	 */
+	public int export_height() {
+		return this.y_points;
+	}
+	
+	/**
 	 * Up-load the altitude of every tile
 	 * @param heights	height (in meters) of every point
 	 */

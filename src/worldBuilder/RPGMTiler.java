@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ListIterator;
+import java.util.Random;
 
 /**
  * exporter to write world map as tile numbers in RPGMaker levels
@@ -87,6 +88,7 @@ public class RPGMTiler implements Exporter {
 	private int bidder_ecotope[];	// (integer) ectotope for each bidder
 	private double bidder_quota[];	// (double) max coverage for each bidder
 	private boolean[] floraGreen;	// which ecotope classes support grass
+	private Random random;			// random number generator
 
 	/**
 	 * create a new output writer
@@ -124,6 +126,9 @@ public class RPGMTiler implements Exporter {
 		this.max_hill = 20;
 		this.min_slope = 25;
 		this.outside = false;	// unless someone calls highlandLevels
+		
+		// create a new random number generator for this export
+		random = new Random();
 	}
 	
 	/**
@@ -527,8 +532,8 @@ public class RPGMTiler implements Exporter {
 			if ((row % r.height) != 0 || (col % r.width) != 0)
 				continue;
 			
-			// see if this bidder has a limited quota
-			if (bidder_quota[b] < 1.0 && Math.random() > bidder_quota[b])
+			// limited quota bidders don't get to bid on every tile
+			if (bidder_quota[b] < 1.0 && random.nextDouble() > bidder_quota[b])
 				continue;
 
 			// give this bid a shot at every tile in the group
@@ -643,7 +648,11 @@ public class RPGMTiler implements Exporter {
 
 		// assemble a list of bidders (and their ecotopes) for this level
 		get_bidders(level);
+		
+		// reinitialize the random number generator
+		random.setSeed(level * y_points * x_points);
 
+		// assign a tile to every point on this level
 		for (int i = 0; i < y_points; i++)
 			for (int j = 0; j < x_points; j++) {
 				grid[i][j] = 0;		// start out empty
@@ -672,6 +681,9 @@ public class RPGMTiler implements Exporter {
 	void stamps(int[][] grid, int level) {	
 		// assemble a list of bidders (and their ecotopes) for this level
 		get_bidders(level);
+		
+		// reinitialize the random number generator
+		random.setSeed(level * y_points * x_points);
 
 		// the grid starts out completely empty
 		for (int i = 0; i < y_points; i++)

@@ -55,9 +55,6 @@ public class Script {
 		AttributeEngine a = new AttributeEngine(map);
 		
 		// auto-placement rules
-		String[] floraClasses = {"Barren", "Grass", "Brush", "Tree" };
-		String[] faunaClasses = {"None", "Birds", "Small Game", "Large Game"};
-		String[] geoClasses = {"None", "Stone", "Metal", "Precious"};
 		double[] quotas = { 1.0, 0.0, 0.0, 0.0 };
 
 		tokens = new String[MAX_TOKENS];
@@ -358,7 +355,7 @@ public class Script {
 						quotas[1] = (double) parms.dRockMin * parms.dRockPct / 10000.0;
 						quotas[3] = (double) (1 - parms.dRockMax) * parms.dRockPct / 10000.0;
 						quotas[2] = (double) (parms.dRockMax - parms.dRockMin) * parms.dRockPct / 10000.0;
-						a.placementRules(parms.mineral_rules, geoClasses, AttributeEngine.WhichMap.MINERAL);
+						a.placementRules(parms.mineral_rules, MineralDialog.rockClasses, AttributeEngine.WhichMap.MINERAL);
 						a.autoPlacement(selected, quotas, AttributeEngine.WhichMap.MINERAL);
 					} else {	// manual placement
 						double type = map.getSoilType(tokens[2]);
@@ -379,7 +376,7 @@ public class Script {
 						quotas[1] = (double) parms.dFloraMin * parms.dFloraPct / 10000.0;
 						quotas[3] = (double) (1 - parms.dFloraMax) * parms.dFloraPct / 10000.0;
 						quotas[2] = (double) (parms.dFloraMax - parms.dFloraMin) * parms.dFloraPct / 10000.0;
-						a.placementRules(parms.flora_rules, floraClasses, AttributeEngine.WhichMap.FLORA);
+						a.placementRules(parms.flora_rules, FloraDialog.floraClasses, AttributeEngine.WhichMap.FLORA);
 						a.autoPlacement(selected, quotas, AttributeEngine.WhichMap.FLORA);
 					} else {	// manual placement
 						double type = map.getFloraType(tokens[2]);
@@ -400,7 +397,7 @@ public class Script {
 						quotas[1] = (double) parms.dFaunaMin * parms.dFaunaPct / 10000.0;
 						quotas[3] = (double) (1 - parms.dFaunaMax) * parms.dFaunaPct / 10000.0;
 						quotas[2] = (double) (parms.dFaunaMax - parms.dFaunaMin) * parms.dFaunaPct / 10000.0;
-						a.placementRules(parms.fauna_rules, faunaClasses, AttributeEngine.WhichMap.FAUNA);
+						a.placementRules(parms.fauna_rules, FaunaDialog.faunaClasses, AttributeEngine.WhichMap.FAUNA);
 						a.autoPlacement(selected, quotas, AttributeEngine.WhichMap.FAUNA);
 					} else {	// manual placement
 						double type = map.getFaunaType(tokens[2]);

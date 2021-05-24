@@ -4,7 +4,7 @@ package worldBuilder;
  * Dialog to enable to populate MeshPoint floral attributes
  */
 public class FloraDialog extends ResourceDialog {
-	private static final String[] floraClasses = {"Barren", "Grass", "Brush", "Tree"};
+	public static final String[] floraClasses = {"Barren", "Grass", "Brush", "Tree"};
 	private Parameters parms;
 	
 	private static final long serialVersionUID = 1L;

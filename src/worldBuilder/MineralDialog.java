@@ -4,7 +4,7 @@ package worldBuilder;
  * Dialog to enable to populate MeshPoint Mineral attributes
  */
 public class MineralDialog extends ResourceDialog {
-	private static final String[] rockClasses = {"None", "Stone", "Metal", "Precious"};
+	public static final String[] rockClasses = {"None", "Stone", "Metal", "Precious"};
 	
 	private Parameters parms;
 	

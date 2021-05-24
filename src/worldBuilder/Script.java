@@ -53,6 +53,12 @@ public class Script {
 		parms = Parameters.getInstance();
 		TerrainEngine t = new TerrainEngine(map);
 		AttributeEngine a = new AttributeEngine(map);
+		
+		// auto-placement rules
+		String[] floraClasses = {"Barren", "Grass", "Brush", "Tree" };
+		String[] faunaClasses = {"None", "Birds", "Small Game", "Large Game"};
+		String[] geoClasses = {"None", "Stone", "Metal", "Precious"};
+		double[] quotas = { 1.0, 0.0, 0.0, 0.0 };
 
 		tokens = new String[MAX_TOKENS];
 		lineNum = 0;
@@ -341,38 +347,65 @@ public class Script {
 				}
 				break;
 				
-			case "minerals":	// <x1,y1>-<x2,y2> type
-				if (tokens[1] == null || tokens[2] == null)
-					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. minerals <x,y> type", filename, lineNum, line));
+			case "minerals":	// <x1,y1>-<x2,y2> [type]
+				if (tokens[1] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. minerals <x,y> [type]", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "mineral region");
 					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
-					double type = map.getSoilType(tokens[2]);
-					a.placement(selected, AttributeEngine.WhichMap.MINERAL, type);
+					if (tokens[2] == null) {	// auto-placement
+						quotas[0] = 1.0;
+						quotas[1] = (double) parms.dRockMin * parms.dRockPct / 10000.0;
+						quotas[3] = (double) (1 - parms.dRockMax) * parms.dRockPct / 10000.0;
+						quotas[2] = (double) (parms.dRockMax - parms.dRockMin) * parms.dRockPct / 10000.0;
+						a.placementRules(parms.mineral_rules, geoClasses, AttributeEngine.WhichMap.MINERAL);
+						a.autoPlacement(selected, quotas, AttributeEngine.WhichMap.MINERAL);
+					} else {	// manual placement
+						double type = map.getSoilType(tokens[2]);
+						a.placement(selected, AttributeEngine.WhichMap.MINERAL, type);
+					}
 					a.commit();
 				}
 				break;
 				
-			case "flora":	// <x1,y1>-<x2,y2> type
-				if (tokens[1] == null || tokens[2] == null)
-					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. flora <x,y> type", filename, lineNum, line));
+			case "flora":	// <x1,y1>-<x2,y2> [type]
+				if (tokens[1] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. flora <x,y> [type]", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "flora region");
 					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
-					double type = map.getFloraType(tokens[2]);
-					a.placement(selected, AttributeEngine.WhichMap.FLORA, type);
+					if (tokens[2] == null) {	// auto-placement
+						quotas[0] = 1.0;
+						quotas[1] = (double) parms.dFloraMin * parms.dFloraPct / 10000.0;
+						quotas[3] = (double) (1 - parms.dFloraMax) * parms.dFloraPct / 10000.0;
+						quotas[2] = (double) (parms.dFloraMax - parms.dFloraMin) * parms.dFloraPct / 10000.0;
+						a.placementRules(parms.flora_rules, floraClasses, AttributeEngine.WhichMap.FLORA);
+						a.autoPlacement(selected, quotas, AttributeEngine.WhichMap.FLORA);
+					} else {	// manual placement
+						double type = map.getFloraType(tokens[2]);
+						a.placement(selected, AttributeEngine.WhichMap.FLORA, type);
+					}
 					a.commit();
 				}
 				break;
 				
-			case "fauna":	// <x1,y1>-<x2,y2> type
-				if (tokens[1] == null || tokens[2] == null)
-					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. fauna <x,y> type", filename, lineNum, line));
+			case "fauna":	// <x1,y1>-<x2,y2> [type]
+				if (tokens[1] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. fauna <x,y> [type]", filename, lineNum, line));
 				else {
 					XY_pos xy = position(tokens[1], "fauna region");
 					boolean[] selected = pointsInBox(map, xy.x, xy.y, xy.x2, xy.y2);
-					double type = map.getFaunaType(tokens[2]);
-					a.placement(selected, AttributeEngine.WhichMap.FAUNA, type);
+					if (tokens[2] == null) {	// auto-placement
+						quotas[0] = 1.0;
+						quotas[1] = (double) parms.dFaunaMin * parms.dFaunaPct / 10000.0;
+						quotas[3] = (double) (1 - parms.dFaunaMax) * parms.dFaunaPct / 10000.0;
+						quotas[2] = (double) (parms.dFaunaMax - parms.dFaunaMin) * parms.dFaunaPct / 10000.0;
+						a.placementRules(parms.fauna_rules, faunaClasses, AttributeEngine.WhichMap.FAUNA);
+						a.autoPlacement(selected, quotas, AttributeEngine.WhichMap.FAUNA);
+					} else {	// manual placement
+						double type = map.getFaunaType(tokens[2]);
+						a.placement(selected, AttributeEngine.WhichMap.FAUNA, type);
+					}
 					a.commit();
 				}
 				break;

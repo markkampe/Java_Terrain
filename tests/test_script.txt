@@ -56,7 +56,8 @@ minerals	<0.0,-0.1>-<0.1,-0.0>	"Marble"
 minerals	<0.1,-0.1>-<0.2,-0.0>	"Copper Ore"
 minerals	<0.2,-0.1>-<0.3,-0.0>	"Iron Ore"
 minerals	<0.3,-0.1>-<0.4,-0.0>	"Silver"
-minerals	<0.4,-0.1>-<0.5,-0.0>	"Gold"
+minerals	<0.4,-0.1>-<0.45,0.0>	"Gold"
+minerals	<0.45,-0.1>-<0.5,0.0>	// auto placement
 //display TM
 //sleep 5
 
@@ -70,7 +71,8 @@ flora	<0.0,-0.0>-<0.1,0.1>	"Riperian"
 flora	<0.1,-0.0>-<0.2,0.1>	"Palms"
 flora	<0.2,-0.0>-<0.3,0.1>	"Jungle"
 flora	<0.3,-0.0>-<0.4,0.1>	"Broadleaf"
-flora	<0.4,-0.0>-<0.5,0.1>	"Conifers"
+flora	<0.4,-0.0>-<0.45,0.1>	"Conifers"
+flora	<0.45,-0.0>-<0.5,0.1>	// auto placement
 //display TF
 //sleep 5
 
@@ -80,7 +82,8 @@ fauna	<-0.4,0.1>-<-0.3,0.2>	"Birds"
 fauna	<-0.3,0.1>-<-0.2,0.2>	"Rabbits"
 fauna	<-0.2,0.1>-<-0.1,0.2>	"Foxes"
 fauna	<-0.1,0.1>-<0.0,0.2>	"Deer"
-fauna	<-0.1,0.0>-<0.1,0.2>	"Bear"
+fauna	<-0.0,0.1>-<0.1,0.2>	"Bear"
+fauna	<0.1,0.1>-<0.2,0.2>	// auto placement
 //display TA
 //sleep 5
 

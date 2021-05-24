@@ -18,8 +18,15 @@ public class RPGMTiler implements Exporter {
 	private static final int ECOTOPE_GREEN = -2;
 	private static final int ECOTOPE_NON_GREEN = -3;	// NONE, Desert, Alpine
 
-	private static final int WATER_SHADE_MIN = 96;	// for previews
+	
+	// preview colors
+	private static final Color GROUND_COLOR = new Color(102,51,0);
+	private static final int MIN_WATER_SHADE = 96; // blue
 	private static final int WATER_SHADE_DELTA = 80;
+	private static final int MIN_LOW_SHADE = 32;	// dark grey
+	private static final int MIN_MID_SHADE = 128;	// medium grey
+	private static final int MIN_HIGH_SHADE = 160;	// light grey
+	private static final int SHADE_RANGE = 64;		// total range (per TerrainType)
 	
 	public static final int FLORA_NONE = 0;
 	public static final int FLORA_GRASS = 1;
@@ -58,14 +65,21 @@ public class RPGMTiler implements Exporter {
 	public int[] typeMap;
 	/** map from ecotope types to names	*/
 	public String[] floraNames;
+	/** level to preview color map	*/
+	public Color[] colorTopo;
 	
 	/** fraction of tiles to be covered by each flora class */
 	private double[] floraQuotas;
 	
 	/** are we using Outside (vs Overworld) levels */
-	private boolean outsideLevels;
+	private boolean outside;
 	/** number of highland (above GROUND) levels */
 	private int highLevels;
+	
+	// water/terrain threshold levels
+	private int min_shallow, max_shallow;
+	private int min_hill, max_hill;
+	private int min_slope;
 
 	private RPGMRule bidders[];		// list of bidders for the current level
 	private	int numRules = 0;		// number of rules eleigible to bid
@@ -73,11 +87,6 @@ public class RPGMTiler implements Exporter {
 	private int bidder_ecotope[];	// (integer) ectotope for each bidder
 	private double bidder_quota[];	// (double) max coverage for each bidder
 	private boolean[] floraGreen;	// which ecotope classes support grass
-
-	//private double minHeight;	// lowest altitude in export
-	//private double maxHeight;	// highest altitude in export
-	//private double minDepth;	// shallowest water in export
-	//private double maxDepth;	// deepest water in export
 
 	/**
 	 * create a new output writer
@@ -103,10 +112,18 @@ public class RPGMTiler implements Exporter {
 				useSLOPE = true;
 		}
 		
-		// default quotas - everyone can bid on every tile
+		// default floral quotas: everyone bids on every tile
 		floraQuotas = new double[4];
 		for(int i = 0; i < floraQuotas.length; i++)
 			floraQuotas[i] = 1.0;
+		
+		this.highLevels = 1;
+		this.min_shallow = 1;
+		this.max_shallow = 10;
+		this.min_hill = 10;
+		this.max_hill = 20;
+		this.min_slope = 25;
+		this.outside = false;	// unless someone calls highlandLevels
 	}
 	
 	/**
@@ -144,19 +161,193 @@ public class RPGMTiler implements Exporter {
 	
 	/**
 	 * set parameters that define the altitude->level mapping
-	 * @param outside	this is outside (vs overworld)
-	 * @param high_levels	number of above-GROUND levels
+	 * @param aboveGround	number of above-GROUND levels
 	 */
-	public void setLevels(boolean outside, int high_levels) {
-		this.outsideLevels = outside;
-		this.highLevels = high_levels; 
+	public void highlandLevels(int aboveGround) {
+		this.outside = true;
+		this.highLevels = aboveGround; 
+		this.levels = null;		// need to rebuild
+	}
+	
+	/**
+	 * set parameters that define the three water levels
+	 * @param passable	fordable/shallow boundary
+	 * @param deep		shallow/deep boundary
+	 */
+	void waterLevels(int passable, int shallow) {
+		this.min_shallow = passable;
+		this.max_shallow = shallow;
+		this.levels = null;		// need to rebuild
+	}
+	
+	/**
+	 * set the minimum required slope percentile to be a mountain (vs plateau)
+	 * @param minSlope
+	 */
+	void mountainSlope(int minSlope) {
+		this.min_slope = minSlope;
+		this.levels = null;		// need to rebuild
+	}
+	
+	/**
+	 * set the thresholds between GROUND/HILL and HILL/MOUNTAIN
+	 * @param low ... minimum altitude percentile to be HILL (vs GROUND)
+	 * @param mid ... maximum altitude percentile to be HILL (vs MOUTNAIN)
+	 */
+	void landLevels(int low, int mid) {
+		this.min_hill = low;
+		this.max_hill = mid;
+		this.levels = null;		// need to rebuild
+	}
+	
+	
+	/**
+	 * generate the percentile to TerrainType maps for this export
+	 *
+	 *  decide on the altitude-to-level mapping, and initialize
+	 *  a per-tile level map accordingly.
+	 * 
+	 *  We also generate the color maps:
+	 *	  - DEEP/SHLLOW/FORDABLE water are BLUE (dark to light)
+	 *	  - PITs are dark gray
+	 *	  - GROUND is dark brown
+	 *	  - higher elevations are shades of gray 
+	 *
+	 * We can use the MountainDialog to create depressions, and this
+	 * module would recognize them as PITs, for which appropriate 
+	 * tiles would be chosen.  But those would be much larger (kM
+	 * on a side) than reasonable PITs ... so I don't enable them.
+	 */
+	private void levelMap() {
+		// maps created by this method
+		int depthMap[]; // depth pctile to terrain level
+		int altMap[]; // alt pctile to terrain level
+	
+		// number of levels of each type
+		int totLevels; // total # of terrain levels
+		int waterLevels; // # of water levels
+		int lowLevels; // # of pit/ground levels
+		int midLevels; // # of ground/hill levels
+
+		boolean have_pits;
+
+		// figure out how many levels we have of which types
+		if (this.outside) {
+			have_pits = false;	// XXX PITs are not what we want
+			waterLevels = 3;	// DEEP/SHALLOW/PASSABLE
+			lowLevels = have_pits ? 1 : 0;	// PIT (or nothing)
+			midLevels = 1;		// one GROUND level
+								// high levels set by slider
+		} else {
+			have_pits = false;	// no PITs in Overworld
+			waterLevels = 3;	// DEEP/SHALLOW/PASSABLE
+			lowLevels = 1;		// GROUND
+			midLevels = 1;		// HILL
+			highLevels = 1;		// MOUNTAIN
+		}
+		totLevels = waterLevels + lowLevels + midLevels + highLevels;
+
+		// figure out the base level for each TerrainType
+		int water_base = 0;
+		int low_base = water_base + waterLevels;
+		int mid_base = low_base + lowLevels;
+		int high_base = mid_base + midLevels;
+
+		// create and initialize the depth percentile->level map
+		// NOTE: everything assumes ONLY three water depth levels
+		if (depths != null) {
+			depthMap = new int[100];
+			for (int i = 0; i < 100; i++)
+				depthMap[i] = (i >= max_shallow) ? 0 : (i <= min_shallow) ? 2 : 1;
+		} else
+			depthMap = null;
+
+		// create and initialize the altitude percentile->level map
+			altMap = new int[100];
+
+		// figure out the base level for each of the three groups
+		for (int i = 0; i < 100; i++)
+			if (i >= max_hill) // one of the high levels
+				altMap[i] = high_base + (((i - max_hill) * highLevels) / (100 - max_hill));
+			else if (i >= min_hill) // one of the mid levels
+				altMap[i] = mid_base + (((i - min_hill) * midLevels) / (max_hill - min_hill));
+			else // one of the low levels
+				altMap[i] = low_base + ((i * lowLevels) / min_hill);
+
+
+		// create the terrain level to TerrainType/color maps
+		typeMap = new int[totLevels];
+		colorTopo = new Color[totLevels];
+		int level = water_base;
+
+		// water related types and colors (shades of blue)
+		int shade = MIN_WATER_SHADE; // currently all shades of blue
+		int delta = SHADE_RANGE;	// big change per level
+		for (int i = 0; i < waterLevels; i++) {
+			typeMap[level] = TerrainType.DEEP_WATER + i;
+			colorTopo[level] = new Color(0, 0, shade);
+			shade += delta;
+			level++;
+		}
+
+		// there is (at most) one low-land level: PIT or GROUND
+		if (lowLevels > 0) {
+			shade = MIN_LOW_SHADE;
+			delta = SHADE_RANGE / lowLevels;
+			for (int i = 0; i < lowLevels; i++) {
+				if (have_pits) {	// one dark gray
+					typeMap[level] = TerrainType.PIT;
+					colorTopo[level] = new Color(shade, shade, shade);
+				} else {			// one dark brown
+					typeMap[level] = TerrainType.GROUND;
+					colorTopo[level] = GROUND_COLOR;
+				}
+				shade += delta;
+				level++;
+			}
+		}
+
+		// there is one mid-land level: GROUND or HILL
+		shade = MIN_MID_SHADE;
+		delta = SHADE_RANGE / midLevels;
+		for (int i = 0; i < midLevels; i++) {
+			if (outside) {	// one dark brown
+				typeMap[level] = TerrainType.GROUND;
+				colorTopo[level] = GROUND_COLOR;
+			} else {			// one dark gray
+				typeMap[level] = TerrainType.HILL;
+				colorTopo[level] = new Color(shade, shade, shade);
+			}
+			shade += delta;
+			level++;
+		}
+
+		// high-land related types and colors
+		// XXX should highlands be lighter brown->yellow
+		shade = MIN_HIGH_SHADE;
+		delta = SHADE_RANGE / highLevels;
+		for (int i = 0; i < highLevels; i++) {
+			typeMap[level] = outside ? TerrainType.HILL : TerrainType.MOUNTAIN;
+			colorTopo[level] = new Color(shade, shade, shade);	// shades of light gray
+			shade += delta;
+			level++;
+		}
+
+		// compute a terrain level for every square
+		RPGMLeveler leveler = new RPGMLeveler();
+		double threshold = (double) this.min_slope / 100.0;
+		this.levels = leveler.getLevels(this, altMap, depthMap, threshold, typeMap);
 	}
 
 	/**
 	 * write out an RPGMaker map
 	 * @param filename of output file
 	 */
-	public boolean writeFile(String filename) {		
+	public boolean writeFile(String filename) {	
+		// we probably have to create a tile-to-level map
+		if (this.levels == null)
+			levelMap();
+		
 		try {
 			FileWriter output = new FileWriter(filename);
 			RPGMwriter w = new RPGMwriter(output);
@@ -229,6 +420,10 @@ public class RPGMTiler implements Exporter {
 	 * generate an export preview, mapping levels to colors
 	 */
 	public void preview(WhichMap chosen, Color colormap[]) {
+		// we may have to generate the level map
+		if (this.levels == null)
+			levelMap();
+		
 		// fill in preview from the per-point attributes
 		Color map[][] = new Color[y_points][x_points];
 		for(int i = 0; i < y_points; i++)
@@ -242,7 +437,8 @@ public class RPGMTiler implements Exporter {
 						map[i][j] = (flora <= 0) ? Color.GRAY : colormap[flora];
 					}
 				} else {
-					map[i][j] = colormap[l];
+					// use or own map due to possible race condition
+					map[i][j] = colorTopo[l];
 				}
 			}
 		new PreviewMap("Export Preview (" +
@@ -678,16 +874,6 @@ public class RPGMTiler implements Exporter {
 	}
 
 	/**
-	 * initialize the bucketized level map
-	 * @param levels ... level for every map point
-	 * @param typeMap ... terrain type of each level
-	 */
-	public void levelMap(int[][] levels, int[] typeMap ) {
-		this.levels = levels;
-		this.typeMap = typeMap;
-	}
-
-	/**
 	 * Up-load the net erosion/deposition for every tile
 	 * @param erode	per point height (in meters) of soil lost to erosion
 	 * 		negative means sedimentqation
@@ -763,7 +949,7 @@ public class RPGMTiler implements Exporter {
 
 		switch( terrainType ) {
 		case TerrainType.DEEP_WATER:
-			return new Color(0, 0, WATER_SHADE_MIN);
+			return new Color(0, 0, MIN_WATER_SHADE);
 		case TerrainType.SHALLOW_WATER:
 			return new Color(0, 0, WATER_SHADE_DELTA);
 		case TerrainType.PASSABLE_WATER:

@@ -50,16 +50,7 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 	private JTextField palette; // tile set description file
 	private JButton choosePalette; // select palette file
 
-	private Color[] colorTopo; // level to preview color map
 	private Color[] colorFlora;	// flora class to preview color map
-
-	// preview colors
-	private static final Color GROUND_COLOR = new Color(102,51,0);
-	private static final int MIN_WATER_SHADE = 96; // blue
-	private static final int MIN_LOW_SHADE = 32; // dark grey
-	private static final int MIN_MID_SHADE = 128; // medium grey
-	private static final int MIN_HIGH_SHADE = 160; // light grey
-	private static final int SHADE_RANGE = 64; // total range (per TerrainType)
 	
 	// indices into the tileRules list
 	public static final int OW_TILES = 0;
@@ -103,6 +94,8 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		setVisible(true);
 		
 		colorFlora = map.getFloraColors();
+		levelsChanged = true;	// force reading
+		
 		if (parms.debug_level >= EXPORT_DEBUG)
 			System.out.println("new RPGMexport(" + format + ")");
 	}
@@ -357,13 +350,18 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 		}
 		
 		if (levelsChanged) {
-			levelMap();
+			// all level sliders are integer percentages
+			tiler.waterLevels(depths.getValue(), depths.getUpperValue());
+			tiler.landLevels(altitudes.getValue(), altitudes.getUpperValue());
+			if (plateau != null)
+				tiler.mountainSlope(plateau.getValue());
+			if (levels != null)
+				tiler.highlandLevels(levels.getValue()-1);	// assuming no PITs
 			levelsChanged = false;
 		}
 		
-		// topo previews do not require hydration and flora updates
 		if (e.getSource() == previewT && selected) {
-			tiler.preview(Exporter.WhichMap.HEIGHTMAP, colorTopo);
+			tiler.preview(Exporter.WhichMap.HEIGHTMAP, tiler.colorTopo);
 			return;
 		}
 		
@@ -412,160 +410,5 @@ public class RPGMexport extends ExportBase implements ActionListener, ChangeList
 
 			}
 		}
-	}
-
-	/**
-	 * generate the percentile to TerrainType maps for this export
-	 *
-	 *  slider inputs: levels total # levels (Outside) depths
-	 *                 passable/shallow/deep altitudes ground/hill/mountain
-	 *                 (Overworld) or pit/ground/mound (Outside) slopes
-	 *                 ground/hill/mountain (Overworld)
-	 * 
-	 *  We also generate the color maps:
-	 *	  - DEEP/SHLLOW/FORDABLE water are BLUE (dark to light)
-	 *	  - PITs are dark gray
-	 *	  - GROUND is dark brown
-	 *	  - higher elevations are shades of gray 
-	 *
-	 * We can use the MountainDialog to create depressions, and this
-	 * module would recognize them as PITs, for which appropriate 
-	 * tiles would be chosen.  But those would be much larger (kM
-	 * on a side) than reasonable PITs ... so I don't enable them.
-	 */
-	void levelMap() {
-
-		// maps created by this method
-		int depthMap[]; // depth pctile to terrain level
-		int altMap[]; // alt pctile to terrain level
-		int typeMap[]; // terrain level to TerrainType
-
-		// number of levels of each type
-		int totLevels; // total # of terrain levels
-		int waterLevels; // # of water levels
-		int lowLevels; // # of pit/ground levels
-		int midLevels; // # of ground/hill levels
-		int highLevels; // # of mound/mountain levels
-
-		boolean have_pits;
-		boolean outside;
-
-		// figure out how many levels we have of which types
-		if (levels == null) {
-			outside = false;	// Overworld
-			have_pits = false;	// no PITs in Overworld
-			waterLevels = 3;	// DEEP/SHALLOW/PASSABLE
-			lowLevels = 1;		// GROUND
-			midLevels = 1;		// HILL
-			highLevels = 1;		// MOUNTAIN
-		} else {
-			outside = true;		// Outside
-			have_pits = false;	// XXX PITs are not what we want
-			waterLevels = 3;	// DEEP/SHALLOW/PASSABLE
-			lowLevels = have_pits ? 1 : 0;	// PIT (or nothing)
-			midLevels = 1;		// one GROUND level
-			int landLevels = levels.getValue();
-			highLevels = landLevels - (lowLevels + midLevels);	// HILL
-		}
-		totLevels = waterLevels + lowLevels + midLevels + highLevels;
-
-		// figure out the base level for each TerrainType
-		int water_base = 0;
-		int low_base = water_base + waterLevels;
-		int mid_base = low_base + lowLevels;
-		int high_base = mid_base + midLevels;
-
-		// create and initialize the depth percentile->level map
-		// NOTE: everything assumes ONLY three water depth levels
-		if (depths != null) {
-			depthMap = new int[100];
-			int low = depths.getValue();
-			int high = depths.getUpperValue();
-			for (int i = 0; i < 100; i++)
-				depthMap[i] = (i >= high) ? 0 : (i <= low) ? 2 : 1;
-		} else
-			depthMap = null;
-
-		// create and initialize the altitude percentile->level map
-		if (altitudes != null) {
-			altMap = new int[100];
-			// figure out where the cut-offs are
-			int low = (lowLevels == 0) ? 0 : altitudes.getValue();
-			int high = altitudes.getUpperValue();
-
-			// figure out the base level for each of the three groups
-			for (int i = 0; i < 100; i++)
-				if (i >= high) // one of the high levels
-					altMap[i] = high_base + (((i - high) * highLevels) / (100 - high));
-				else if (i >= low) // one of the mid levels
-					altMap[i] = mid_base + (((i - low) * midLevels) / (high - low));
-				else // one of the low levels
-					altMap[i] = low_base + ((i * lowLevels) / low);
-		} else
-			altMap = null;
-
-		// create the terrain level to TerrainType/color maps
-		typeMap = new int[totLevels];
-		colorTopo = new Color[totLevels];
-		int level = water_base;
-
-		// water related types and colors (shades of blue)
-		int shade = MIN_WATER_SHADE; // currently all shades of blue
-		int delta = SHADE_RANGE;	// big change per level
-		for (int i = 0; i < waterLevels; i++) {
-			typeMap[level] = TerrainType.DEEP_WATER + i;
-			colorTopo[level] = new Color(0, 0, shade);
-			shade += delta;
-			level++;
-		}
-
-		// there is (at most) one low-land level: PIT or GROUND
-		if (lowLevels > 0) {
-			shade = MIN_LOW_SHADE;
-			delta = SHADE_RANGE / lowLevels;
-			for (int i = 0; i < lowLevels; i++) {
-				if (have_pits) {	// one dark gray
-					typeMap[level] = TerrainType.PIT;
-					colorTopo[level] = new Color(shade, shade, shade);
-				} else {			// one dark brown
-					typeMap[level] = TerrainType.GROUND;
-					colorTopo[level] = GROUND_COLOR;
-				}
-				shade += delta;
-				level++;
-			}
-		}
-
-		// there is one mid-land level: GROUND or HILL
-		shade = MIN_MID_SHADE;
-		delta = SHADE_RANGE / midLevels;
-		for (int i = 0; i < midLevels; i++) {
-			if (outside) {	// one dark brown
-				typeMap[level] = TerrainType.GROUND;
-				colorTopo[level] = GROUND_COLOR;
-			} else {			// one dark gray
-				typeMap[level] = TerrainType.HILL;
-				colorTopo[level] = new Color(shade, shade, shade);
-			}
-			shade += delta;
-			level++;
-		}
-
-		// high-land related types and colors
-		// XXX should highlands be lighter brown->yellow
-		shade = MIN_HIGH_SHADE;
-		delta = SHADE_RANGE / highLevels;
-		for (int i = 0; i < highLevels; i++) {
-			typeMap[level] = outside ? TerrainType.HILL : TerrainType.MOUNTAIN;
-			colorTopo[level] = new Color(shade, shade, shade);	// shades of light gray
-			shade += delta;
-			level++;
-		}
-
-		// compute a terrain level for every square
-		RPGMLeveler leveler = new RPGMLeveler();
-		double threshold = plateau != null ? ((double) plateau.getValue())/100.0 : 0.0;
-		int[][] levelMap = leveler.getLevels(tiler, altMap, depthMap, threshold, typeMap);
-		tiler.levelMap(levelMap, typeMap);
 	}
 }

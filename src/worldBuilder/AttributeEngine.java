@@ -166,7 +166,6 @@ public class AttributeEngine {
 		}
 	}
 	
-	private static final String[] None = {"NONE", "NONE", "NONE", "NONE"};
 	/**
 	 * rule based resource placement for the selected points
 	 * @param selected per-point booleans for selected points

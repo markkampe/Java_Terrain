@@ -22,6 +22,8 @@ public class AttributeEngine {
 	// changes since the last commit
 	boolean newRain, newRock, newFlora, newFauna;
 	private int adjusted;
+	String[] classNames = null;
+	int[] classCounts = null;
 	
 	private static final int ATTRIBUTE_DEBUG = 2;
 	
@@ -187,8 +189,6 @@ public class AttributeEngine {
 			perClass[i] = (int) (quotas[i] * num_points);
 		
 		// run the placement engine
-		String[] classNames = None;
-		int[] classCounts;
 		switch(whichmap) {
 		case MINERAL:
 			if (rockPlacer == null)
@@ -217,21 +217,6 @@ public class AttributeEngine {
 		
 		// and up date the display
 		putMap(whichmap, AUTO_PLACEMENT);
-		
-		// report on how many points assigned to each class
-		if (parms.debug_level >= ATTRIBUTE_DEBUG) {
-			String names = "";
-			String counts = "";
-			for(int i = 0; i < classNames.length; i++) {
-				if (i > 0) {
-					names += "/";
-					counts += "/";
-				}
-				names += classNames[i];
-				counts += String.format("%d", classCounts[i]);
-			}
-			System.out.println(names + " = " + counts);
-		}
 		
 		return true;
 	}
@@ -268,6 +253,24 @@ public class AttributeEngine {
 				System.out.println(String.format("Updated fauna distribution for %d points", this.adjusted));
 			newFauna = false;
 		}
+		if (classCounts != null) {
+			String names = "";
+			String counts = "";
+			for(int i = 0; i < classNames.length; i++) {
+				if (i > 0) {
+					names += "/";
+					counts += "/";
+				}
+				names += classNames[i];
+				counts += String.format("%d", classCounts[i]);
+			}
+			System.out.println("Auto-Placement: " + names + " = " + counts);
+			classCounts = null;
+			newRock = false;
+			newFlora = false;
+			newFauna = false;
+		}
+				
 		adjusted = 0;
 		return true;
 	}

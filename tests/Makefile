@@ -262,36 +262,72 @@ raw_json: $(JAR)
 	@echo "loading a complex map and exporting it in Raw JSON"		> /tmp/$@
 	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
 	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/$@.json raw 200m"		>>/tmp/$@
-#	@echo "exit 0"								>>/tmp/$@
+	@echo "exit 0"								>> /tmp/$@
 	@java -jar $(JAR) -s /tmp/$@
+	@cmp /tmp/$@.json raw_test.json;	\
+	if [ $$? -ne 0 ];			\
+	then					\
+		echo "... $@: /tmp/$@.json does not match expected (raw_test.json)";\
+		false;				\
+	else					\
+		echo "... all rivers, erosion and deposition as expected (raw_test.json)";\
+		rm -f /tmp/$@ /tmp/$@.json;	\
+	fi
 
 overworld: $(JAR)
 	@echo "loading a complex map and exporting it as RPGM.overworld"	> /tmp/$@
 	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
 	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/$@.json overworld 200m /home/git/Java_Terrain/src/Templates/Overworld.json"	>>/tmp/$@
-#	@echo "exit 0"								>>/tmp/$@
+	@echo "exit 0"								>> /tmp/$@
 	@java -jar $(JAR) -s /tmp/$@
+	@cmp /tmp/$@.json overworld_test.json;	\
+	if [ $$? -ne 0 ];			\
+	then					\
+		echo "... $@: /tmp/$@.json does not match expected (overworld_test.json)";\
+		false;				\
+	else					\
+		echo "... all rivers, erosion and deposition as expected (overworld_test.json)";\
+		rm -f /tmp/$@ /tmp/$@.json;	\
+	fi
 	
 
 outside: $(JAR)
 	@echo "loading a complex map and exporting it as RPGM.outside"		> /tmp/$@
 	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
 	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/$@.json outside 200m /home/git/Java_Terrain/src/Templates/Overworld.json"	>>/tmp/$@
-#	@echo "exit 0"								>>/tmp/$@
+	@echo "exit 0"								>> /tmp/$@
 	@java -jar $(JAR) -s /tmp/$@
+	@cmp /tmp/$@.json outside_test.json;	\
+	if [ $$? -ne 0 ];			\
+	then					\
+		echo "... $@: /tmp/$@.json does not match expected (outside_test.json)";\
+		false;				\
+	else					\
+		echo "... all rivers, erosion and deposition as expected (outside_test.json)";\
+		rm -f /tmp/$@ /tmp/$@.json;	\
+	fi
 	
 
 foundation: $(JAR)
 	@echo "loading a complex map and exporting it as Foundation"		> /tmp/$@
 	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
-	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/Export.$@ foundation 200m"	>>/tmp/$@
-#	@echo "exit 0"								>>/tmp/$@
+	@echo "export <-0.1,-0.1>-<0.1,0.1> /tmp/Export.$@ foundation 200m"	>>/tmp/$@
+	@echo "exit 0"								>> /tmp/$@
 	@java -jar $(JAR) -s /tmp/$@
+	@echo "Region has been exported to /tmp/Export.$@"
 	
 object: $(JAR)
 	@echo "loading a complex map and exporting it as Object Overlay"	> /tmp/$@
 	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
 	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/$@.json object 200m"		>>/tmp/$@
-#	@echo "exit 0"								>>/tmp/$@
+	@echo "exit 0"								>> /tmp/$@
 	@java -jar $(JAR) -s /tmp/$@
-	
+	@cmp /tmp/$@.json object_test.json;	\
+	if [ $$? -ne 0 ];			\
+	then					\
+		echo "... $@: /tmp/$@.json does not match expected (object_test.json)";\
+		false;				\
+	else					\
+		echo "... all rivers, erosion and deposition as expected (object_test.json)";\
+		rm -f /tmp/$@ /tmp/$@.json;	\
+	fi

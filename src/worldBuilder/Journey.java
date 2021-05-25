@@ -10,6 +10,7 @@ package worldBuilder;
  * until they meet journeys from another city.
  */
 public class Journey {
+	public int index;	// index of this Journey node
 	public int city;	// index of owning city
 	public double cost;	// cost of traveling from city
 	public int route;	// index of easiest route to city
@@ -18,10 +19,12 @@ public class Journey {
 	
 	/**
 	 * create a node for the next step in an outward journey
+	 * @param index ... corresponding MeshPoint index
 	 * @param fromCity ... large city from which we are traveling
 	 * @param fromPoint ... previous point in our journey
 	 */
-	public Journey(int fromCity, int fromPoint) {
+	public Journey(int index, int fromCity, int fromPoint) {
+		this.index = index;
 		this.city = fromCity;
 		this.route = fromPoint;
 		this.next = null;

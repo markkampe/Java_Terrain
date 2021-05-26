@@ -27,7 +27,7 @@ public class TradeRoutes {
 	public LinkedList<TradeRoute> routes;
 	public LinkedList<TradeRoute> indirects;
 	
-	private static final int ROUTE_DEBUG = 2;
+	// private static final int ROUTE_DEBUG = 2;
 	
 	public TradeRoutes(Map map) {
 		this.map = map;

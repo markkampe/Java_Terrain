@@ -65,6 +65,9 @@ public class CityMap {
 		int n_height = m.getHeight();
 		for(int i = 0; i < map.mesh.vertices.length; i++) {
 			if (names[i] != null) {
+				// make sure it is on the current screen
+				if (!map.on_screen(mesh.vertices[i].x, mesh.vertices[i].y))
+					continue;
 				String s = names[i];
 				String t = CityDialog.lexType(s);
 				int x = map.screen_x(mesh.vertices[i].x);
@@ -107,11 +110,16 @@ public class CityMap {
 	 * @param n2	index of second MeshPoint
 	 */
 	private void connect(Graphics g, int n1, int n2) {
+		// make sure this segment is on-screen
+		if (!map.on_screen(mesh.vertices[n1].x, mesh.vertices[n1].y))
+			return;
+		if (!map.on_screen(mesh.vertices[n2].x, mesh.vertices[n2].y))
+			return;
+		
 		int x1 = map.screen_x(mesh.vertices[n1].x);
 		int y1 = map.screen_y(mesh.vertices[n1].y);
 		int x2 = map.screen_x(mesh.vertices[n2].x);
 		int y2 = map.screen_y(mesh.vertices[n2].y);
-		
 		g.drawLine(x1, y1, x2, y2);
 	}
 }

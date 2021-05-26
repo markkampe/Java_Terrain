@@ -6,7 +6,9 @@ public class TerritoryEngine {
 	private Map map;
 	private String[] names;
 	private double[] heights;
+	private double[] erosion;
 	private double[] riverFlux;
+	private double[] waterLevel;
 	private boolean[] oceanic;
 	private TradeRoutes routes;
 	
@@ -17,7 +19,7 @@ public class TerritoryEngine {
 	
 	// caravan travel speed estimates
 	private static final double WALK_TIME = 20.0;	// minutes/km
-	private static final double	CLIMB_TIME = 150.0;	// minutes/km
+	private static final double	CLIMB_TIME = 250.0;	// minutes/km
 	private static final double FORD_TIME = 60.0;	// minutes/M^3/s
 	private static final double PER_DAY = 330;		// minutes/day of travel
 	
@@ -34,6 +36,8 @@ public class TerritoryEngine {
 	public TerritoryEngine(Map map) {
 		this.map = map;
 		this.heights = map.getHeightMap();
+		this.erosion = map.getErodeMap();
+		this.waterLevel = map.getWaterLevel();
 		this.riverFlux = map.getFluxMap();
 		this.names = map.getNameMap();
 		this.oceanic = map.getDrainage().oceanic;
@@ -80,6 +84,7 @@ public class TerritoryEngine {
 	 * journey outwards from each city until we have covered the map
 	 */
 	private void process() {
+		
 		for( Journey step = queue.next(); step != null; step = queue.next()) {
 			// recursively explore all of our neighbors
 			MeshPoint p = map.mesh.vertices[step.index];
@@ -88,11 +93,9 @@ public class TerritoryEngine {
 			for(int i = 0; i < p.neighbors; i++) {
 				MeshPoint neighbor = p.neighbor[i];
 				// ignore edge nodes
-				if (neighbor.neighbors < 3) {
-					if (parms.debug_level > TERRITORY_DEBUG)
-						System.out.println ("Territory: ignoring edge node " + neighbor.index);
+				if (neighbor.neighbors < 3)
 					continue;
-				}
+
 				// already claimed nodes might be cross-overs
 				int neighbor_x = neighbor.index;
 				if (nodes[neighbor_x] != null) {
@@ -100,14 +103,16 @@ public class TerritoryEngine {
 						routes.addCrossing(step, nodes[neighbor_x]);
 					continue;
 				} 
-				// ignore oceanic nodes
+				// stop at the ocean
 				if (oceanic[neighbor_x]) {
-					if (parms.debug_level > TERRITORY_DEBUG)
-						System.out.println ("Territory: ignoring oceanic node " + neighbor.index);
+					Journey ocean = new Journey(neighbor_x, -1, step.index);
+					routes.addCrossing(step, ocean);
 					continue;
 				}
 				
-				// FIX no crossing lakes
+				// no crossing lakes
+				if (waterLevel[neighbor_x] > heights[neighbor_x] - erosion[neighbor_x])
+					continue;
 				
 				// add this node to the list to be explored
 				Journey nextStep = new Journey(neighbor_x, step.city, step.index);

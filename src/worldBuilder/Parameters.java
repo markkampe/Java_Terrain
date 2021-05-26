@@ -133,6 +133,12 @@ public class Parameters {
 	/** default mountain altitude		*/	public int dAltitude;
 	/** default mountain shape			*/	public int dShape;
 	/** chosen mountain outline			*/	public int dOutline = ELIPSE;
+	
+	/** horizontal minutes/km			*/	public double dTimeTravel;
+	/** vertical minutes/km				*/	public double dTimeClimb;
+	/** crossing minutes/m^3/s			*/	public double dTimeCross;
+	/** travel minutes per day			*/	public double dTravelDay;
+	/** max days between cities			*/	public double dTravelMax;
 
 	/** default river flow (m^3/s)x		*/	public int dTribute;
 
@@ -241,7 +247,7 @@ public class Parameters {
 		// default export tile size
 		dTileSize = 1000;			// 1km
 		
-		// default ROGNajer altitude/slope/depth thresholds
+		// default altitude/slope/depth thresholds
 		dWaterMin = 1;	// passable/shallow cut-off
 		dWaterMax = 10;	// shallow/deep cut-off
 		dHillMin = 10;	// ground/hill cut-off
@@ -262,6 +268,12 @@ public class Parameters {
 		dFaunaPct = 10;
 		dFaunaMin = 35;
 		dFaunaMax = 90;
+		// default travel times
+		dTimeTravel =  20;	// min/km
+		dTimeClimb = 250;	// min/1000m
+		dTimeCross = 60;	// min/m^3/s
+		dTravelDay = 330;	// minutes of travel/day
+		dTravelMax = 14.0;	// travel days between cities
 		
 		descr_height = 4;
 		descr_width = 80;

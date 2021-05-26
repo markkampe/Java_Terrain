@@ -1,7 +1,9 @@
 package worldBuilder;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 /**
  * a class to render the oceans and rivers as an image in shades of blue
@@ -30,7 +32,7 @@ public class RiverMap {
 	 * @param height of the display map
 	 */
 	public void paint(Graphics g, int width, int height) {
-		
+		Graphics2D g2 = (Graphics2D) g;
 		Mesh mesh = map.getMesh();
 		int downHill[] = map.getDrainage().downHill;
 		double flux[] = map.getFluxMap();
@@ -72,16 +74,15 @@ public class RiverMap {
 				double blue = WATER_DIM + delta;
 				double green = Math.max(0, WATER_DIM - delta);
 				g.setColor(new Color(0, (int) green, (int) blue));
-				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
-				
-				// if a river or artery, extra lines to make it wider
 				if (flux[i] < min_river)
-					continue;
-				g.drawLine((int) (x1+1), (int) (y1+1), (int) (x2+1), (int) (y2+1));
-				if (flux[i] < min_artery)
-					continue;
-				g.drawLine((int) (x1-1), (int) (y1-1), (int) (x2-1), (int) (y2-1));
+					g2.setStroke(new BasicStroke(1));
+				else if (flux[i] < min_artery)
+					g2.setStroke(new BasicStroke(2));
+				else
+					g2.setStroke(new BasicStroke(3));
+				g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 			}
 		}
+		g2.setStroke(new BasicStroke(1));
 	}
 }

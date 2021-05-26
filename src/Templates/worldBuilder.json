@@ -1,83 +1,83 @@
 {   "title": "WorldBuilder 0.9 (Alpha)",
     "window": {
-	"height": 1000,
-	"width": 1000,
-	"border": 10,
-	"dialog_x": 250,
-	"dialog_y": 1000,
-	"dialog_delta": 50,
-    	"dialog_border": 5
-    },
-    "identification": {
-	"region_name": "Never-Never-Land",
-	"description": "where dreams come true"
+		"height": 1000,
+		"width": 1000,
+		"border": 10,
+		"dialog_x": 250,
+		"dialog_y": 1000,
+		"dialog_delta": 50,
+		"dialog_border": 5
+	},
+	"identification": {
+		"region_name": "Never-Never-Land",
+		"description": "where dreams come true"
     },
     "limits": {
-	"diameter_unit": 10,
-	"diameter_max": 1000,
-	"diameter_grain": 10,
-	"altitude_unit": 100,
-	"altitude_max": 5000,
-	"mountain_fraction": 2,
-	"msl_range": 1000,
-	"tribute_max": 1000,
-	"tiles_max": 16384
+		"diameter_unit": 10,
+		"diameter_max": 1000,
+		"diameter_grain": 10,
+		"altitude_unit": 100,
+		"altitude_max": 5000,
+		"mountain_fraction": 2,
+		"msl_range": 1000,
+		"tribute_max": 1000,
+		"tiles_max": 16384
 	},
     "world": {
-	"radius": 6371,
-	"tilt": 23.5,
-	"latitude": 30.0,
-	"longitude": -90.0,
-	"sediment": 100
+		"radius": 6371,
+		"tilt": 23.5,
+		"latitude": 30.0,
+		"longitude": -90.0,
+		"sediment": 100
 	},
     "hydro-physics": {
     	"Vmin": 0.002,
-	"Vd": 0.01,
-	"Ve": 0.40,
-	"Vmax": 3.0,
-	"Smax": 0.10,
-	"Ce": 0.10,
-	"Cd": 0.05,
-	"Cs": 0.003,
+		"Vd": 0.01,
+		"Ve": 0.40,
+		"Vmax": 3.0,
+		"Smax": 0.10,
+		"Ce": 0.10,
+		"Cd": 0.05,
+		"Cs": 0.003,
     	"Dp": 0.5,
-	"Edeg": 10,
-	"E35C": 100
+		"Edeg": 10,
+		"E35C": 100
     },
     "map": {
-	"points": 4096,
-	"improvements": 1,
-	"topo_major": 10,
-	"topo_minor": 100,
-	"stream": 0.10,
-	"river": 2.5,
-	"artery": 25,
-	"deep": 10
+		"points": 4096,
+		"improvements": 1,
+		"topo_major": 10,
+		"topo_minor": 100,
+		"stream": 0.10,
+		"river": 2.5,
+		"artery": 25,
+		"deep": 10
     },
     "display": {
     	"mesh": false,
-	"topo": true,
-	"rain": false,
-	"water": true,
+		"topo": true,
+		"rain": false,
+		"water": true,
     	"erosion": false,
-	"soil": false,
-	"hydro": false,
-	"flora": false
+		"soil": false,
+		"hydro": false,
+		"flora": false
     },
     "traderoutes": {
     	"flat km": 24,
-	"climb 1000m": 300,
-	"cross 1m3/s": 60,
-	"min/day": 360,
-	"max days": 13.9
+		"climb 1000m": 250,
+		"cross 1m3/s": 60,
+		"min/day": 360,
+		"max days": 13.5
     },
     "resources": {
     	"flora": "ecotopes.json",
-	"fauna": "faunatopes.json",
-	"minerals": "geotopes.json"
+		"fauna": "faunatopes.json",
+		"minerals": "geotopes.json"
     },
     "export": {
     	"map_name": "Map001",
     	"rules": [ "Overworld.json", "Outside.json" ],
-	"objects": "Overlay_objects.json"
+		"objects": "Overlay_objects.json"
     }
 }

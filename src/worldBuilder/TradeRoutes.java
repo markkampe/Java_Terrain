@@ -25,12 +25,16 @@ public class TradeRoutes {
 	public String[] names;
 	public Parameters parms;
 	public LinkedList<TradeRoute> routes;
+	public LinkedList<TradeRoute> indirects;
+	
+	private static final int ROUTE_DEBUG = 2;
 	
 	public TradeRoutes(Map map) {
 		this.map = map;
 		this.names = map.getNameMap();
 		this.parms = Parameters.getInstance();
 		this.routes = new LinkedList<TradeRoute>();
+		this.indirects = new LinkedList<TradeRoute>();
 	}
 	
 	/**
@@ -40,25 +44,69 @@ public class TradeRoutes {
 	 * @return boolean (is this a new trade route)
 	 */
 	public boolean addCrossing(Journey one, Journey other) {
-		// is there already a crossing between these two territories
+		// see if we already have a route between these two cities
+		TradeRoute r = findRoute(one.city, other.city);
+		if (r != null)
+			return false;
+		
+		// get names of source and destination (for logging)
+		String s1 = (one.city >= 0) ? CityDialog.lexName(names[one.city]) : "Ocean";
+		String s2 = (other.city >= 0) ? CityDialog.lexName(names[other.city]) : "Ocean";
+		
+		// see if there is a cheaper route through another city
 		for(Iterator<TradeRoute> it = routes.iterator(); it.hasNext();) {
-			TradeRoute r = it.next();
-			if (one.city == r.city1 && other.city == r.city2)
-				return false;
-			if (one.city == r.city2 && other.city == r.city1)
-				return false;
+			TradeRoute r1 = it.next();
+			if (r1.city1 != one.city && r1.city2 != one.city)
+				continue;	// this route doesn't involve us
+			int intermediate = (r1.city1 == one.city) ? r1.city2 : r1.city1;
+			if (intermediate == -1)
+				continue;	// no going through the ocean
+			TradeRoute r2 = findRoute(intermediate, other.city);
+			if (r2 != null) {	// there is an indirect alternative
+				String s3 = CityDialog.lexName(names[intermediate]);
+				if (r1.cost + r2.cost < one.cost + other.cost) {
+					r = new TradeRoute(one, other);
+					r.cost = r1.cost + r2.cost;
+					indirects.add(r);
+					if (parms.debug_level > 0)
+						System.out.println(String.format("Indirect: %s->%s->%s: %.1f days", 
+														s1, s3, s2, r.cost));
+					return false;
+				}
+			}
 		}
 		
-		// FIX is there already a cheaper route through another city
-		
 		// add this new route to the list
-		TradeRoute r = new TradeRoute(one, other);
+		r = new TradeRoute(one, other);
 		routes.add(r);
 		if (parms.debug_level > 0)
-			System.out.println(String.format("Trade route: %s to %s, %.1f days",
-								CityDialog.lexName(names[one.city]), 
-								CityDialog.lexName(names[other.city]),
-								r.cost));
+			System.out.println(String.format("Trade route: %s to %s, %.1f days", s1, s2, r.cost));
+			
 		return true;
+	}
+	
+	/**
+	 * look for an existing crossing between two Journey nodes
+	 */
+	TradeRoute findRoute(int city1, int city2) {
+		// see if we already have a direct route
+		for(Iterator<TradeRoute> it = routes.iterator(); it.hasNext();) {
+			TradeRoute r = it.next();
+			if (city1 == r.city1 && city2 == r.city2)
+				return r;
+			if (city1 == r.city2 && city2 == r.city1)
+				return r;
+		}
+		
+		// see if we already have a better indirect route
+		for(Iterator<TradeRoute> it = indirects.iterator(); it.hasNext();) {
+			TradeRoute r = it.next();
+			if (city1 == r.city1 && city2 == r.city2)
+				return r;
+			if (city1 == r.city2 && city2 == r.city1)
+				return r;
+		}
+		
+		return null;
 	}
 }

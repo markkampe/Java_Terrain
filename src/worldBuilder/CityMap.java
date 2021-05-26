@@ -49,26 +49,11 @@ public class CityMap {
 		if (routes != null) {
 			for(Iterator<TradeRoutes.TradeRoute> it = routes.iterator(); it.hasNext(); ) {
 				TradeRoutes.TradeRoute r = it.next();
-				int n = r.node1;
-				while (n >= 0) {
-					// see if we have reached the end of the first half
-					if (journeyNodes[n].route < 0)
-						if (n == r.city1) {
-							n = r.node2;
-							continue;
-						} else
-							break;
-					// FIX, draw the missing piece
-					
-					// figure out where the end-points are on the screen
-					int x1 = map.screen_x(mesh.vertices[n].x);
-					int y1 = map.screen_y(mesh.vertices[n].y);
-					n = journeyNodes[n].route;
-					int x2 = map.screen_x(mesh.vertices[n].x);
-					int y2 = map.screen_y(mesh.vertices[n].y);
-					
-					g.drawLine(x1, y1, x2, y2);
-				}
+				connect(g, r.node1, r.node2);
+				for(int n = r.node1; journeyNodes[n].route >= 0; n = journeyNodes[n].route)
+					connect(g, n, journeyNodes[n].route);
+				for(int n = r.node2; journeyNodes[n].route >= 0; n = journeyNodes[n].route)
+					connect(g, n, journeyNodes[n].route);
 			}
 		}
 		g2d.setStroke(new BasicStroke(1));
@@ -112,5 +97,19 @@ public class CityMap {
 			}
 		}
 
+	}
+	
+	/**
+	 * draw a line connecting two Mesh points
+	 * @param n1	index of first MeshPoint
+	 * @param n2	index of second MeshPoint
+	 */
+	private void connect(Graphics g, int n1, int n2) {
+		int x1 = map.screen_x(mesh.vertices[n1].x);
+		int y1 = map.screen_y(mesh.vertices[n1].y);
+		int x2 = map.screen_x(mesh.vertices[n2].x);
+		int y2 = map.screen_y(mesh.vertices[n2].y);
+		
+		g.drawLine(x1, y1, x2, y2);
 	}
 }

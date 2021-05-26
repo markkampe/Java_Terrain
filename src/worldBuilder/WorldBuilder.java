@@ -231,7 +231,6 @@ public class WorldBuilder  extends JFrame
 		editCity.addActionListener(this);
 		editRoads = new JMenuItem("trade routes");
 		editRoads.addActionListener(this);
-		editRoads.setEnabled(false);	// SOMEDAY implement roads
 		JMenu editMenu = new JMenu("Edit");
 		editMenu.add(editWorld);
 		editMenu.add(editSlope);
@@ -608,7 +607,7 @@ public class WorldBuilder  extends JFrame
 				activeDialog = true;
 			}
 		} else if (o == editRoads) {
-			System.err.println("implement edit:Roads");
+			new TerritoryEngine(map);
 		}
 		
 		// view menu toggles individual views on and off

@@ -73,7 +73,7 @@ public class TerritoryEngine {
 		
 		// record the routes
 		map.tradeRoutes(routes.routes);
-		map.journeys = nodes;
+		map.journeys(nodes);
 	}
 	
 	/**

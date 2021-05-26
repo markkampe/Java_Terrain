@@ -28,7 +28,7 @@ public class CityMap {
 		this.map = map;
 		this.mesh = map.mesh;
 		this.names = map.getNameMap();
-		this.journeyNodes = map.journeys;
+		this.journeyNodes = map.journeys();
 	}
 	
 	/**

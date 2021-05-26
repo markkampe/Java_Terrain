@@ -104,7 +104,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double faunaMap[];	// assigned fauna type
 	private double waterLevel[];// level of nearest water body
 	private LinkedList<TradeRoutes.TradeRoute> trade_routes;
-	public Journey[] journeys;	// possible nodes on trade routes	// FIX make this private
+	private Journey[] journeys;	// possible nodes on trade routes
 
 	private Cartesian poly_map;		// interpolation based on surrounding polygon
 	private double tileHeight[][];	// altitude of each screen tile (Z units)
@@ -1007,6 +1007,20 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	 */
 	public LinkedList<TradeRoutes.TradeRoute> tradeRoutes() {
 		return trade_routes;
+	}
+	
+	/**
+	 * set the list of trade route journey nodes
+	 */
+	public void journeys(Journey[] journeys) {
+		this.journeys = journeys;
+	}
+	
+	/**
+	 * return list of trade routes
+	 */
+	public Journey[] journeys() {
+		return journeys;
 	}
 	
 	/**

@@ -49,11 +49,13 @@ public class CityMap {
 		if (routes != null) {
 			for(Iterator<TradeRoutes.TradeRoute> it = routes.iterator(); it.hasNext(); ) {
 				TradeRoutes.TradeRoute r = it.next();
-				connect(g, r.node1, r.node2);
 				for(int n = r.node1; journeyNodes[n].route >= 0; n = journeyNodes[n].route)
 					connect(g, n, journeyNodes[n].route);
-				for(int n = r.node2; journeyNodes[n].route >= 0; n = journeyNodes[n].route)
-					connect(g, n, journeyNodes[n].route);
+				if (journeyNodes[r.node2] != null) {	// non-oceanic path
+					connect(g, r.node1, r.node2);
+					for(int n = r.node2; journeyNodes[n].route >= 0; n = journeyNodes[n].route)
+						connect(g, n, journeyNodes[n].route);
+				}
 			}
 		}
 		g2d.setStroke(new BasicStroke(1));

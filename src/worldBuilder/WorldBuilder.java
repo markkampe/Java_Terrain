@@ -18,7 +18,6 @@ public class WorldBuilder  extends JFrame
 	public static final String DEFAULT_TEMPLATE = "/Templates/default_%d.json";
 	
 	// identification information
-	private static final String version = "WorldBuilder 0.1";
 	private static final String author = "Author: Mark Kampe (mark.kampe@gmail.com)";
 	private static final String credit = "Inspired by Martin O'Leary's Uncharted Atlas terrain generator (mewo2.com)";
 	private static final String license = "";	// TBD
@@ -647,7 +646,7 @@ public class WorldBuilder  extends JFrame
 			}
 		} else if (o == helpInfo) {		// help menu just shows info
 			JOptionPane.showMessageDialog(new JFrame(), 
-					version +"\n" + author + "\n" + credit + "\n" + license, 
+					parms.title +"\n" + author + "\n" + credit + "\n" + license, 
 					"Information", JOptionPane.INFORMATION_MESSAGE);
 		} else if (o == ruleDebug) {
 			placeDialog(new RuleDebug(), false);

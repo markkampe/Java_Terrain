@@ -21,8 +21,8 @@ import javax.json.stream.JsonParser;
 public class Parameters {
 	// version identification info
 	private static final String PROGRAM_NAME = "WorldBuilder";
-	private static final String PROGRAM_VERSION = "0.5";
-	private static final String VERSION_NAME = "(Alpha)";
+	private static final String PROGRAM_VERSION = "0.x";
+	private static final String VERSION_NAME = "(default)";
 
 	// default configuration information
 	/** program name/version*/	public String title = PROGRAM_NAME + " " + PROGRAM_VERSION + " " + VERSION_NAME;
@@ -592,9 +592,9 @@ public class Parameters {
 			System.out.println("               sedimentary layer=" + String.format("%.0f%s", sediment, unit_z));
 			System.out.println("               watershed=" + tribute_max + " " + unit_f);
 			System.out.println("   traderoutes:"
-												+ String.format("flat_km: %.0f min", dTimeTravel)
-												+ String.format(", up 1000m: %.0f min", dTimeClimb)
-												+ String.format(", cross 1 %s: %.0f min", unit_f, dTimeCross));
+												+ String.format("flat: %.0f min/km", dTimeTravel)
+												+ String.format(", up: %.0f min/km", dTimeClimb)
+												+ String.format(", cross 1%s: %.0f min", unit_f, dTimeCross));
 			System.out.println("               " + String.format("travel %.0f min/day", dTravelDay)
 												 + String.format(", max %.1f days between cities", dTravelMax));
 			System.out.println("   resource placement:");

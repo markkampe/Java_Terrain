@@ -1,6 +1,5 @@
-{
+{   "title": "WorldBuilder 0.9 (Alpha)",
     "window": {
-	"title": "Worldbuilder 0.1 - Demo",
 	"height": 1000,
 	"width": 1000,
 	"border": 10,

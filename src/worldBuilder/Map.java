@@ -103,6 +103,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double floraMap[];	// assigned flora type
 	private double faunaMap[];	// assigned fauna type
 	private double waterLevel[];// level of nearest water body
+	private LinkedList<TradeRoutes.TradeRoute> trade_routes;
+	public Journey[] journeys;	// possible nodes on trade routes	// FIX make this private
 
 	private Cartesian poly_map;		// interpolation based on surrounding polygon
 	private double tileHeight[][];	// altitude of each screen tile (Z units)
@@ -132,7 +134,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				  max_rain;			// maximum rainfall (cm/y)
 	
 	// icons to be placed on may (e.g. for cities)
-	private BufferedImage[] iconImages;
+	public BufferedImage[] iconImages;
 
 	private Parameters parms;
 	
@@ -1001,6 +1003,20 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
+	 * return list of trade routes
+	 */
+	public LinkedList<TradeRoutes.TradeRoute> tradeRoutes() {
+		return trade_routes;
+	}
+	
+	/**
+	 * set the list of trade routes
+	 */
+	public void tradeRoutes(LinkedList<TradeRoutes.TradeRoute> routes) {
+		trade_routes = routes;
+	}
+	
+	/**
 	 * assoicate a name with the MeshPoint nearest <x,y>
 	 * @param name new name string
 	 * @param x (map) x coordinate
@@ -1666,46 +1682,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			r.paint(g, width, height, TOPO_CELL);
 		}
 		
-		// add capital/city/town/village icons
+		// add capital/city/town/village icons and trade routes
 		if ((display & SHOW_CITY) != 0) {
-			g.setColor(Color.BLACK);
-			FontMetrics m = g.getFontMetrics();
-			int n_height = m.getHeight();
-			for(int i = 0; i < mesh.vertices.length; i++) {
-				if (nameMap[i] != null) {
-					String s = nameMap[i];
-					String t = CityDialog.lexType(s);
-					int x = screen_x(mesh.vertices[i].x);
-					int y = screen_y(mesh.vertices[i].y);
-					// draw the icon
-					for(int j = 0; j < CityDialog.typeList.length; j++)
-						if (iconImages[j] != null && CityDialog.typeList[j].equals(t)) {
-							// get the pixels
-							BufferedImage img = iconImages[j];
-							// figure out where to put them
-							int w = img.getWidth();
-							int h = img.getHeight();
-							x -= w/2;
-							y -= h/2;
-							// over-paint the black pixels
-							int[] pixels = new int[w * h];
-							img.getRaster().getPixels(0, 0, w, h, pixels);
-							for(int r = 0; r < h; r++)
-								for(int c = 0; c < w; c++)
-									if (pixels[(r*w) + c] == 0)
-										g.drawLine(x+c, y+r, x+c, y+r);
-							
-							x += w;		// name goes after the icon
-							y += h/2;	// name goes at level of dot
-							break;
-						}
-					
-					// put up the name to the right of the icon
-					String n = CityDialog.lexName(s);
-					if (n != null && !n.equals(""))
-						g.drawString(n, x, y+(n_height/3));
-				}
-			}
+			CityMap c = new CityMap(this);
+			c.paint(g, width, height);
 		}
 		
 		// see if we are rendering the mesh (debugging, put it on top)

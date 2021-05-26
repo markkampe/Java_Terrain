@@ -64,6 +64,13 @@
 	"hydro": false,
 	"flora": false
     },
+    "traderoutes": {
+    	"flat km": 24,
+	"climb 1000m": 300,
+	"cross 1m3/s": 60,
+	"min/day": 360,
+	"max days": 13.9
+    },
     "resources": {
     	"flora": "ecotopes.json",
 	"fauna": "faunatopes.json",

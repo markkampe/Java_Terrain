@@ -268,12 +268,6 @@ public class Parameters {
 		dFaunaPct = 10;
 		dFaunaMin = 35;
 		dFaunaMax = 90;
-		// default travel times
-		dTimeTravel =  20;	// min/km
-		dTimeClimb = 250;	// min/1000m
-		dTimeCross = 60;	// min/m^3/s
-		dTravelDay = 330;	// minutes of travel/day
-		dTravelMax = 14.0;	// travel days between cities
 		
 		descr_height = 4;
 		descr_width = 80;
@@ -361,6 +355,9 @@ public class Parameters {
 					break;
 				case "fauna":
 					display_options |= Map.SHOW_FAUNA;
+					break;
+				case "city":
+					display_options |= Map.SHOW_CITY;
 					break;
 				}
 				break;
@@ -532,6 +529,23 @@ public class Parameters {
 				case "improvements":
 					improvements = new Integer(parser.getString());
 					break;
+					
+				// trade route parameters
+				case "flat km":
+					dTimeTravel = new Integer(parser.getString());
+					break;
+				case "climb 1000m":
+					dTimeClimb = new Integer(parser.getString());
+					break;
+				case "cross 1m3/s":
+					dTimeCross = new Integer(parser.getString());
+					break;
+				case "min/day":
+					dTravelDay = new Integer(parser.getString());
+					break;
+				case "max days":
+					dTravelMax = new Double(parser.getString());
+					break;
 
 				default:
 					break;
@@ -577,6 +591,12 @@ public class Parameters {
 			System.out.println("               initial slope=" + String.format("%.6f", slope_init) + unit_s);
 			System.out.println("               sedimentary layer=" + String.format("%.0f%s", sediment, unit_z));
 			System.out.println("               watershed=" + tribute_max + " " + unit_f);
+			System.out.println("   traderoutes:"
+												+ String.format("flat_km: %.0f min", dTimeTravel)
+												+ String.format(", up 1000m: %.0f min", dTimeClimb)
+												+ String.format(", cross 1 %s: %.0f min", unit_f, dTimeCross));
+			System.out.println("               " + String.format("travel %.0f min/day", dTravelDay)
+												 + String.format(", max %.1f days between cities", dTravelMax));
 			System.out.println("   resource placement:");
 			System.out.println("               flora rules:   " + flora_rules);
 			System.out.println("               fauna rules:   " + fauna_rules);

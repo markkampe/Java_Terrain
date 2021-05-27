@@ -16,7 +16,6 @@ public class CityMap {
 	private Map map;
 	private Mesh mesh;		
 	private String[] names;
-	private Journey[] journeyNodes;
 	
 	private static final int STROKE_WIDTH = 3;
 	
@@ -28,7 +27,6 @@ public class CityMap {
 		this.map = map;
 		this.mesh = map.mesh;
 		this.names = map.getNameMap();
-		this.journeyNodes = map.journeys();
 	}
 	
 	/**
@@ -49,13 +47,8 @@ public class CityMap {
 		if (routes != null) {
 			for(Iterator<TradeRoutes.TradeRoute> it = routes.iterator(); it.hasNext(); ) {
 				TradeRoutes.TradeRoute r = it.next();
-				for(int n = r.node1; journeyNodes[n].route >= 0; n = journeyNodes[n].route)
-					connect(g, n, journeyNodes[n].route);
-				if (journeyNodes[r.node2] != null) {	// non-oceanic path
-					connect(g, r.node1, r.node2);
-					for(int n = r.node2; journeyNodes[n].route >= 0; n = journeyNodes[n].route)
-						connect(g, n, journeyNodes[n].route);
-				}
+				for(int i = 0; i < r.path.length-1; i++)
+					connect(g, r.path[i], r.path[i+1]);
 			}
 		}
 		g2d.setStroke(new BasicStroke(1));

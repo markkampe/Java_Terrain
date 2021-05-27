@@ -13,7 +13,7 @@ public class Journey {
 	public int index;	// index of this Journey node
 	public int city;	// index of owning city
 	public double cost;	// cost of traveling from city
-	public int route;	// index of easiest route to city
+	public Journey route;// path back to owning city
 	
 	protected Journey next;	// link in NextSteps queue
 	
@@ -23,7 +23,7 @@ public class Journey {
 	 * @param fromCity ... large city from which we are traveling
 	 * @param fromPoint ... previous point in our journey
 	 */
-	public Journey(int index, int fromCity, int fromPoint) {
+	public Journey(int index, int fromCity, Journey fromPoint) {
 		this.index = index;
 		this.city = fromCity;
 		this.route = fromPoint;

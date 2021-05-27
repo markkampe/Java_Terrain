@@ -4,36 +4,69 @@ import java.util.LinkedList;
 import java.util.Iterator;
 
 public class TradeRoutes {
-	
-	public class TradeRoute {
-		int node1;	// index of one border node
-		int	city1;	// index of node 1 source city
-		int node2;	// index of second border node
-		int city2;	// index of node 2 source city
-		double cost;// cost of travel
-		
-		public TradeRoute(Journey one, Journey other) {
-			node1 = one.index;
-			city1 = one.city;
-			node2 = other.index;
-			city2 = other.city;
-			cost = one.cost + other.cost;
-		}
-	}
-	
+
 	public Map map;
 	public String[] names;
 	public Parameters parms;
 	public LinkedList<TradeRoute> routes;
 	public LinkedList<TradeRoute> indirects;
 	
-	// private static final int ROUTE_DEBUG = 2;
+	private static final int TRADEROUTE_DEBUG = 2;
+	
+	public class TradeRoute {
+		int node1;	// index of one border node
+		int	city1;	// index of node 1 source city
+		int node2;	// index of second border node
+		int city2;	// index of node 2 source city
+		int[] path;	// sequence of connecting points
+		double cost;// cost of travel
+		
+		/**
+		 * create a new TradeRoute between two outgoing paths
+		 * @param one the path that tried to expand
+		 * @param other the (already claimed) neighbor it encountered
+		 */
+		public TradeRoute(Journey one, Journey other) {
+			node1 = one.index;
+			city1 = one.city;
+			node2 = other.index;
+			city2 = other.city;
+			cost = one.cost + other.cost;
+			
+			// figure out how long the path is
+			int leftHops = 0, rightHops = 0;
+			for(Journey j = one; j != null; j = j.route)
+				leftHops++;
+			for(Journey j = other; j != null; j = j.route)
+				rightHops++;
+			path = new int[leftHops + rightHops];
+			
+			// itemize the path from here to city1 and city2
+			int i = leftHops - 1;
+			for(Journey j = one; j != null; j = j.route)
+				path[i--] = j.index;
+			i = leftHops;
+			for(Journey j = other; j != null; j = j.route)
+				path[i++] = j.index;
+			
+			if (parms.debug_level >= TRADEROUTE_DEBUG) {
+				System.out.print(city1 + "->" + city2 + ": ");
+				for(i = 0; i < path.length; i++) {
+					if (i > 0)
+						System.out.print("->");
+					System.out.print(path[i]);
+				}
+				System.out.print("\n");
+			}
+		}
+	}
+
 	
 	public TradeRoutes(Map map) {
 		this.map = map;
 		this.names = map.getNameMap();
 		this.parms = Parameters.getInstance();
-		this.routes = new LinkedList<TradeRoute>();
+		this.routes = new LinkedList<TradeRoute>();	// FIX only allocate of non-existent
 		this.indirects = new LinkedList<TradeRoute>();
 	}
 	

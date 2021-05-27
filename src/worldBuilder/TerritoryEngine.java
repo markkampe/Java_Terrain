@@ -13,7 +13,7 @@ public class TerritoryEngine {
 	private TradeRoutes routes;
 	
 	// local data
-	Journey[] nodes;			// status of every point
+	Journey[] nodes;			// status of every MeshPoint
 	Journey.NextSteps queue;	// queue of points to be explored
 	
 	private static final int TERRITORY_DEBUG = 2;
@@ -34,14 +34,13 @@ public class TerritoryEngine {
 		this.riverFlux = map.getFluxMap();
 		this.names = map.getNameMap();
 		this.oceanic = map.getDrainage().oceanic;
-		this.routes = new TradeRoutes(map);
-		
 		this.parms = Parameters.getInstance();
 		
 		int n = map.mesh.vertices.length;
 		nodes = new Journey[n];
-		Journey dummy = new Journey(-1, -1,-1);
+		Journey dummy = new Journey(-1, -1, null);
 		queue = dummy.new NextSteps();
+		this.routes = new TradeRoutes(map);
 		
 		// identify all of the known cities
 		for(int i = 0; i < n; i++) {
@@ -49,7 +48,7 @@ public class TerritoryEngine {
 				continue;
 			if (names[i].startsWith("capitol:") || names[i].startsWith("city:")) {
 				// a city defines a new territory
-				nodes[i] = new Journey(i, i, -1);
+				nodes[i] = new Journey(i, i, null);
 				nodes[i].cost = 0;
 				if (parms.debug_level >= TERRITORY_DEBUG)
 					System.out.println(String.format("%d: %s", i, names[i]));
@@ -57,7 +56,7 @@ public class TerritoryEngine {
 				for(int j = 0; j < map.mesh.vertices[i].neighbors; j++) {
 					MeshPoint neighbor = map.mesh.vertices[i].neighbor[j];
 					int x = neighbor.index;
-					Journey step = new Journey(x, i, i);
+					Journey step = new Journey(x, i, nodes[i]);
 					step.cost = cost(i, x);
 					nodes[x] = step;
 					queue.add(step);
@@ -70,7 +69,6 @@ public class TerritoryEngine {
 		
 		// record the routes
 		map.tradeRoutes(routes.routes);
-		map.journeys(nodes);
 		map.repaint();
 	}
 	
@@ -103,7 +101,7 @@ public class TerritoryEngine {
 				
 				// stop at the ocean
 				if (oceanic[neighbor_x]) {
-					Journey ocean = new Journey(neighbor_x, -1, step.index);
+					Journey ocean = new Journey(neighbor_x, -1, null);
 					routes.addCrossing(step, ocean);
 					continue;
 				}
@@ -118,7 +116,7 @@ public class TerritoryEngine {
 					continue;
 				
 				// add this Journey node to the list to be explored
-				Journey nextStep = new Journey(neighbor_x, step.city, step.index);
+				Journey nextStep = new Journey(neighbor_x, step.city, step);
 				nextStep.cost = thisCost;
 				nodes[neighbor_x] = nextStep;
 				queue.add(nextStep);

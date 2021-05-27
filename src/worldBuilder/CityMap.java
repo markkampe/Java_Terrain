@@ -16,6 +16,9 @@ public class CityMap {
 	private Map map;
 	private Mesh mesh;		
 	private String[] names;
+	private boolean oceanic[];
+	private double heights[];
+	private Parameters parms;
 	
 	private static final int STROKE_WIDTH = 3;
 	
@@ -27,6 +30,9 @@ public class CityMap {
 		this.map = map;
 		this.mesh = map.mesh;
 		this.names = map.getNameMap();
+		this.oceanic = map.getDrainage().oceanic;
+		this.heights = map.getHeightMap();
+		this.parms = Parameters.getInstance();
 	}
 	
 	/**
@@ -109,10 +115,32 @@ public class CityMap {
 		if (!map.on_screen(mesh.vertices[n2].x, mesh.vertices[n2].y))
 			return;
 		
+		// make sure the line is (at least partially) above water
+		if (oceanic[n1] && oceanic[n2])
+			return;
+		
+		// figure out where the line starts and ends
 		int x1 = map.screen_x(mesh.vertices[n1].x);
 		int y1 = map.screen_y(mesh.vertices[n1].y);
 		int x2 = map.screen_x(mesh.vertices[n2].x);
 		int y2 = map.screen_y(mesh.vertices[n2].y);
+		
+		// if one end is Oceanic, shorten line to above water fraction
+		if (oceanic[n1] || oceanic[n2]) {
+			double z1 = heights[n1];
+			double z2 = heights[n2];
+			double dz = (z1 > z2) ? z1 - z2 : z2 - z1;
+			double Zabove = ((z1 > z2) ? z1 : z2) - parms.sea_level;
+			double Fabove = Zabove/dz;
+			if (z1 > z2) {	// pull <x2,y2> in
+				x2 = (int) (x1 + Fabove * (x2 - x1));
+				y2 = (int) (y1 + Fabove * (y2 - y1));
+			} else {		// pull <x1,y1> in
+				x1 = (int) (x2 + Fabove * (x1 - x2));
+				y1 = (int) (y2 + Fabove * (y1 - y2));
+			}
+		}
+		
 		g.drawLine(x1, y1, x2, y2);
 	}
 }

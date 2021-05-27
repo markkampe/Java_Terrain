@@ -65,9 +65,13 @@ public class TradeRoutes {
 	public TradeRoutes(Map map) {
 		this.map = map;
 		this.names = map.getNameMap();
-		this.parms = Parameters.getInstance();
-		this.routes = new LinkedList<TradeRoute>();	// FIX only allocate of non-existent
+		this.routes = map.tradeRoutes();
+		if (this.routes == null) {
+			this.routes = new LinkedList<TradeRoute>();
+			map.tradeRoutes(this.routes);
+		}
 		this.indirects = new LinkedList<TradeRoute>();
+		this.parms = Parameters.getInstance();
 	}
 	
 	/**

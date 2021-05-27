@@ -66,11 +66,9 @@ public class TerritoryEngine {
 		
 		// enumerate all reachable nodes (within dTravelMax/2)
 		outwards();
-		
-		// record the routes
-		map.tradeRoutes(routes.routes);
 		map.repaint();
 	}
+	
 	
 	/**
 	 * Journey outwards from each city until we have covered the map.

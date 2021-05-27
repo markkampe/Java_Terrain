@@ -119,7 +119,7 @@ public class CityMap {
 		if (oceanic[n1] && oceanic[n2])
 			return;
 		
-		// figure out where the line starts and ends
+		// figure out where two end points are on the screen
 		int x1 = map.screen_x(mesh.vertices[n1].x);
 		int y1 = map.screen_y(mesh.vertices[n1].y);
 		int x2 = map.screen_x(mesh.vertices[n2].x);

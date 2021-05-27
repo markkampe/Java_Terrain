@@ -606,7 +606,13 @@ public class WorldBuilder  extends JFrame
 				activeDialog = true;
 			}
 		} else if (o == editRoads) {
-			new TerritoryEngine(map);
+			if (activeDialog)
+				twoDialogError();
+			else {
+				parms.display_options = map.setDisplay(Map.SHOW_CITY, true);
+				placeDialog(new RouteDialog(map), false);
+				activeDialog = true;
+			}
 		}
 		
 		// view menu toggles individual views on and off

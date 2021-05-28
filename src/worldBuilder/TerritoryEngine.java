@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import worldBuilder.TradeRoutes.TradeRoute;
 
 public class TerritoryEngine {
-	// imported tables
+	// imported tables and data
 	private Parameters parms;
 	private Map map;
 	private String[] names;
@@ -15,15 +15,21 @@ public class TerritoryEngine {
 	private double[] riverFlux;
 	private double[] waterLevel;
 	private boolean[] oceanic;
-	private TradeRoutes routes;
+	
+	LinkedList<TradeRoutes.TradeRoute> curRoutes;	// currently displayed
+	LinkedList<TradeRoutes.TradeRoute> prevRoutes;	// last committed
 	
 	// local data
-	Journey[] nodes;			// status of every MeshPoint
+	private TradeRoutes routes;	// route management
+	Journey[] nodes;			// territorial status of every MeshPoint
 	Journey.NextSteps queue;	// queue of points to be explored
 	
-	// current and previous routes
-	LinkedList<TradeRoutes.TradeRoute> prevRoutes;
-	LinkedList<TradeRoutes.TradeRoute> curRoutes;
+	// travel parameters
+	private double time_travel;	// minutes to travel one flat km
+	private double time_climb;	// minutes to gain 1000 m
+	private double time_cross;	// minutes to cross 1m^3/s stream
+	private double travel_day;	// minutes of travel per day
+	private double max_days;	// max days between cities
 	
 	private static final int TERRITORY_DEBUG = 2;
 
@@ -44,6 +50,12 @@ public class TerritoryEngine {
 		this.names = map.getNameMap();
 		this.oceanic = map.getDrainage().oceanic;
 		this.parms = Parameters.getInstance();
+		
+		time_travel = parms.dTimeTravel;
+		time_climb = parms.dTimeClimb;
+		time_cross = parms.dTimeCross;
+		travel_day = parms.dTravelDay;
+		max_days = parms.dTravelMax;
 		
 		int n = map.mesh.vertices.length;
 		this.nodes = new Journey[n];
@@ -172,7 +184,7 @@ public class TerritoryEngine {
 				
 				// no farther than (half) the maximum allowable inter-city journey
 				double thisCost = step.cost + cost(step.index, neighbor_x);
-				if (thisCost > parms.dTravelMax/2 && !long_ok)
+				if (thisCost > max_days/2 && !long_ok)
 					continue;
 				
 				// add this Journey node to the list to be explored
@@ -194,19 +206,35 @@ public class TerritoryEngine {
 	public double cost(int from, int to) {
 		// start with our horizontal travel time
 		double dX = parms.km(map.mesh.vertices[from].distance(map.mesh.vertices[to]));
-		double minutes = dX * parms.dTimeTravel;
+		double minutes = dX * time_travel;
 		
 		// going up-hill adds extra time
 		double dZ = parms.height(heights[to] - heights[from]);
 		if (dZ > 0)
-			minutes += dZ * parms.dTimeClimb / 1000.0;
+			minutes += dZ * time_climb / 1000.0;
 		
 		// crossing rivers adds extra time
 		double flux = riverFlux[from];
 		if (flux > 0)
-			minutes += Math.sqrt(flux) * parms.dTimeCross;
+			minutes += Math.sqrt(flux) * time_cross;
 		
-		return minutes / parms.dTravelDay;
+		return minutes / travel_day;
+	}
+	
+	/**
+	 * update the parameters that guide route selection
+	 * @param t_flat	minutes to travel one flat km
+	 * @param t_climb	minutes to gain 1000 meters
+	 * @param t_cross	minutes to cross a 1M^3/s stream
+	 * @param min_per_day	minutes of travel per day
+	 * @param max_days	maximum days between cities
+	 */
+	public void set_parms(double t_flat, double t_climb, double t_cross, double min_per_day, double max_days) {
+		this.time_travel = t_flat;
+		this.time_climb = t_climb;
+		this.time_cross = t_cross;
+		this.travel_day = min_per_day;
+		this.max_days = max_days;
 	}
 	
 	/**

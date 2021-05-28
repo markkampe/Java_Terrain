@@ -24,9 +24,12 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 	private JButton accept;
 	private JButton cancel;
 	
-	private boolean selected;		// selection completed
-	private double x_start, x_end, y_start, y_end;		// selection start/end coordinates
-	private boolean changes_made;
+	private double x_start, y_start;// currently selected start coordinates
+	private double x_end, y_end;	// currently selected end coordinates
+	private boolean auto_changes;	// there are uncommited automatic changes
+	private boolean manual_changes;	// there are uncommited manual changes
+	private int last_start;			// point index of last manual route start
+	private int last_end;			// point index of last manual route end
 	
 	// slider ranges
 	private static final int KM_MIN = 10;
@@ -195,7 +198,8 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 		mainPane.add(controls);
 		pack();
 		setVisible(true);
-		changes_made = false;
+		manual_changes = false;
+		auto_changes = false;
 		
 		// add the other widget action listeners
 		x_cost.addChangeListener(this);
@@ -214,7 +218,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 		
 		// set us up for line selection
 		map.selectMode(Map.Selection.LINE);
-		selected = map.checkSelection(Map.Selection.LINE);
+		map.checkSelection(Map.Selection.LINE);
 	}
 	
 	/**
@@ -237,32 +241,74 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 		this.x_end = map_x + width;
 		this.y_end = map_y + height;
 		if (complete) {
-			int valid = 0;
-			if (te.startFrom(map.mesh.choosePoint(x_start, y_start).index))
-				valid++;
-			if (te.startFrom(map.mesh.choosePoint(x_end, y_end).index))
-				valid++;
-			if (valid > 0) {
-				te.reset();
-				TradeRoutes.TradeRoute added = te.outwards(1, valid == 1);
-				if (added != null)
-					travel_time.setText(String.format("%.1f days", added.cost));
-				map.repaint();
-				changes_made = true;
-			}
-			selected = true;
+			last_start = map.mesh.choosePoint(x_start, y_start).index;
+			last_end = map.mesh.choosePoint(x_end, y_end).index;
+			manual_route();
+		} else {
+			last_start = -1;
+			last_end = -1;
 		}
-	
 		map.requestFocus();
 		return true;
 	}
 
 	/**
+	 * (re) draw the last-selected manual route
+	 */
+	private void manual_route() {
+		int valid = 0;
+		if (te.startFrom(last_start))
+			valid++;
+		if (te.startFrom(last_end))
+			valid++;
+		if (valid > 0) {
+			te.reset();
+			set_parameters();
+			TradeRoutes.TradeRoute added = te.outwards(1, valid == 1);
+			if (added != null)
+				travel_time.setText(String.format("%.1f days", added.cost));
+		}
+		map.repaint();
+		manual_changes = true;
+	}
+	
+	/**
+	 * (re)perform automatic route selection
+	 */
+	private void auto_route() {
+		te.reset();	// start from scratch
+		set_parameters();
+		te.allCities();
+		auto_changes = true;
+		map.repaint();
+	}
+	
+	/**
+	 * load the current slider values into the TerritoryEngine
+	 */
+	private void set_parameters() {
+		te.set_parms(x_cost.getValue(), z_cost.getValue(), w_cost.getValue(),
+					 day_len.getValue(), max_days.getValue());
+	}
+	
+	/**
+	 * updates to the parameter sliders
+	 */
+	public void stateChanged(ChangeEvent e) {
+			te.abort();		// everything changes
+			if (auto_changes)
+				auto_route();
+			if (manual_changes)
+				manual_route();
+			map.requestFocus();
+	}
+	
+	/**
 	 * restore previous height map and exit dialog
 	 */
 	private void cancelDialog() {
 		// back out any uncommitted updates
-		if (changes_made)
+		if (manual_changes || auto_changes)
 			te.abort();
 		
 		// un-register our listeners and end the dialog
@@ -282,33 +328,28 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 	}
 	
 	/**
-	 * updates to the parameter sliders
-	 */
-	public void stateChanged(ChangeEvent e) {
-			// FIX redraw w/new parameters
-			map.requestFocus();
-	}
-	
-	/**
 	 * look for ENTER or ESC
 	 */
 	public void keyTyped(KeyEvent e) {
 		int key = e.getKeyChar();
-		if (key == KeyEvent.VK_ENTER && changes_made) {
+		if (key == KeyEvent.VK_ENTER && (manual_changes || auto_changes)) {
 			te.commit();
-			changes_made = false;
+			manual_changes = false;
+			auto_changes = false;
 		} else if (key == KeyEvent.VK_ESCAPE) {
 			// cancel the last updates
-			if (changes_made) {
+			if (manual_changes || auto_changes) {
 				te.abort();
 				map.repaint();
-				changes_made = false;
+				manual_changes = false;
+				auto_changes = false;
 			}
 			
 			// undo the last region selection
-			selected = false;
 			map.selectMode(Map.Selection.NONE);
 			map.selectMode(Map.Selection.LINE);
+			last_start = -1;
+			last_end = -1;
 		}
 	}
 
@@ -318,15 +359,14 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			cancelDialog();
-		} else if (e.getSource() == accept && changes_made) {
+		} else if (e.getSource() == accept && (auto_changes || manual_changes)) {
 			te.commit();
-			changes_made = false;
+			auto_changes = false;
+			manual_changes = false;
 			map.requestFocus();
 		} else if (e.getSource() == automatic) {
-			te.reset();
-			te.allCities();
-			changes_made = true;
-			map.repaint();
+			te.abort();
+			auto_route();
 		}
 	}
 	

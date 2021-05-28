@@ -1002,6 +1002,22 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	}
 	
 	/**
+	 * return a descriptive name string for a chosen point
+	 */
+	public String pointName(int point) {
+		if (point < 0)
+			return("Ocean");
+		String s = nameMap[point];
+		if (s == null) {
+			double x = mesh.vertices[point].x;
+			double y = mesh.vertices[point].y;
+			return(String.format("<%.6f,%.6f>", parms.latitude(x), parms.longitude(y)));
+		}
+		return(CityDialog.lexName(s));
+		
+	}
+	
+	/**
 	 * return list of trade routes
 	 */
 	public LinkedList<TradeRoutes.TradeRoute> tradeRoutes() {

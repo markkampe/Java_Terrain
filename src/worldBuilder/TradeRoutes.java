@@ -80,15 +80,11 @@ public class TradeRoutes {
 	 * @param other	Journey point on other side
 	 * @return boolean (is this a new trade route)
 	 */
-	public boolean addCrossing(Journey one, Journey other) {
+	public TradeRoute addCrossing(Journey one, Journey other) {
 		// see if we already have a route between these two cities
 		TradeRoute r = findRoute(one.city, other.city);
 		if (r != null)
-			return false;
-		
-		// get names of source and destination (for logging)
-		String s1 = (one.city >= 0) ? CityDialog.lexName(names[one.city]) : "Ocean";
-		String s2 = (other.city >= 0) ? CityDialog.lexName(names[other.city]) : "Ocean";
+			return null;
 		
 		// see if there is a cheaper route through another city
 		for(Iterator<TradeRoute> it = routes.iterator(); it.hasNext();) {
@@ -100,15 +96,15 @@ public class TradeRoutes {
 				continue;	// no going through the ocean
 			TradeRoute r2 = findRoute(intermediate, other.city);
 			if (r2 != null) {	// there is an indirect alternative
-				String s3 = CityDialog.lexName(names[intermediate]);
 				if (r1.cost + r2.cost < one.cost + other.cost) {
 					r = new TradeRoute(one, other);
 					r.cost = r1.cost + r2.cost;
 					indirects.add(r);
 					if (parms.debug_level > 0)
 						System.out.println(String.format("Indirect: %s->%s->%s: %.1f days", 
-														s1, s3, s2, r.cost));
-					return false;
+														pointName(one.city), pointName(intermediate), 
+														pointName(other.city), r.cost));
+					return null;
 				}
 			}
 		}
@@ -117,11 +113,27 @@ public class TradeRoutes {
 		r = new TradeRoute(one, other);
 		routes.add(r);
 		if (parms.debug_level > 0)
-			System.out.println(String.format("Trade route: %s to %s, %.1f days", s1, s2, r.cost));
+			System.out.println(String.format("Trade route: %s to %s, %.1f days", 
+					pointName(one.city), pointName(other.city), r.cost));
 			
-		return true;
+		return r;
 	}
 	
+	/**
+	 * return a descriptive name string for a chosen point
+	 */
+	private String pointName(int point) {
+		if (point < 0)
+			return("Ocean");
+		String s = names[point];
+		if (s == null) {
+			double x = map.mesh.vertices[point].x;
+			double y = map.mesh.vertices[point].y;
+			return(String.format("<%.6f,%.6f>", parms.latitude(x), parms.longitude(y)));
+		}
+		return(CityDialog.lexName(s));
+		
+	}
 	/**
 	 * look for an existing crossing between two Journey nodes
 	 */

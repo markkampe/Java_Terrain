@@ -63,13 +63,13 @@ public class TerritoryEngine {
 		this.queue = dummy.new NextSteps();
 		this.routes = new TradeRoutes(map);
 		
-		// make a back-up of the current routes
+		// start with the current list of routes
 		curRoutes = map.tradeRoutes();
 		if (curRoutes == null) {
 			curRoutes = new LinkedList<TradeRoutes.TradeRoute>();
 			map.tradeRoutes(curRoutes);
 		}
-		prevRoutes = (LinkedList<TradeRoute>) curRoutes.clone();
+		commit();	// make a copy of it in case we need to abort
 	}
 	
 	/**
@@ -242,7 +242,11 @@ public class TerritoryEngine {
 	 */
 	public void commit() {
 		// make a new copy of the current list
-		prevRoutes = (LinkedList<TradeRoutes.TradeRoute>) curRoutes.clone();
+		prevRoutes = new LinkedList<TradeRoutes.TradeRoute>();
+		for(Iterator<TradeRoutes.TradeRoute> it = curRoutes.iterator(); it.hasNext(); ) {
+			TradeRoutes.TradeRoute r = it.next();
+			prevRoutes.add(r);
+		}
 	}
 	
 	/**

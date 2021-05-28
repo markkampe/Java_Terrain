@@ -14,10 +14,8 @@ public class TradeRoutes {
 	private static final int TRADEROUTE_DEBUG = 2;
 	
 	public class TradeRoute {
-		int node1;	// index of one border node
-		int	city1;	// index of node 1 source city
-		int node2;	// index of second border node
-		int city2;	// index of node 2 source city
+		int	city1;	// index of first end point
+		int city2;	// index of second end point
 		int[] path;	// sequence of connecting points
 		double cost;// cost of travel
 		
@@ -27,9 +25,7 @@ public class TradeRoutes {
 		 * @param other the (already claimed) neighbor it encountered
 		 */
 		public TradeRoute(Journey one, Journey other) {
-			node1 = one.index;
 			city1 = one.city;
-			node2 = other.index;
 			city2 = other.city;
 			cost = one.cost + other.cost;
 			

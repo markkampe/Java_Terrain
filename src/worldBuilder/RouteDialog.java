@@ -2,14 +2,13 @@ package worldBuilder;
 
 import java.awt.*;
 import java.awt.event.*;
-
 import javax.swing.*;
 import javax.swing.event.*;
 
 /**
  * Dialog to lay out trade routes
  */
-public class RouteDialog extends JFrame implements ActionListener, ChangeListener, MapListener, ItemListener, KeyListener, WindowListener {	
+public class RouteDialog extends JFrame implements ActionListener, ChangeListener, MapListener, KeyListener, WindowListener {	
 	
 	private Map map;
 	private TerritoryEngine te;
@@ -27,6 +26,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 	
 	private boolean selected;		// selection completed
 	private double x_start, x_end, y_start, y_end;		// selection start/end coordinates
+	private boolean changes_made;
 	
 	// slider ranges
 	private static final int KM_MIN = 10;
@@ -47,6 +47,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 	public RouteDialog(Map map)  {
 		// pick up references
 		this.map = map;
+		te = new TerritoryEngine(map);
 		this.parms = Parameters.getInstance();
 	
 		// create the dialog box
@@ -95,6 +96,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 		max_days.setPaintLabels(true);
 		
 		travel_time = new JTextField("");
+		travel_time.setEditable(false);
 		
 		/*
 		 * 
@@ -193,6 +195,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 		mainPane.add(controls);
 		pack();
 		setVisible(true);
+		changes_made = false;
 		
 		// add the other widget action listeners
 		x_cost.addChangeListener(this);
@@ -228,12 +231,28 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 			double map_x, double map_y, 
 			double width, double height,
 			boolean complete) {
-		x_start = map_x;
-		y_start = map_y;
-		x_end = map_x + width;
-		y_end = map_y + height;
-		selected = complete;
 		
+		this.x_start = map_x;
+		this.y_start = map_y;
+		this.x_end = map_x + width;
+		this.y_end = map_y + height;
+		if (complete) {
+			int valid = 0;
+			if (te.startFrom(map.mesh.choosePoint(x_start, y_start).index))
+				valid++;
+			if (te.startFrom(map.mesh.choosePoint(x_end, y_end).index))
+				valid++;
+			if (valid > 0) {
+				te.reset();
+				TradeRoutes.TradeRoute added = te.outwards(1, valid == 1);
+				if (added != null)
+					travel_time.setText(String.format("%.1f days", added.cost));
+				map.repaint();
+				changes_made = true;
+			}
+			selected = true;
+		}
+	
 		map.requestFocus();
 		return true;
 	}
@@ -242,8 +261,12 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 	 * restore previous height map and exit dialog
 	 */
 	private void cancelDialog() {
+		// back out any uncommitted updates
+		if (changes_made)
+			te.abort();
+		
+		// un-register our listeners and end the dialog
 		map.selectMode(Map.Selection.NONE);
-		// abort
 		map.removeMapListener(this);
 		map.removeKeyListener(this);
 		map.selectMode(Map.Selection.ANY);
@@ -259,9 +282,10 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 	}
 	
 	/**
-	 * updates to the diameter/rounding sliders
+	 * updates to the parameter sliders
 	 */
 	public void stateChanged(ChangeEvent e) {
+			// FIX redraw w/new parameters
 			map.requestFocus();
 	}
 	
@@ -270,11 +294,17 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void keyTyped(KeyEvent e) {
 		int key = e.getKeyChar();
-		if (key == KeyEvent.VK_ENTER && selected) {
-			// accept 
+		if (key == KeyEvent.VK_ENTER && changes_made) {
+			te.commit();
+			changes_made = false;
 		} else if (key == KeyEvent.VK_ESCAPE) {
 			// cancel the last updates
-			// abort
+			if (changes_made) {
+				te.abort();
+				map.repaint();
+				changes_made = false;
+			}
+			
 			// undo the last region selection
 			selected = false;
 			map.selectMode(Map.Selection.NONE);
@@ -288,21 +318,16 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
 			cancelDialog();
-		} else if (e.getSource() == accept && selected) {
-			// accept
+		} else if (e.getSource() == accept && changes_made) {
+			te.commit();
+			changes_made = false;
 			map.requestFocus();
 		} else if (e.getSource() == automatic) {
-			te = new TerritoryEngine(map);
+			te.reset();
+			te.allCities();
+			changes_made = true;
+			map.repaint();
 		}
-	}
-	
-	/**
-	 * symmetric checkbox has changed state
-	 * 
-	 * @param e
-	 */
-	public void itemStateChanged(ItemEvent e) {
-		map.requestFocus();
 	}
 	
 	/** (perfunctory) */ public boolean pointSelected(double map_x, double map_y) { return false; }

@@ -102,8 +102,9 @@ public class TradeRoutes {
 					indirects.add(r);
 					if (parms.debug_level > 0)
 						System.out.println(String.format("Indirect: %s->%s->%s: %.1f days", 
-														pointName(one.city), pointName(intermediate), 
-														pointName(other.city), r.cost));
+														map.pointName(one.city), 
+														map.pointName(intermediate), 
+														map.pointName(other.city), r.cost));
 					return null;
 				}
 			}
@@ -114,26 +115,12 @@ public class TradeRoutes {
 		routes.add(r);
 		if (parms.debug_level > 0)
 			System.out.println(String.format("Trade route: %s to %s, %.1f days", 
-					pointName(one.city), pointName(other.city), r.cost));
+					map.pointName(one.city), map.pointName(other.city), r.cost));
 			
 		return r;
 	}
 	
-	/**
-	 * return a descriptive name string for a chosen point
-	 */
-	private String pointName(int point) {
-		if (point < 0)
-			return("Ocean");
-		String s = names[point];
-		if (s == null) {
-			double x = map.mesh.vertices[point].x;
-			double y = map.mesh.vertices[point].y;
-			return(String.format("<%.6f,%.6f>", parms.latitude(x), parms.longitude(y)));
-		}
-		return(CityDialog.lexName(s));
-		
-	}
+	
 	/**
 	 * look for an existing crossing between two Journey nodes
 	 */

@@ -351,6 +351,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 			last_start = -1;
 			last_end = -1;
 		}
+		map.requestFocus();
 	}
 
 	/**
@@ -367,6 +368,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 		} else if (e.getSource() == automatic) {
 			te.abort();
 			auto_route();
+			map.requestFocus();
 		}
 	}
 	

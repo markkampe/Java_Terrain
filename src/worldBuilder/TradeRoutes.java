@@ -3,6 +3,20 @@ package worldBuilder;
 import java.util.LinkedList;
 import java.util.Iterator;
 
+/**
+ * Before we create a new TradeRoute (path from point A to point B)
+ * we want to make sure we do not already have that path.  This class
+ * maintains lists of direct (and indirect) routes and does these
+ * checks before creating a new route.
+ * 
+ * There are two constructors:
+ *   
+ *   the first is used by TerritoryEngine when the expanding
+ *   set of Journeys encounters a Journey from another Territory.
+ *   
+ *	 the second is used by Map.read() when we are simply re-loading
+ *	 routes that have already been defined (we know all the steps)
+ */
 public class TradeRoutes {
 
 	public Map map;
@@ -10,9 +24,6 @@ public class TradeRoutes {
 	public Parameters parms;
 	public LinkedList<TradeRoute> routes;
 	public LinkedList<TradeRoute> indirects;
-	
-	private static final int TRADEROUTE_DEBUG = 2;
-	
 	
 	public TradeRoutes(Map map) {
 		this.map = map;

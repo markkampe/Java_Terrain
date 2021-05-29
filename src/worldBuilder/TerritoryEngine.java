@@ -3,8 +3,6 @@ package worldBuilder;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import worldBuilder.TradeRoutes.TradeRoute;
-
 public class TerritoryEngine {
 	// imported tables and data
 	private Parameters parms;
@@ -16,8 +14,8 @@ public class TerritoryEngine {
 	private double[] waterLevel;
 	private boolean[] oceanic;
 	
-	LinkedList<TradeRoutes.TradeRoute> curRoutes;	// currently displayed
-	LinkedList<TradeRoutes.TradeRoute> prevRoutes;	// last committed
+	LinkedList<TradeRoute> curRoutes;	// currently displayed
+	LinkedList<TradeRoute> prevRoutes;	// last committed
 	
 	// local data
 	private TradeRoutes routes;	// route management
@@ -66,7 +64,7 @@ public class TerritoryEngine {
 		// start with the current list of routes
 		curRoutes = map.tradeRoutes();
 		if (curRoutes == null) {
-			curRoutes = new LinkedList<TradeRoutes.TradeRoute>();
+			curRoutes = new LinkedList<TradeRoute>();
 			map.tradeRoutes(curRoutes);
 		}
 		commit();	// make a copy of it in case we need to abort
@@ -242,9 +240,9 @@ public class TerritoryEngine {
 	 */
 	public void commit() {
 		// make a new copy of the current list
-		prevRoutes = new LinkedList<TradeRoutes.TradeRoute>();
-		for(Iterator<TradeRoutes.TradeRoute> it = curRoutes.iterator(); it.hasNext(); ) {
-			TradeRoutes.TradeRoute r = it.next();
+		prevRoutes = new LinkedList<TradeRoute>();
+		for(Iterator<TradeRoute> it = curRoutes.iterator(); it.hasNext(); ) {
+			TradeRoute r = it.next();
 			prevRoutes.add(r);
 		}
 	}
@@ -258,8 +256,8 @@ public class TerritoryEngine {
 			curRoutes.remove();
 		
 		// recreate the list with its previous contents
-		for(Iterator<TradeRoutes.TradeRoute> it = prevRoutes.iterator(); it.hasNext(); ) {
-			TradeRoutes.TradeRoute r = it.next();
+		for(Iterator<TradeRoute> it = prevRoutes.iterator(); it.hasNext(); ) {
+			TradeRoute r = it.next();
 			curRoutes.add(r);
 		}
 		map.repaint();

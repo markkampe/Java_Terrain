@@ -61,6 +61,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private static final int TOPO_CELL = 5;		// pixels/topographic cell
 												// CODE DEPENDS ON THIS CONSTANT
 	
+	// other limits
+	private static final int MAX_STEPS = 200;	// max steps per route
+	
 	private static final String DEFAULT_ICONS = "/icons";
 	
 	private Dimension size;
@@ -103,7 +106,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	private double floraMap[];	// assigned flora type
 	private double faunaMap[];	// assigned fauna type
 	private double waterLevel[];// level of nearest water body
-	private LinkedList<TradeRoutes.TradeRoute> trade_routes;
+	private LinkedList<TradeRoute> trade_routes;
 
 	private Cartesian poly_map;		// interpolation based on surrounding polygon
 	private double tileHeight[][];	// altitude of each screen tile (Z units)
@@ -316,6 +319,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		String thisKey = "";		// last key read
 		boolean inPoints = false;	// in points array
 		boolean inPoIs = false;		// in points of interest
+		boolean inRoutes = false;	// in trade routes
+		boolean inSteps = false;	// in trade route steps
 		int length = 0;				// expected number of points
 		int points = 0;				// number of points read	
 		
@@ -332,6 +337,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 		String name = null;
 		String poi_type = "";
 		String poi_name = "";
+		double route_cost = 0;
+		int num_steps = 0;
+		int[] route_steps = new int[MAX_STEPS];
 		
 		// reallocate this every time
 		this.poi_list = new LinkedList<POI>();
@@ -345,19 +353,40 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					if (thisKey.equals("points")) {
 						inPoints = true;
 						inPoIs = false;
+						inRoutes = false;
+						inSteps = false;
 						points = 0;
 					} else if (thisKey.equals("pois")) {
 						inPoIs = true;
 						inPoints = false;
+						inRoutes = false;
+						inSteps = false;
 					} else if (thisKey.equals("mesh")) {
 						inPoints = false;
 						inPoIs = false;
+						inRoutes = false;
+						inSteps = false;
+					} else if (thisKey.equals("routes")) {
+						inPoints = false;
+						inPoIs = false;
+						inRoutes = true;
+						inSteps = false;
+					} else if (thisKey.equals("steps")) {
+						inPoints = false;
+						inPoIs = false;
+						inRoutes = true;
+						inSteps = true;
+						num_steps = 0;
 					}
 				}
 				break;
 
 			case VALUE_STRING:
 			case VALUE_NUMBER:
+				if (inSteps) {
+					route_steps[num_steps++] = new Integer(parser.getString());
+					break;
+				}
 				switch(thisKey) {
 					case "length":
 						length = new Integer(parser.getString());
@@ -411,6 +440,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 							poi_name = parser.getString();
 						else
 							name = parser.getString();
+						break;
+					
+					// route attributes
+					case "cost":
+						route_cost = new Double(parser.getString());
 						break;
 						
 					// world attributes
@@ -505,6 +539,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					points++;
 				} else if (inPoIs) {
 					poi_list.add(new POI(poi_type, poi_name, x, y));
+				} else if (inRoutes) {
+					TradeRoute route = new TradeRoute(route_steps, num_steps, route_cost);
+					if (trade_routes == null)
+						trade_routes = new LinkedList<TradeRoute>();
+					trade_routes.add(route);
 				}
 				break;
 				
@@ -516,6 +555,10 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					inPoints = false;
 				else if (inPoIs)
 					inPoIs = false;
+				else if (inSteps)
+					inSteps = false;
+				else if (inRoutes)
+					inRoutes = false;
 				break;
 				
 			case START_OBJECT:
@@ -530,6 +573,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				} else if (inPoIs) {
 					poi_name = "";
 					poi_type = "";
+				} else if (inRoutes) {
+					route_cost = 0;
 				}
 			default:
 				break;
@@ -600,6 +645,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 			final String P_format = "    \"parent_name\": \"%s\",\n";
 			final String D_format = "    \"description\": \"%s\",\n";
 			final String I_FORMAT = "        { \"x\": %.7f, \"y\": %.7f, \"type\": \"%s\", \"name\": \"%s\" }";
+			final String C_FORMAT = "        { \"cost\": %.1f,\n";
+			final String R_FORMAT = "          \"steps\": [ ";
+			final int STEPS_PER_LINE = 12;
 			
 			output.write( "{   \"length\": " + mesh.vertices.length + ",\n");
 			output.write( String.format(M_format, parms.map_name));
@@ -632,7 +680,29 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 					output.write((numPoints++ == 0) ? "\n" : ",\n");
 					output.write(String.format(I_FORMAT, point.x, point.y, point.type, point.name ));
 				}
-				output.write(" ],\n");
+				output.write("\n    ],\n");
+			}
+			
+			// write out the trade routes
+			if (trade_routes != null && trade_routes.size() > 0) {
+				output.write( "    \"routes\": [" );
+				int numRoutes = 0;
+				for(Iterator<TradeRoute> it = trade_routes.iterator(); it.hasNext(); ) {
+					TradeRoute r = it.next();
+					output.write((numRoutes++ == 0) ? "\n" : ",\n");
+					output.write(String.format(C_FORMAT, r.cost));
+					output.write(String.format(R_FORMAT));
+					for(int i = 0; i < r.path.length; i++) {
+						if (i > 0)
+							if (i%STEPS_PER_LINE == 0)
+								output.write(",\n                     ");
+							else
+								output.write(", ");
+						output.write(String.format("%d", r.path[i]));
+					}
+					output.write( " ] }");
+				}
+				output.write("\n    ],\n");
 			}
 			
 			// write out the points and per-point attributes
@@ -660,8 +730,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 				}
 				output.write(" ]");
 			}
-		
 			output.write( "\n    ]\n");
+			
 			output.write( "}\n");
 			output.close();
 			
@@ -1020,14 +1090,14 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener {
 	/**
 	 * return list of trade routes
 	 */
-	public LinkedList<TradeRoutes.TradeRoute> tradeRoutes() {
+	public LinkedList<TradeRoute> tradeRoutes() {
 		return trade_routes;
 	}
 	
 	/**
 	 * set the list of trade routes
 	 */
-	public void tradeRoutes(LinkedList<TradeRoutes.TradeRoute> routes) {
+	public void tradeRoutes(LinkedList<TradeRoute> routes) {
 		trade_routes = routes;
 	}
 	

@@ -264,7 +264,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 		if (valid > 0) {
 			te.reset();
 			set_parameters();
-			TradeRoutes.TradeRoute added = te.outwards(1, valid == 1);
+			TradeRoute added = te.outwards(1, valid == 1);
 			if (added != null)
 				travel_time.setText(String.format("%.1f days", added.cost));
 		}

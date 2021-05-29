@@ -49,10 +49,10 @@ public class CityMap {
 		g2d.setStroke(new BasicStroke(STROKE_WIDTH));
 		
 		// start by rendering the trade routes
-		LinkedList<TradeRoutes.TradeRoute> routes = map.tradeRoutes();
+		LinkedList<TradeRoute> routes = map.tradeRoutes();
 		if (routes != null) {
-			for(Iterator<TradeRoutes.TradeRoute> it = routes.iterator(); it.hasNext(); ) {
-				TradeRoutes.TradeRoute r = it.next();
+			for(Iterator<TradeRoute> it = routes.iterator(); it.hasNext(); ) {
+				TradeRoute r = it.next();
 				for(int i = 0; i < r.path.length-1; i++)
 					connect(g, r.path[i], r.path[i+1]);
 			}

@@ -14,6 +14,7 @@ public class ErodeMap {
 	private static final double MIN_DEPOSITION = 0.05;	// meters
 	
 	private Map map;
+	private MapWindow window;
 	private Parameters parms;
 	
 	/**
@@ -22,6 +23,7 @@ public class ErodeMap {
 	 */
 	public ErodeMap(Map map) {
 		this.map = map;
+		this.window = map.window;
 		this.parms = Parameters.getInstance();
 	}
 
@@ -43,7 +45,7 @@ public class ErodeMap {
 		double max_deposition = map.max_deposition;
 		
 		// interpolate erosion values from the latest mesh
-		Cartesian cart = map.window.getCartesian(Cartesian.vicinity.POLYGON);
+		Cartesian cart = window.getCartesian(Cartesian.vicinity.POLYGON);
 		double eArray[][] = cart.interpolate(map.getErodeMap());
 		
 		// render each cell according to its erosion/deposition

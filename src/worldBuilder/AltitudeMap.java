@@ -13,6 +13,7 @@ public class AltitudeMap {
 	private static final int TOPO_BRITE = 255;
 	
 	private Map map;
+	private MapWindow window;
 	//private Parameters parms;
 	
 	/**
@@ -21,6 +22,7 @@ public class AltitudeMap {
 	 */
 	public AltitudeMap(Map map) {
 		this.map = map;
+		this.window = map.window;
 		//this.parms = Parameters.getInstance();
 	}
 
@@ -35,9 +37,9 @@ public class AltitudeMap {
 	public void paint(Graphics g, int width, int height, int cellWidth) {
 			int h = height/cellWidth;
 			int w = width/cellWidth;
-			boolean show_water = ((map.window.display & MapWindow.SHOW_WATER) != 0);
-			double[][] heights = map.window.getTileHeights();
-			double[][] depths = map.window.getTileDepths();
+			boolean show_water = ((window.display & MapWindow.SHOW_WATER) != 0);
+			double[][] heights = window.getTileHeights();
+			double[][] depths = window.getTileDepths();
 			// use height to generate background colors
 			for(int r = 0; r < h; r++)
 				for(int c = 0; c < w; c++) {

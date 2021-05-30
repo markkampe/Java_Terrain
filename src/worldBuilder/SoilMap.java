@@ -10,6 +10,7 @@ public class SoilMap {
 	private static int ALLUVIAL;
 	
 	private Map map;
+	private MapWindow window;
 	
 	/**
 	 * instantiate a soil map generator
@@ -17,6 +18,7 @@ public class SoilMap {
 	 */
 	public SoilMap(Map map) {
 		this.map = map;
+		this.window = map.window;
 		ALLUVIAL = map.getSoilType("Alluvial");
 	}
 
@@ -31,10 +33,10 @@ public class SoilMap {
 	public void paint(Graphics g, int width, int height, int cellWidth) {
 			int h = height/cellWidth;
 			int w = width/cellWidth;
-			double dArray[][] = map.window.getTileDepths();
+			double dArray[][] = window.getTileDepths();
 			
 			// interpolate values from the latest mesh
-			Cartesian cart = map.window.getCartesian(Cartesian.vicinity.POLYGON);
+			Cartesian cart = window.getCartesian(Cartesian.vicinity.POLYGON);
 			double sArray[][] = cart.nearest(map.getSoilMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			

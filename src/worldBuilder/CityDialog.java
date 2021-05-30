@@ -10,6 +10,7 @@ import javax.swing.*;
  */
 public class CityDialog extends JFrame implements WindowListener, MapListener, ActionListener {
 		private Map map;
+		private MapWindow window;
 		private Parameters parms;
 
 		private String[] nameMap;
@@ -38,6 +39,7 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		public CityDialog(Map map)  {
 			// pick up references
 			this.map = map;
+			this.window = map.window;
 			this.parms = Parameters.getInstance();
 			
 			nameMap = map.getNameMap();
@@ -119,9 +121,9 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			delete.addActionListener(this);
 			
 			chosenPoint = -1;
-			map.window.addMapListener(this);
-			map.window.selectMode(MapWindow.Selection.POINT);
-			map.window.checkSelection(MapWindow.Selection.POINT);
+			window.addMapListener(this);
+			window.selectMode(MapWindow.Selection.POINT);
+			window.checkSelection(MapWindow.Selection.POINT);
 		}
 		
 		/**
@@ -132,12 +134,12 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 */
 		public boolean pointSelected(double map_x, double map_y) {
 			// cancel all previous highlights
-			map.window.selectMode(MapWindow.Selection.NONE);
-			map.window.highlight(-1,  null);
+			window.selectMode(MapWindow.Selection.NONE);
+			window.highlight(-1,  null);
 			
 			// identify the nearest MeshPoint
 			MeshPoint point = map.mesh.choosePoint(map_x, map_y);
-			map.window.highlight(point.index, SELECTED_COLOR);
+			window.highlight(point.index, SELECTED_COLOR);
 			chosenPoint = point.index;
 			
 			lat.setText(String.format("%.5f", parms.latitude(point.y)));
@@ -209,7 +211,7 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			nameMap[chosenPoint] = s.equals("") ? 
 					String.format("%s - %s", name.getText(), descr.getText()) :
 					String.format("%s: %s - %s", s, name.getText(), descr.getText());
-					map.window.repaint();
+					window.repaint();
 		}
 		
 		/**
@@ -217,16 +219,16 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 */
 		private void deletePoint() {
 			nameMap[chosenPoint] = null;
-			map.window.repaint();
+			window.repaint();
 		}
 		
 		/**
 		 * unregister our listeners and exit
 		 */
 		private void cancelDialog() {
-			map.window.highlight(-1,  null);			// clear highlights
-			map.window.selectMode(MapWindow.Selection.ANY); 	// clear selections
-			map.window.removeMapListener(this);
+			window.highlight(-1,  null);			// clear highlights
+			window.selectMode(MapWindow.Selection.ANY); 	// clear selections
+			window.removeMapListener(this);
 			this.dispose();
 			WorldBuilder.activeDialog = false;
 		}

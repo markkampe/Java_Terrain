@@ -15,11 +15,12 @@
  * @depend - - - Map
  */
 class WorldDialog  implements ActionListener, ChangeListener, WindowListener {
+	WorldDialog(Map map) {};
 }
 
 /**
  * @opt all
- * @depend - - - Map
+ * @depend - - - TerrainEngine
  */
 class MountainDialog  implements MapListener, ActionListener, ChangeListener, WindowListener {
 	MountainDialog(Map map) {};
@@ -27,15 +28,15 @@ class MountainDialog  implements MapListener, ActionListener, ChangeListener, Wi
 
 /**
  * @opt all
- * @depend - - - Map
+ * @depend - - - AttributeEngine
  */
-class RainDialog  implements ActionListener, ChangeListener, WindowListener {
+class RainDialog  implements MapListener, ActionListener, ChangeListener, WindowListener {
 	RainDialog(Map map) {};
 }
 
 /**
  * @opt all
- * @depend - - - Map
+ * @depend - - - AttributeEngine
  */
 class RiverDialog  implements MapListener, ActionListener, ChangeListener, WindowListener {
 	RiverDialog(Map map) {};
@@ -43,7 +44,7 @@ class RiverDialog  implements MapListener, ActionListener, ChangeListener, Windo
 
 /**
  * @opt all
- * @depend - - - Map
+ * @depend - - - TerrainEngine
  */
 class SlopeDialog  implements ActionListener, ChangeListener, WindowListener {
 	SlopeDialog(Map map) {};
@@ -51,10 +52,87 @@ class SlopeDialog  implements ActionListener, ChangeListener, WindowListener {
 
 /**
  * @opt all
+ * @depend - - - TerrainEngine
+ */
+class LandDialog  implements MapListener, ActionListener, ChangeListener, WindowListener {
+	LandDialog(Map map) {};
+}
+
+/**
+ * @opt all
  * @depend - - - Map
  */
-class LandDialog  implements ActionListener, ChangeListener, WindowListener {
-	LandDialog(Map map) {};
+class PoIDialog  implements MapListener, ActionListener, ChangeListener, WindowListener {
+	PoIDialog(Map map) {};
+}
+
+/**
+ * @opt all
+ * @depend - - - Map
+ */
+class CityDialog  implements MapListener, ActionListener, ChangeListener, WindowListener {
+	CityDialog(Map map) {};
+}
+
+/**
+ * @opt all
+ */
+class MineralDialog extends ResourceDialog {
+	MineralDialog(Map map) {};
+}
+
+/**
+ * @opt all
+ */
+class FloraDialog extends ResourceDialog {
+	FloraDialog(Map map) {};
+}
+
+/**
+ * @opt all
+ */
+class FaunaDialog extends ResourceDialog {
+	FaunaDialog(Map map) {};
+}
+
+/**
+ * @opt all
+ * @depend - - - Map
+ */
+class ResourceDialog  implements MapListener, ActionListener, ChangeListener, WindowListener {
+	ResourceDialog(Map map) {};
+}
+
+/**
+ * @opt all
+ * @depend - - - TerritoryEngine
+ */
+class RouteDialog {
+	RouteDialog(Map map) {};
+}
+
+/**
+ * @opt all
+ * @depend - - - Map
+ */
+class TerrainEngine {
+	TerrainEngine(Map map) {};
+}
+
+/**
+ * @opt all
+ * @depend - - - Map
+ */
+class AttributeEngine {
+	AttributeEngine(Map map) {};
+}
+
+/**
+ * @opt all
+ * @depend - - - Map
+ */
+class TerritoryEngine {
+	TerritoryEngine(Map map) {};
 }
 
 /**
@@ -66,6 +144,7 @@ class LandDialog  implements ActionListener, ChangeListener, WindowListener {
  * @depend - - - SoilMap
  * @depend - - - TopoMap
  * @depend - - - WaterMap
+ * @depend - - - CityMap
  * @depend - - - Cartesian
  * @depend - - - Hydrology
  */
@@ -87,6 +166,7 @@ class Map implements MouseListener, MouseMotionListener {
 	double[] getErodeMap() {};
 	double[] getHydrationMap() {};
 	double[] getDepthMap() {};
+	double[] getNameMap() {};
 	void waterDepth() {};
 	int[] getdownHill() {};
 	int getErosion() {};
@@ -171,6 +251,14 @@ class TopoMap {
  */
 class WaterMap {
 	WaterMap(Map map) {};
+	void paint(Graphics g, int width, int height, int cellWidth) {};
+}
+
+/**
+ * @opt all
+ */
+class CityMap {
+	CityMap(Map map) {};
 	void paint(Graphics g, int width, int height, int cellWidth) {};
 }
 

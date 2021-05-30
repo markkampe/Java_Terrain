@@ -77,10 +77,20 @@ architectural thoughts (about how to structure geo-physics simulations
 and plug-in RPG-map exporters) and
 Christopher Kampe's experiences (with how to make a more usable tool
 for creating satisfying worlds).
+After studying O'Leary's work, I came up with my own (surely personal) prime directive:
+<ul>
+	<em>The only attributes of any consequence are associated with the points of 
+	the (sparse) Voronoi mesh.  All finer grained models (e.g. Cartesian exports or
+	2D displays) should be <u>deterministic</u> functions of those
+	per MeshPoint attributes.</em>
+</ul>
+I will not attempt to defend this decision, but it strongly guided all subsequent 
+decisions.
+</P>
 </P>
 
 <a name="overview">
-<H2>Structural Overview</H2>
+<H2>High-Level Overview</H2>
 </a>
 <P>
 To greatly over-simplify, this program can be divided into:
@@ -91,9 +101,12 @@ To greatly over-simplify, this program can be divided into:
 	    those attributes (e.g. topography and water, erosion and deposition, etc.).</li>
 	<li>a collection of exporters, to translate such maps into a form that can be
 	    imported into another program (e.g. RPGMaker, Foundation).</li>
-	<li>a collection of dialogs and editors for changing the attributes (e.g.
+	<li>a collection of engines for making updates to the topography, water
+	    flow, plant cover, and other attributes of map points.</li>
+	<li>a collection of dialogs/editors and a script interpreter
+	    that use those engines to update those attributes (e.g.
 	    creating mountains or changing water flow) of map points.</li>
-	<li>a collection of menus and dialog widgets for accepting and executing commands.</li>
+	<li>a collection of menus, dialog widgets for accepting and executing commands.</li>
 	<li>a collection of parsers to read program parameters, maps,
 	    and export generation rules from (mostly <em>JSON</em>) configuration files.
 </ul>
@@ -119,6 +132,8 @@ There are several different map renderers, one for each major attribute:
     <li> <a Href="JavaDoc/worldBuilder/SoilMap.html">SoilMap.java</a>, showing soil types and mineral deposits</li>
     <li> <a Href="JavaDoc/worldBuilder/FloraMap.html">FloraMap.java</a>, showing plant distributions</li>
     <li> <a Href="JavaDoc/worldBuilder/FaunaMap.html">FaunaMap.java</a>, showing animal/fish distributions</li>
+    <li> <a Href="JavaDoc/worldBuilder/CityMap.html">CityMap.java</a>, showing identified cities and the
+         trade-routes between them</li>
 </ul>
 The mapping from a (sparse and irregular) Voronoi mesh to a 
 (dense and continuous) 2D map is greatly facilitated by the
@@ -134,7 +149,7 @@ independent layers is managed by (the largest and most important class in the pr
 <P>
 Many decisions about resource placement or which (exporter) tiles to use to represent a region are
 based on MeshPoint (or tile) based bidding rules.  The base class for these rules (used for
-Mineral and Flora placement) is 
+Mineral, Flora, and Fauna placement) is 
 <a Href="JavaDoc/worldBuilder/ResourceRule.html">ResourceRule.java</a>,
 which can be extended by exporter-specific sub-classes like
 <a Href="JavaDoc/worldBuilder/RPGMRule.html">RPGMRule.java</a> and
@@ -200,11 +215,18 @@ interactive dialogs in one of the sub-dialog managers:
    <li> <a Href="JavaDoc/worldBuilder/RainDialog.html">RainDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/RegionDialog.html">RegionDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/RiverDialog.html">RiverDialog.java</a>,</li>
-   <li> <a Href="JavaDoc/worldBuilder/MineralDialog.html">MineralDialog.java</a>,</li>
-   <li> <a Href="JavaDoc/worldBuilder/FloraDialog.html">FloraDialog.java</a>,</li>
-   <li> <a Href="JavaDoc/worldBuilder/FaunaDialog.html">FaunaDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/MineralDialog.html">MineralDialog.java</a> 
+   	(most of the work done by <a Href="Javadoc/worldBuilder/ResourceDialog.java">
+	ResourceDialog.java),</li>
+   <li> <a Href="JavaDoc/worldBuilder/FloraDialog.html">FloraDialog.java</a> 
+   	(most of the work done by <a Href="Javadoc/worldBuilder/ResourceDialog.java">
+	ResourceDialog.java),</li>
+   <li> <a Href="JavaDoc/worldBuilder/FaunaDialog.html">FaunaDialog.java</a> 
+   	(most of the work done by <a Href="Javadoc/worldBuilder/ResourceDialog.java">
+	ResourceDialog.java),</li>
    <li> <a Href="JavaDoc/worldBuilder/PointDebug.html">PointDebug.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/SlopeDialog.html">SlopeDialog.java</a>,</li>
+   <li> <a Href="JavaDoc/worldBuilder/CityDialog.html">CityDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/POIDialog.html">POIDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/ZoomDialog.html">ZoomDialog.java</a>,</li>
    <li> <a Href="JavaDoc/worldBuilder/RuleDebug.html">RuleDebug.java</a>.</li>
@@ -212,15 +234,18 @@ interactive dialogs in one of the sub-dialog managers:
 These put-up and respond to their own widgets, but on-map selection
 (e.g. of lines, rectangles or groups of MeshPoints) is handled by
 <a Href="JavaDoc/worldBuilder/Map.html">Map.java</a>.
-<br>
-These dialogs effect their updates by creating updated copies of
-the attribute maps (arrays containing the values of a particular attribute
-for each <em>MeshPoint</em>) and calling <em>set</em> functions
-(e.g. <tt>setHeightMap()</tt> or <tt>setSoilMap()</tt>) in the
-in the <em>Map</em> class.
+The actual map/attribute updates are made by the update engines
+(<a Href="JavaDoc/worldBuilder/TerrainEngine.html">TerrainEngine.java</a>,
+ <a Href="JavaDoc/worldBuilder/AttributeEngine.html">AttributeEngine.java</a>,
+ <a Href="JavaDoc/worldBuilder/TerritoryEngine.html">TerritoryEngine.java</a>),
+which update the per <em>MeshPoint</em> arrays and use <em>Map.set</em> functions
+(e.g. <tt>Map.setHeightMap()</tt> or <tt>Map.setSoilMap()</tt>)
+to give effect to the new values.
+Most of the same operations can be initiated through the script interpreter
+(<a Href="JavaDoc/worldBuilder/Script.html">Script.java</a>).
 </P>
 <P>
-The most complex modules are probably the 
+The most complex (and only barely under control) modules are probably the 
 <a Href="JavaDoc/worldBuilder/Drainage.html">Drainage</a> and
 <a Href="JavaDoc/worldBuilder/WaterFlow.html">WaterFlow</a> classes,
 which use rainfall and topology to compute water flow, erosion, 
@@ -232,6 +257,7 @@ implemented by
 <a Href="JavaDoc/worldBuilder/Parameters.html">Parameters.java</a>.
 <br>
 When a map is read in (or written out), this is done by
+the <tt>read()</tt> and <tt>write()</tt> functions in
 <a Href="JavaDoc/worldBuilder/Map.html">Map.java</a>.
 </P>
 
@@ -326,7 +352,7 @@ attributes are stored in series of parallel arrays:
 	<li><tt>soilMap</tt> stores the soil and mineral types
 	     (sedimentary, metamorphic, igneous, alluvial, iron, copper, precious, ...)
 	     of each <em>MeshPoint</em></li>
-	<li><tt>rainMap</tt> stores the annual rainfal (in cm)
+	<li><tt>rainMap</tt> stores the annual rainfall (in cm)
 	     for each <em>MeshPoint</em></li>
 	<li><tt>fluxMap</tt> stores the flow of water (in cubic meters/year) 
 	     into each <em>MeshPoint</em></li>
@@ -336,9 +362,11 @@ attributes are stored in series of parallel arrays:
 	     for each <em>MeshPoint</em></li>
 	<li><tt>faunaMap</tt> stores a dominant animal (including birds and fish) class
 	     for each <em>MeshPoint</em></li>
+	<li><tt>nameMap</tt> stores the types/names of cities, towns, aand villages
+	     for each <em>MeshPoint</em></li>
 </ul>
-The attribute editing dialogs load the appropriate attribute maps from the <em>Map</em>
-class, update them according to the user's instructions, and then pass the
+The attribute update engines load the appropriate attribute maps from the <em>Map</em>
+class, update them according to the specified operations, and then pass the
 updated values back to the <em>Map</em> class.
 </P>
 
@@ -635,33 +663,37 @@ unexpected consequences of seemingly simple changes:
 	performing operations on a few different maps and seeing
 	if the resulting changes "looked right".</li>
 </ul>
-The testing difficulty may be further complicated by the fact that
-all map-editing operations were implmented as part of editing 
-dialogs.  The only way to cause them is through (moving sliders
-and clicking buttons).
-In retrospect, a more reasonable approach would be:
+But ...
 <ul>
-   <li>	provide APIs for all map-update operations, and update
-        the editing dialogs to call them to translate slider
-	motion and button pushes into map updates.</li>
-   <li> provide CLI options to perform any update or sequence
-        of updates ... a scripting language would probably be
-	useful for many purposes.</li>
-   <li> implement <em>MeshPoint</em> editing test suites as
-   	scripts that start from known input, perform a series
-	of operations, and output an updated set of <em>MeshPoint</em>s
-	and attributes.  Verify correctness of each operation
-	by comparing the output with (manually approved)
-	golden results.</li>
-   <li> implement Export test suites by reading a known map,
-        and doing a file-by-file comparison of the (should
-	be deterministic) output for every tile.
-	A raw JSON export will test the basic Cartesian
-	translation process, and format-specific exports 
-	can exercise the proper representation of all
-	map features.
-	</li>
+   <li> by decoupling the actual map/attribute updating from the
+	editing dialogs, we can cause most manual-editing operations
+	to be driven by scripts.</li>
+   <li> given my <em>Prime Directive</em> that all exported or
+        graphically rendered information should be a deterministic
+	function of the <em>per MeshPoint Attributes</em>,
+	most of what we could need to check is likely to be present
+	(in a relatively compact form) in a saved map.</li>
 </ul>
+Thus, we can do a fairly reasonable job of base engine testing by:
+<ol>
+   <li> writing scripts to perform all of the various types of
+   	terrain and attribute editing operations.</li>
+   <li> save the resulting map, and then read it back in.</li>
+   <li> carefully examine the graphical output and point attributes
+        resulting from each of these tests to ensure that the
+	correctness of the restored map.</li>
+   <li> use that saved map as Golden Output, against which we
+        compare the results of future test runs.</li>
+   <li> divide tests across multiple scripts so that the addition
+        of a new test does not invalidate golden output for
+	previous tests.</li>
+</ol>
+We can similarly test exports, by starting with a fixed and content-rich
+map, exporting it in various formats, and manually confirming the correctness
+of each export.
 </P>
+This process isn't ideal, but it will warn us whenever code changes result
+in a different set of per <em>MeshPoint</em> attributes, or a different
+translation of those attributes into a Cartesian grid.
 </body>
 </html>

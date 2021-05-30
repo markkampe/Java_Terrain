@@ -15,6 +15,10 @@ class JFrame {}
 
 /** @opt all */
 interface Exporter {
+	int neededInfo();
+	int export_width() {};
+	int export_height() {};
+
 	void tileSize(int meters) {};
 	void temps(double meanTemp, double meanSummer, double meanWinter) {};
 	void heigthMap(double[][] heights) {};
@@ -109,7 +113,7 @@ class RPGMwriter {
 
 /** 
  * @opt all
- * @depend - - - TileRule
+ * @depend - - - ResourceRule
  */
 class TileRules {
 	LinkedList  rules;
@@ -123,8 +127,12 @@ class TileRules {
  * @opt all
  * @depend - - - TerrainType
  */
-class TileRule {
-	TileRule(String name, int tile_set, int level, int base) {};
+class ResourceRule {
+	ResourceRule(String name) {};
+	void set_attribute(String name, String value);
+	void set_attribute(String name, int value);
+	void set_range(String name, String limit, int value);
+	void loadRules(String filename);
 	double range_bid(double value, double min, double max) {};
 	double bid(double alt, double hydro, double winter, double summer, double soil, double slope, double direction) {};
 }
@@ -139,6 +147,7 @@ class ObjectExport extends ExportBase implements ActionListener, ChangeListener 
 
 /**
  * @opt all
+ * @depend - - - ResourceRule
  */
 class ObjectExporter implements Exporter {
 	ObjectExporter(String obj_palette, int width, int height) {};
@@ -180,6 +189,22 @@ class LuaWriter {
 	boolean startDensities() {};
 	boolean map(String name, double density, MapInfo[] maps, boolean last) {};
 	boolean endDensities() {};
+}
+
+/**
+ * @opt all
+ * @depend - - - ObjectExporter
+ */
+class ObjectExport extends ExportBase implements ActionListener, ChangeListener {
+	ObjectExport(Map map) {};
+}
+
+/**
+ * @opt all
+ * @depend - - - LuaWriter
+ */
+class ObjectExport implements Exporter {
+	ObjectExport(int width, int height) {};
 }
 
 /** @opt all */

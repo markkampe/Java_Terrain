@@ -35,9 +35,9 @@ public class AltitudeMap {
 	public void paint(Graphics g, int width, int height, int cellWidth) {
 			int h = height/cellWidth;
 			int w = width/cellWidth;
-			boolean show_water = ((map.display & Map.SHOW_WATER) != 0);
-			double[][] heights = map.getTileHeights();
-			double[][] depths = map.getTileDepths();
+			boolean show_water = ((map.window.display & MapWindow.SHOW_WATER) != 0);
+			double[][] heights = map.window.getTileHeights();
+			double[][] depths = map.window.getTileDepths();
 			// use height to generate background colors
 			for(int r = 0; r < h; r++)
 				for(int c = 0; c < w; c++) {
@@ -45,7 +45,7 @@ public class AltitudeMap {
 						continue;
 					
 					double z = heights[r][c];
-					double shade = Map.linear(TOPO_DIM, TOPO_BRITE, z + Parameters.z_extent/2);
+					double shade = MapWindow.linear(TOPO_DIM, TOPO_BRITE, z + Parameters.z_extent/2);
 					g.setColor(new Color((int) shade, (int) shade, (int) shade));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				}

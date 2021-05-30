@@ -260,6 +260,6 @@ public class TerritoryEngine {
 			TradeRoute r = it.next();
 			curRoutes.add(r);
 		}
-		map.repaint();
+		map.window.repaint();
 	}
 }

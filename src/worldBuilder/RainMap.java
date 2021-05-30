@@ -39,7 +39,7 @@ public class RainMap {
 		int w = width / cellWidth;
 
 		// interpolate rainfall values from the latest mesh
-		double rArray[][] = map.getCartesian(Cartesian.vicinity.POLYGON).interpolate(map.getRainMap());
+		double rArray[][] = map.window.getCartesian(Cartesian.vicinity.POLYGON).interpolate(map.getRainMap());
 
 		// use rainfall to generate background colors
 		for (int r = 0; r < h; r++)
@@ -48,7 +48,7 @@ public class RainMap {
 				double rain = rArray[r][c];
 
 				// shade a rectangle w/cyan for that rainfall
-				double shade = Map.logarithmic(RAIN_DIM, RAIN_BRITE, rain / parms.rain_max, 0.2);
+				double shade = MapWindow.logarithmic(RAIN_DIM, RAIN_BRITE, rain / parms.rain_max, 0.2);
 				g.setColor(new Color(0, (int) shade, (int) shade));
 				g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 			}

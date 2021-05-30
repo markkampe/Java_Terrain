@@ -51,8 +51,8 @@ public class RiverMap {
 			if (downHill[i] >= 0) {
 				int d = downHill[i];
 				// ignore lines that are completely off map
-				if (!map.on_screen(mesh.vertices[i].x, mesh.vertices[i].y) &&
-				    !map.on_screen(mesh.vertices[d].x, mesh.vertices[d].y))
+				if (!map.window.on_screen(mesh.vertices[i].x, mesh.vertices[i].y) &&
+				    !map.window.on_screen(mesh.vertices[d].x, mesh.vertices[d].y))
 				   		continue;
 				
 				// don't draw flowing water between non-neighbors
@@ -63,10 +63,10 @@ public class RiverMap {
 					continue;	// d must be my escape point
 				
 				// figure out where the end-points are on screen
-				int x1 = map.screen_x(mesh.vertices[i].x);
-				int y1 = map.screen_y(mesh.vertices[i].y);
-				int x2 = map.screen_x(mesh.vertices[d].x);
-				int y2 = map.screen_y(mesh.vertices[d].y);
+				int x1 = map.window.screen_x(mesh.vertices[i].x);
+				int y1 = map.window.screen_y(mesh.vertices[i].y);
+				int x2 = map.window.screen_x(mesh.vertices[d].x);
+				int y2 = map.window.screen_y(mesh.vertices[d].y);
 				
 				// blue gets brighter, green dimmer w/increasing flow
 				double delta = (flux[i] - min_stream) * dBdF;

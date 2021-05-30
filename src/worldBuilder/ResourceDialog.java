@@ -180,14 +180,14 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 		
 		// get keyboard input
 		addKeyListener(this);
-		map.addKeyListener(this);
-		map.requestFocus();
+		map.window.addKeyListener(this);
+		map.window.requestFocus();
 
 		// get region selection input
 		changes_made = false;
-		map.addMapListener(this);	
-		map.selectMode(Map.Selection.POINTS);
-		map.checkSelection(Map.Selection.POINTS);
+		map.window.addMapListener(this);	
+		map.window.selectMode(MapWindow.Selection.POINTS);
+		map.window.checkSelection(MapWindow.Selection.POINTS);
 		
 		// we start out with rule-based placement
 		chosen_type = AUTOMATIC;
@@ -242,7 +242,7 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 				autoPlace();
 			}
 		}
-		map.requestFocus();
+		map.window.requestFocus();
 	}
 	
 	/**
@@ -254,9 +254,9 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 		}
 
 		// cease to listen to selection events
-		map.selectMode(Map.Selection.ANY);
-		map.removeMapListener(this);
-		map.removeKeyListener(this);
+		map.window.selectMode(MapWindow.Selection.ANY);
+		map.window.removeMapListener(this);
+		map.window.removeKeyListener(this);
 
 		// close the window
 		this.dispose();
@@ -291,9 +291,9 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 			undo();
 		
 		// clear the (just committed) selection
-		map.selectMode(Map.Selection.NONE);
+		map.window.selectMode(MapWindow.Selection.NONE);
 		whichPoints = null;
-		map.selectMode(Map.Selection.POINTS);
+		map.window.selectMode(MapWindow.Selection.POINTS);
 	}
 
 	/**
@@ -352,7 +352,7 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 			}
 			mode.setText(chosen);
 		}
-		map.requestFocus();
+		map.window.requestFocus();
 	}
 
 	/** (perfunctory)*/ public boolean regionSelected(double mx0, double my0, double dx, double dy, boolean complete) {	return false;}

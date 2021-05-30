@@ -227,10 +227,10 @@ public class Script {
 				
 			case "display":		// display-options
 				if (tokens[1] != null) {
-					map.display = 0;
-					map.setDisplay(displayOptions(tokens[1]), true);
+					map.window.display = 0;
+					map.window.setDisplay(displayOptions(tokens[1]), true);
 				} else {
-					map.repaint();
+					map.window.repaint();
 				}
 				break;
 					
@@ -709,28 +709,28 @@ public class Script {
 		for(int i = 0; i < list.length(); i++) {
 			switch(list.charAt(i)) {
 			case 't': case 'T':
-				options |= Map.SHOW_TOPO;
+				options |= MapWindow.SHOW_TOPO;
 				break;
 			case 'r': case 'R':
-				options |= Map.SHOW_RAIN;
+				options |= MapWindow.SHOW_RAIN;
 				break;
 			case 'w': case 'W':
-				options |= Map.SHOW_WATER;
+				options |= MapWindow.SHOW_WATER;
 				break;
 			case 'e': case 'E':
-				options |= Map.SHOW_ERODE;
+				options |= MapWindow.SHOW_ERODE;
 				break;
 			case 'm': case 'M':
-				options |= Map.SHOW_ROCKS;
+				options |= MapWindow.SHOW_ROCKS;
 				break;
 			case 'f': case 'F':
-				options |= Map.SHOW_FLORA;
+				options |= MapWindow.SHOW_FLORA;
 				break;
 			case 'a': case 'A':
-				options |= Map.SHOW_FAUNA;
+				options |= MapWindow.SHOW_FAUNA;
 				break;
 			case 'c': case 'C':
-				options |= Map.SHOW_CITY;
+				options |= MapWindow.SHOW_CITY;
 				break;
 			}
 		}

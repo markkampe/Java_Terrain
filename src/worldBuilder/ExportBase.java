@@ -59,7 +59,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	 * @param maxTile ... maximum tile size (meters)
 	 * @param shape ... required export region shape
 	 */
-	public ExportBase(String format, Map map, int minTile, int maxTile, Map.Selection shape)  {
+	public ExportBase(String format, Map map, int minTile, int maxTile, MapWindow.Selection shape)  {
 		// pick up references
 		this.map = map;
 		this.parms = Parameters.getInstance();
@@ -169,7 +169,7 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 		
 		// add the super-class action listeners
 		// (in-place to prevent shadowing by sub-class listeners)
-		map.addMapListener(this);
+		map.window.addMapListener(this);
 		
 		// tile size may or may not be changeable
 		if (resolution != null) {
@@ -193,8 +193,8 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 			});
 		}
 		
-		map.selectMode(shape);
-		selected = map.checkSelection(shape);
+		map.window.selectMode(shape);
+		selected = map.window.checkSelection(shape);
 		newSelection = false;
 	}
 	
@@ -310,8 +310,8 @@ public class ExportBase extends JFrame implements WindowListener, MapListener {
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.selectMode(Map.Selection.ANY);
-		map.removeMapListener(this);
+		map.window.selectMode(MapWindow.Selection.ANY);
+		map.window.removeMapListener(this);
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}

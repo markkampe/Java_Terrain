@@ -37,7 +37,7 @@ public class ObjectExport extends ExportBase implements ActionListener {
 	 * @param map ... Map to be exported
 	 */
 	public ObjectExport(Map map) {
-		super("Object Overlay", map, MIN_TILE, MAX_TILE, Map.Selection.RECTANGLE);
+		super("Object Overlay", map, MIN_TILE, MAX_TILE, MapWindow.Selection.RECTANGLE);
 		
 		// additional widgets for overlay export
 		// Font fontSmall = new Font("Serif", Font.ITALIC, 10);

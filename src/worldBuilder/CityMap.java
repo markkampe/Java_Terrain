@@ -65,17 +65,17 @@ public class CityMap {
 		for(int i = 0; i < map.mesh.vertices.length; i++) {
 			if (names[i] != null) {
 				// make sure it is on the current screen
-				if (!map.on_screen(mesh.vertices[i].x, mesh.vertices[i].y))
+				if (!map.window.on_screen(mesh.vertices[i].x, mesh.vertices[i].y))
 					continue;
 				String s = names[i];
 				String t = CityDialog.lexType(s);
-				int x = map.screen_x(mesh.vertices[i].x);
-				int y = map.screen_y(mesh.vertices[i].y);
+				int x = map.window.screen_x(mesh.vertices[i].x);
+				int y = map.window.screen_y(mesh.vertices[i].y);
 				// draw the icon
 				for(int j = 0; j < CityDialog.typeList.length; j++)
-					if (map.iconImages[j] != null && CityDialog.typeList[j].equals(t)) {
+					if (map.window.iconImages[j] != null && CityDialog.typeList[j].equals(t)) {
 						// get the pixels
-						BufferedImage img = map.iconImages[j];
+						BufferedImage img = map.window.iconImages[j];
 						// figure out where to put them
 						int w = img.getWidth();
 						int h = img.getHeight();
@@ -110,9 +110,9 @@ public class CityMap {
 	 */
 	private void connect(Graphics g, int n1, int n2) {
 		// make sure this segment is on-screen
-		if (!map.on_screen(mesh.vertices[n1].x, mesh.vertices[n1].y))
+		if (!map.window.on_screen(mesh.vertices[n1].x, mesh.vertices[n1].y))
 			return;
-		if (!map.on_screen(mesh.vertices[n2].x, mesh.vertices[n2].y))
+		if (!map.window.on_screen(mesh.vertices[n2].x, mesh.vertices[n2].y))
 			return;
 		
 		// make sure the line is (at least partially) above water
@@ -120,10 +120,10 @@ public class CityMap {
 			return;
 		
 		// figure out where two end points are on the screen
-		int x1 = map.screen_x(mesh.vertices[n1].x);
-		int y1 = map.screen_y(mesh.vertices[n1].y);
-		int x2 = map.screen_x(mesh.vertices[n2].x);
-		int y2 = map.screen_y(mesh.vertices[n2].y);
+		int x1 = map.window.screen_x(mesh.vertices[n1].x);
+		int y1 = map.window.screen_y(mesh.vertices[n1].y);
+		int x2 = map.window.screen_x(mesh.vertices[n2].x);
+		int y2 = map.window.screen_y(mesh.vertices[n2].y);
 		
 		// if one end is Oceanic, shorten line to above water fraction
 		if (oceanic[n1] || oceanic[n2]) {

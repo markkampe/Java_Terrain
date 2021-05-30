@@ -243,16 +243,16 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		rounding2.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
-		map.addMapListener(this);
-		map.addKeyListener(this);
+		map.window.addMapListener(this);
+		map.window.addKeyListener(this);
 		addKeyListener(this);
 		symmetric.addItemListener(this);
 		form.addActionListener(this);
-		map.requestFocus();
+		map.window.requestFocus();
 		
 		// set us up for line selection
-		map.selectMode(Map.Selection.LINE);
-		selected = map.checkSelection(Map.Selection.LINE);
+		map.window.selectMode(MapWindow.Selection.LINE);
+		selected = map.window.checkSelection(MapWindow.Selection.LINE);
 		
 		// instantiate a TerrainEngine
 		te = new TerrainEngine(map);
@@ -311,7 +311,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		y_end = map_y + height;
 		selected = complete;
 		redraw();
-		map.requestFocus();
+		map.window.requestFocus();
 		return true;
 	}
 
@@ -319,12 +319,12 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * restore previous height map and exit dialog
 	 */
 	private void cancelDialog() {
-		map.selectMode(Map.Selection.NONE);
+		map.window.selectMode(MapWindow.Selection.NONE);
 		te.abort();
 		
-		map.removeMapListener(this);
-		map.removeKeyListener(this);
-		map.selectMode(Map.Selection.ANY);
+		map.window.removeMapListener(this);
+		map.window.removeKeyListener(this);
+		map.window.selectMode(MapWindow.Selection.ANY);
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
@@ -342,9 +342,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		te.commit();
 		
 		// reset the selected area
-		map.selectMode(Map.Selection.NONE);
+		map.window.selectMode(MapWindow.Selection.NONE);
 		x_start = 0; y_start = 0; x_end = 0; y_end = 0;
-		map.selectMode(Map.Selection.LINE);
+		map.window.selectMode(MapWindow.Selection.LINE);
 		selected = false;
 	}
 				
@@ -373,7 +373,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			
 			if (selected)
 				redraw();
-			map.requestFocus();
+			map.window.requestFocus();
 	}
 	
 	/**
@@ -388,8 +388,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			te.abort();	
 			// undo the last region selection
 			selected = false;
-			map.selectMode(Map.Selection.NONE);
-			map.selectMode(Map.Selection.LINE);
+			map.window.selectMode(MapWindow.Selection.NONE);
+			map.window.selectMode(MapWindow.Selection.LINE);
 		}
 	}
 
@@ -401,7 +401,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			cancelDialog();
 		} else if (e.getSource() == accept && selected) {
 			acceptMountain();
-			map.requestFocus();
+			map.window.requestFocus();
 		} else if (e.getSource() == form) {
 			int x = form.getSelectedIndex();
 			altitude.setValue(landforms[x].altitude);
@@ -411,7 +411,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			diameter1.setValue(landforms[x].width);
 			if (selected)
 				redraw();
-			map.requestFocus();
+			map.window.requestFocus();
 		}
 	}
 	
@@ -434,7 +434,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 				rounding2.setEnabled(true);
 			}
 		} 
-		map.requestFocus();
+		map.window.requestFocus();
 	}
 	
 	/** (perfunctory) */ public boolean pointSelected(double map_x, double map_y) { return false; }

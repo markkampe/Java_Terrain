@@ -31,10 +31,10 @@ public class SoilMap {
 	public void paint(Graphics g, int width, int height, int cellWidth) {
 			int h = height/cellWidth;
 			int w = width/cellWidth;
-			double dArray[][] = map.getTileDepths();
+			double dArray[][] = map.window.getTileDepths();
 			
 			// interpolate values from the latest mesh
-			Cartesian cart = map.getCartesian(Cartesian.vicinity.POLYGON);
+			Cartesian cart = map.window.getCartesian(Cartesian.vicinity.POLYGON);
 			double sArray[][] = cart.nearest(map.getSoilMap());
 			double eArray[][] = cart.interpolate(map.getErodeMap());
 			

@@ -43,7 +43,7 @@ public class ErodeMap {
 		double max_deposition = map.max_deposition;
 		
 		// interpolate erosion values from the latest mesh
-		Cartesian cart = map.getCartesian(Cartesian.vicinity.POLYGON);
+		Cartesian cart = map.window.getCartesian(Cartesian.vicinity.POLYGON);
 		double eArray[][] = cart.interpolate(map.getErodeMap());
 		
 		// render each cell according to its erosion/deposition
@@ -51,11 +51,11 @@ public class ErodeMap {
 			for(int c = 0; c < w; c++) {
 				double e = eArray[r][c];
 				if (e > 0) {		// erosion
-					double shade = Map.logarithmic(DIM, BRITE, e/max_erosion, 0.1);
+					double shade = MapWindow.logarithmic(DIM, BRITE, e/max_erosion, 0.1);
 					g.setColor(new Color((int) shade, 0, (int) shade));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				} else if (e < -min_deposition) {	// deposition
-					double shade = Map.logarithmic(DIM, BRITE, -e/max_deposition, 0.1);
+					double shade = MapWindow.logarithmic(DIM, BRITE, -e/max_deposition, 0.1);
 					g.setColor(new Color((int) shade, (int) shade, 0));
 					g.fillRect(c * cellWidth, r * cellWidth, cellWidth, cellWidth);
 				}

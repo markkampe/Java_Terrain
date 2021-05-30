@@ -170,14 +170,14 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		deposition.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
-		map.addMapListener(this);
-		map.addKeyListener(this);
+		map.window.addMapListener(this);
+		map.window.addKeyListener(this);
 		addKeyListener(this);
-		map.requestFocus();
+		map.window.requestFocus();
 		
 		// set us up for point-group selection
-		map.selectMode(Map.Selection.POINTS);
-		map.checkSelection(Map.Selection.POINTS);
+		map.window.selectMode(MapWindow.Selection.POINTS);
+		map.window.checkSelection(MapWindow.Selection.POINTS);
 	}
 
 	/**
@@ -219,12 +219,12 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		t.abort();
 		
 		// disable any in-progress selection
-		map.selectMode(Map.Selection.NONE);
+		map.window.selectMode(MapWindow.Selection.NONE);
 		
 		// delete listeners and lose the dialog
-		map.removeMapListener(this);
-		map.removeKeyListener(this);
-		map.selectMode(Map.Selection.ANY);
+		map.window.removeMapListener(this);
+		map.window.removeKeyListener(this);
+		map.window.selectMode(MapWindow.Selection.ANY);
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
@@ -249,8 +249,8 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		deposition.setValue(0);
 		
 		// un-do the current selection
-		map.selectMode(Map.Selection.NONE);
-		map.selectMode(Map.Selection.POINTS);
+		map.window.selectMode(MapWindow.Selection.NONE);
+		map.window.selectMode(MapWindow.Selection.POINTS);
 		have_selection = false;
 		
 		// there are no uncommitted changes
@@ -271,7 +271,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	public void stateChanged(ChangeEvent e) {
 		if (have_selection) {
 			update();
-			map.requestFocus();
+			map.window.requestFocus();
 		}
 	}
 	
@@ -284,8 +284,8 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 			acceptChanges();
 		else if (key == KeyEvent.VK_ESCAPE) {
 			t.abort();
-			map.selectMode(Map.Selection.NONE);	// undo current selection
-			map.selectMode(Map.Selection.POINTS);
+			map.window.selectMode(MapWindow.Selection.NONE);	// undo current selection
+			map.window.selectMode(MapWindow.Selection.POINTS);
 		}
 		changes_made = false;
 	}

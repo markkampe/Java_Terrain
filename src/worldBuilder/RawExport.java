@@ -23,7 +23,7 @@ public class RawExport extends ExportBase implements ActionListener {
 	 * @param map ... Map to be exported
 	 */
 	public RawExport(Map map) {
-		super("Raw JSON", map, 1, 100000, Map.Selection.RECTANGLE);
+		super("Raw JSON", map, 1, 100000, MapWindow.Selection.RECTANGLE);
 		this.map = map;
 
 		// we handle window and button events

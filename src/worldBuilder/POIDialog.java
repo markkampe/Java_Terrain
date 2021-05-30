@@ -107,9 +107,9 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 			accept.addActionListener(this);
 			cancel.addActionListener(this);
 			table.getSelectionModel().addListSelectionListener(this);
-			map.addMapListener(this);
-			map.selectMode(Map.Selection.POINT);
-			map.checkSelection(Map.Selection.POINT);
+			map.window.addMapListener(this);
+			map.window.selectMode(MapWindow.Selection.POINT);
+			map.window.checkSelection(MapWindow.Selection.POINT);
 		}
 		
 		/**
@@ -120,7 +120,7 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 		 */
 		public boolean pointSelected(double map_x, double map_y) {
 			// cancel all previous highlights
-			map.highlight(-1,  null);
+			map.window.highlight(-1,  null);
 			
 			// update the selected (or first empty) row
 			int row = table.getSelectedRow();
@@ -145,8 +145,8 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 			int row = table.getSelectedRow();
 			String type = (String) table.getValueAt(row, COL_TYPE);
 			if (type != null && !type.equals("")) {
-				map.highlight(x[row],  y[row]);	
-				map.repaint();
+				map.window.highlight(x[row],  y[row]);	
+				map.window.repaint();
 			}
 		}
 		
@@ -177,9 +177,9 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 		 * unregister our listeners and exit
 		 */
 		private void cancelDialog() {
-			map.highlight(-1,  null);			// clear highlights
-			map.selectMode(Map.Selection.ANY); 	// clear selections
-			map.removeMapListener(this);
+			map.window.highlight(-1,  null);			// clear highlights
+			map.window.selectMode(MapWindow.Selection.ANY); 	// clear selections
+			map.window.removeMapListener(this);
 			this.dispose();
 			WorldBuilder.activeDialog = false;
 		}

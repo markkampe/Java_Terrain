@@ -333,31 +333,31 @@ public class Parameters {
 			case VALUE_TRUE:
 				switch (thisKey) {
 				case "points":
-					display_options |= Map.SHOW_POINTS;
+					display_options |= MapWindow.SHOW_POINTS;
 					break;
 				case "mesh":
-					display_options |= Map.SHOW_MESH;
+					display_options |= MapWindow.SHOW_MESH;
 					break;
 				case "topo":
-					display_options |= Map.SHOW_TOPO;
+					display_options |= MapWindow.SHOW_TOPO;
 					break;
 				case "rain":
-					display_options |= Map.SHOW_RAIN;
+					display_options |= MapWindow.SHOW_RAIN;
 					break;
 				case "water":
-					display_options |= Map.SHOW_WATER;
+					display_options |= MapWindow.SHOW_WATER;
 					break;
 				case "soil":
-					display_options |= Map.SHOW_ROCKS;
+					display_options |= MapWindow.SHOW_ROCKS;
 					break;
 				case "flora":
-					display_options |= Map.SHOW_FLORA;
+					display_options |= MapWindow.SHOW_FLORA;
 					break;
 				case "fauna":
-					display_options |= Map.SHOW_FAUNA;
+					display_options |= MapWindow.SHOW_FAUNA;
 					break;
 				case "city":
-					display_options |= Map.SHOW_CITY;
+					display_options |= MapWindow.SHOW_CITY;
 					break;
 				}
 				break;

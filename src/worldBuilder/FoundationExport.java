@@ -30,7 +30,7 @@ public class FoundationExport extends ExportBase implements ActionListener {
 	 * @param map ... Map to be exported
 	 */
 	public FoundationExport(Map map) {
-		super("Foundation", map, 1, 1, Map.Selection.SQUARE);
+		super("Foundation", map, 1, 1, MapWindow.Selection.SQUARE);
 		
 		// 1024x1024 is slow and noisy, start small and interpolate
 		x_points = EXPORT_SIZE;

@@ -131,10 +131,10 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 		// add the action listeners
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
-		map.addMapListener(this);
+		map.window.addMapListener(this);
 		
-		map.selectMode(Map.Selection.SQUARE);
-		selected = map.checkSelection(Map.Selection.SQUARE);
+		map.window.selectMode(MapWindow.Selection.SQUARE);
+		selected = map.window.checkSelection(MapWindow.Selection.SQUARE);
 	}
 
 	/**
@@ -172,8 +172,8 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.selectMode(Map.Selection.ANY);
-		map.removeMapListener(this);
+		map.window.selectMode(MapWindow.Selection.ANY);
+		map.window.removeMapListener(this);
 		this.dispose();
 	}
 
@@ -202,7 +202,7 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 		}
 		
 		// clear the selection
-		map.selectMode(Map.Selection.ANY);
+		map.window.selectMode(MapWindow.Selection.ANY);
 		
 		// discard the dialog
 		this.dispose();

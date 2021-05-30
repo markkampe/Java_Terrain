@@ -110,7 +110,7 @@ public class Drainage {
 
 		// turn off any previous sink-point debugs
 		if (parms.debug_level >= HYDRO_DEBUG)
-			map.highlight(-1, null);
+			map.window.highlight(-1, null);
 
 		/*
 		 * 1. determine which points are under the ocean
@@ -311,11 +311,11 @@ public class Drainage {
 				 */
 				if (parms.debug_level >= HYDRO_DEBUG)
 					if (escapeTo >= 0) {
-						map.highlight(escapeTo, sinkMap[escapeTo] == OCEAN ? Color.BLUE : Color.GREEN);
+						map.window.highlight(escapeTo, sinkMap[escapeTo] == OCEAN ? Color.BLUE : Color.GREEN);
 						// XXX I have seen blue (likely intermediate) escape points inside of a depression
-						map.highlight(s,  Color.ORANGE);
+						map.window.highlight(s,  Color.ORANGE);
 					} else
-						map.highlight(s, Color.RED);
+						map.window.highlight(s, Color.RED);
 			}
 		} while (combined);
 		

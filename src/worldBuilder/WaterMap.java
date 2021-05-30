@@ -46,7 +46,7 @@ public class WaterMap {
 		int w = width/cellWidth;
 		
 		// interpolate per-cell water depth from the mesh
-		depthMap = map.getTileDepths();
+		depthMap = map.window.getTileDepths();
 		
 		/*
 		 * We paint blue any point that is under water, and

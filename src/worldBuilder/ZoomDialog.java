@@ -70,9 +70,9 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		
 		// add the action listeners
 		accept.addActionListener(this);
-		map.addMapListener(this);
+		map.window.addMapListener(this);
 		
-		selected = map.checkSelection(Map.Selection.RECTANGLE);
+		selected = map.window.checkSelection(MapWindow.Selection.RECTANGLE);
 	}
 	
 	/**
@@ -82,8 +82,8 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	 */
 	private void describe(double width, double height) {
 		// selected area in pixels
-		int x_pixels = map.screen_x(width) - map.screen_x(0);
-		int y_pixels = map.screen_y(height) - map.screen_y(0);
+		int x_pixels = map.window.screen_x(width) - map.window.screen_x(0);
+		int y_pixels = map.window.screen_y(height) - map.window.screen_y(0);
 		
 		// selected area in world coordinates
 		double x_km = parms.km(width);
@@ -115,7 +115,7 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 		
 		if (complete) {
 			// ensure new map has correct aspect ration
-			double mapAspect = (double) map.getWidth() / map.getHeight();
+			double mapAspect = (double) map.window.getWidth() / map.window.getHeight();
 			double selAspect = (double) width / height;
 			if (selAspect >= mapAspect)
 				height = width * mapAspect;
@@ -123,8 +123,8 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 				width = height / mapAspect;
 			
 			// and push this correction back to the display
-			map.selectRect(map.screen_x(x0), map.screen_y(y0),
-						   map.screen_x(x0+width), map.screen_y(y0+height));
+			map.window.selectRect(map.window.screen_x(x0), map.window.screen_y(y0),
+					map.window.screen_x(x0+width), map.window.screen_y(y0+height));
 		}
 		new_height = height;
 		new_width = width;
@@ -138,9 +138,9 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	 * Window Close event handler ... do nothing
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.selectMode(Map.Selection.ANY);
-		map.setWindow(-Parameters.x_extent/2, -Parameters.y_extent/2, Parameters.x_extent/2, Parameters.y_extent/2);
-		map.removeMapListener(this);
+		map.window.selectMode(MapWindow.Selection.ANY);
+		map.window.setWindow(-Parameters.x_extent/2, -Parameters.y_extent/2, Parameters.x_extent/2, Parameters.y_extent/2);
+		map.window.removeMapListener(this);
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
@@ -150,15 +150,15 @@ public class ZoomDialog extends JFrame implements ActionListener, WindowListener
 	 */
 	public void actionPerformed(ActionEvent e) {
 		// clear the selection
-		map.selectMode(Map.Selection.ANY);
+		map.window.selectMode(MapWindow.Selection.ANY);
 		
 		if (e.getSource() == accept && selected && !zoomed) {
 			sel_pixels.setText("DISMISS DIALOG TO UNZOOM");
-			map.setWindow(new_x, new_y, new_x + new_width, new_y + new_height);
+			map.window.setWindow(new_x, new_y, new_x + new_width, new_y + new_height);
 			zoomed = true;
 			
 			// we accept no further input, just wait for the close
-			map.removeMapListener(this);
+			map.window.removeMapListener(this);
 			accept.setVisible(false);
 			WorldBuilder.activeDialog = false;
 			accept.removeActionListener(this);

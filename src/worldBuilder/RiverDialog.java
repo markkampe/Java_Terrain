@@ -102,17 +102,17 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 		t = new TerrainEngine(map);
 		
 		// add the action listeners
-		map.addMapListener(this);
+		map.window.addMapListener(this);
 		flow.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		addKeyListener(this);
-		map.addKeyListener(this);
-		map.requestFocus();
+		map.window.addKeyListener(this);
+		map.window.requestFocus();
 		
 		// wait for a new entry point to be selected
-		map.selectMode(Map.Selection.NONE);
-		map.selectMode(Map.Selection.POINT);
+		map.window.selectMode(MapWindow.Selection.NONE);
+		map.window.selectMode(MapWindow.Selection.POINT);
 	}
 
 
@@ -153,8 +153,8 @@ public class RiverDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	private void cancelDialog() {
 		t.abort();
-		map.removeMapListener(this);
-		map.removeKeyListener(this);
+		map.window.removeMapListener(this);
+		map.window.removeKeyListener(this);
 		WorldBuilder.activeDialog = false;
 		this.dispose();
 	}

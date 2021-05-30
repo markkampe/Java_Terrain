@@ -119,9 +119,9 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			delete.addActionListener(this);
 			
 			chosenPoint = -1;
-			map.addMapListener(this);
-			map.selectMode(Map.Selection.POINT);
-			map.checkSelection(Map.Selection.POINT);
+			map.window.addMapListener(this);
+			map.window.selectMode(MapWindow.Selection.POINT);
+			map.window.checkSelection(MapWindow.Selection.POINT);
 		}
 		
 		/**
@@ -132,12 +132,12 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 */
 		public boolean pointSelected(double map_x, double map_y) {
 			// cancel all previous highlights
-			map.selectMode(Map.Selection.NONE);
-			map.highlight(-1,  null);
+			map.window.selectMode(MapWindow.Selection.NONE);
+			map.window.highlight(-1,  null);
 			
 			// identify the nearest MeshPoint
 			MeshPoint point = map.mesh.choosePoint(map_x, map_y);
-			map.highlight(point.index, SELECTED_COLOR);
+			map.window.highlight(point.index, SELECTED_COLOR);
 			chosenPoint = point.index;
 			
 			lat.setText(String.format("%.5f", parms.latitude(point.y)));
@@ -154,7 +154,7 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			}
 				
 			// and enable the next selection
-			map.selectMode(Map.Selection.POINT);
+			map.window.selectMode(MapWindow.Selection.POINT);
 			return true;
 		}
 		
@@ -209,7 +209,7 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			nameMap[chosenPoint] = s.equals("") ? 
 					String.format("%s - %s", name.getText(), descr.getText()) :
 					String.format("%s: %s - %s", s, name.getText(), descr.getText());
-			map.repaint();
+					map.window.repaint();
 		}
 		
 		/**
@@ -217,16 +217,16 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 */
 		private void deletePoint() {
 			nameMap[chosenPoint] = null;
-			map.repaint();
+			map.window.repaint();
 		}
 		
 		/**
 		 * unregister our listeners and exit
 		 */
 		private void cancelDialog() {
-			map.highlight(-1,  null);			// clear highlights
-			map.selectMode(Map.Selection.ANY); 	// clear selections
-			map.removeMapListener(this);
+			map.window.highlight(-1,  null);			// clear highlights
+			map.window.selectMode(MapWindow.Selection.ANY); 	// clear selections
+			map.window.removeMapListener(this);
 			this.dispose();
 			WorldBuilder.activeDialog = false;
 		}

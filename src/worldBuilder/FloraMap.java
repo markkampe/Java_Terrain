@@ -30,7 +30,7 @@ public class FloraMap {
 		int w = width/cellWidth;
 		
 		// rather than interpolate, use the nearest mesh point
-		Cartesian cart = map.getCartesian(Cartesian.vicinity.POLYGON);
+		Cartesian cart = map.window.getCartesian(Cartesian.vicinity.POLYGON);
 		double flora[][] = cart.nearest(map.getFloraMap());
 		
 		// look up the type to color mapping

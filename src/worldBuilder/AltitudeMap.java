@@ -12,7 +12,6 @@ public class AltitudeMap {
 	private static final int TOPO_DIM = 0;
 	private static final int TOPO_BRITE = 255;
 	
-	private Map map;
 	private MapWindow window;
 	//private Parameters parms;
 	
@@ -21,7 +20,6 @@ public class AltitudeMap {
 	 * @param map	to be rendered
 	 */
 	public AltitudeMap(Map map) {
-		this.map = map;
 		this.window = map.window;
 		//this.parms = Parameters.getInstance();
 	}

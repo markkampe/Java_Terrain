@@ -12,7 +12,7 @@ import javax.swing.event.*;
  * a Dialog to control the direction and amount of rainfall on the world map.
  */
 public class RainDialog extends JFrame implements ActionListener, ChangeListener, MapListener, KeyListener, WindowListener {	
-	private Map map;
+	private MapWindow window;
 	private AttributeEngine a;
 	
 	private Parameters parms;
@@ -37,7 +37,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	public RainDialog(Map map)  {
 		// pick up references
-		this.map = map;
+		this.window = map.window;
 		this.a = new AttributeEngine(map);
 		this.parms = Parameters.getInstance();
 
@@ -103,18 +103,18 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		amount.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
-		map.window.addMapListener(this);
+		window.addMapListener(this);
 		addKeyListener(this);
-		map.window.addKeyListener(this);
-		map.window.requestFocus();
+		window.addKeyListener(this);
+		window.requestFocus();
 		
 		// initialize the rainfall to default values
 		rainFall(slider2rainfall(amount.getValue()));
 		
 		// get region selection input
-		map.window.addMapListener(this);	
-		map.window.selectMode(MapWindow.Selection.POINTS);
-		map.window.checkSelection(MapWindow.Selection.POINTS);
+		window.addMapListener(this);	
+		window.selectMode(MapWindow.Selection.POINTS);
+		window.checkSelection(MapWindow.Selection.POINTS);
 	}
 	
 	/**
@@ -171,7 +171,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 */
 	public void windowClosing(WindowEvent e) {
 		// clear selected points and uncommitted rainfall
-		map.window.selectMode(MapWindow.Selection.NONE);
+		window.selectMode(MapWindow.Selection.NONE);
 		a.abort();
 		cancelDialog();
 	}
@@ -183,7 +183,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		if (e.getSource() == amount) {
 			rainFall(slider2rainfall(amount.getValue()));	
 		}
-		map.window.requestFocus();
+		window.requestFocus();
 	}
 	
 	/**
@@ -211,8 +211,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		else if (key == KeyEvent.VK_ESCAPE) {
 			a.abort();
 			// and clear the current selection
-			map.window.selectMode(MapWindow.Selection.NONE);
-			map.window.selectMode(MapWindow.Selection.POINTS);
+			window.selectMode(MapWindow.Selection.NONE);
+			window.selectMode(MapWindow.Selection.POINTS);
 		}
 
 		changes_made = false;
@@ -221,8 +221,8 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 	 * unregister our map listener and close the dialog
 	 */
 	private void cancelDialog() {
-		map.window.selectMode(MapWindow.Selection.ANY);
-		map.window.removeMapListener(this);
+		window.selectMode(MapWindow.Selection.ANY);
+		window.removeMapListener(this);
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
@@ -238,7 +238,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			// checkpoint these updates
 			a.commit();
 			changes_made = false;
-			map.window.requestFocus();
+			window.requestFocus();
 			
 			// make the latest rainfall the default
 			parms.dAmount = slider2rainfall(amount.getValue());

@@ -13,6 +13,7 @@ import javax.swing.event.*;
 public class LandDialog extends JFrame implements ActionListener, ChangeListener, MapListener, KeyListener, WindowListener {	
 	
 	private Map map;
+	private MapWindow window;
 	private TerrainEngine t;
 	private Parameters parms;
 	
@@ -40,6 +41,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		
 		// pick up references current maps
 		this.map = map;
+		this.window = map.window;
 		this.t = new TerrainEngine(map);
 		
 		// create the dialog box
@@ -170,14 +172,14 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		deposition.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
-		map.window.addMapListener(this);
-		map.window.addKeyListener(this);
+		window.addMapListener(this);
+		window.addKeyListener(this);
 		addKeyListener(this);
-		map.window.requestFocus();
+		window.requestFocus();
 		
 		// set us up for point-group selection
-		map.window.selectMode(MapWindow.Selection.POINTS);
-		map.window.checkSelection(MapWindow.Selection.POINTS);
+		window.selectMode(MapWindow.Selection.POINTS);
+		window.checkSelection(MapWindow.Selection.POINTS);
 	}
 
 	/**
@@ -219,12 +221,12 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		t.abort();
 		
 		// disable any in-progress selection
-		map.window.selectMode(MapWindow.Selection.NONE);
+		window.selectMode(MapWindow.Selection.NONE);
 		
 		// delete listeners and lose the dialog
-		map.window.removeMapListener(this);
-		map.window.removeKeyListener(this);
-		map.window.selectMode(MapWindow.Selection.ANY);
+		window.removeMapListener(this);
+		window.removeKeyListener(this);
+		window.selectMode(MapWindow.Selection.ANY);
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
@@ -249,8 +251,8 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		deposition.setValue(0);
 		
 		// un-do the current selection
-		map.window.selectMode(MapWindow.Selection.NONE);
-		map.window.selectMode(MapWindow.Selection.POINTS);
+		window.selectMode(MapWindow.Selection.NONE);
+		window.selectMode(MapWindow.Selection.POINTS);
 		have_selection = false;
 		
 		// there are no uncommitted changes
@@ -271,7 +273,7 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 	public void stateChanged(ChangeEvent e) {
 		if (have_selection) {
 			update();
-			map.window.requestFocus();
+			window.requestFocus();
 		}
 	}
 	
@@ -284,8 +286,8 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 			acceptChanges();
 		else if (key == KeyEvent.VK_ESCAPE) {
 			t.abort();
-			map.window.selectMode(MapWindow.Selection.NONE);	// undo current selection
-			map.window.selectMode(MapWindow.Selection.POINTS);
+			window.selectMode(MapWindow.Selection.NONE);	// undo current selection
+			window.selectMode(MapWindow.Selection.POINTS);
 		}
 		changes_made = false;
 	}

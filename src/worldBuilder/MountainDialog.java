@@ -12,7 +12,7 @@ import javax.swing.event.*;
  */
 public class MountainDialog extends JFrame implements ActionListener, ChangeListener, MapListener, ItemListener, KeyListener, WindowListener {	
 	
-	private Map map;
+	private MapWindow window;
 	TerrainEngine te;
 	private Parameters parms;
 	
@@ -66,7 +66,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	public MountainDialog(Map map)  {
 		// pick up references
-		this.map = map;
+		this.window = map.window;
 		this.parms = Parameters.getInstance();
 
 		// calibrate full scale on the sliders
@@ -243,16 +243,16 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		rounding2.addChangeListener(this);
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
-		map.window.addMapListener(this);
-		map.window.addKeyListener(this);
+		window.addMapListener(this);
+		window.addKeyListener(this);
 		addKeyListener(this);
 		symmetric.addItemListener(this);
 		form.addActionListener(this);
-		map.window.requestFocus();
+		window.requestFocus();
 		
 		// set us up for line selection
-		map.window.selectMode(MapWindow.Selection.LINE);
-		selected = map.window.checkSelection(MapWindow.Selection.LINE);
+		window.selectMode(MapWindow.Selection.LINE);
+		selected = window.checkSelection(MapWindow.Selection.LINE);
 		
 		// instantiate a TerrainEngine
 		te = new TerrainEngine(map);
@@ -311,7 +311,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		y_end = map_y + height;
 		selected = complete;
 		redraw();
-		map.window.requestFocus();
+		window.requestFocus();
 		return true;
 	}
 
@@ -319,12 +319,12 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 	 * restore previous height map and exit dialog
 	 */
 	private void cancelDialog() {
-		map.window.selectMode(MapWindow.Selection.NONE);
+		window.selectMode(MapWindow.Selection.NONE);
 		te.abort();
 		
-		map.window.removeMapListener(this);
-		map.window.removeKeyListener(this);
-		map.window.selectMode(MapWindow.Selection.ANY);
+		window.removeMapListener(this);
+		window.removeKeyListener(this);
+		window.selectMode(MapWindow.Selection.ANY);
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
@@ -342,9 +342,9 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 		te.commit();
 		
 		// reset the selected area
-		map.window.selectMode(MapWindow.Selection.NONE);
+		window.selectMode(MapWindow.Selection.NONE);
 		x_start = 0; y_start = 0; x_end = 0; y_end = 0;
-		map.window.selectMode(MapWindow.Selection.LINE);
+		window.selectMode(MapWindow.Selection.LINE);
 		selected = false;
 	}
 				
@@ -373,7 +373,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			
 			if (selected)
 				redraw();
-			map.window.requestFocus();
+			window.requestFocus();
 	}
 	
 	/**
@@ -388,8 +388,8 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			te.abort();	
 			// undo the last region selection
 			selected = false;
-			map.window.selectMode(MapWindow.Selection.NONE);
-			map.window.selectMode(MapWindow.Selection.LINE);
+			window.selectMode(MapWindow.Selection.NONE);
+			window.selectMode(MapWindow.Selection.LINE);
 		}
 	}
 
@@ -401,7 +401,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			cancelDialog();
 		} else if (e.getSource() == accept && selected) {
 			acceptMountain();
-			map.window.requestFocus();
+			window.requestFocus();
 		} else if (e.getSource() == form) {
 			int x = form.getSelectedIndex();
 			altitude.setValue(landforms[x].altitude);
@@ -411,7 +411,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 			diameter1.setValue(landforms[x].width);
 			if (selected)
 				redraw();
-			map.window.requestFocus();
+			window.requestFocus();
 		}
 	}
 	
@@ -434,7 +434,7 @@ public class MountainDialog extends JFrame implements ActionListener, ChangeList
 				rounding2.setEnabled(true);
 			}
 		} 
-		map.window.requestFocus();
+		window.requestFocus();
 	}
 	
 	/** (perfunctory) */ public boolean pointSelected(double map_x, double map_y) { return false; }

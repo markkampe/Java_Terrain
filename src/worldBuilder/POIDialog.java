@@ -16,6 +16,7 @@ import javax.swing.table.TableColumnModel;
  */
 public class POIDialog extends JFrame implements WindowListener, MapListener, ActionListener, ListSelectionListener {
 		private Map map;
+		private MapWindow window;
 		private Parameters parms;
 			
 		private static final int BORDER_WIDTH = 5;
@@ -42,6 +43,7 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 		public POIDialog(Map map)  {
 			// pick up references
 			this.map = map;
+			this.window = map.window;
 			this.parms = Parameters.getInstance();
 			
 			// import the current PoI list into a data table
@@ -107,9 +109,9 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 			accept.addActionListener(this);
 			cancel.addActionListener(this);
 			table.getSelectionModel().addListSelectionListener(this);
-			map.window.addMapListener(this);
-			map.window.selectMode(MapWindow.Selection.POINT);
-			map.window.checkSelection(MapWindow.Selection.POINT);
+			window.addMapListener(this);
+			window.selectMode(MapWindow.Selection.POINT);
+			window.checkSelection(MapWindow.Selection.POINT);
 		}
 		
 		/**
@@ -120,7 +122,7 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 		 */
 		public boolean pointSelected(double map_x, double map_y) {
 			// cancel all previous highlights
-			map.window.highlight(-1,  null);
+			window.highlight(-1,  null);
 			
 			// update the selected (or first empty) row
 			int row = table.getSelectedRow();
@@ -145,8 +147,8 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 			int row = table.getSelectedRow();
 			String type = (String) table.getValueAt(row, COL_TYPE);
 			if (type != null && !type.equals("")) {
-				map.window.highlight(x[row],  y[row]);	
-				map.window.repaint();
+				window.highlight(x[row],  y[row]);	
+				window.repaint();
 			}
 		}
 		
@@ -177,9 +179,9 @@ public class POIDialog extends JFrame implements WindowListener, MapListener, Ac
 		 * unregister our listeners and exit
 		 */
 		private void cancelDialog() {
-			map.window.highlight(-1,  null);			// clear highlights
-			map.window.selectMode(MapWindow.Selection.ANY); 	// clear selections
-			map.window.removeMapListener(this);
+			window.highlight(-1,  null);			// clear highlights
+			window.selectMode(MapWindow.Selection.ANY); 	// clear selections
+			window.removeMapListener(this);
 			this.dispose();
 			WorldBuilder.activeDialog = false;
 		}

@@ -16,7 +16,7 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 	private String[] rsrcClasses = {"NONE", "FIRST", "SECOND", "THIRD"};
 	private String[] rsrcNames;		// map resource type into a name
 	
-	private Map map;
+	private MapWindow window;
 	private Parameters parms;
 	private AttributeEngine a;		// attribute placement engine
 	private boolean rules_loaded;	// auto-placement rules have been loaded
@@ -53,7 +53,7 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 	 */
 	public ResourceDialog(Map map, AttributeEngine.WhichMap maptype, String[] classNames, String[] rsrcNames)  {
 		// pick up references
-		this.map = map;
+		this.window = map.window;
 		this.parms = Parameters.getInstance();
 		this.whichMap = maptype;
 		this.rsrcClasses = classNames;
@@ -180,14 +180,14 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 		
 		// get keyboard input
 		addKeyListener(this);
-		map.window.addKeyListener(this);
-		map.window.requestFocus();
+		window.addKeyListener(this);
+		window.requestFocus();
 
 		// get region selection input
 		changes_made = false;
-		map.window.addMapListener(this);	
-		map.window.selectMode(MapWindow.Selection.POINTS);
-		map.window.checkSelection(MapWindow.Selection.POINTS);
+		window.addMapListener(this);	
+		window.selectMode(MapWindow.Selection.POINTS);
+		window.checkSelection(MapWindow.Selection.POINTS);
 		
 		// we start out with rule-based placement
 		chosen_type = AUTOMATIC;
@@ -242,7 +242,7 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 				autoPlace();
 			}
 		}
-		map.window.requestFocus();
+		window.requestFocus();
 	}
 	
 	/**
@@ -254,9 +254,9 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 		}
 
 		// cease to listen to selection events
-		map.window.selectMode(MapWindow.Selection.ANY);
-		map.window.removeMapListener(this);
-		map.window.removeKeyListener(this);
+		window.selectMode(MapWindow.Selection.ANY);
+		window.removeMapListener(this);
+		window.removeKeyListener(this);
 
 		// close the window
 		this.dispose();
@@ -291,9 +291,9 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 			undo();
 		
 		// clear the (just committed) selection
-		map.window.selectMode(MapWindow.Selection.NONE);
+		window.selectMode(MapWindow.Selection.NONE);
 		whichPoints = null;
-		map.window.selectMode(MapWindow.Selection.POINTS);
+		window.selectMode(MapWindow.Selection.POINTS);
 	}
 
 	/**
@@ -352,7 +352,7 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 			}
 			mode.setText(chosen);
 		}
-		map.window.requestFocus();
+		window.requestFocus();
 	}
 
 	/** (perfunctory)*/ public boolean regionSelected(double mx0, double my0, double dx, double dy, boolean complete) {	return false;}

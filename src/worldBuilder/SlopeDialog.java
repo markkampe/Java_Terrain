@@ -9,7 +9,7 @@ import javax.swing.event.*;
  * Dialog to choose axis and inclination for a constant slope to the map.
  */
 public class SlopeDialog extends JFrame implements ActionListener, ChangeListener, WindowListener {	
-	private Map map;
+	private MapWindow window;
 	private Parameters parms;
 	TerrainEngine t;
 	
@@ -29,7 +29,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public SlopeDialog(Map map)  {
 		// pick up references
-		this.map = map;
+		this.window = map.window;
 		this.parms = Parameters.getInstance();
 		
 		// create the dialog box
@@ -114,7 +114,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		t = new TerrainEngine(map);
 		
 		// disable selection
-		map.window.selectMode(MapWindow.Selection.NONE);
+		window.selectMode(MapWindow.Selection.NONE);
 		
 		// initialize the slope axis
 		setAxis(0);
@@ -140,17 +140,17 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	private void setAxis(int degrees) {
 		
 		// figure out line center and length
-		int x_center = map.window.getWidth()/2;
+		int x_center = window.getWidth()/2;
 		int x_len = 3 * x_center / 2;
-		int y_center = map.window.getHeight()/2;
+		int y_center = window.getHeight()/2;
 		int y_len = 3 * y_center / 2;
 		
 		// vertical lines are a special case
 		if (degrees == -90 || degrees == 90) {
 			x0 = x_center;
 			x1 = x_center;
-			y0 = map.window.getHeight()/8;
-			y1 = map.window.getHeight()*7/8;
+			y0 = window.getHeight()/8;
+			y1 = window.getHeight()*7/8;
 		} else {
 			double radians = Math.toRadians(degrees);
 			double sin = Math.sin(radians);
@@ -164,7 +164,7 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 		}
 		
 		// display the slope axis
-		map.window.selectLine(x0, y0, x1, y1);
+		window.selectLine(x0, y0, x1, y1);
 		incline(inclination.getValue());
 	}
 	
@@ -172,9 +172,9 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.window.selectMode(MapWindow.Selection.ANY);
+		window.selectMode(MapWindow.Selection.ANY);
 		t.abort();
-		map.window.repaint();
+		window.repaint();
 		this.dispose();
 	}
 	
@@ -194,12 +194,12 @@ public class SlopeDialog extends JFrame implements ActionListener, ChangeListene
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == cancel) {
-			map.window.selectMode(MapWindow.Selection.ANY);
+			window.selectMode(MapWindow.Selection.ANY);
 			t.abort();
-			map.window.repaint();
+			window.repaint();
 			this.dispose();
 		} else if (e.getSource() == accept) {
-			map.window.selectMode(MapWindow.Selection.ANY);
+			window.selectMode(MapWindow.Selection.ANY);
 			t.commit();
 			this.dispose();
 			

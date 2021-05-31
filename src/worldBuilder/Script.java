@@ -50,6 +50,7 @@ public class Script {
 	 * @return anything other than DO_NOT_EXIT is an exit code
 	 */
 	public int process(Map map) {
+		MapWindow window = map.window;
 		parms = Parameters.getInstance();
 		TerrainEngine t = new TerrainEngine(map);
 		AttributeEngine a = new AttributeEngine(map);
@@ -227,10 +228,10 @@ public class Script {
 				
 			case "display":		// display-options
 				if (tokens[1] != null) {
-					map.window.display = 0;
-					map.window.setDisplay(displayOptions(tokens[1]), true);
+					window.display = 0;
+					window.setDisplay(displayOptions(tokens[1]), true);
 				} else {
-					map.window.repaint();
+					window.repaint();
 				}
 				break;
 					

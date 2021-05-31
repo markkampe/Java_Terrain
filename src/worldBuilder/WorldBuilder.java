@@ -38,6 +38,7 @@ public class WorldBuilder  extends JFrame
 	// 2D canvas
 	private Container mainPane;
 	private Map map;
+	private MapWindow window;
 	
 	// counter to position off-map dialogs
 	private int numDialogs = 0;
@@ -131,7 +132,8 @@ public class WorldBuilder  extends JFrame
 		
 		// create the display map generator
 		map = new Map(parms.width, parms.height);
-		mainPane.add(map.window, BorderLayout.CENTER);	
+		window = map.window;
+		mainPane.add(window, BorderLayout.CENTER);	
 		
 		// if we were given an input file, use it
 		map.read(filename);
@@ -557,7 +559,7 @@ public class WorldBuilder  extends JFrame
 		} else if (o == editSlope) {
 			placeDialog(new SlopeDialog(map), false);
 		} else if (o == editRain) {
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_RAIN, true);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_RAIN, true);
 			placeDialog(new RainDialog(map), false);
 		} else if (o == editRiver) {
 			if (activeDialog)
@@ -570,7 +572,7 @@ public class WorldBuilder  extends JFrame
 			if (activeDialog)
 				twoDialogError();
 			else {
-				parms.display_options = map.window.setDisplay(MapWindow.SHOW_FLORA, true);
+				parms.display_options = window.setDisplay(MapWindow.SHOW_FLORA, true);
 				placeDialog(new FloraDialog(map), false);
 				activeDialog = true;
 			}
@@ -578,7 +580,7 @@ public class WorldBuilder  extends JFrame
 			if (activeDialog)
 				twoDialogError();
 			else {
-				parms.display_options = map.window.setDisplay(MapWindow.SHOW_FAUNA, true);
+				parms.display_options = window.setDisplay(MapWindow.SHOW_FAUNA, true);
 				placeDialog(new FaunaDialog(map), false);
 				activeDialog = true;
 			}
@@ -586,7 +588,7 @@ public class WorldBuilder  extends JFrame
 			if (activeDialog)
 				twoDialogError();
 			else {
-				parms.display_options = map.window.setDisplay(MapWindow.SHOW_ROCKS, true);
+				parms.display_options = window.setDisplay(MapWindow.SHOW_ROCKS, true);
 				placeDialog(new MineralDialog(map), false);
 				activeDialog = true;
 			}
@@ -601,7 +603,7 @@ public class WorldBuilder  extends JFrame
 			if (activeDialog)
 				twoDialogError();
 			else {
-				parms.display_options = map.window.setDisplay(MapWindow.SHOW_CITY, true);
+				parms.display_options = window.setDisplay(MapWindow.SHOW_CITY, true);
 				placeDialog(new CityDialog(map), false);
 				activeDialog = true;
 			}
@@ -609,7 +611,7 @@ public class WorldBuilder  extends JFrame
 			if (activeDialog)
 				twoDialogError();
 			else {
-				parms.display_options = map.window.setDisplay(MapWindow.SHOW_CITY, true);
+				parms.display_options = window.setDisplay(MapWindow.SHOW_CITY, true);
 				placeDialog(new RouteDialog(map), false);
 				activeDialog = true;
 			}
@@ -617,25 +619,25 @@ public class WorldBuilder  extends JFrame
 		
 		// view menu toggles individual views on and off
 		else if (o == viewPoints)
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_POINTS, (parms.display_options & MapWindow.SHOW_POINTS) == 0);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_POINTS, (parms.display_options & MapWindow.SHOW_POINTS) == 0);
 		else if (o == viewMesh)
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_MESH, (parms.display_options & MapWindow.SHOW_MESH) == 0);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_MESH, (parms.display_options & MapWindow.SHOW_MESH) == 0);
 		else if (o == viewTopo)
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_TOPO, (parms.display_options & MapWindow.SHOW_TOPO) == 0);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_TOPO, (parms.display_options & MapWindow.SHOW_TOPO) == 0);
 		else if (o == viewRain)
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_RAIN, (parms.display_options & MapWindow.SHOW_RAIN) == 0);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_RAIN, (parms.display_options & MapWindow.SHOW_RAIN) == 0);
 		else if (o == viewWater)
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_WATER, (parms.display_options & MapWindow.SHOW_WATER) == 0);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_WATER, (parms.display_options & MapWindow.SHOW_WATER) == 0);
 		else if (o == viewErode)
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_ERODE, (parms.display_options & MapWindow.SHOW_ERODE) == 0);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_ERODE, (parms.display_options & MapWindow.SHOW_ERODE) == 0);
 		else if (o == viewRocks)
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_ROCKS, (parms.display_options & MapWindow.SHOW_ROCKS) == 0);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_ROCKS, (parms.display_options & MapWindow.SHOW_ROCKS) == 0);
 		else if (o == viewFlora)
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_FLORA, (parms.display_options & MapWindow.SHOW_FLORA) == 0);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_FLORA, (parms.display_options & MapWindow.SHOW_FLORA) == 0);
 		else if (o == viewFauna)
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_FAUNA, (parms.display_options & MapWindow.SHOW_FAUNA) == 0);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_FAUNA, (parms.display_options & MapWindow.SHOW_FAUNA) == 0);
 		else if (o == viewCities)
-			parms.display_options = map.window.setDisplay(MapWindow.SHOW_CITY,  (parms.display_options & MapWindow.SHOW_CITY) == 0);
+			parms.display_options = window.setDisplay(MapWindow.SHOW_CITY,  (parms.display_options & MapWindow.SHOW_CITY) == 0);
 		else if (o == viewZoom)	{
 			if (activeDialog)
 				twoDialogError();
@@ -815,7 +817,7 @@ public class WorldBuilder  extends JFrame
 		WorldBuilder w = new WorldBuilder(filename);
 		
 		// initialize the display type and options menus
-		w.map.window.setDisplay(parms.display_options, true);
+		w.window.setDisplay(parms.display_options, true);
 		w.updateDisplayMenus(parms.display_options);
 		
 		// see if we were given a script to run

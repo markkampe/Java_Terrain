@@ -9,6 +9,7 @@ import javax.swing.*;
  */
 public class PointDebug extends JFrame implements WindowListener, MapListener, ActionListener {
 		private Map map;
+		private MapWindow window;
 		private Parameters parms;
 			
 		private static final int BORDER_WIDTH = 5;
@@ -50,6 +51,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 		public PointDebug(Map map)  {
 			// pick up references
 			this.map = map;
+			this.window = map.window;
 			this.parms = Parameters.getInstance();
 			
 			// create the dialog box
@@ -137,9 +139,9 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			
 			// add the action listeners
 			selectMode.addActionListener(this);
-			map.window.addMapListener(this);
-			map.window.selectMode(MapWindow.Selection.POINT);
-			map.window.checkSelection(MapWindow.Selection.POINT);
+			window.addMapListener(this);
+			window.selectMode(MapWindow.Selection.POINT);
+			window.checkSelection(MapWindow.Selection.POINT);
 		}
 		
 		/**
@@ -150,7 +152,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 		 */
 		public boolean pointSelected(double map_x, double map_y) {
 			// cancel all previous highlights
-			map.window.highlight(-1,  null);
+			window.highlight(-1,  null);
 			
 			// display the info for this point
 			if (meshMode) {
@@ -158,7 +160,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 				meshPointInfo(point);
 				
 				// highlight selected point
-				map.window.highlight(point.index, SELECTED_COLOR);
+				window.highlight(point.index, SELECTED_COLOR);
 			} else {
 				mapPointInfo(map_x, map_y);
 			}
@@ -167,7 +169,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			
 			// update the point information pop-up and display the highlights
 			pack();
-			map.window.repaint();
+			window.repaint();
 			return true;
 		}
 		
@@ -241,7 +243,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			// find and highlight our Mesh neighbors
 			String neighbors = "";
 			for(int i = 0; i < point.neighbors; i++) {
-				map.window.highlight(point.neighbor[i].index, NEIGHBOR_COLOR);
+				window.highlight(point.neighbor[i].index, NEIGHBOR_COLOR);
 				if (neighbors == "")
 					neighbors = String.format("%d", point.neighbor[i].index);
 				else
@@ -308,7 +310,7 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 			String neighbors = "";
 			for(int i = 0; i < Vicinity.NUM_NEIGHBORS; i++)
 				if (vicinity.neighbors[i] >= 0) {
-					map.window.highlight(vicinity.neighbors[i], NEIGHBOR_COLOR);
+					window.highlight(vicinity.neighbors[i], NEIGHBOR_COLOR);
 					if (neighbors == "")
 						neighbors = String.format("%d", vicinity.neighbors[i]);
 					else
@@ -359,9 +361,9 @@ public class PointDebug extends JFrame implements WindowListener, MapListener, A
 		 * Window Close event handler ... do nothing
 		 */
 		public void windowClosing(WindowEvent e) {
-			map.window.highlight(-1,  null);			// clear highlights
-			map.window.selectMode(MapWindow.Selection.ANY); 	// clear selections
-			map.window.removeMapListener(this);
+			window.highlight(-1,  null);			// clear highlights
+			window.selectMode(MapWindow.Selection.ANY); 	// clear selections
+			window.removeMapListener(this);
 			this.dispose();
 			WorldBuilder.activeDialog = false;
 		}

@@ -156,7 +156,7 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			}
 				
 			// and enable the next selection
-			map.window.selectMode(MapWindow.Selection.POINT);
+			window.selectMode(MapWindow.Selection.POINT);
 			return true;
 		}
 		

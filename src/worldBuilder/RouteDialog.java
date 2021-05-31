@@ -11,6 +11,7 @@ import javax.swing.event.*;
 public class RouteDialog extends JFrame implements ActionListener, ChangeListener, MapListener, KeyListener, WindowListener {	
 	
 	private Map map;
+	private MapWindow window;
 	private TerritoryEngine te;
 	private Parameters parms;
 	
@@ -50,6 +51,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 	public RouteDialog(Map map)  {
 		// pick up references
 		this.map = map;
+		this.window = map.window;
 		te = new TerritoryEngine(map);
 		this.parms = Parameters.getInstance();
 	
@@ -210,15 +212,15 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
 		automatic.addActionListener(this);
-		map.window.addMapListener(this);
-		map.window.addKeyListener(this);
+		window.addMapListener(this);
+		window.addKeyListener(this);
 		addKeyListener(this);
 
-		map.window.requestFocus();
+		window.requestFocus();
 		
 		// set us up for line selection
-		map.window.selectMode(MapWindow.Selection.LINE);
-		map.window.checkSelection(MapWindow.Selection.LINE);
+		window.selectMode(MapWindow.Selection.LINE);
+		window.checkSelection(MapWindow.Selection.LINE);
 	}
 	
 	/**
@@ -248,7 +250,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 			last_start = -1;
 			last_end = -1;
 		}
-		map.window.requestFocus();
+		window.requestFocus();
 		return true;
 	}
 
@@ -268,7 +270,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 			if (added != null)
 				travel_time.setText(String.format("%.1f days", added.cost));
 		}
-		map.window.repaint();
+		window.repaint();
 		manual_changes = true;
 	}
 	
@@ -280,7 +282,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 		set_parameters();
 		te.allCities();
 		auto_changes = true;
-		map.window.repaint();
+		window.repaint();
 	}
 	
 	/**
@@ -300,7 +302,7 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 				auto_route();
 			if (manual_changes)
 				manual_route();
-			map.window.requestFocus();
+			window.requestFocus();
 	}
 	
 	/**
@@ -312,10 +314,10 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 			te.abort();
 		
 		// un-register our listeners and end the dialog
-		map.window.selectMode(MapWindow.Selection.NONE);
-		map.window.removeMapListener(this);
-		map.window.removeKeyListener(this);
-		map.window.selectMode(MapWindow.Selection.ANY);
+		window.selectMode(MapWindow.Selection.NONE);
+		window.removeMapListener(this);
+		window.removeKeyListener(this);
+		window.selectMode(MapWindow.Selection.ANY);
 		this.dispose();
 		WorldBuilder.activeDialog = false;
 	}
@@ -340,18 +342,18 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 			// cancel the last updates
 			if (manual_changes || auto_changes) {
 				te.abort();
-				map.window.repaint();
+				window.repaint();
 				manual_changes = false;
 				auto_changes = false;
 			}
 			
 			// undo the last region selection
-			map.window.selectMode(MapWindow.Selection.NONE);
-			map.window.selectMode(MapWindow.Selection.LINE);
+			window.selectMode(MapWindow.Selection.NONE);
+			window.selectMode(MapWindow.Selection.LINE);
 			last_start = -1;
 			last_end = -1;
 		}
-		map.window.requestFocus();
+		window.requestFocus();
 	}
 
 	/**
@@ -364,11 +366,11 @@ public class RouteDialog extends JFrame implements ActionListener, ChangeListene
 			te.commit();
 			auto_changes = false;
 			manual_changes = false;
-			map.window.requestFocus();
+			window.requestFocus();
 		} else if (e.getSource() == automatic) {
 			te.abort();
 			auto_route();
-			map.window.requestFocus();
+			window.requestFocus();
 		}
 	}
 	

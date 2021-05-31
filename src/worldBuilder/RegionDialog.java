@@ -9,6 +9,7 @@ import javax.swing.*;
  */
 public class RegionDialog extends JFrame implements ActionListener, MapListener, WindowListener {	
 	private Map map;
+	private MapWindow window;
 	private Parameters parms;
 	
 	private JLabel sel_center;
@@ -34,6 +35,7 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 	public RegionDialog(Map map)  {
 		// pick up references
 		this.map = map;
+		this.window = map.window;
 		this.parms = Parameters.getInstance();
 		
 		// create the dialog box
@@ -131,10 +133,10 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 		// add the action listeners
 		accept.addActionListener(this);
 		cancel.addActionListener(this);
-		map.window.addMapListener(this);
+		window.addMapListener(this);
 		
-		map.window.selectMode(MapWindow.Selection.SQUARE);
-		selected = map.window.checkSelection(MapWindow.Selection.SQUARE);
+		window.selectMode(MapWindow.Selection.SQUARE);
+		selected = window.checkSelection(MapWindow.Selection.SQUARE);
 	}
 
 	/**
@@ -172,8 +174,8 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 	 * Window Close event handler ... implicit CANCEL
 	 */
 	public void windowClosing(WindowEvent e) {
-		map.window.selectMode(MapWindow.Selection.ANY);
-		map.window.removeMapListener(this);
+		window.selectMode(MapWindow.Selection.ANY);
+		window.removeMapListener(this);
 		this.dispose();
 	}
 
@@ -202,7 +204,7 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 		}
 		
 		// clear the selection
-		map.window.selectMode(MapWindow.Selection.ANY);
+		window.selectMode(MapWindow.Selection.ANY);
 		
 		// discard the dialog
 		this.dispose();

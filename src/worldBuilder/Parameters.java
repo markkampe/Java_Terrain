@@ -31,6 +31,7 @@ public class Parameters {
 	/** project export dir	*/	public String project_dir = null;
 	/** simple export dir	*/	public String export_dir = null;
 	/** world open/save dir	*/	public String world_dir = ".";
+	/** map/preview icons	*/	public String icon_dir = "/icons";
 	
 	private static final String DEFAULT_CONFIG = "/Templates/worldBuilder.json";
 
@@ -391,6 +392,9 @@ public class Parameters {
 				case "minerals":
 					mineral_rules = parser.getString();
 					break;
+				case "icons":
+					icon_dir = parser.getString();
+					break;
 				case "outline":
 					String s = parser.getString();
 					if (s.equals("square"))
@@ -609,6 +613,7 @@ public class Parameters {
 				System.out.println("               overlays:  " + overlay_objects);
 			System.out.println("   warnings:   tiles=" + tiles_max);
 
+			System.out.println("   icons:      " + icon_dir);
 			System.out.println("   verbosity:  " + debug_level);
 		}
 	}

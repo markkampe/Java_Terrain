@@ -56,8 +56,6 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 	private static final int TOPO_CELL = 5;		// pixels/topographic cell
 												// CODE DEPENDS ON THIS CONSTANT
 	
-	private static final String DEFAULT_ICONS = "/icons";
-	
 	private Dimension size;
 	
 	// displayed window offset and size
@@ -114,10 +112,10 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 		for(int i = 0; i < CityDialog.typeList.length; i++) {
 			String filename = CityDialog.typeList[i] + ".bmp";
 			try {
-				if (filename.charAt(0) == '/') {	// XXX add icons path to config file
+				if (filename.charAt(0) == '/') {
 					iconImages[i] = ImageIO.read(new File(filename));
 				} else {
-					InputStream s = getClass().getResourceAsStream(DEFAULT_ICONS + "/" + filename);
+					InputStream s = getClass().getResourceAsStream(parms.icon_dir + "/" + filename);
 					if (s == null)
 						throw new IOException("not available to class loader");
 					else

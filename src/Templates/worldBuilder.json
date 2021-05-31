@@ -79,5 +79,6 @@
     	"map_name": "Map001",
     	"rules": [ "Overworld.json", "Outside.json" ],
 		"objects": "Overlay_objects.json"
-    }
+    },
+    "icons": "/icons"
 }

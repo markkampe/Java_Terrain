@@ -11,8 +11,6 @@ import javax.imageio.ImageIO;
  */
 public class OverlayRule extends ResourceRule {
 	
-	private static final String DEFAULT_ICONS = "/icons";
-
 	/** RPGMaker tile set	*/
 	public static int tile_size;
 	/** dimensions (if this is a stamp)	*/
@@ -56,6 +54,7 @@ public class OverlayRule extends ResourceRule {
 	 */
 	public OverlayRule factory(String name) {
 		OverlayRule newRule = new OverlayRule(name);
+		Parameters parms = Parameters.getInstance();
 		
 		// copy extended attributes into the new rule
 		newRule.height = n_height;
@@ -70,7 +69,7 @@ public class OverlayRule extends ResourceRule {
 			String icon_file = n_icon_file;
 			try {
 				if (n_icon_file.charAt(0) != '/') {
-					icon_file = DEFAULT_ICONS + "/" + n_icon_file;
+					icon_file = parms.icon_dir + "/" + n_icon_file;
 					InputStream s = getClass().getResourceAsStream(icon_file);
 					if (s != null)
 						newRule.icon = ImageIO.read(s);

@@ -14,6 +14,8 @@ FINE = ../src/Templates/default_4096.json
 
 all:	load_save sealevel attributes mountains waterflow
 
+exports: raw_json overworld outside foundation object
+
 #
 # load a complex (uses all the features) map and then save it ... 
 #   the output should be identical to input
@@ -286,7 +288,7 @@ overworld: $(JAR)
 		echo "... $@: /tmp/$@.json does not match expected (overworld_test.json)";\
 		false;				\
 	else					\
-		echo "... all rivers, erosion and deposition as expected (overworld_test.json)";\
+		echo "... all tile placements as expected (overworld_test.json)";\
 		rm -f /tmp/$@ /tmp/$@.json;	\
 	fi
 	
@@ -303,7 +305,7 @@ outside: $(JAR)
 		echo "... $@: /tmp/$@.json does not match expected (outside_test.json)";\
 		false;				\
 	else					\
-		echo "... all rivers, erosion and deposition as expected (outside_test.json)";\
+		echo "... all tile placements as expected (outside_test.json)";\
 		rm -f /tmp/$@ /tmp/$@.json;	\
 	fi
 	
@@ -328,6 +330,6 @@ object: $(JAR)
 		echo "... $@: /tmp/$@.json does not match expected (object_test.json)";\
 		false;				\
 	else					\
-		echo "... all rivers, erosion and deposition as expected (object_test.json)";\
+		echo "... all heights, depths, and overlays as expected (object_test.json)";\
 		rm -f /tmp/$@ /tmp/$@.json;	\
 	fi

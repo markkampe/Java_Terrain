@@ -21,7 +21,7 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		private static final Color SELECTED_COLOR = Color.MAGENTA;
 
 		private JMenu typeMenu;
-		private JLabel type;
+		private JTextField type;
 		private JTextField name;
 		private JLabel lat;
 		private JLabel lon;
@@ -56,13 +56,15 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			// type selection menu
 			JMenuBar bar = new JMenuBar();
 			typeMenu = new JMenu("type");
-			typeMenu.add("none");
-			typeMenuItems = new JMenuItem[typeList.length];
+			typeMenuItems = new JMenuItem[typeList.length+1];
 			for(int i = 0; i < typeList.length; i++) {
 				typeMenuItems[i] = new JMenuItem(typeList[i]);
 				typeMenu.add(typeMenuItems[i]);
 				typeMenuItems[i].addActionListener(this);
 			}
+			typeMenuItems[typeList.length] = new JMenuItem("custom");
+			typeMenu.add(typeMenuItems[typeList.length]);
+			typeMenuItems[typeList.length].addActionListener(this);
 			bar.add(typeMenu);
 
 			JPanel info = new JPanel();
@@ -76,7 +78,7 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 			l.setFont(fontSmall);
 			info.add(l);
 			// second row: data fields
-			type = new JLabel("");
+			type = new JTextField("");
 			info.add(type);
 			lat = new JLabel("");
 			info.add(lat);
@@ -252,9 +254,11 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 				deletePoint();
 			} else {
 				type.setText("");
+				type.setEditable(true);
 				for(int i = 0; i < typeList.length; i++)
 					if (e.getSource() == typeMenuItems[i]) {
 						type.setText(typeList[i]);
+						type.setEditable(false);
 						break;
 					}
 			}

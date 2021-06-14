@@ -184,8 +184,11 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == accept && selected) {
+			// create the new sub-region
+			SubRegion s = new SubRegion((int) pointsChooser.getSelectedItem());
+			s.newMap(map);
+			
 			// update the world location and size
-			map.isSubRegion = false;		// leave location editing enabled	
 			parms.xy_range = (int) ((x_km >= y_km) ? x_km : y_km);
 			parms.latitude = lat;
 			parms.longitude = lon;
@@ -195,12 +198,14 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 			
 			// create a new map for the chosen subset
 			int points = (int) pointsChooser.getSelectedItem();
-			if (parms.debug_level > 0)
+			if (parms.debug_level > 0) {
 				System.out.println("Expand " + (int) x_km + Parameters.unit_xy +
 						" sub-region around <" + 
 						String.format("%.6f", lat) + "," + String.format("%.6f", lon) + 
 						"> to new " + points + " point mesh");
-			map.subregion(points);
+				parms.worldParms();
+				map.region_stats();
+			}
 		}
 		
 		// clear the selection

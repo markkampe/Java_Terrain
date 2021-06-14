@@ -418,7 +418,7 @@ public class Script {
 				break;
 				
 			case "region":	// region <x,y> name [description]
-			case "capitol":	// capitol <x1,y1> name [description]
+			case "capital":	// capital <x1,y1> name [description]
 			case "city":	// city <x1,y1> name [description]
 			case "town":	// town <x1,y1> name [description]
 			case "village":	// village <x1,y1> name [description]

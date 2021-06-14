@@ -79,7 +79,7 @@ public class TerritoryEngine {
 		for(int i = 0; i < n; i++) {
 			if (names[i] == null)
 				continue;
-			if (names[i].startsWith("capitol:") || names[i].startsWith("city:"))
+			if (names[i].startsWith("capital:") || names[i].startsWith("city:"))
 				startFrom(i);
 		}
 		

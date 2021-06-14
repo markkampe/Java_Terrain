@@ -3324,7 +3324,7 @@
         { "x": 0.0634611, "y": 0.1564157, "z": 0.233512387, "rain": "165.0cm/y" },
         { "x": 0.0713109, "y": 0.1551730, "z": 0.180524369, "rain": "50.0cm/y", "flora": "Brush" },
         { "x": -0.2329073, "y": -0.2515113, "z": -0.014343447, "rain": "95.0cm/y", "flora": "Grassland", "fauna": "Birds" },
-        { "x": -0.2318256, "y": -0.2398068, "z": -0.014276721, "rain": "95.0cm/y", "flora": "Grassland", "fauna": "Birds", "name": "capitol: Veruda - city of false dreams" },
+        { "x": -0.2318256, "y": -0.2398068, "z": -0.014276721, "rain": "95.0cm/y", "flora": "Grassland", "fauna": "Birds", "name": "capital: Veruda - city of false dreams" },
         { "x": 0.2649534, "y": 0.3232035, "z": 0.016324021, "rain": "65.0cm/y", "flora": "Brush" },
         { "x": 0.2677494, "y": 0.3220336, "z": 0.016496246, "rain": "65.0cm/y" },
         { "x": -0.4137887, "y": 0.0167985, "z": -0.069782291, "rain": "150.0cm/y" },

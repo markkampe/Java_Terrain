@@ -408,20 +408,13 @@ public class Script {
 				}
 				break;
 				
-			case "PoI":	// <x1,y1>-<x2,y2> type name
-				if (tokens[1] == null || tokens[2] == null || tokens[3] == null)
-					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. PoI <x,y> type name", filename, lineNum, line));
-				else {
-					XY_pos xy = position(tokens[1], "POI location");
-					map.addPOI(new POI(tokens[2], tokens[3], xy.x, xy.y));
-				}
-				break;
-				
 			case "region":	// region <x,y> name [description]
 			case "capital":	// capital <x1,y1> name [description]
 			case "city":	// city <x1,y1> name [description]
 			case "town":	// town <x1,y1> name [description]
 			case "village":	// village <x1,y1> name [description]
+			case "entrypoint":	// entrypoint <x1,y1> name [description]
+			case "exitpoint":	// exitpoint <x1,y1> name [description]
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. %s <x,y> name [description]", 
 										filename, lineNum, line, tokens[0]));

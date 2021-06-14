@@ -62,8 +62,6 @@ public class Map {
 	private double waterLevel[];// level of nearest water body
 	private LinkedList<TradeRoute> trade_routes;
 	
-	private LinkedList<POI> poi_list;	// list of points of interest
-	
 	/** results of hydrological computation	*/
 	public double max_height,		// maximum altitude (m MSL)
 				  min_height,		// minimum altitude (m MSL)
@@ -88,7 +86,7 @@ public class Map {
 	 * @param width
 	 *            ... preferred width (in pixels)
 	 * @param height
-	 *            ... perferred height 9in pixels)
+	 *            ... preferred height 9in pixels)
 	 */
 	public Map(int width, int height) {
 		this.parms = Parameters.getInstance();
@@ -238,24 +236,17 @@ public class Map {
 		int points = 0;				// number of points read	
 		
 		// per-point parameters we are looking for
-		double z = 0;
+		double x = 0, y = 0, z = 0;
 		double rain = 0;
 		int soil = 0;
 		int flora = 0;
 		int fauna = 0;
 		double influx = 0;
 		isSubRegion = false;
-		double x = 0;
-		double y = 0;
 		String name = null;
-		String poi_type = "";
-		String poi_name = "";
 		double route_cost = 0;
 		int num_steps = 0;
 		int[] route_steps = new int[MAX_STEPS];
-		
-		// reallocate this every time
-		this.poi_list = new LinkedList<POI>();
 		
 		while(parser.hasNext()) {
 			JsonParser.Event e = parser.next();
@@ -344,15 +335,8 @@ public class Map {
 						influx = new Double(s);
 						break;
 						
-					case "type":
-						poi_type = parser.getString();
-						break;
-						
 					case "name":
-						if (inPoIs)
-							poi_name = parser.getString();
-						else
-							name = parser.getString();
+						name = parser.getString();
 						break;
 					
 					// route attributes
@@ -443,6 +427,7 @@ public class Map {
 			case END_OBJECT:
 				if (inPoints) {
 					heightMap[points] = z;
+					ignore(x, y);		// not currently used
 					soilMap[points] = soil;
 					floraMap[points] = flora;
 					faunaMap[points] = fauna;
@@ -450,8 +435,6 @@ public class Map {
 					incoming[points] = influx;
 					nameMap[points] = name;
 					points++;
-				} else if (inPoIs) {
-					poi_list.add(new POI(poi_type, poi_name, x, y));
 				} else if (inRoutes) {
 					TradeRoute route = new TradeRoute(route_steps, num_steps, route_cost);
 					if (trade_routes == null)
@@ -483,9 +466,6 @@ public class Map {
 					rain = 0;
 					z = 0.0;
 					name = null;
-				} else if (inPoIs) {
-					poi_name = "";
-					poi_type = "";
 				} else if (inRoutes) {
 					route_cost = 0;
 				}
@@ -557,7 +537,6 @@ public class Map {
 			final String M_format = "    \"map_name\": \"%s\",\n";
 			final String P_format = "    \"parent_name\": \"%s\",\n";
 			final String D_format = "    \"description\": \"%s\",\n";
-			final String I_FORMAT = "        { \"x\": %.7f, \"y\": %.7f, \"type\": \"%s\", \"name\": \"%s\" }";
 			final String C_FORMAT = "        { \"cost\": %.1f,\n";
 			final String R_FORMAT = "          \"steps\": [ ";
 			final int STEPS_PER_LINE = 12;
@@ -583,18 +562,6 @@ public class Map {
 			
 			if (parms.description != "")
 				output.write(String.format(D_format,  parms.description));
-			
-			// write out the points of interest
-			if (poi_list.size() > 0) {
-				output.write( "    \"pois\": [" );
-				int numPoints = 0;
-				for(Iterator<POI> it = poi_list.iterator(); it.hasNext();) {
-					POI point = it.next();
-					output.write((numPoints++ == 0) ? "\n" : ",\n");
-					output.write(String.format(I_FORMAT, point.x, point.y, point.type, point.name ));
-				}
-				output.write("\n    ],\n");
-			}
 			
 			// write out the trade routes
 			if (trade_routes != null && trade_routes.size() > 0) {
@@ -708,7 +675,6 @@ public class Map {
 			
 			this.incoming = new double[mesh.vertices.length];
 			this.nameMap = new String[mesh.vertices.length];
-			this.poi_list = new LinkedList<POI>();
 			this.drainage = new Drainage(this);
 			this.waterflow = new WaterFlow(this);
 		} else {
@@ -722,7 +688,6 @@ public class Map {
 			this.faunaMap = null;
 			this.incoming = null;
 			this.nameMap = null;
-			this.poi_list = null;
 			this.drainage = null;
 			this.waterflow = null;
 		}
@@ -1014,25 +979,6 @@ public class Map {
 		nameMap[p.index] = name;
 	}
 	
-	/**
-	 * return the list of Points of Interest
-	 */
-	public LinkedList<POI> getPOI() {
-		return poi_list;
-	}
-	
-	/**
-	 * add a POI
-	 * @param point new POI to be added
-	 */
-	public void addPOI(POI point) {
-		poi_list.add(point);
-		if (parms.debug_level > 0)
-			System.out.println(String.format("POI: %s(%s) at <%.6f,%.6f>",
-							point.type, point.name,
-							parms.latitude(point.y), parms.longitude(point.x)));
-	}
-	
 	/*
 	 * these arrays are regularly re-calculated from height/rain
 	 * and so do not need to be explicitly SET
@@ -1068,4 +1014,7 @@ public class Map {
 	 * return reference to the Drainage calculator
 	 */
 	public Drainage getDrainage() { return drainage; }
+	
+	/* turn-off unused variable warnings */
+	private void ignore(double x, double y) {}
 }

@@ -1,8 +1,6 @@
 package worldBuilder;
 
 import java.awt.event.*;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 import javax.swing.JFileChooser;
 
@@ -95,34 +93,35 @@ public class FoundationExport extends ExportBase implements ActionListener {
 		}
 		if (!exported) {
 			export(exporter);
-		
-			// see if there are any defined entry/exit points inside our export
-			LinkedList<POI> interest = map.getPOI();
-			if (interest != null) {
-				Point[] entrypoints = new Point[FoundExporter.MAX_PORTS];
-				Point[] exitpoints = new Point[FoundExporter.MAX_PORTS];
-				int entrances = 0;
-				int exits = 0;
-				for(Iterator<POI> it = interest.iterator(); it.hasNext();) {
-					POI poi = it.next();
-					if (poi == null)
-						continue; 
-					
-					// make sure it is inside the box
-					if (poi.x < box_x || poi.y < box_y)
-						continue;
-					if (poi.x > box_x + box_width || poi.y > box_y + box_height)
-						continue;
-					if (poi.type.equals("ENTRY") && entrances < entrypoints.length)
-						entrypoints[entrances++] = new Point(poi.x, poi.y);
-					else if (poi.type.equals("EXIT") && exits < exitpoints.length)
-						exitpoints[exits++] = new Point(poi.x, poi.y);
+			
+			// look for designated entry and exit points
+			Point[] entrypoints = new Point[FoundExporter.MAX_PORTS];
+			Point[] exitpoints = new Point[FoundExporter.MAX_PORTS];
+			int entrances = 0;
+			int exits = 0;
+			String[] names = map.getNameMap();
+			for(int i = 0; i < map.mesh.vertices.length; i++) {
+				// make sure this is a named point within the box
+				if (names[i] == null)
+					continue;
+				MeshPoint p = map.mesh.vertices[i];
+				if (p.x < box_x || p.y < box_y)
+					continue;
+				if (p.x >= box_x + box_width || p.y >= box_y + box_height)
+					continue;
+				
+				// see if it is an entry or exit point
+				String type = CityDialog.lexType(names[i]);
+				if (type.equals("entrypoint")) {
+					entrypoints[entrances++] = new Point(p.x, p.y);
+				} else if (type.equals("exitpoint")) {
+					exitpoints[exits++] = new Point(p.x, p.y);
 				}
-				// pass them to the exporter
-				for(int i = 0; i < entrances && i < exits; i++)
-					exporter.entryPoint(entrypoints[i].col, entrypoints[i].row, 
-										exitpoints[i].col, exitpoints[i].row);
 			}
+			// pass them to the exporter
+			for(int i = 0; i < entrances && i < exits; i++)
+				exporter.entryPoint(entrypoints[i].col, entrypoints[i].row, 
+									exitpoints[i].col, exitpoints[i].row);
 
 			exported = true;
 		}

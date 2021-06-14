@@ -5,13 +5,6 @@
     "scale": { "xy_range": "200km", "z_range": "5000m" },
     "sealevel": "-159m",
     "description": "where dreams come true",
-    "pois": [
-        { "x": -0.3575620, "y": -0.2309035, "type": "ENTRY", "name": "Veruda Hagen (north)" },
-        { "x": -0.3527880, "y": -0.2167110, "type": "EXIT", "name": "Veruda Hagen (south)" },
-        { "x": -0.3637000, "y": -0.2545578, "type": "PORT", "name": "Veruda Lagoon" },
-        { "x": -0.3810910, "y": -0.1310826, "type": "Lighthouse", "name": "Point Leopold" },
-        { "x": -0.2313920, "y": -0.2422576, "type": "Fort", "name": "Fort Kess" }
-    ],
     "routes": [
         { "cost": 0.7,
           "steps": [ 7545, 5493, 5494, 5486, 1573, 2190 ] },

@@ -88,12 +88,12 @@ fauna	<0.1,0.1>-<0.2,0.2>	// auto placement
 //sleep 5
 
 # points of interest
-PoI		<-0.1,-0.1>	ENTRY "Plymouth Harbor"
-PoI		<0.1,-0.1>	EXIT "Plymouth Gate"
 capital		<0.0,-0.2>	Veruda
 city		<0.15,-0.15>	"Port Kess"
 town		<0.2,-0.1>	"Simpleton"
 village		<0.25,-0.05>	BoonieVille "just like it sounds"
+entrypoint	<-0.017,-0.008>	"Veruda River"
+exitpoint	<0.069,0.017>	"Kess Fork"
 
 export <-0.1,-0.1>-<0.1,0.1> /tmp/test.json raw 0.002
 //export <-0.1,-0.1>-<0.1,0.1> output.xxx overworld 200m

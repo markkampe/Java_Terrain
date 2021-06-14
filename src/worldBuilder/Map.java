@@ -95,101 +95,6 @@ public class Map {
 	}
 	
 	/**
-	 * create a new sub-region map
-	 * 
-	 * @param numpoints ... number of desired points in new Mesh
-	 */
-	public void subregion(int numpoints) {
-		// compute x/y coordinate translation coefficients
-		double xShift = window.map_x(window.sel_x0 + (window.sel_width/2));
-		double yShift = window.map_y(window.sel_y0 + (window.sel_height/2));
-		double xScale = Parameters.x_extent/window.map_width(window.sel_width);
-		double yScale = Parameters.y_extent/window.map_height(window.sel_height);
-		
-		// generate a new mesh, w/requested number of points, where the
-		Mesh newMesh = new Mesh();
-		MeshPoint[] points = newMesh.makePoints(numpoints);
-		newMesh.makeMesh(points);
-		
-		// allocate new attribute maps
-		int newlen = newMesh.vertices.length;
-		double[] h = new double[newlen];	// height map
-		double[] e = new double[newlen];	// erosion map
-		double[] r = new double[newlen];	// rain map
-		double[] m = new double[newlen];	// soil/mineral map
-		double[] f = new double[newlen];	// flora map
-		double[] a = new double[newlen];	// fauna map
-		double[] w = new double[newlen];	// incoming map
-		String[] n = new String[newlen];	// name Map
-
-		// interpolate per-point attributes for each mesh point
-		for(int i = 0; i < newlen; i++) {
-			// find the corresponding previous-map coordinates
-			double x = (newMesh.vertices[i].x/xScale) + xShift;
-			double y = (newMesh.vertices[i].y/yScale) + yShift;
-			
-			// find surrounding points from the previous map
-			Vicinity poly = new Polygon(mesh, x, y);
-
-			// interpolate values for height, rain, minerals, flora, fauna
-			h[i] = poly.interpolate(heightMap);
-			e[i] = poly.interpolate(erodeMap);
-			r[i] = poly.interpolate(rainMap);
-			m[i] = poly.nearest(soilMap);
-			f[i] = poly.nearest(floraMap);
-			a[i] = poly.nearest(faunaMap);
-		}
-		
-		// reproduce all cities and water flows INTO the new sub-region
-		for (int i = 0; i < mesh.vertices.length; i++) {
-			MeshPoint p = mesh.vertices[i];
-			if (window.inTheBox(p.x, p.y)) {
-				// copy name attributes to nearest point in new mesh
-				if (nameMap[i] != null) {
-					double x = (p.x - xShift) * xScale;
-					double y = (p.y - yShift) * yScale;
-					MeshPoint p2 = newMesh.choosePoint(x, y);
-					n[p2.index] = nameMap[i];
-				}
-				// find all water flows ENTERING the box from outside
-				for (int j = 0; j < mesh.vertices.length; j++) {
-					MeshPoint p2 = mesh.vertices[j];
-					if (drainage.downHill[j] == i && !window.inTheBox(p2.x, p2.y)) {
-						// we found a point of water entry into the box
-						// find the closest point (in new mesh) to the source
-						double x = (p2.x - xShift) * xScale;
-						double y = (p2.y - yShift) * yScale;
-						MeshPoint p3 = newMesh.choosePoint(x,y);
-						w[p3.index] += fluxMap[p2.index];
-						p3.immutable = true;
-					}
-				}
-			}
-		}
-		
-		// install and attribute the new mesh
-		setMesh(newMesh);
-		rainMap = r;
-		soilMap = m;
-		floraMap = f;
-		faunaMap = a;
-		erodeMap = e;
-		incoming = w;
-		heightMap = h;
-		nameMap = n;
-		
-		// instantiate hydrology engine, recompute drainage and water flow
-		drainage = new Drainage(this);
-		waterflow = new WaterFlow(this);
-		
-		if (parms.debug_level > 0) {
-			parms.worldParms();
-			region_stats();
-		}
-	}
-	
-	
-	/**
 	 * read a saved map in from a file
 	 * 
 	 * @param filename - of input file
@@ -713,6 +618,10 @@ public class Map {
 		window.repaint();
 		
 		return old;
+	}
+	
+	public void setErodeMap(double[] newErode) {
+		erodeMap = newErode;
 	}
 	
 	/**

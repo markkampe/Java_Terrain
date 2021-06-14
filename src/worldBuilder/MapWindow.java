@@ -129,6 +129,9 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 	
 	public void newMesh(Mesh mesh) {
 		this.mesh = mesh;
+		this.poly_map = null;
+		this.tileDepth = null;
+		this.tileHeight = null;
 		if (this.mesh != null)
 			this.highLights = new Color[mesh.vertices.length];
 	}

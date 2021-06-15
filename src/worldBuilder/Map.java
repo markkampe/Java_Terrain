@@ -582,6 +582,7 @@ public class Map {
 			this.nameMap = new String[mesh.vertices.length];
 			this.drainage = new Drainage(this);
 			this.waterflow = new WaterFlow(this);
+			this.trade_routes = new LinkedList<TradeRoute>();
 		} else {
 			this.heightMap = null;
 			this.rainMap = null;
@@ -595,6 +596,7 @@ public class Map {
 			this.nameMap = null;
 			this.drainage = null;
 			this.waterflow = null;
+			this.trade_routes = null;
 		}
 		window.newMesh(mesh);
 		window.repaint();

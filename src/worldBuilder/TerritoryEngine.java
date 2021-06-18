@@ -216,6 +216,8 @@ public class TerritoryEngine {
 		if (flux > 0)
 			minutes += Math.sqrt(flux) * time_cross;
 		
+		if (parms.debug_level > TERRITORY_DEBUG)
+			System.out.println(String.format("    %d->%d: dX=%.3f, dZ=%.3f, flux=%.3f -> %.1f min", from, to, dX, dZ, flux, minutes));
 		return minutes / travel_day;
 	}
 	

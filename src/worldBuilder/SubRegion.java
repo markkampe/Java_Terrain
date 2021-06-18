@@ -141,11 +141,20 @@ public class SubRegion {
 					y = (last.y - yShift) * yScale;	// new Map y coordinate
 					MeshPoint p2 = newMesh.choosePoint(x, y);
 					
-					// create a TradeROute between those two points
-					te.startFrom(p1.index);
-					te.startFrom(p2.index);
+					// note the start/end points (one of which may be the ocean)
+					boolean ocean_ok = false;
+					if (map.getDrainage().oceanic[p1.index])
+						ocean_ok = true;
+					else
+						te.startFrom(p1.index);
+					if (map.getDrainage().oceanic[p2.index])
+						ocean_ok = true;
+					else
+						te.startFrom(p2.index);
+					
+					// create a TradeRoute between those two points
 					te.reset();
-					TradeRoute newRoute = te.outwards(1,  false);
+					TradeRoute newRoute = te.outwards(1,  ocean_ok);
 					if (newRoute != null)
 						newTrade.add(newRoute);
 				}

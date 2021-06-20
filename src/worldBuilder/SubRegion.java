@@ -6,6 +6,8 @@ import java.util.LinkedList;
 public class SubRegion {
 	private Mesh newMesh;
 	
+	private static final int INFLUX_DEBUG = 2;
+	
 	public SubRegion(int numPoints) {
 		// create a new mesh
 		newMesh = new Mesh();
@@ -14,6 +16,7 @@ public class SubRegion {
 	}
 	
 	public boolean newMap(Map map) {
+		Parameters parms = Parameters.getInstance();
 		MapWindow window = map.window;
 		Mesh oldMesh = map.mesh;
 		double[] heightMap = map.getHeightMap();
@@ -80,6 +83,8 @@ public class SubRegion {
 			double y = (p2.y - yShift) * yScale;	// new Map y coordinate
 			MeshPoint p3 = newMesh.choosePoint(x, y);
 			w[p3.index] += fluxMap[i];
+			if (parms.debug_level >= INFLUX_DEBUG)
+				System.out.println(String.format("... incoming[%d] += %.4f", p3.index, fluxMap[i]));
 		}
 		
 		
@@ -141,7 +146,7 @@ public class SubRegion {
 					y = (last.y - yShift) * yScale;	// new Map y coordinate
 					MeshPoint p2 = newMesh.choosePoint(x, y);
 					
-					// note the start/end points (one of which may be the ocean)
+					// note the start/end points (one of which may be oceanic)
 					boolean ocean_ok = false;
 					if (map.getDrainage().oceanic[p1.index])
 						ocean_ok = true;

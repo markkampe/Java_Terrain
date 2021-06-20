@@ -543,7 +543,7 @@ public class Map {
 		int x = p.index;
 		if (heightMap[x] != 0)
 			output.write(String.format(", \"z\": %.9f", heightMap[x]));
-		output.write(String.format(", \"rain\": \"%.1f%s\"", rainMap[x], Parameters.unit_r));
+		output.write(String.format(", \"rain\": \"%.2f%s\"", rainMap[x], Parameters.unit_r));
 		if (soilMap[x] != 0)
 			output.write(String.format(", \"soil\": \"%s\"", rockNames[(int) Math.round(soilMap[x])]));
 		if (floraMap[x] != 0)
@@ -551,7 +551,7 @@ public class Map {
 		if (faunaMap[x] != 0)
 			output.write(String.format(", \"fauna\": \"%s\"", faunaNames[(int) Math.round(faunaMap[x])]));
 		if (incoming[x] != 0)
-			output.write(String.format(", \"influx\": \"%.2f%s\"", incoming[x], Parameters.unit_f));
+			output.write(String.format(", \"influx\": \"%.5f%s\"", incoming[x], Parameters.unit_f));
 		if (nameMap[x] != null)
 			output.write(String.format(", \"name\": \"%s\"",  nameMap[x]));
 		output.write(" }");

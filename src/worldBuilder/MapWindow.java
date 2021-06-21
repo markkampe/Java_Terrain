@@ -254,11 +254,11 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 			return false;
 		return true;
 	}
-	// FIX shouldn't need to expose sel_{x,y,width,height}
+
 	// description (screen coordinates) of the area to be highlighted
-	protected int sel_x0, sel_y0, sel_x1, sel_y1;	// line/rectangle ends
+	private int sel_x0, sel_y0, sel_x1, sel_y1;	// line/rectangle ends
 	private int x_start, y_start;		// where a drag started
-	protected int sel_height, sel_width;	// selected rectangle size
+	private int sel_height, sel_width;	// selected rectangle size
 	private int sel_radius;				// selected point indicator size
 	private boolean[] sel_points;		// which points are in selected group
 	

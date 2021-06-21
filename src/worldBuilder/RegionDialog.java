@@ -23,6 +23,8 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 	private double x_km, y_km;		// selection width/height (in km)
 	private double lat, lon;		// center of selected region
 	private boolean selected;		// a region has been selected
+	private double x0, y0;			// (map) <x,y> of upper left corner
+	private double width, height;	// (map) size of selected region
 	
 	// mesh points per sub-region
 	private static final int DEFAULT_POINTS = 1024;
@@ -159,6 +161,10 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 				dx = dy;
 		
 		// describe the selected area
+		x0 = mx0;
+		y0 = my0;
+		width = dx;
+		height = dy;
 		x_km = parms.km(dx);
 		y_km = parms.km(dy);
 		lat = parms.latitude(my0 + dy/2);
@@ -186,7 +192,7 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 		if (e.getSource() == accept && selected) {
 			// create the new sub-region
 			SubRegion s = new SubRegion((int) pointsChooser.getSelectedItem());
-			s.newMap(map);
+			s.newMap(map, x0, y0, width, height);
 			
 			// update the world location and size
 			parms.xy_range = (int) ((x_km >= y_km) ? x_km : y_km);

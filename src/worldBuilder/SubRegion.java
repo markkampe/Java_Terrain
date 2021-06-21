@@ -15,7 +15,17 @@ public class SubRegion {
 		newMesh.makeMesh(points);
 	}
 	
-	public boolean newMap(Map map) {
+	/**
+	 * instantiate a new sub-region 
+	 * @param map	parent map
+	 * @param x0	(map) upper-left corner of sub-region
+	 * @param y0	(map) upper-left corner of sub-region
+	 * @param width	(map) width of sub-region
+	 * @param height (,a[) height of sub-region
+	 * 
+	 * @return		success/failure
+	 */
+	public boolean newMap(Map map, double x0, double y0, double width, double height) {
 		Parameters parms = Parameters.getInstance();
 		MapWindow window = map.window;
 		Mesh oldMesh = map.mesh;
@@ -30,10 +40,10 @@ public class SubRegion {
 		LinkedList<TradeRoute> oldTrade = map.tradeRoutes();
 		
 		// compute x/y coordinate translation coefficients
-		double xShift = window.map_x(window.sel_x0 + (window.sel_width/2));
-		double yShift = window.map_y(window.sel_y0 + (window.sel_height/2));
-		double xScale = Parameters.x_extent/window.map_width(window.sel_width);
-		double yScale = Parameters.y_extent/window.map_height(window.sel_height);
+		double xShift = x0 + (width/2);
+		double yShift = y0 + (height/2);
+		double xScale = Parameters.x_extent/width;
+		double yScale = Parameters.y_extent/height;
 
 		// allocate new per-point attribute maps
 		int newlen = newMesh.vertices.length;

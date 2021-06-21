@@ -44,6 +44,7 @@ public class SubRegion {
 		double[] f = new double[newlen];	// flora map
 		double[] a = new double[newlen];	// fauna map
 		double[] w = new double[newlen];	// incoming water
+		double[] s = new double[newlen];	// incoming sediment
 
 		// interpolate per-point attributes for each mesh point
 		for(int i = 0; i < newlen; i++) {
@@ -83,8 +84,10 @@ public class SubRegion {
 			double y = (p2.y - yShift) * yScale;	// new Map y coordinate
 			MeshPoint p3 = newMesh.choosePoint(x, y);
 			w[p3.index] += fluxMap[i];
+			s[p3.index] = map.waterflow.suspended[i];
 			if (parms.debug_level >= INFLUX_DEBUG)
-				System.out.println(String.format("... incoming[%d] += %.4f", p3.index, fluxMap[i]));
+				System.out.println(String.format("... incoming[%d] += %.4f, susp += %.4f", 
+									p3.index, fluxMap[i], map.waterflow.suspended[i]));
 		}
 		
 		
@@ -96,9 +99,9 @@ public class SubRegion {
 		map.setFloraMap(f);
 		map.setFaunaMap(a);
 	
-		map.setErodeMap(e);		// FIX sub-region recomputed erosion/deposition differ
-		map.setIncoming(w);		// FIX sub-region recomputed minor streams differ
-								// FIX sub-region recomputed lake boundaries differ
+		map.setErodeMap(e);		// FIX post-create erode differs from save/restore
+		map.setSusp(s);			// FIX post-create susp differs from save/restore
+		map.setIncoming(w);		// FIX post-create flux differs from save/restore
 		
 		// these will force drainage and waterflow recomputation
 		map.setHeightMap(h);

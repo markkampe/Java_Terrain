@@ -51,12 +51,13 @@ public class Map {
 
 	// per MeshPoint information
 	private String nameMap[];	// name/description of each mesh POint
-	private double heightMap[]; // Height of each mesh point
+	private double heightMap[]; // Height of each mesh point (z)
 	private double soilMap[];	// Soil type of each mesh point
-	private double rainMap[];	// Rainfall of each mesh point
-	private double fluxMap[];	// Water flow through each point
+	private double rainMap[];	// Rainfall of each mesh point (cm/y)
+	private double fluxMap[];	// Water flow through each point (m^3/s)
 	private double erodeMap[];	// erosion/deposition
-	private double incoming[];	// incoming water from off-map
+	private double incoming[];	// incoming water from off-map (m^3/s)
+	private double suspMap[];	// incoming sediment from off-map (m^3/s)
 	private double floraMap[];	// assigned flora type
 	private double faunaMap[];	// assigned fauna type
 	private double waterLevel[];// level of nearest water body
@@ -147,6 +148,7 @@ public class Map {
 		int flora = 0;
 		int fauna = 0;
 		double influx = 0;
+		double suspended = 0;
 		isSubRegion = false;
 		String name = null;
 		double route_cost = 0;
@@ -238,6 +240,14 @@ public class Map {
 						if (u != -1)
 							s = s.substring(0, u);
 						influx = new Double(s);
+						break;
+						
+					case "suspended":
+						s = parser.getString();
+						u = s.indexOf(Parameters.unit_f);
+						if (u != -1)
+							s = s.substring(0, u);
+						suspended = new Double(s);
 						break;
 						
 					case "name":
@@ -338,6 +348,7 @@ public class Map {
 					faunaMap[points] = fauna;
 					rainMap[points] = rain;
 					incoming[points] = influx;
+					suspMap[points] = suspended;
 					nameMap[points] = name;
 					points++;
 				} else if (inRoutes) {
@@ -365,6 +376,7 @@ public class Map {
 			case START_OBJECT:
 				if (inPoints) {
 					influx = 0;
+					suspended = 0;
 					soil = 0;
 					flora = 0;
 					fauna = 0;
@@ -552,6 +564,8 @@ public class Map {
 			output.write(String.format(", \"fauna\": \"%s\"", faunaNames[(int) Math.round(faunaMap[x])]));
 		if (incoming[x] != 0)
 			output.write(String.format(", \"influx\": \"%.5f%s\"", incoming[x], Parameters.unit_f));
+		if (suspMap[x] != 0)
+			output.write(String.format(", \"suspended\": \"%.5f%s\"", suspMap[x], Parameters.unit_f));
 		if (nameMap[x] != null)
 			output.write(String.format(", \"name\": \"%s\"",  nameMap[x]));
 		output.write(" }");
@@ -579,6 +593,8 @@ public class Map {
 			this.faunaMap = new double[mesh.vertices.length];
 			
 			this.incoming = new double[mesh.vertices.length];
+			this.suspMap = new double[mesh.vertices.length];
+			
 			this.nameMap = new String[mesh.vertices.length];
 			this.drainage = new Drainage(this);
 			this.waterflow = new WaterFlow(this);
@@ -593,6 +609,7 @@ public class Map {
 			this.floraMap = null;
 			this.faunaMap = null;
 			this.incoming = null;
+			this.suspMap = null;
 			this.nameMap = null;
 			this.drainage = null;
 			this.waterflow = null;
@@ -679,6 +696,22 @@ public class Map {
 	 * return incoming off-map rivers
 	 */
 	public double[] getIncoming() { return incoming; }
+	
+	/**
+	 * update the suspended sediment after a change to the incoming arterial river
+	 * @param new_map new incoming flux per point
+	 */
+	public void setSusp(double[] new_map) {
+		suspMap = new_map;
+		waterflow.recompute();
+		window.newHeight();
+		window.repaint(); 
+	}
+	
+	/**
+	 * return incoming silt from off-map rivers
+	 */
+	public double[] getSusp() { return suspMap; }
 
 	
 	/**

@@ -76,6 +76,7 @@ public class WaterFlow {
 		// import the rainfall and arterial river influx
 		double[] rainMap = map.getRainMap();
 		double[] incoming = map.getIncoming();
+		double[] suspMap = map.getSusp();
 		double[] soilMap = map.getSoilMap();
 		double sea_level = map.getSeaLevel();
 		fluxMap = map.getFluxMap();
@@ -105,7 +106,7 @@ public class WaterFlow {
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			fluxMap[i] = 0.0;
 			removal[i] = 0.0;
-			suspended[i] = 0.0;
+			suspended[i] = suspMap[i];
 			velocityMap[i] = 0.0;
 			waterLevel[i] = drainage.oceanic[i] ? sea_level : UNKNOWN;
 		}

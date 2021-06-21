@@ -31,7 +31,7 @@
 		"sediment": 100
 	},
     "hydro-physics": {
-    	"Vmin": 0.002,
+		"Vmin": 0.002,
 		"Vd": 0.01,
 		"Ve": 0.40,
 		"Vmax": 3.0,
@@ -39,9 +39,7 @@
 		"Ce": 0.10,
 		"Cd": 0.05,
 		"Cs": 0.003,
-    	"Dp": 0.5,
-		"Edeg": 10,
-		"E35C": 100
+		"Dp": 0.5,
     },
     "map": {
 		"points": 4096,
@@ -54,30 +52,30 @@
 		"deep": 10
     },
     "display": {
-    	"mesh": false,
+		"mesh": false,
 		"topo": true,
 		"rain": false,
 		"water": true,
-    	"erosion": false,
+		"erosion": false,
 		"soil": false,
 		"hydro": false,
 		"flora": false
     },
     "traderoutes": {
-    	"flat km": 24,
+		"flat km": 24,
 		"climb 1000m": 250,
 		"cross 1m3/s": 60,
 		"min/day": 360,
 		"max days": 13.5
     },
     "resources": {
-    	"flora": "ecotopes.json",
+		"flora": "ecotopes.json",
 		"fauna": "faunatopes.json",
 		"minerals": "geotopes.json"
     },
     "export": {
-    	"map_name": "Map001",
-    	"rules": [ "Overworld.json", "Outside.json" ],
+		"map_name": "Map001",
+		"rules": [ "Overworld.json", "Outside.json" ],
 		"objects": "Overlay_objects.json"
     },
     "icons": "/icons"

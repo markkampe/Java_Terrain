@@ -277,19 +277,24 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		}
 	}
 	
-	/**
-	 * look for ENTER or ESC
+	/*
+	 * key events: ENTER, ESCAPE, ^A (select all)
 	 */
+	private static final int CTRL_A = 1;
+
 	public void keyTyped(KeyEvent e) {
 		int key = e.getKeyChar();
-		if (key == KeyEvent.VK_ENTER && changes_made)
+		if (key == KeyEvent.VK_ENTER && changes_made) {
 			acceptChanges();
-		else if (key == KeyEvent.VK_ESCAPE) {
+			changes_made = false;
+		} else if (key == KeyEvent.VK_ESCAPE) {
 			t.abort();
 			window.selectMode(MapWindow.Selection.NONE);	// undo current selection
 			window.selectMode(MapWindow.Selection.POINTS);
+			changes_made = false;
+		}  else if (key == CTRL_A) {
+			window.selectAll(true);
 		}
-		changes_made = false;
 	}
 
 	/**

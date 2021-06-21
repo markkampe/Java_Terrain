@@ -138,7 +138,6 @@ public class WaterFlow {
 			
 			// flux at this point is incoming + rain - evapotranspiration
 			double net = net_rain(rainMap[x], parms.altitude(heightMap[x]));
-			System.out.println(String.format("caller sees %.1f%s -> %.1f", rainMap[x], Parameters.unit_r, net, Parameters.unit_r) );
 			fluxMap[x] += incoming[x] + (rain_to_flow * net);
 			if (debug_log != null)
 				debug_log.write(String.format("x=%4d, i=%6.3f r:%.1f->%.1f, f=%6.3f/Y\n", 
@@ -477,7 +476,6 @@ public class WaterFlow {
 		double degC = parms.meanTemp() - (altitude * parms.lapse_rate);
 		double mm_per_month = parms.evt_mult * Math.log(degC) - parms.evt_base;
 		double cm_per_year = mm_per_month * 12 / 10;
-		System.out.println(String.format("%.1f%s @ %.1f%s loses %.1f%s", incoming, Parameters.unit_r, degC, Parameters.unit_t, cm_per_year, Parameters.unit_r));
 		if (cm_per_year >= incoming)
 			return 0.0;
 		else

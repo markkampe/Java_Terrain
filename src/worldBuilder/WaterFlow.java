@@ -61,11 +61,8 @@ public class WaterFlow {
 		this.erodeMap = map.getErodeMap();
 		this.downHill = drainage.downHill;
 		
-		// many square meters per (average) mesh point
-		area = 1000000 * (parms.xy_range * parms.xy_range) / mesh.vertices.length;
-		// how many M^3/s is 1cm of annual rainfall
-		rain_to_flow = .01 * area / YEAR;
 		
+	
 		// see if we are producing a debug log
 		if (parms.debug_level > HYDRO_DEBUG)
 			debug_log = new DebugLog("WaterFlow", DEBUG_LOG_FILE);
@@ -87,7 +84,22 @@ public class WaterFlow {
 		removal = new double[mesh.vertices.length];
 		suspended = new double[mesh.vertices.length];
 		velocityMap = new double[mesh.vertices.length];
-				
+		int net_zero = 0;
+		int examined = 0;
+		
+		// how many square meters per (average) mesh point
+		area = 1000000.0 * (parms.xy_range * parms.xy_range) / mesh.vertices.length;
+		// how many M^3/s is 1cm of annual rainfall
+		rain_to_flow = .01 * area / YEAR;
+		
+		String msg = String.format("world=%dx%d%s/%d points, 100%s rain -> %.4f%s (per point)", 
+									parms.xy_range, parms.xy_range, Parameters.unit_xy2, mesh.vertices.length,
+									Parameters.unit_r, 100 * rain_to_flow, Parameters.unit_f);
+		if (parms.debug_level > 1)
+			System.out.println("WaterFlow: " + msg);
+		if (debug_log != null)
+			debug_log.write("\nRECOMPUTE: " + msg + "\n");
+		
 		// 0. initialize our output maps to no flowing water or lakes
 		waterLevel = map.getWaterLevel();
 		for(int i = 0; i < mesh.vertices.length; i++) {
@@ -102,7 +114,7 @@ public class WaterFlow {
 		if (incoming == null && rainMap == null)
 			return;
 		
-		// pick up the erosion parameters
+		// pick up the erosion and evaporation parameters
 		double Ve = parms.Ve;		// erosion/deposition threshold
 		double Vmin = parms.Vmin;	// minimum velocity to carry sediment
 		double Smax = parms.Smax;	// maximum sediment per M^3 of water
@@ -116,30 +128,32 @@ public class WaterFlow {
 		map.max_rain = TOO_SMALL;
 		for(int i = 0; i < drainage.landPoints; i++) {
 			int x = drainage.byFlow[i];
+			examined++;
 
 			// keep track of min/max rainfall
 			if (rainMap[x] < map.min_rain)
 				map.min_rain = rainMap[x];
 			if (rainMap[x] > map.max_rain)
 				map.max_rain = rainMap[x];
-
-			// add incoming off-map rivers and rainfall to this point's flux
-			fluxMap[x] += incoming[x] + (rain_to_flow * rainMap[x]);
-		
-			// compute the soil evaporative loss
-			double lost = evaporation();
 			
-			// if loss exceeds incoming, net flux is zero
-			if (fluxMap[x] * YEAR <= lost) {
+			// flux at this point is incoming + rain - evapotranspiration
+			double net = net_rain(rainMap[x], parms.altitude(heightMap[x]));
+			System.out.println(String.format("caller sees %.1f%s -> %.1f", rainMap[x], Parameters.unit_r, net, Parameters.unit_r) );
+			fluxMap[x] += incoming[x] + (rain_to_flow * net);
+			if (debug_log != null)
+				debug_log.write(String.format("x=%4d, i=%6.3f r:%.1f->%.1f, f=%6.3f/Y\n", 
+												x, incoming[x], rainMap[x], net, 
+												fluxMap[x] * YEAR));
+			
+			// if there is no outgoing flux, we are done with this point
+			if (fluxMap[x] <= 0) {
 				fluxMap[x] = 0;
+				net_zero++;
 				continue;
 			}
-				
-			// net incoming is reduced by evaporative loss
-			fluxMap[x] -= lost / YEAR;
 			
 			// figure out what happens to the excess water
-			String msg = null;	// debug message string
+			msg = null;	// debug message string
 			int d = downHill[x];
 			if (d >= 0) {
 				// my net incoming flows to my downhill neightbor
@@ -200,8 +214,7 @@ public class WaterFlow {
 					erodeMap[x] -= parms.z(annual_sedimentation(x));
 					if (erodeMap[x] < -map.max_deposition)
 						map.max_deposition = -erodeMap[x];
-				} else
-					msg = null;	// no deposition or erosion
+				}
 			}
 			
 			// if this point is under water, figure out how deep
@@ -232,23 +245,31 @@ public class WaterFlow {
 				map.min_flux = fluxMap[x];
 		}
 		
-		// flush out any debugging info
-		if (debug_log != null)
-			debug_log.flush();
-		
 		// if there was no water flow, fix the Map min/max values
-		if (map.max_flux == TOO_SMALL)
-			map.max_flux = 0;
-		if (map.min_flux == TOO_BIG)
-			map.min_flux = 0;
-		if (map.min_velocity == TOO_BIG)
-			map.min_velocity = 0;
-		if (map.max_velocity == TOO_SMALL)
-			map.max_velocity = 0;
-		if (map.max_rain == TOO_SMALL)
-			map.max_rain = 0;
-		if (map.min_rain == TOO_BIG)
-			map.min_rain = 0;
+			if (map.max_flux == TOO_SMALL)
+				map.max_flux = 0;
+			if (map.min_flux == TOO_BIG)
+				map.min_flux = 0;
+			if (map.min_velocity == TOO_BIG)
+				map.min_velocity = 0;
+			if (map.max_velocity == TOO_SMALL)
+				map.max_velocity = 0;
+			if (map.max_rain == TOO_SMALL)
+				map.max_rain = 0;
+			if (map.min_rain == TOO_BIG)
+				map.min_rain = 0;
+			
+		// flush out any debugging info
+		if (debug_log != null) {
+			debug_log.write(String.format("Examined %d points, %d w/no eflux\n", examined, net_zero));
+			debug_log.write(String.format("  rain=%.5f-%.5f", map.min_rain, map.max_rain));
+			debug_log.write(String.format("  flux=%.5f-%.5f", map.min_flux, map.max_flux));
+			debug_log.write(String.format("  v=%.5f-%.5f", map.min_velocity, map.max_velocity));
+			
+			debug_log.flush();
+		}
+		
+		
 	}
 	
 	/**
@@ -441,19 +462,26 @@ public class WaterFlow {
 		return Math.sqrt(area / ratio);
 	}
 	
-	/*
-	 * returns fraction of soil-water lost over a year
+	/**
+	 * compute net incoming rainfall (after evapo-transpiration)
+	 * @param incoming (cm/y) rainfall
+	 * @param altitude (in meters) of the point in question
+	 * @return net incoming rainfall (after evapo-transpiration)
 	 * 
-	 * 	Note: I read a few articles and, finding them quite complex
-	 * 		  made up a formula that I fit to a few data
-	 * 		  points based on two plausible assumptions:
-	 * 			1. there is a half-time, during which 1/2 of the water evaporates
-	 * 			2. the half time decreases exponentially as the temperature rises
+	 * I was surprised to find numerous non-quantitative descriptions of
+	 * evapo-transpiration, but I did find this equation (in a paper
+	 * on the agricultural economic impact of climate change in the
+	 * Amenian Ararat valley).
 	 */
-	private double evaporation() {
-		double degC = parms.meanTemp();
-		double half_time = parms.E35C * Math.pow(2, (35-degC)/parms.Edeg);
-		return 1 - Math.pow(0.5, 365.25/half_time);
+	private double net_rain(double incoming, double altitude) {
+		double degC = parms.meanTemp() - (altitude * parms.lapse_rate);
+		double mm_per_month = parms.evt_mult * Math.log(degC) - parms.evt_base;
+		double cm_per_year = mm_per_month * 12 / 10;
+		System.out.println(String.format("%.1f%s @ %.1f%s loses %.1f%s", incoming, Parameters.unit_r, degC, Parameters.unit_t, cm_per_year, Parameters.unit_r));
+		if (cm_per_year >= incoming)
+			return 0.0;
+		else
+			return (cm_per_year > 0) ? incoming - cm_per_year : incoming;
 	}
 }
 

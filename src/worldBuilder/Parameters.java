@@ -187,6 +187,8 @@ public class Parameters {
 	public double evt_mult = 54.35;
 	/** evapo-transpiration base offset (see WaterFlow.net_rain)	*/
 	public double evt_base = 77.65;
+	/** evapo-transpiration scaling factor (see WaterFlow.net_rain)	*/
+	public double evt_scale = 1.0;
 
 	/** adiabatic lapse rate (degC/M): used to compute temperature changes associated w/altitude	*/
 	public double lapse_rate = 0.01;
@@ -501,6 +503,9 @@ public class Parameters {
 				case "evt_base": // evapo-transpiration offset
 					evt_base = new Double(parser.getString());
 					break;
+				case "EVT": 	// evapo-transpiration scaling factor
+					evt_scale = new Double(parser.getString());
+					break;
 				case "sediment": // sedimentary layer thickness
 					sediment = new Double(parser.getString());
 					break;
@@ -588,7 +593,8 @@ public class Parameters {
 					+ ", Vd=" + String.format("%.2f", Vd) + unit_v
 					+ ", Cd=" + String.format("%.2f",  Cd));
 			System.out.println("   rainfall:   " + "default=" + dAmount + unit_r
-					+ ", Dp=" + String.format("%.1f",  Dp) + unit_z);
+					+ ", Dp=" + String.format("%.1f",  Dp) + unit_z
+					+ ", evapo-transpiration=" + String.format("%.2f", evt_scale));
 			System.out.println("   mean temps: polar=" + Tmin + unit_t + ", equator=" + Tmax + unit_t);
 			System.out.println("   max ranges: " + diameter_max + unit_xy + ", altitude +/-" + alt_max + unit_z
 					+ ", msl +/-" + msl_range + unit_z);

@@ -476,7 +476,7 @@ public class WaterFlow {
 	private double net_rain(double incoming, double altitude) {
 		double degC = parms.meanTemp() - (altitude * parms.lapse_rate);
 		double mm_per_month = parms.evt_mult * Math.log(degC) - parms.evt_base;
-		double cm_per_year = mm_per_month * 12 / 10;
+		double cm_per_year = (mm_per_month/10) * 12 * parms.evt_scale;
 		if (cm_per_year >= incoming)
 			return 0.0;
 		else

@@ -13,6 +13,7 @@ public class RiverMap {
 	private MapWindow window;
 
 	private static final int WATER_DIM = 128;	// dimmest water
+	private static final int WATER_BRITE = 255;	// brightest water
 	
 	private Parameters parms;
 	
@@ -71,10 +72,16 @@ public class RiverMap {
 				int y2 = window.screen_y(mesh.vertices[d].y);
 				
 				// blue gets brighter, green dimmer w/increasing flow
-				double delta = (flux[i] - min_stream) * dBdF;
-				if (delta >= (255-WATER_DIM)) delta = (255-WATER_DIM);
-				double blue = WATER_DIM + delta;
-				double green = Math.max(0, WATER_DIM - delta);
+				double blue, green;
+				if (flux[i] < min_artery) {
+					double delta = (flux[i] - min_stream) * dBdF;
+					if (delta >= (WATER_BRITE-WATER_DIM)) delta = (WATER_BRITE-WATER_DIM);
+					blue = WATER_DIM + delta;
+					green = Math.max(0, WATER_DIM - delta);
+				} else {
+					blue = WATER_BRITE;
+					green = 0;
+				}
 				g.setColor(new Color(0, (int) green, (int) blue));
 				if (flux[i] < min_river)
 					g2.setStroke(new BasicStroke(1));

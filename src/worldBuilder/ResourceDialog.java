@@ -280,20 +280,27 @@ public class ResourceDialog extends JFrame implements ActionListener, ChangeList
 		a.abort();
 	}
 	
-	/**
-	 * ENTER/ESC for accept or undo
+	/*
+	 * key events: ENTER, ESCAPE, ^A (select all)
 	 */
+	private static final int CTRL_A = 1;
 	public void keyTyped(KeyEvent e) {
 		int key = e.getKeyChar();
-		if (key == KeyEvent.VK_ENTER)
+		if (key == KeyEvent.VK_ENTER) {
 			accept();
-		else if (key == KeyEvent.VK_ESCAPE)
+			window.selectMode(MapWindow.Selection.NONE);
+			whichPoints = null;
+			window.selectMode(MapWindow.Selection.POINTS);
+		} else if (key == KeyEvent.VK_ESCAPE) {
 			undo();
+			window.selectMode(MapWindow.Selection.NONE);
+			whichPoints = null;
+			window.selectMode(MapWindow.Selection.POINTS);
+		} else if (key == CTRL_A) {
+			window.selectAll(true);
+		}
 		
-		// clear the (just committed) selection
-		window.selectMode(MapWindow.Selection.NONE);
-		whichPoints = null;
-		window.selectMode(MapWindow.Selection.POINTS);
+		
 	}
 
 	/**

@@ -106,7 +106,6 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		window.addMapListener(this);
 		addKeyListener(this);
 		window.addKeyListener(this);
-		window.requestFocus();
 		
 		// initialize the rainfall to default values
 		rainFall(slider2rainfall(amount.getValue()));
@@ -115,6 +114,7 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 		window.addMapListener(this);	
 		window.selectMode(MapWindow.Selection.POINTS);
 		window.checkSelection(MapWindow.Selection.POINTS);
+		window.requestFocus();
 	}
 	
 	/**
@@ -198,25 +198,31 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			
 		if (complete)
 			rainFall(slider2rainfall(amount.getValue()));
+		window.requestFocus();
 		return true;
 	}
 	
-	/**
-	 * look for ENTER or ESC
+	/*
+	 * key events: ENTER, ESCAPE, ^A (select all)
 	 */
+	private static final int CTRL_A = 1;
+
 	public void keyTyped(KeyEvent e) {
 		int key = e.getKeyChar();
-		if (key == KeyEvent.VK_ENTER && changes_made)
+		if (key == KeyEvent.VK_ENTER && changes_made) {
 			a.commit();
-		else if (key == KeyEvent.VK_ESCAPE) {
+			changes_made = false;
+		} else if (key == KeyEvent.VK_ESCAPE) {
 			a.abort();
 			// and clear the current selection
 			window.selectMode(MapWindow.Selection.NONE);
 			window.selectMode(MapWindow.Selection.POINTS);
+			changes_made = false;
+		} else if (key == CTRL_A) {
+			window.selectAll(true);
 		}
-
-		changes_made = false;
 	}
+	
 	/**
 	 * unregister our map listener and close the dialog
 	 */
@@ -244,14 +250,13 @@ public class RainDialog extends JFrame implements ActionListener, ChangeListener
 			parms.dAmount = slider2rainfall(amount.getValue());
 		}
 	}
-	
+	/** (perfunctory) */ public void keyPressed(KeyEvent e) {}
+	/** (perfunctory) */ public void keyReleased(KeyEvent e) {}
 	/** (perfunctory) */ public boolean regionSelected(double mx0, double my0, double dx, double dy, boolean complete) {return false;}
 	/** (perfunctory) */ public boolean pointSelected(double x, double y) {return false;}
 	/** (perfunctory) */ public void mouseMoved(MouseEvent arg0) {}
 	/** (perfunctory) */ public void mouseEntered(MouseEvent arg0) {}
 	/** (perfunctory) */ public void mouseExited(MouseEvent arg0) {}
-	/** (perfunctory) */ public void keyPressed(KeyEvent arg0) {}
-	/** (perfunctory) */ public void keyReleased(KeyEvent arg0) {}
 	/** (perfunctory) */ public void windowActivated(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowClosed(WindowEvent arg0) {}
 	/** (perfunctory) */ public void windowDeactivated(WindowEvent arg0) {}

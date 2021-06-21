@@ -553,6 +553,26 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 	}
 	
 	/**
+	 * select/deselect the entire screen
+	 * @param on (boolean) select (vs unselect)
+	 */
+	public void selectAll(boolean on) {
+		// make sure we have a point selection map
+		if (sel_points == null)
+			sel_points = new boolean[mesh.vertices.length];
+		
+		// set the status of every point
+		for(int i = 0; i < sel_points.length; i++)
+			sel_points[i] = on;
+		sel_type = Selection.POINTS;
+		repaint();
+		
+		// inform the listener of this selection
+		if (listener != null && !listener.groupSelected(sel_points, true))
+			sel_type = Selection.NONE;
+	}
+	
+	/**
 	 * return whether or not Map coordinates are within a selected box
 	 */
 	public boolean inTheBox(double x, double y) {

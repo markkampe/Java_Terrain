@@ -183,10 +183,11 @@ public class Parameters {
 	 */
 	/** depth (m) of rain pentration into the soil (or how much water the soil can hold)	*/
 	public double Dp = 0.5;
-	/** transpiration half-time (days), time (at 35C) to evaporate half of the water		*/
-	public double E35C = 100;
-	/** evaporation vs temperature (degC) temperature reduction to halve evaporation rate	*/
-	public double Edeg = 10;
+	/** evapo-transpiration coefficient (see WaterFlow.net_rain)	*/
+	public double evt_mult = 54.35;
+	/** evapo-transpiration base offset (see WaterFlow.net_rain)	*/
+	public double evt_base = 77.65;
+
 	/** adiabatic lapse rate (degC/M): used to compute temperature changes associated w/altitude	*/
 	public double lapse_rate = 0.01;
 
@@ -494,11 +495,11 @@ public class Parameters {
 				case "Cs": // per-point silting coefficient
 					Cs = new Double(parser.getString());
 					break;
-				case "Edeg": // evaporation half-time doubling temp
-					Edeg = new Double(parser.getString());
+				case "evt_mult": // evapo-transpiration coefficient
+					evt_mult = new Double(parser.getString());
 					break;
-				case "E35C": // evaporation half-time for 35C
-					E35C = new Double(parser.getString());
+				case "evt_base": // evapo-transpiration offset
+					evt_base = new Double(parser.getString());
 					break;
 				case "sediment": // sedimentary layer thickness
 					sediment = new Double(parser.getString());

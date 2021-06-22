@@ -555,7 +555,7 @@ public class Map {
 		int x = p.index;
 		if (heightMap[x] != 0)
 			output.write(String.format(", \"z\": %.9f", heightMap[x]));
-		output.write(String.format(", \"rain\": \"%.2f%s\"", rainMap[x], Parameters.unit_r));
+		output.write(String.format(", \"rain\": \"%.1f%s\"", rainMap[x], Parameters.unit_r));
 		if (soilMap[x] != 0)
 			output.write(String.format(", \"soil\": \"%s\"", rockNames[(int) Math.round(soilMap[x])]));
 		if (floraMap[x] != 0)

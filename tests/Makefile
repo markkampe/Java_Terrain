@@ -218,6 +218,12 @@ attributes: $(JAR) attribute_test.json
 	fi
 
 #
+# add test cases to place cities and create trade routes
+#
+cities: $(JAR) city_test.json
+	exit -1
+
+#
 # this test case generates water flow from both rainfall and an arterial
 # river.  We expect to see more tributaries and flow in the center (where
 # the rainfall is heavier) and small lakes around the edges of the ridges

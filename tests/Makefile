@@ -171,26 +171,26 @@ attributes: $(JAR) attribute_test.json
 	@echo "minerals <0.4,0.0>-<0.5,0.1>	Gold"		>> /tmp/$@
 	@echo "region   <0.425,0.05>		Gold"		>> /tmp/$@
 	@echo "creating blocks of standard floral ecotopes ..."
-	@echo "flora    <-0.5,0.15>-<-0.4,0.25>	Alpine"		>> /tmp/$@
-	@echo "region   <-0.5,0.20>		Alpine"		>> /tmp/$@
+	@echo "flora    <-0.5,0.15>-<-0.4,0.25>	Tundra"		>> /tmp/$@
+	@echo "region   <-0.5,0.20>		Tundra"		>> /tmp/$@
 	@echo "flora    <-0.4,0.15>-<-0.3,0.25>	Desert"		>> /tmp/$@
 	@echo "region   <-0.4,0.20>		Desert"		>> /tmp/$@
 	@echo "flora    <-0.3,0.15>-<-0.2,0.25>	Grassland"	>> /tmp/$@
 	@echo "region   <-0.3,0.20>		Grassland"	>> /tmp/$@
-	@echo "flora    <-0.2,0.15>-<-0.1,0.25>	Brush"		>> /tmp/$@
-	@echo "region   <-0.175,0.17>		Brush"		>> /tmp/$@
+	@echo "flora    <-0.2,0.15>-<-0.1,0.25>	Shrubland"	>> /tmp/$@
+	@echo "region   <-0.175,0.17>		Shrubland"	>> /tmp/$@
 	@echo "flora    <-0.1,0.15>-<0.0,0.25>	Marsh"		>> /tmp/$@
 	@echo "region   <-0.1,0.17>		Marsh"		>> /tmp/$@
 	@echo "flora    <0.0,0.15>-<0.1,0.25>	Riperian"	>> /tmp/$@
 	@echo "region   <0.0,0.20>		Riperian"	>> /tmp/$@
-	@echo "flora    <0.1,0.15>-<0.2,0.25>	Palms"		>> /tmp/$@
-	@echo "region   <0.125,0.20>		Palms"		>> /tmp/$@
-	@echo "flora    <0.2,0.15>-<0.3,0.25>	Jungle"		>> /tmp/$@
-	@echo "region   <0.225,0.20>		Jungle"		>> /tmp/$@
-	@echo "flora    <0.3,0.15>-<0.4,0.25>	Broadleaf"	>> /tmp/$@
-	@echo "region   <0.3,0.20>		Broadleaf"	>> /tmp/$@
-	@echo "flora    <0.4,0.15>-<0.5,0.25>	Conifers"	>> /tmp/$@
-	@echo "region   <0.420,0.175>		Conifers"	>> /tmp/$@
+	@echo "flora    <0.1,0.15>-<0.2,0.25>	Tropical_Forest"	>> /tmp/$@
+	@echo "region   <0.125,0.20>		Tropical_Forest"	>> /tmp/$@
+	@echo "flora    <0.2,0.15>-<0.3,0.25>	Tropical_Rainforest"	>> /tmp/$@
+	@echo "region   <0.225,0.20>		Tropical_Rainforest"	>> /tmp/$@
+	@echo "flora    <0.3,0.15>-<0.4,0.25>	Temperate_Rainforest"	>> /tmp/$@
+	@echo "region   <0.3,0.20>		Temperate_Rainforest"	>> /tmp/$@
+	@echo "flora    <0.4,0.15>-<0.5,0.25>	Taiga"		>> /tmp/$@
+	@echo "region   <0.420,0.175>		Taiga"		>> /tmp/$@
 	@echo "creating blocks of standard fauna types ..."
 	@echo "fauna    <-0.5,0.3>-<-0.4,0.4>	Fish"		>> /tmp/$@
 	@echo "region   <-0.5,0.325>		Fish"		>> /tmp/$@
@@ -314,7 +314,7 @@ foundation: $(JAR)
 	@echo "loading a complex map and exporting it as Foundation"		> /tmp/$@
 	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
 	@echo "export <-0.1,-0.1>-<0.1,0.1> /tmp/Export.$@ foundation 200m"	>>/tmp/$@
-	@echo "exit 0"								>> /tmp/$@
+	@echo "exit 0"								>>/tmp/$@
 	@java -jar $(JAR) -s /tmp/$@
 	@echo "Region has been exported to /tmp/Export.$@"
 	

@@ -12,3 +12,5 @@ These are maps that Chris or I created in order to exercise the program or demon
    flora placement testing, I gave it a little more tilt, and then added graduated rainfall,
    followed by rule-based flora placement.  It is a more interesting version of the same
    terrain.
+ - **test_world_3.json**: adds cities, trade-routes, and includes a few other updates to
+   enable the testing of newer features.

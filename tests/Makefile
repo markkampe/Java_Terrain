@@ -302,7 +302,7 @@ overworld: $(JAR)
 outside: $(JAR)
 	@echo "loading a complex map and exporting it as RPGM.outside"		> /tmp/$@
 	@echo "load test_world_2.json"		>  /tmp/$@			>>/tmp/$@
-	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/$@.json outside 200m /home/git/Java_Terrain/src/Templates/Overworld.json"	>>/tmp/$@
+	@echo "export <-0.5,-0.3>-<-0.2,-0.1> /tmp/$@.json outside 200m /home/git/Java_Terrain/src/Templates/Outside.json"	>>/tmp/$@
 	@echo "exit 0"								>>/tmp/$@
 	@java -jar $(JAR) -s /tmp/$@
 	@cmp /tmp/$@.json outside_test.json;	\

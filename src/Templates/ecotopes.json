@@ -1,7 +1,7 @@
 { 
   "Default Floral Ecotopes": [
 	{ "//": "forests" },
-	{ "name": "Conifers",	"order": 2,
+	{ "name": "Taiga",	"order": 2,
 	  "class": "Tree",
 	  "alt":   { "min": 1500, "max": 2500 },
 	  "temp":  { "max": 25 },
@@ -10,7 +10,7 @@
 	   "bid": "tapered",
 	  "color": [0,102,51]
 	},
-	{ "name": "Broadleaf",	 "order": 2,
+	{ "name": "Temperate_Rainforest", "order": 2,
 	  "class": "Tree",
 	  "alt":   { "min": 500, "max": 2000 },
 	  "temp":  { "min": 0,   "max": 30 },
@@ -19,7 +19,7 @@
 	   "bid": "tapered",
 	  "color": [128,255,0]
 	},
-	{ "name": "Jungle",	"order": 2,
+	{ "name": "Tropical_Rainforest", "order": 2,
 	  "class": "Tree",
 	  "alt":   { "min": 0,  "max": 1000 },
 	  "temp":  { "min": 15 },
@@ -28,7 +28,7 @@
 	  "bid": "tapered",
 	  "color": [76,153,0]
 	},
-	{ "name": "Palms",	"order": 3,
+	{ "name": "Tropical_Forest",	"order": 3,
 	  "class": "Tree",
 	  "alt":   { "min": 0,  "max": 100 },
 	  "temp":  { "min": 15 },
@@ -56,7 +56,7 @@
 	},
 
 	{ "//": "more robust brush" },
-	{ "name": "Brush",	"order": 4,
+	{ "name": "Shrubland",	"order": 4,
 	  "class": "Brush",
 	  "alt":   { "min": 0,  "max": 1000 },
 	  "rain":  { "min": 25,  "max": 50 },
@@ -66,6 +66,16 @@
 	},
 
 	{ "//": "more robust grasses" },
+	{ "name": "Savanna",	"order": 5,
+	  "class": "Grass",
+	  "alt":   { "min": 100,   "max": 1500 },
+	  "temp":  { "min": 0,   "max": 20 },
+	  "rain":  { "min": 25,  "max": 100 },
+	  "vigor": 32,
+	  "range": "flexible",	"bid": "tapered",
+	  "color": [178,255,102]
+	},
+
 	{ "name": "Grassland",	"order": 5,
 	  "class": "Grass",
 	  "alt":   { "min": 100,   "max": 1500 },
@@ -77,7 +87,7 @@
 	},
 
 	{ "//": "barrens go where nothing else can live" },
-	{ "name": "Alpine",	
+	{ "name": "Tundra",	
 	  "class": "Barren",
 	  "alt":   { "min": 2500 },
 	  "temp":  { "max": 15 },

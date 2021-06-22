@@ -40,7 +40,7 @@
 	},
 	{ "name": "rocks-A",	"level": 1, "base": 3680,
 	  "terrain": "land",
-	  "flora": "Alpine",
+	  "flora": "Tundra",
 	  "vigor": 32
 	},
 	{ "name": "marsh",	"level": 1, "base": 2816,	"//": "FIND BETTER TILE ?",
@@ -62,34 +62,34 @@
 	  "vigor": 32
 	},
 	{ "name": "Brush",	"level": 2, "base": 2864,	"//": "FIND BETTER TILE ?",
-	  "class": "Brush",	"flora": "Brush",
+	  "class": "Brush",	"flora": "Shrubland",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
 
 	{ "name": "palm",	"level": 2, "base": 3776,
-	  "class": "Tree",	"flora": "Palms",
+	  "class": "Tree",	"flora": "Tropical_Forest",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
 	{ "name": "jungle",	"level": 2, "base": 3776,	"//": "FIND BETTER TILE ?",
-	  "class": "Tree",	"flora": "Jungle",
+	  "class": "Tree",	"flora": "Tropical_Rainforest",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
 	{ "name": "tree",	"level": 2, "base": 3008,
-	  "class": "Tree",	"flora": "Broadleaf",
+	  "class": "Tree",	"flora": "Temperate_Rainforest",
 	  "terrain": "ground",
 	  "vigor": 32
 	},
 	{ "name": "pine",	"level": 2, "base": 3056,
-	  "class": "Tree",	"flora": "Conifers",
+	  "class": "Tree",	"flora": "Taiga",
 	  "terrain": "ground",
 	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
 	{ "name": "snowpine",	"level": 2, "base": 4160,
-	  "class": "Tree",	"flora": "Conifers",
+	  "class": "Tree",	"flora": "Taiga",
 	  "terrain": "ground",
 	  "temp": { "max": 0 },
 	  "vigor": 32

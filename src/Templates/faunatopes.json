@@ -19,19 +19,19 @@
 	  "color": [204,204,0]
 	},
 	{ "name": "Foxes",	"class": "Small Game",
-	  "flora": "Broadleaf",	"order": 2,
+	  "flora": "Temperate_Rainforest", "order": 2,
 	  "vigor": 32,
 	  "color": [255,102,102]
 	},
 
 	{ "//": "large game" },
 	{ "name": "Deer",	"class": "Large Game",
-	  "flora": "Broadleaf",
+	  "flora": "Temperate_Rainforest",
 	  "vigor": 32,		"order": 1,
 	  "color": [255,153,51]
 	},
 	{ "name": "Bear",	"class": "Large Game",
-	  "flora": "Conifers",	"order": 1,
+	  "flora": "Taiga",	"order": 1,
 	  "vigor": 32,
 	  "color": [153,76,0]
 	}

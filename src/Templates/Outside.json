@@ -91,7 +91,7 @@
 	  "vigor": 32
 	},
 	{ "name": "brush", "level": 4, "base": 91, 
-	  "class": "Brush",	"flora": "Brush",
+	  "class": "Brush",	"flora": "Shrubland",
 	  "terrain": "land",
 	  "vigor": 32
 	},
@@ -101,29 +101,29 @@
 	  "vigor": 32
 	},
 	{ "name": "tree", "level": 4, "base": 112, "stamp": "2x2", "surround": 114,
-	  "class": "Tree",	"flora": "Broadleaf",
+	  "class": "Tree",	"flora": "Temperate_Rainforest",
 	  "terrain": "land",
 	  "vigor": 32
 	},
 	{ "name": "jungle", "level": 4, "base": 87,
-	  "class": "Tree",	"flora": "Jungle",
+	  "class": "Tree",	"flora": "Tropical_Rainforest",
 	  "terrain": "land",
 	  "vigor": 32
 	},
 	{ "name": "pine", "level": 4, "base": 93, "stamp": "1x2",
-	  "class": "Tree",	"flora": "Conifers",
+	  "class": "Tree",	"flora": "Taiga",
 	  "terrain": "land",
 	  "temp": { "min": 0 },
 	  "vigor": 32
 	},
 	{ "name": "snowpine", "level": 4, "base": 128, "stamp": "2x2", "surround": 130,
-	  "class": "Tree",	"flora": "Conifers",
+	  "class": "Tree",	"flora": "Taiga",
 	  "terrain": "land",
 	  "temp": { "max": 0 },
 	  "vigor": 32
 	},
 	{ "name": "palm", "level": 4, "base": 172, "stamp": "1x2",
-	  "class": "Tree",	"flora": "Palms",
+	  "class": "Tree",	"flora": "Tropical_Forest",
 	  "terrain": "land",
 	  "vigor": 32
 	}

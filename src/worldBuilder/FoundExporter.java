@@ -55,8 +55,8 @@ public class FoundExporter implements Exporter {
 	};
 	
 	// mapping from eco/geo type names into Foundation resources
-	private static String coniferous_resources[] = { "Conifers" };
-	private static String deciduous_resources[] = { "Broadleaf" };
+	private static String coniferous_resources[] = { "Taiga" };
+	private static String deciduous_resources[] = { "Temperate_Rainforest" };
 	private static String berry_resources[] = { "Riperian" };
 	private static String grass_resources[] = { "Grassland" };
 	private static String stone_resources[] = { "Sand Stone", "Granite" };

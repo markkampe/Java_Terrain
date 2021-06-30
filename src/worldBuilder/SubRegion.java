@@ -21,7 +21,7 @@ public class SubRegion {
 	 * @param x0	(map) upper-left corner of sub-region
 	 * @param y0	(map) upper-left corner of sub-region
 	 * @param width	(map) width of sub-region
-	 * @param height (,a[) height of sub-region
+	 * @param height (map) height of sub-region
 	 * 
 	 * @return		success/failure
 	 */
@@ -38,12 +38,6 @@ public class SubRegion {
 		double[] fluxMap = map.getFluxMap();
 		String[] oldNames = map.getNameMap();
 		LinkedList<TradeRoute> oldTrade = map.tradeRoutes();
-		
-		// compute x/y coordinate translation coefficients
-		double xShift = x0 + (width/2);
-		double yShift = y0 + (height/2);
-		double xScale = Parameters.x_extent/width;
-		double yScale = Parameters.y_extent/height;
 
 		// allocate new per-point attribute maps
 		int newlen = newMesh.vertices.length;
@@ -55,15 +49,22 @@ public class SubRegion {
 		double[] a = new double[newlen];	// fauna map
 		double[] w = new double[newlen];	// incoming water
 		double[] s = new double[newlen];	// incoming sediment
+		
+		// figure out the relative width/height of the new window
+		double x_shrink = width / Parameters.x_extent;
+		double y_shrink = height / Parameters.y_extent;
+		double Ox = x0 + (width/2);
+		double Oy = y0 + (height/2);
+		System.out.println(String.format("origin=<%.6f,%.6f> shrink=<%.2f,%.2f>", Ox, Oy, x_shrink, y_shrink));
 
 		// interpolate per-point attributes for each mesh point
 		for(int i = 0; i < newlen; i++) {
 			// find the corresponding previous-map coordinates
-			double x = (newMesh.vertices[i].x/xScale) + xShift;
-			double y = (newMesh.vertices[i].y/yScale) + yShift;
+			double x1 = (x_shrink * newMesh.vertices[i].x) + Ox;
+			double y1 = (y_shrink * newMesh.vertices[i].y) + Oy;
 			
 			// find surrounding points from the previous map
-			Vicinity poly = new Polygon(oldMesh, x, y);
+			Vicinity poly = new Polygon(oldMesh, x1, y1);
 
 			// interpolate values for spatial attributes
 			h[i] = poly.interpolate(heightMap);
@@ -79,25 +80,25 @@ public class SubRegion {
 			// find out-of-the-box points that flow into the box
 			if (fluxMap[i] <= 0)
 				continue;
-			MeshPoint p1 = oldMesh.vertices[i];
-			if (window.inTheBox(p1.x, p1.y))
+			MeshPoint p = oldMesh.vertices[i];
+			if (window.inTheBox(p.x, p.y))
 				continue;
 			int d = map.getDrainage().downHill[i];
 			if (d < 0)
 				continue;
-			MeshPoint p2 = oldMesh.vertices[d];
-			if (!window.inTheBox(p2.x,p2.y))
+			MeshPoint p1 = oldMesh.vertices[d];
+			if (!window.inTheBox(p1.x,p1.y))
 				continue;
 			
 			// direct flow to corresponding point in new Map
-			double x = (p2.x - xShift) * xScale;	// new Map x coordinate
-			double y = (p2.y - yShift) * yScale;	// new Map y coordinate
-			MeshPoint p3 = newMesh.choosePoint(x, y);
-			w[p3.index] += fluxMap[i];
-			s[p3.index] = map.waterflow.suspended[i];
+			double x2 = (p1.x - Ox) / x_shrink;
+			double y2 = (p1.y - Oy) / y_shrink;
+			MeshPoint p2 = newMesh.choosePoint(x2, y2);
+			w[p2.index] += fluxMap[i];
+			s[p2.index] = map.waterflow.suspended[i];
 			if (parms.debug_level >= INFLUX_DEBUG)
 				System.out.println(String.format("... incoming[%d] += %.4f, susp += %.4f", 
-									p3.index, fluxMap[i], map.waterflow.suspended[i]));
+									p2.index, fluxMap[i], map.waterflow.suspended[i]));
 		}
 		
 		
@@ -124,9 +125,9 @@ public class SubRegion {
 			MeshPoint p = oldMesh.vertices[i];
 			if (window.inTheBox(p.x, p.y)) {
 				// find corresponding point in new Map
-				double x = (p.x - xShift) * xScale;	// new Map x coordinate
-				double y = (p.y - yShift) * yScale;	// new Map y coordinate
-				MeshPoint p2 = newMesh.choosePoint(x, y);
+				double x2 = (p.x - Ox) / x_shrink;
+				double y2 = (p.y - Oy) / y_shrink;
+				MeshPoint p2 = newMesh.choosePoint(x2, y2);
 				n[p2.index] = oldNames[i];
 			}
 		}
@@ -152,12 +153,12 @@ public class SubRegion {
 				// see if all or part of this route was in the box
 				if (first != null && last != first) {
 					// find corresponding points in new Map
-					double x = (first.x - xShift) * xScale;	// new Map x coordinate
-					double y = (first.y - yShift) * yScale;	// new Map y coordinate
-					MeshPoint p1 = newMesh.choosePoint(x, y);
-					x = (last.x - xShift) * xScale;	// new Map x coordinate
-					y = (last.y - yShift) * yScale;	// new Map y coordinate
-					MeshPoint p2 = newMesh.choosePoint(x, y);
+					double x1 = (first.x - Ox) / x_shrink;
+					double y1 = (first.y - Oy) / y_shrink;
+					MeshPoint p1 = newMesh.choosePoint(x1, y1);
+					double x2 = (last.x - Ox) / x_shrink;
+					double y2 = (last.y - Oy) / y_shrink;
+					MeshPoint p2 = newMesh.choosePoint(x2, y2);
 					
 					// note the start/end points (one of which may be oceanic)
 					boolean ocean_ok = false;

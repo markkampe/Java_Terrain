@@ -524,7 +524,7 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 			dx = dy * square;		// too narrow
 		double x = (x1 > x0) ? x0 + dx : x0 - dx;
 		double y = (y1 > y0) ? y0 + dy : y0 - dy;
-								x0, y0, x1, y1, x0, y0, (int) x, (int) y));
+
 		// and now select the (corrected) rectangle
 		selectRect(x0, y0, (int) x, (int) y);
 		sel_type = Selection.SQUARE;

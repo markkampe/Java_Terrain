@@ -297,14 +297,10 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 			sel_type = Selection.LINE;
 			repaint();
 		} else if (type == Selection.SQUARE && sel_type == Selection.RECTANGLE) {
-			// square the selection
-			int side = (sel_width + sel_height)/2;
-			sel_width = side;
-			sel_height = side;
-			sel_x1 = sel_x0 + sel_width;
-			sel_y1 = sel_y0 + sel_height;
+			// adjust rectangular selection to be square
 			sel_type = Selection.SQUARE;
-			repaint();
+			selectSquare(sel_x0, sel_y0, sel_x0+sel_width, sel_y0+sel_height);
+			// selectSquare will repaint
 		} else if (type == Selection.POINT && sel_type == Selection.RECTANGLE) {
 			// rectangles can also be (crudely) converted to points
 			sel_x0 += sel_width/2;
@@ -424,17 +420,7 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 			if (listener != null && !listener.groupSelected(sel_points, selected))
 				sel_type = Selection.NONE;
 		} else if (sel_mode == Selection.SQUARE) {
-			// figure out whether selection is taller or wider
-			int x = e.getX();
-			int dx = (x < x_start) ? x_start - x : x - x_start;
-			int y = e.getY();
-			int dy = (y < y_start) ? y_start - y : y - y_start;
-			// square it
-			if (dy > dx)
-				x = (x > x_start) ? x_start + dy : x_start - dy;
-			else
-				y = (y > y_start) ? y_start + dx : y_start - dx;
-			selectRect(x_start, y_start, x, y);
+			selectSquare(x_start, y_start, e.getX(), e.getY());
 			if (listener != null &&
 				!listener.regionSelected(map_x(sel_x0),  map_y(sel_y0),
 									    map_width(sel_width), map_height(sel_height),
@@ -509,6 +495,39 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 		}
 		sel_type = Selection.RECTANGLE;
 		repaint();
+	}
+	
+	/**
+	 * highlight a (map-units) square selection area on the displayed map
+	 * 
+	 * @param x0 ... (px) starting x
+	 * @param y0 ... (px) starting y
+	 * @param x1 ... (px) ending x
+	 * @param y1 ... (px) ending y
+	 * 
+	 * The given coordinates are in pixels (and our map window is not square).
+	 * We want the selected area to have the same dimensions as a map window,
+	 * so we must correct the slection to have the same aspect ratio as our
+	 * (at this moment) map window.
+	 */
+	public void selectSquare(int x0, int y0, int x1, int y1) {
+		// compute the selected area aspect ratio
+		double dx = (x1 > x0) ? x1 - x0 : x0 - x1;
+		double dy = (y1 > y0) ? y1 - y0 : y0 - y1;
+		double aspect_ratio = dx / dy;
+		
+		// see if it is off-square and correct it
+		double square = ((double) getWidth()) / getHeight();
+		if (aspect_ratio > square)
+			dy = dx / square;		// too short
+		else if (aspect_ratio < square)
+			dx = dy * square;		// too narrow
+		double x = (x1 > x0) ? x0 + dx : x0 - dx;
+		double y = (y1 > y0) ? y0 + dy : y0 - dy;
+								x0, y0, x1, y1, x0, y0, (int) x, (int) y));
+		// and now select the (corrected) rectangle
+		selectRect(x0, y0, (int) x, (int) y);
+		sel_type = Selection.SQUARE;
 	}
 	
 	/**

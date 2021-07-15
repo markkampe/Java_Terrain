@@ -55,7 +55,6 @@ public class SubRegion {
 		double y_shrink = height / Parameters.y_extent;
 		double Ox = x0 + (width/2);
 		double Oy = y0 + (height/2);
-		System.out.println(String.format("origin=<%.6f,%.6f> shrink=<%.2f,%.2f>", Ox, Oy, x_shrink, y_shrink));
 
 		// interpolate per-point attributes for each mesh point
 		for(int i = 0; i < newlen; i++) {

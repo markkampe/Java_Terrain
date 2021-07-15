@@ -153,15 +153,6 @@ public class RegionDialog extends JFrame implements ActionListener, MapListener,
 	 */
 	public boolean regionSelected(double mx0, double my0, 
 								  double dx, double dy, boolean complete) {
-		// if he's done square the area
-		if (complete && dx != dy) {
-			System.err.println(String.format("warning: square selection returned %.6fx%.6f region", dx, dy));
-			if (dx > dy)
-				dy = dx;
-			else
-				dx = dy;
-		}
-		
 		// describe the selected area
 		x0 = mx0;
 		y0 = my0;

@@ -42,7 +42,6 @@ public class SubRegion {
 		// allocate new per-point attribute maps
 		int newlen = newMesh.vertices.length;
 		double[] h = new double[newlen];	// height map
-		double[] e = new double[newlen];	// erosion map
 		double[] r = new double[newlen];	// rain map
 		double[] m = new double[newlen];	// soil/mineral map
 		double[] f = new double[newlen];	// flora map
@@ -65,9 +64,8 @@ public class SubRegion {
 			// find surrounding points from the previous map
 			Vicinity poly = new Polygon(oldMesh, x1, y1);
 
-			// interpolate values for spatial attributes
+			// interpolate/expand spatially localized attributes
 			h[i] = poly.interpolate(heightMap);
-			e[i] = poly.interpolate(erodeMap);
 			r[i] = poly.interpolate(rainMap);
 			m[i] = poly.nearest(soilMap);
 			f[i] = poly.nearest(floraMap);
@@ -109,7 +107,6 @@ public class SubRegion {
 		map.setFloraMap(f);
 		map.setFaunaMap(a);
 	
-		map.setErodeMap(e);		// FIX post-create erode differs from save/restore
 		map.setSusp(s);			// FIX post-create susp differs from save/restore
 		map.setIncoming(w);		// FIX post-create flux differs from save/restore
 		

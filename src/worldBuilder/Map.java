@@ -58,6 +58,8 @@ public class Map {
 	private double erodeMap[];	// erosion/deposition
 	private double incoming[];	// incoming water from off-map (m^3/s)
 	private double suspMap[];	// incoming sediment from off-map (m^3/s)
+	private double e_factors[];	// exaggerated per point erosion
+	private double s_factors[];	// exaggerated per point sedimentation
 	private double floraMap[];	// assigned flora type
 	private double faunaMap[];	// assigned fauna type
 	private double waterLevel[];// level of nearest water body
@@ -150,6 +152,8 @@ public class Map {
 		double influx = 0;
 		double suspended = 0;
 		double erosion = 0;
+		double e_factor = 1.0;
+		double s_factor = 1.0;
 		isSubRegion = false;
 		String name = null;
 		double route_cost = 0;
@@ -245,6 +249,14 @@ public class Map {
 						
 					case "erosion":
 						erosion = new Double(parser.getString());
+						break;
+						
+					case "e_factor":
+						e_factor = new Double(parser.getString());
+						break;
+						
+					case "s_factor":
+						s_factor = new Double(parser.getString());
 						break;
 						
 					case "suspended":
@@ -355,6 +367,8 @@ public class Map {
 					incoming[points] = influx;
 					suspMap[points] = suspended;
 					erodeMap[points] = erosion;
+					e_factors[points] = e_factor;
+					s_factors[points] = s_factor;
 					nameMap[points] = name;
 					points++;
 				} else if (inRoutes) {
@@ -384,6 +398,8 @@ public class Map {
 					influx = 0;
 					suspended = 0;
 					erosion = 0;
+					e_factor = 1.0;
+					s_factor = 1.0;
 					soil = 0;
 					flora = 0;
 					fauna = 0;
@@ -508,7 +524,7 @@ public class Map {
 				}
 				output.write("\n    ],\n");
 			}
-			
+		
 			// write out the points and per-point attributes
 			output.write( "    \"points\": [" );
 			for(int i = 0; i < mesh.vertices.length; i++) {
@@ -576,6 +592,10 @@ public class Map {
 			output.write(String.format(", \"influx\": \"%.5f%s\"", incoming[x], Parameters.unit_f));
 		if (suspMap[x] != 0)
 			output.write(String.format(", \"suspended\": \"%.5f%s\"", suspMap[x], Parameters.unit_f));
+		if (e_factors[x] != 1.0)
+			output.write(String.format(", \"e_factor\": \"%.3f\"",  e_factors[x]));
+		if (s_factors[x] != 1.0)
+			output.write(String.format(", \"s_factor\": \"%.3f\"",  s_factors[x]));
 		if (nameMap[x] != null)
 			output.write(String.format(", \"name\": \"%s\"",  nameMap[x]));
 		output.write(" }");
@@ -601,6 +621,8 @@ public class Map {
 			this.waterLevel = new double[mesh.vertices.length];
 			this.floraMap = new double[mesh.vertices.length];
 			this.faunaMap = new double[mesh.vertices.length];
+			this.e_factors = new double[mesh.vertices.length];
+			this.s_factors = new double[mesh.vertices.length];
 			
 			this.incoming = new double[mesh.vertices.length];
 			this.suspMap = new double[mesh.vertices.length];
@@ -614,6 +636,8 @@ public class Map {
 			this.rainMap = null;
 			this.fluxMap = null;
 			this.erodeMap = null;
+			this.e_factors = null;
+			this.s_factors = null;
 			this.soilMap = null;
 			this.waterLevel = null;
 			this.floraMap = null;
@@ -947,6 +971,26 @@ public class Map {
 	 * return array of net erosion/deposition at each mesh point
 	 */
 	public double[] getErodeMap() {return erodeMap;}
+	public double[] getE_factors() {return e_factors;}
+	public double[] getS_factors() { return s_factors;}
+	
+	/**
+	 * update the erosion factors
+	 */
+	public double[] setE_factors(double[] factors) {
+		double[] prev = e_factors;
+		e_factors = factors;
+		return prev;
+	}
+	
+	/**
+	 * update the sedimentation factors
+	 */
+	public double[] setS_factors(double[] factors) {
+		double[] prev = s_factors;
+		s_factors = factors;
+		return prev;
+	}
 	
 	/**
 	 * return array of nearest water level to each mesh point

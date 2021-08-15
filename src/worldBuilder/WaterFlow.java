@@ -101,14 +101,16 @@ public class WaterFlow {
 		if (debug_log != null)
 			debug_log.write("\nRECOMPUTE: " + msg + "\n");
 		
-		// 0. initialize our output maps to no flowing water or lakes
+		// 0. initialize our output maps to no flowing water, lakes, erosion
 		waterLevel = map.getWaterLevel();
 		for(int i = 0; i < mesh.vertices.length; i++) {
 			fluxMap[i] = 0.0;
 			removal[i] = 0.0;
-			suspended[i] = suspMap[i];
 			velocityMap[i] = 0.0;
+			erodeMap[i] = 0.0;
 			waterLevel[i] = drainage.oceanic[i] ? sea_level : UNKNOWN;
+			// but we do still have suspended sediment coming from off-map
+			suspended[i] = suspMap[i];
 		}
 		
 		// if no incoming rivers or rain, we are done

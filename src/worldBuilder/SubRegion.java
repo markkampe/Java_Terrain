@@ -30,7 +30,6 @@ public class SubRegion {
 		MapWindow window = map.window;
 		Mesh oldMesh = map.mesh;
 		double[] heightMap = map.getHeightMap();
-		double[] erodeMap = map.getErodeMap();
 		double[] rainMap = map.getRainMap();
 		double[] soilMap = map.getSoilMap();
 		double[] floraMap = map.getFloraMap();

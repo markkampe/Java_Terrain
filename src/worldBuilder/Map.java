@@ -149,6 +149,7 @@ public class Map {
 		int fauna = 0;
 		double influx = 0;
 		double suspended = 0;
+		double erosion = 0;
 		isSubRegion = false;
 		String name = null;
 		double route_cost = 0;
@@ -240,6 +241,10 @@ public class Map {
 						if (u != -1)
 							s = s.substring(0, u);
 						influx = new Double(s);
+						break;
+						
+					case "erosion":
+						erosion = new Double(parser.getString());
 						break;
 						
 					case "suspended":
@@ -349,6 +354,7 @@ public class Map {
 					rainMap[points] = rain;
 					incoming[points] = influx;
 					suspMap[points] = suspended;
+					erodeMap[points] = erosion;
 					nameMap[points] = name;
 					points++;
 				} else if (inRoutes) {
@@ -377,6 +383,7 @@ public class Map {
 				if (inPoints) {
 					influx = 0;
 					suspended = 0;
+					erosion = 0;
 					soil = 0;
 					flora = 0;
 					fauna = 0;
@@ -555,7 +562,10 @@ public class Map {
 		int x = p.index;
 		if (heightMap[x] != 0)
 			output.write(String.format(", \"z\": %.9f", heightMap[x]));
-		output.write(String.format(", \"rain\": \"%.1f%s\"", rainMap[x], Parameters.unit_r));
+		if (erodeMap[x] != 0)
+			output.write(String.format(", \"erosion\": %.9f", erodeMap[x]));
+		if (rainMap[x] != 0)
+			output.write(String.format(", \"rain\": \"%.1f%s\"", rainMap[x], Parameters.unit_r));
 		if (soilMap[x] != 0)
 			output.write(String.format(", \"soil\": \"%s\"", rockNames[(int) Math.round(soilMap[x])]));
 		if (floraMap[x] != 0)

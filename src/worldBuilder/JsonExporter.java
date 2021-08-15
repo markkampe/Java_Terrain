@@ -32,6 +32,7 @@ public class JsonExporter implements Exporter {
 	private String[] floraNames;	// per flora type names
 	private String[] rockNames;		// per soil type names
 	private String[] faunaNames;	// per fauna type names
+	private int ALLUVIAL;			// soil type for sediment
 	
 	private double maxHeight;		// highest discovered altitude
 	private double minHeight;		// lowest discovered altitude
@@ -154,6 +155,13 @@ public class JsonExporter implements Exporter {
 	public void soilMap(double[][] soil, String[] names) {
 		this.soil = soil;
 		this.rockNames = names;
+
+		// look up the type for sediment
+		for(int i = 0; i < names.length; i++)
+			if (names[i] != null && names[i].equals("Alluvial")) {
+				ALLUVIAL = i;
+				break;
+			}
 	}
 
 	/**
@@ -285,6 +293,8 @@ public class JsonExporter implements Exporter {
 					}
 					
 					int st = (int) soil[r][c];
+					if (erode[r][c] < 0)
+						st = ALLUVIAL;		// sedimentation is automaticaly alluvial
 					if (st > 0 && rockNames[st] != null) {
 						output.write(COMMA);
 						output.write(String.format(FORMAT_S, "soil", rockNames[st]));

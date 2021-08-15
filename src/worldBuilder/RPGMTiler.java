@@ -948,7 +948,7 @@ public class RPGMTiler implements Exporter {
 	 * Up-load the fauna type for every tile
 	 * @param fauna - per point fauna type
 	 */
-	public void faunaMap(double[][] soil, String[] names) {
+	public void faunaMap(double[][] fauna, String[] names) {
 		// this.fauna = fauna;
 		// this.faunaNames = names;
 	}

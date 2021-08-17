@@ -18,8 +18,6 @@ public class WaterFlow {
 	private double erodeMap[];		// Z erosion of each MeshPoint (from Map)
 	private int downHill[];			// down-hill neighbor of each MeshPoint
 	private double fluxMap[];		// water flow through MeshPoint
-	private double e_factors[];		// per point erosion multiplier
-	private double s_factors[];		// per point sedimentation multiplier
 	
 	// maps we create, that will be pushed into the Map
 	private double waterLevel[];	// water level at each (u/w) MeshPoint
@@ -61,12 +59,8 @@ public class WaterFlow {
 		this.drainage = map.getDrainage();
 		this.heightMap = map.getHeightMap();
 		this.erodeMap = map.getErodeMap();
-		this.e_factors = map.getE_factors();
-		this.s_factors = map.getS_factors();
 		this.downHill = drainage.downHill;
 		
-		
-	
 		// see if we are producing a debug log
 		if (parms.debug_level > HYDRO_DEBUG)
 			debug_log = new DebugLog("WaterFlow", DEBUG_LOG_FILE);
@@ -82,6 +76,8 @@ public class WaterFlow {
 		double[] incoming = map.getIncoming();
 		double[] suspMap = map.getSusp();
 		double[] soilMap = map.getSoilMap();
+		double[] e_factors = map.getE_factors();
+		double[] s_factors = map.getS_factors();
 		double sea_level = map.getSeaLevel();
 		fluxMap = map.getFluxMap();
 		

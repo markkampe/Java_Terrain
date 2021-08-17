@@ -18,6 +18,8 @@ public class WaterFlow {
 	private double erodeMap[];		// Z erosion of each MeshPoint (from Map)
 	private int downHill[];			// down-hill neighbor of each MeshPoint
 	private double fluxMap[];		// water flow through MeshPoint
+	private double e_factors[];		// per point erosion multiplier
+	private double s_factors[];		// per point sedimentation multiplier
 	
 	// maps we create, that will be pushed into the Map
 	private double waterLevel[];	// water level at each (u/w) MeshPoint
@@ -59,6 +61,8 @@ public class WaterFlow {
 		this.drainage = map.getDrainage();
 		this.heightMap = map.getHeightMap();
 		this.erodeMap = map.getErodeMap();
+		this.e_factors = map.getE_factors();
+		this.s_factors = map.getS_factors();
 		this.downHill = drainage.downHill;
 		
 		
@@ -190,11 +194,13 @@ public class WaterFlow {
 						removal[x] += taken;	// M^3/second of rock removal
 					}
 					
+					// compute the annual whole-point effect of that removal
+					erodeMap[x] += parms.z(annual_erosion(x)) * e_factors[x];
+					
 					// downhill gets our incoming plus our erosion
 					suspended[d] += suspended[x] + taken;
 					
 					// see if this is the worst erosion on the map
-					erodeMap[x] += parms.z(annual_erosion(x));
 					if (erodeMap[x] > map.max_erosion)
 						map.max_erosion = erodeMap[x];
 					
@@ -212,8 +218,10 @@ public class WaterFlow {
 					if (debug_log != null)
 						msg += String.format(", d=%.6f, susp[%4d]=%.6f", dropped, d, suspended[d]);
 					
+					// compute the annual whole-point effect of this deposition
+					erodeMap[x] -= parms.z(annual_sedimentation(x)) * s_factors[x];
+					
 					// see if this is the deepest sedimentation on the map
-					erodeMap[x] -= parms.z(annual_sedimentation(x));
 					if (erodeMap[x] < -map.max_deposition)
 						map.max_deposition = -erodeMap[x];
 				}
@@ -308,7 +316,7 @@ public class WaterFlow {
 		 *     always deposits silt in proportion to flux (and inverse
 		 *     proportion to speed).
 		 */
-		final double EXAGGERATE = 4.0;	// this looks good :-)
+		final double EXAGGERATE = 50.0;	// this looks good :-)
 		
 		double sediment = 0.0;
 		if (removal[index] < 0)

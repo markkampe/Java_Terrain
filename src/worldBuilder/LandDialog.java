@@ -95,7 +95,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		erosion.setPaintTicks(true);
 		erosion.setLabelTable(labels);
 		erosion.setPaintLabels(true);
-		erosion.setEnabled(false);	// FIX implement erosion slider
 		JLabel erosionLabel = new JLabel("High Flow Erosion", JLabel.CENTER);
 		erosionLabel.setFont(fontLarge);
 		
@@ -105,7 +104,6 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 		deposition.setPaintTicks(true);
 		deposition.setLabelTable(labels);
 		deposition.setPaintLabels(true);
-		deposition.setEnabled(false);	// FIX implement deposition slider
 		JLabel depositionLabel = new JLabel("Low Flow Deposition", JLabel.CENTER);
 		depositionLabel.setFont(fontLarge);
 		
@@ -197,6 +195,20 @@ public class LandDialog extends JFrame implements ActionListener, ChangeListener
 			t.exaggerate(selected_points, z_mult);
 			changes_made = true;
 			flatness.setValue(0);	// reset slider after the change
+		}
+		
+		// erosion and sedimentation sliders
+		double e_factor = multiplier(erosion.getValue());
+		if (e_factor != 1.0) {
+			t.erosion(selected_points, e_factor);
+			changes_made = true;
+			erosion.setValue(0);
+		}
+		double s_factor = multiplier(deposition.getValue());
+		if (s_factor != 1.0) {
+			t.sedimentation(selected_points, s_factor);
+			changes_made = true;
+			deposition.setValue(0);
 		}
 	}
 	

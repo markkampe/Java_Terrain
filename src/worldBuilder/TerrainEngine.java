@@ -14,6 +14,10 @@ public class TerrainEngine {
 	private double prevHeight[];	// last committed per MeshPoint Z values
 	private double thisRivers[];	// currently active per MeshPoint incoming flux
 	private double prevRivers[];	// last committed per MeshPoint incoming flux
+	private double thisErosion[];	// currently active per MeshPoint erosion scale
+	private double prevErosion[];	// last committed per MeshPoint erosion scale
+	private double thisSediment[];	// currently active per MeshPoint sedimentation scale
+	private double prevSediment[];	// last committed per MeshPoint sedimentation scale
 	private int axis;				// last used slope axis
 	private double inclination;		// last used slope inclination
 	private int above, below;		// above/below sea-level relocations
@@ -24,6 +28,8 @@ public class TerrainEngine {
 	private double ridgeHeight;		// height of last ridge
 	private double ridgeLength;		// length of last ridge
 	private double ridgeRadius;		// radius of last ridge
+	private double e_factor;		// last used erosion factor
+	private double s_factor;		// last used sedimentation factor
 	private int adjusted;			// number of points raised/lowered
 	
 	private static final int TERRAIN_DEBUG = 2;
@@ -43,6 +49,16 @@ public class TerrainEngine {
 		thisRivers = new double[prevRivers.length];
 		for(int i = 0; i < prevRivers.length; i++)
 			thisRivers[i] = prevRivers[i];
+		
+		// save erosion and sedimentation factors
+		prevErosion = map.getE_factors();
+		prevSediment = map.getS_factors();
+		thisErosion = new double[prevErosion.length];
+		thisSediment = new double[prevSediment.length];
+		for(int i = 0; i < prevErosion.length; i++) {
+			thisErosion[i] = prevErosion[i];
+			thisSediment[i] = prevSediment[i];
+		}
 	}
 	
 	/**
@@ -174,6 +190,60 @@ public class TerrainEngine {
 		if (parms.debug_level >= TERRAIN_DEBUG)
 			System.out.println(String.format("Exaggerated heights of %d points by %f", 
 								this.adjusted, this.zMultiple));
+		return true;
+	}
+	
+	/**
+	 * update erosion factor for all points in a box
+	 * @param selected ... per point selected/not booleans
+	 * @param e_factor erosion scaling factor
+	 */
+	public boolean erosion(boolean[] selected, double e_factor) {
+		this.e_factor = e_factor;
+		
+		// set erosion factor for each of those points
+		int points = 0;
+		for(int i = 0; i < map.mesh.vertices.length; i++) {
+			if (selected[i]) {
+				thisErosion[i] = e_factor;
+				points++;
+			}
+		}
+
+		// tell the map about the update
+		map.setE_factors(thisErosion);
+		
+		this.adjusted = points;
+		if (parms.debug_level >= TERRAIN_DEBUG)
+			System.out.println(String.format("Set Erosion factor of %d points to %f", 
+								this.adjusted, this.e_factor));
+		return true;
+	}
+	
+	/**
+	 * update sedimentation factor for all points in a box
+	 * @param selected ... per point selected/not booleans
+	 * @param s_factor sedimentation scaling factor
+	 */
+	public boolean sedimentation(boolean[] selected, double s_factor) {
+		this.s_factor = s_factor;
+		
+		// set sedimentation factor for each of those points
+		int points = 0;
+		for(int i = 0; i < map.mesh.vertices.length; i++) {
+			if (selected[i]) {
+				thisSediment[i] = s_factor;
+				points++;
+			}
+		}
+
+		// tell the map about the update
+		map.setS_factors(thisSediment);
+		
+		this.adjusted = points;
+		if (parms.debug_level >= TERRAIN_DEBUG)
+			System.out.println(String.format("Set Sedimentation factor of %d points to %f", 
+								this.adjusted, this.s_factor));
 		return true;
 	}
 	
@@ -340,6 +410,10 @@ public class TerrainEngine {
 			prevHeight[i] = thisHeight[i];
 		for(int i = 0; i < prevRivers.length; i++)
 			prevRivers[i] = thisRivers[i];
+		for(int i = 0; i < prevErosion.length; i++) {
+			prevErosion[i] = thisErosion[i];
+			prevSediment[i] = thisSediment[i];
+		}
 		
 		// log the most recent changes being committed
 		if (parms.debug_level > 0) {
@@ -368,6 +442,16 @@ public class TerrainEngine {
 						this.adjusted, this.zMultiple));
 				zMultiple = 0;
 			}
+			if (e_factor != 0) {
+				System.out.println(String.format("Scaled erosion at %d points by %f",
+						this.adjusted, this.e_factor));
+				e_factor = 0;
+			}
+			if (s_factor != 0) {
+				System.out.println(String.format("Scaled sedimentation at %d points by %f",
+						this.adjusted, this.s_factor));
+				s_factor = 0;
+			}
 			if (inclination != 0) {
 				System.out.println(String.format("Slope axis=%d\u00B0, incline=%.1fcm/km: %d points above sea level, %d below",
 								axis, inclination*100000, above, below));
@@ -393,6 +477,13 @@ public class TerrainEngine {
 		for(int i = 0; i < prevRivers.length; i++)
 			thisRivers[i] = prevRivers[i];
 		map.setIncoming(prevRivers);
+		
+		for(int i = 0; i < prevErosion.length; i++) {
+			thisErosion[i] = prevErosion[i];
+			thisSediment[i] = prevSediment[i];
+		}
+		map.setE_factors(prevErosion);
+		map.setS_factors(prevSediment);
 		return true;
 	}
 }

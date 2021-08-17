@@ -980,6 +980,9 @@ public class Map {
 	public double[] setE_factors(double[] factors) {
 		double[] prev = e_factors;
 		e_factors = factors;
+		waterflow.recompute();
+		window.newHeight();
+		window.repaint(); 
 		return prev;
 	}
 	
@@ -989,6 +992,9 @@ public class Map {
 	public double[] setS_factors(double[] factors) {
 		double[] prev = s_factors;
 		s_factors = factors;
+		waterflow.recompute();
+		window.newHeight();
+		window.repaint(); 
 		return prev;
 	}
 	

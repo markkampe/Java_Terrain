@@ -35,6 +35,8 @@ public class SubRegion {
 		double[] floraMap = map.getFloraMap();
 		double[] faunaMap = map.getFaunaMap();
 		double[] fluxMap = map.getFluxMap();
+		double[] e_factors = map.getE_factors();
+		double[] s_factors = map.getS_factors();
 		String[] oldNames = map.getNameMap();
 		LinkedList<TradeRoute> oldTrade = map.tradeRoutes();
 
@@ -47,6 +49,8 @@ public class SubRegion {
 		double[] a = new double[newlen];	// fauna map
 		double[] w = new double[newlen];	// incoming water
 		double[] s = new double[newlen];	// incoming sediment
+		double[] ef = new double[newlen];	// erosion scaling factors
+		double[] sf = new double[newlen];	// sedimentation scaling factors
 		
 		// figure out the relative width/height of the new window
 		double x_shrink = width / Parameters.x_extent;
@@ -69,6 +73,8 @@ public class SubRegion {
 			m[i] = poly.nearest(soilMap);
 			f[i] = poly.nearest(floraMap);
 			a[i] = poly.nearest(faunaMap);
+			ef[i] = poly.nearest(e_factors);
+			sf[i] = poly.nearest(s_factors);
 		}
 		
 		// reproduce all water flows into the box
@@ -111,6 +117,8 @@ public class SubRegion {
 		
 		// these will force drainage and waterflow recomputation
 		map.setHeightMap(h);
+		map.setE_factors(ef);
+		map.setS_factors(sf);
 		
 		// reproduce all named points within the box
 		String[] n = map.getNameMap();

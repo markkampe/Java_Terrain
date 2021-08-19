@@ -106,23 +106,21 @@ public class SubRegion {
 									p2.index, fluxMap[i], map.waterflow.suspended[i]));
 		}
 		
-		
 		// push all of these changes back to the map
 		map.isSubRegion = true;
 		map.setMesh(newMesh);
-		map.setRainMap(r);
+		map.setRainMap(r, true);
 		map.setSoilMap(m);
 		map.setFloraMap(f);
 		map.setFaunaMap(a);
 	
-		map.setSusp(s);			// FIX post-create susp differs from save/restore
-		map.setIncoming(w);		// FIX post-create flux differs from save/restore
-		
-		// these will force drainage and waterflow recomputation
+		// drainage/waterflow is very expensive, avoid extra recomputes
+		map.setSusp(s, false);
+		map.setIncoming(w, false);
 		map.setErodeMap(e);
-		map.setHeightMap(h);
-		map.setE_factors(ef);
-		map.setS_factors(sf);
+		map.setE_factors(ef, false);
+		map.setS_factors(sf, false);
+		map.setHeightMap(h, true);	// force the recomputation
 		
 		// reproduce all named points within the box
 		String[] n = map.getNameMap();

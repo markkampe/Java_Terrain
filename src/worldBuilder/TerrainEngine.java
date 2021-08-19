@@ -112,7 +112,7 @@ public class TerrainEngine {
 		}
 		
 		// tell the map about the update
-		map.setHeightMap(thisHeight);
+		map.setHeightMap(thisHeight, true);
 		
 		if (parms.debug_level >= TERRAIN_DEBUG)
 			System.out.println(String.format("Slope axis=%d\u00B0, incline=%.1fcm/km: %d points above sea level, %d below",
@@ -138,7 +138,7 @@ public class TerrainEngine {
 		}
 
 		// tell the map about the update
-		map.setHeightMap(thisHeight);
+		map.setHeightMap(thisHeight, true);
 		
 		this.adjusted = points;
 		if (parms.debug_level >= TERRAIN_DEBUG)
@@ -184,7 +184,7 @@ public class TerrainEngine {
 		}
 
 		// tell the map about the update
-		map.setHeightMap(thisHeight);
+		map.setHeightMap(thisHeight, true);
 		
 		this.adjusted = points;
 		if (parms.debug_level >= TERRAIN_DEBUG)
@@ -211,7 +211,7 @@ public class TerrainEngine {
 		}
 
 		// tell the map about the update
-		map.setE_factors(thisErosion);
+		map.setE_factors(thisErosion, true);
 		
 		this.adjusted = points;
 		if (parms.debug_level >= TERRAIN_DEBUG)
@@ -238,7 +238,7 @@ public class TerrainEngine {
 		}
 
 		// tell the map about the update
-		map.setS_factors(thisSediment);
+		map.setS_factors(thisSediment, true);
 		
 		this.adjusted = points;
 		if (parms.debug_level >= TERRAIN_DEBUG)
@@ -375,7 +375,7 @@ public class TerrainEngine {
 			points++;
 		}
 		
-		map.setHeightMap(thisHeight);
+		map.setHeightMap(thisHeight, true);
 		this.adjusted = points;
 		this.ridgeHeight = height;
 		this.ridgeRadius = rMax;
@@ -390,7 +390,7 @@ public class TerrainEngine {
 	 */
 	public boolean setIncoming(MeshPoint p, double flux) {
 		thisRivers[p.index] = flux;
-		map.setIncoming(thisRivers);
+		map.setIncoming(thisRivers, true);
 		lastRiver = p;
 		lastFlux = flux;
 		
@@ -470,20 +470,24 @@ public class TerrainEngine {
 	 * revert maps to last committed values
 	 */
 	public boolean abort() {
-		for(int i = 0; i < prevHeight.length; i++)
-			thisHeight[i] = prevHeight[i];
-		map.setHeightMap(prevHeight);
-		
-		for(int i = 0; i < prevRivers.length; i++)
-			thisRivers[i] = prevRivers[i];
-		map.setIncoming(prevRivers);
-		
+		// back out any changes to erosion/sedimentation
+		map.setE_factors(prevErosion, false);
+		map.setS_factors(prevSediment, false);
 		for(int i = 0; i < prevErosion.length; i++) {
 			thisErosion[i] = prevErosion[i];
 			thisSediment[i] = prevSediment[i];
 		}
-		map.setE_factors(prevErosion);
-		map.setS_factors(prevSediment);
+		
+		// back out any changes to incoming rivers
+		for(int i = 0; i < prevRivers.length; i++)
+			thisRivers[i] = prevRivers[i];
+		map.setIncoming(prevRivers, false);
+		
+		// revert to the last committed height map
+		for(int i = 0; i < prevHeight.length; i++)
+			thisHeight[i] = prevHeight[i];
+		map.setHeightMap(prevHeight, true);	// recompute drainage/waterflow
+		
 		return true;
 	}
 }

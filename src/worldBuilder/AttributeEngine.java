@@ -88,7 +88,7 @@ public class AttributeEngine {
 		String mapName = "???";
 		switch(whichmap) {
 		case RAIN:
-			map.setRainMap(thisRain);
+			map.setRainMap(thisRain, true);
 			newRain = (adjusted > 0);
 			mapName = "rainfall";
 			break;
@@ -281,7 +281,7 @@ public class AttributeEngine {
 		if (prevRain != null) {
 			for(int i = 0; i < prevRain.length; i++)
 				thisRain[i] = prevRain[i];
-			map.setRainMap(thisRain);
+			map.setRainMap(thisRain, true);
 			newRain = false;
 		}
 		if (prevRock != null) {

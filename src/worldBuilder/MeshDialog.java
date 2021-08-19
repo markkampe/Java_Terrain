@@ -186,7 +186,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 					double d = m.vertices[i].distanceLine(minX, maxY, maxX, maxY);
 					heightMap[i] =  d * parms.slope_init;
 				}
-				map.setHeightMap(heightMap);
+				map.setHeightMap(heightMap, true);
 				
 				if (parms.debug_level > 0)
 					System.out.println("Reinitialized map w/" + parms.dDiameter * parms.diam_scale + Parameters.unit_xy + " diameter");

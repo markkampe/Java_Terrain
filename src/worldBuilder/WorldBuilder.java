@@ -675,7 +675,7 @@ public class WorldBuilder  extends JFrame
 	public void stateChanged(ChangeEvent e) {
 		Object o = e.getSource();
 		if (o == seaLevel) {
-			map.setSeaLevel(((double) seaLevel.getValue()) / parms.z_range);
+			map.setSeaLevel(((double) seaLevel.getValue()) / parms.z_range, true);
 		}
 	}
 	

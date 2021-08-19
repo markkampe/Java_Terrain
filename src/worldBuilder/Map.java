@@ -659,16 +659,19 @@ public class Map {
 	public double[] getHeightMap() {return heightMap;}
 
 	/**
-	 * update the height map for the current mesth	 * @param newHeight new set of Z values
+	 * update the height map for the current mesth	 
+	 * @param newHeight new set of Z values
+	 * @param recompute drainage and waterflow 
 	 */
-	public double[] setHeightMap(double newHeight[]) {
+	public double[] setHeightMap(double newHeight[], boolean recompute) {
 		double old[] = heightMap; 
-		// recompute drainage and waterflow
 		heightMap = newHeight; 
-		drainage.recompute();
-		waterflow.recompute();
-		window.newHeight();
-		window.repaint();
+		if (recompute) {
+			drainage.recompute();
+			waterflow.recompute();
+			window.newHeight();
+			window.repaint();
+		}
 		
 		return old;
 	}
@@ -685,13 +688,16 @@ public class Map {
 	/**
 	 * update the rainfall map for the current mesth
 	 * @param newRain new set of rainfall values
+	 * @param recompute waterflow
 	 */
-	public double[] setRainMap(double newRain[]) {
+	public double[] setRainMap(double newRain[], boolean recompute) {
 		double old[] = rainMap; 
-		rainMap = newRain; 
-		waterflow.recompute();
-		window.newHeight();
-		window.repaint();
+		rainMap = newRain;
+		if (recompute) {
+			waterflow.recompute();
+			window.newHeight();
+			window.repaint();
+		}
 
 		return old;
 	}
@@ -699,13 +705,16 @@ public class Map {
 	/**
 	 * record a change in sea level
 	 * @param z_value new sea level
+	 * @param recompute drainage and water flow
 	 */
-	public void setSeaLevel(double z_value) {
+	public void setSeaLevel(double z_value, boolean recompute) {
 		parms.sea_level = z_value;
-		drainage.recompute();
-		waterflow.recompute();
-		window.newHeight();
-		window.repaint();
+		if (recompute) {
+			drainage.recompute();
+			waterflow.recompute();
+			window.newHeight();
+			window.repaint();
+		}
 	}
 	
 	/**
@@ -718,12 +727,15 @@ public class Map {
 	/**
 	 * update the water-flow after a change to the incoming arterial river
 	 * @param new_map new incoming flux per point
+	 * @param recompute water flow
 	 */
-	public void setIncoming(double[] new_map) {
+	public void setIncoming(double[] new_map, boolean recompute) {
 		incoming = new_map;
-		waterflow.recompute();
-		window.newHeight();
-		window.repaint(); 
+		if (recompute) {
+			waterflow.recompute();
+			window.newHeight();
+			window.repaint(); 
+		}
 	}
 	
 	/**
@@ -734,12 +746,15 @@ public class Map {
 	/**
 	 * update the suspended sediment after a change to the incoming arterial river
 	 * @param new_map new incoming flux per point
+	 * @param recompute water flow
 	 */
-	public void setSusp(double[] new_map) {
+	public void setSusp(double[] new_map, boolean recompute) {
 		suspMap = new_map;
-		waterflow.recompute();
-		window.newHeight();
-		window.repaint(); 
+		if (recompute) {
+			waterflow.recompute();
+			window.newHeight();
+			window.repaint(); 
+		}
 	}
 	
 	/**
@@ -976,25 +991,31 @@ public class Map {
 	
 	/**
 	 * update the erosion factors
+	 * @param recompute water flow
 	 */
-	public double[] setE_factors(double[] factors) {
+	public double[] setE_factors(double[] factors, boolean recompute) {
 		double[] prev = e_factors;
 		e_factors = factors;
-		waterflow.recompute();
-		window.newHeight();
-		window.repaint(); 
+		if (recompute) {
+			waterflow.recompute();
+			window.newHeight();
+			window.repaint(); 
+		}
 		return prev;
 	}
 	
 	/**
 	 * update the sedimentation factors
+	 * @param recompute waterflow
 	 */
-	public double[] setS_factors(double[] factors) {
+	public double[] setS_factors(double[] factors, boolean recompute) {
 		double[] prev = s_factors;
 		s_factors = factors;
-		waterflow.recompute();
-		window.newHeight();
-		window.repaint(); 
+		if (recompute) {
+			waterflow.recompute();
+			window.newHeight();
+			window.repaint();
+		}
 		return prev;
 	}
 	

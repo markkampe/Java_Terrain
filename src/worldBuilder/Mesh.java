@@ -78,13 +78,12 @@ public class Mesh {
 	public MeshPoint[] makePoints( int numpoints, ArrayList<MeshPoint> seeds ) {
 		// allocate an array of the requested size
 		MeshPoint points[] = new MeshPoint[numpoints];
-		int first = 0;
 		
 		// start initializing it with seeded points
-		if (seeds != null) {
+		int first = 0;
+		if (seeds != null)
 			for(MeshPoint p : seeds)
 				points[first++] = p;
-		}
 		
 		// fill it with random points
 		for (int i = first; i < points.length; i++) {

@@ -14,8 +14,6 @@ public class WaterFlow {
 	private Parameters parms;
 	
 	// maps that we import/export from/to Map
-	private double heightMap[];		// Z value of each MeshPoint (from Map)
-	private double erodeMap[];		// Z erosion of each MeshPoint (from Map)
 	private int downHill[];			// down-hill neighbor of each MeshPoint
 	private double fluxMap[];		// water flow through MeshPoint
 	
@@ -57,8 +55,6 @@ public class WaterFlow {
 		this.map = map;
 		this.mesh = map.getMesh();
 		this.drainage = map.getDrainage();
-		this.heightMap = map.getHeightMap();
-		this.erodeMap = map.getErodeMap();
 		this.downHill = drainage.downHill;
 		
 		// see if we are producing a debug log
@@ -72,6 +68,8 @@ public class WaterFlow {
 	
 	public void recompute() {
 		// import the rainfall and arterial river influx
+		double[] heightMap = map.getHeightMap();		
+		double[] erodeMap = map.getErodeMap();
 		double[] rainMap = map.getRainMap();
 		double[] incoming = map.getIncoming();
 		double[] suspMap = map.getSusp();

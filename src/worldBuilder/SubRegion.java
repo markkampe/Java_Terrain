@@ -35,6 +35,7 @@ public class SubRegion {
 		double[] floraMap = map.getFloraMap();
 		double[] faunaMap = map.getFaunaMap();
 		double[] fluxMap = map.getFluxMap();
+		double[] erodeMap = map.getErodeMap();
 		double[] e_factors = map.getE_factors();
 		double[] s_factors = map.getS_factors();
 		String[] oldNames = map.getNameMap();
@@ -49,6 +50,7 @@ public class SubRegion {
 		double[] a = new double[newlen];	// fauna map
 		double[] w = new double[newlen];	// incoming water
 		double[] s = new double[newlen];	// incoming sediment
+		double[] e = new double[newlen];	// erosion/sedimentation
 		double[] ef = new double[newlen];	// erosion scaling factors
 		double[] sf = new double[newlen];	// sedimentation scaling factors
 		
@@ -73,6 +75,7 @@ public class SubRegion {
 			m[i] = poly.nearest(soilMap);
 			f[i] = poly.nearest(floraMap);
 			a[i] = poly.nearest(faunaMap);
+			e[i] = poly.nearest(erodeMap);
 			ef[i] = poly.nearest(e_factors);
 			sf[i] = poly.nearest(s_factors);
 		}
@@ -116,6 +119,7 @@ public class SubRegion {
 		map.setIncoming(w);		// FIX post-create flux differs from save/restore
 		
 		// these will force drainage and waterflow recomputation
+		map.setErodeMap(e);
 		map.setHeightMap(h);
 		map.setE_factors(ef);
 		map.setS_factors(sf);

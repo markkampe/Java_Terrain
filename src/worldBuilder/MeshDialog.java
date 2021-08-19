@@ -172,7 +172,7 @@ public class MeshDialog extends JFrame implements ActionListener, WindowListener
 				parms.dDiameter = diameter.getValue();
 				parms.improvements = (Integer) improveChooser.getSelectedItem();
 				Mesh m = new Mesh();
-				MeshPoint[] points = m.makePoints(parms.points);
+				MeshPoint[] points = m.makePoints(parms.points, null);
 				m.makeMesh(points);
 				map.setMesh(m);
 				

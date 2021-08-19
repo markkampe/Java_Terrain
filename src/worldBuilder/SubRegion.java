@@ -11,7 +11,7 @@ public class SubRegion {
 	public SubRegion(int numPoints) {
 		// create a new mesh
 		newMesh = new Mesh();
-		MeshPoint[] points = newMesh.makePoints(numPoints);
+		MeshPoint[] points = newMesh.makePoints(numPoints, null);
 		newMesh.makeMesh(points);
 	}
 	

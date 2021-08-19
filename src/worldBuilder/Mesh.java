@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -68,12 +69,25 @@ public class Mesh {
 	/**
 	 * create a set of mesh points
 	 * @param numpoints in the desired mesh
+	 * @param seeds list of pre-chosen points
+	 * 		Pre-chosen points are used for river/route entry/exit points
+	 * 		in new SubRegions, to ensure that they are at the same positions
+	 * 		they were in the parent map.
 	 * @return array of new MeshPoints
 	 */
-	public MeshPoint[] makePoints( int numpoints ) {
-		// create a set of random points
+	public MeshPoint[] makePoints( int numpoints, ArrayList<MeshPoint> seeds ) {
+		// allocate an array of the requested size
 		MeshPoint points[] = new MeshPoint[numpoints];
-		for (int i = 0; i < points.length; i++) {
+		int first = 0;
+		
+		// start initializing it with seeded points
+		if (seeds != null) {
+			for(MeshPoint p : seeds)
+				points[first++] = p;
+		}
+		
+		// fill it with random points
+		for (int i = first; i < points.length; i++) {
 			double x = Parameters.x_extent * (Math.random() - 0.5);
 			double y = Parameters.y_extent * (Math.random() - 0.5);
 			points[i] = new MeshPoint(x, y);

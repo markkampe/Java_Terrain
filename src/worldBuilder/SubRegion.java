@@ -1,18 +1,17 @@
 package worldBuilder;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 public class SubRegion {
-	private Mesh newMesh;
+	private int numPoints;
 	
 	private static final int INFLUX_DEBUG = 2;
 	
 	public SubRegion(int numPoints) {
-		// create a new mesh
-		newMesh = new Mesh();
-		MeshPoint[] points = newMesh.makePoints(numPoints, null);
-		newMesh.makeMesh(points);
+		this.numPoints = numPoints;
+		
 	}
 	
 	/**
@@ -40,6 +39,26 @@ public class SubRegion {
 		double[] s_factors = map.getS_factors();
 		String[] oldNames = map.getNameMap();
 		LinkedList<TradeRoute> oldTrade = map.tradeRoutes();
+		
+		// locate river entry and exit points
+		ArrayList<MeshPoint> entries = new ArrayList();
+		entries.add(new MeshPoint(-0.4999, -0.25));	// FIX WIP
+		entries.add(new MeshPoint(-0.4999, 0.0));
+		entries.add(new MeshPoint(-0.4999, 0.25));
+		entries.add(new MeshPoint(0.4999, -0.25));
+		entries.add(new MeshPoint(0.4999, 0.0));
+		entries.add(new MeshPoint(0.4999, 0.25));
+		entries.add(new MeshPoint(-0.25, -0.4999));
+		entries.add(new MeshPoint(0.0, -0.4999));
+		entries.add(new MeshPoint(0.25, -0.4999));
+		entries.add(new MeshPoint(-0.25, 0.4999));
+		entries.add(new MeshPoint(0.0, 0.4999));
+		entries.add(new MeshPoint(0.25, 0.4999));
+		
+		// create a new mesh
+		Mesh newMesh = new Mesh();
+		MeshPoint[] points = newMesh.makePoints(numPoints, entries);
+		newMesh.makeMesh(points);
 
 		// allocate new per-point attribute maps
 		int newlen = newMesh.vertices.length;

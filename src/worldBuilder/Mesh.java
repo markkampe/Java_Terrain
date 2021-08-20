@@ -79,14 +79,8 @@ public class Mesh {
 		// allocate an array of the requested size
 		MeshPoint points[] = new MeshPoint[numpoints];
 		
-		// start initializing it with seeded points
-		int first = 0;
-		if (seeds != null)
-			for(MeshPoint p : seeds)
-				points[first++] = p;
-		
 		// fill it with random points
-		for (int i = first; i < points.length; i++) {
+		for (int i = 0; i < points.length; i++) {
 			double x = Parameters.x_extent * (Math.random() - 0.5);
 			double y = Parameters.y_extent * (Math.random() - 0.5);
 			points[i] = new MeshPoint(x, y);
@@ -96,7 +90,18 @@ public class Mesh {
 		for( int i = 0; i < parms.improvements; i++ )
 			points = improve(points);
 		
-		return(points);
+		// add in any seeded points
+		if (seeds != null && seeds.size() > 0) {
+			// FIX thes points are in the list, but won't be in the voronoi mesh
+			MeshPoint[] newPoints = new MeshPoint[points.length + seeds.size()];
+			int i;
+			for(i = 0; i < points.length; i++)
+				newPoints[i] = points[i];
+			for(MeshPoint p: seeds)
+				newPoints[i++] = p;
+			return newPoints;
+		} else
+			return points;
 	}
 	
 	/**

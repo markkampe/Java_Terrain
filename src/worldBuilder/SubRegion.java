@@ -71,11 +71,8 @@ public class SubRegion {
 		
 		// create a new mesh
 		Mesh newMesh = new Mesh();
-		int save = parms.debug_level;	// FIX 86
-		parms.debug_level = 3;			// FIX 86
 		MeshPoint[] points = newMesh.makePoints(numPoints, entries);
 		newMesh.makeMesh(points);
-		parms.debug_level = save;	// FIX 86
 
 		// allocate new per-point attribute maps
 		int newlen = newMesh.vertices.length;
@@ -115,25 +112,28 @@ public class SubRegion {
 			// find out-of-the-box points that flow into the box
 			if (fluxMap[i] <= 0)
 				continue;
-			MeshPoint p = oldMesh.vertices[i];
-			if (window.inTheBox(p.x, p.y))
+			MeshPoint p1 = oldMesh.vertices[i];
+			if (window.inTheBox(p1.x, p1.y))
 				continue;
 			int d = map.getDrainage().downHill[i];
 			if (d < 0)
 				continue;
-			MeshPoint p1 = oldMesh.vertices[d];
-			if (!window.inTheBox(p1.x,p1.y))
+			MeshPoint p2 = oldMesh.vertices[d];
+			if (!window.inTheBox(p2.x,p2.y))
 				continue;
 			
+			// compute old coordinates of where river crosses box
+			MeshPoint p = MeshPoint.interpolate(p1, p2, x0, y0, width, height);
+	
 			// direct flow to corresponding point in new Map
-			double x2 = (p1.x - Ox) / x_shrink;
-			double y2 = (p1.y - Oy) / y_shrink;
-			MeshPoint p2 = newMesh.choosePoint(x2, y2);
-			w[p2.index] += fluxMap[i];
-			s[p2.index] = map.waterflow.suspended[i];
+			double x2 = (p.x - Ox) / x_shrink;
+			double y2 = (p.y - Oy) / y_shrink;
+			p = newMesh.choosePoint(x2, y2);
+			w[p.index] += fluxMap[i];
+			s[p.index] = map.waterflow.suspended[i];
 			if (parms.debug_level >= INFLUX_DEBUG)
-				System.out.println(String.format("... incoming[%d] += %.4f, susp += %.4f", 
-									p2.index, fluxMap[i], map.waterflow.suspended[i]));
+				System.out.println(String.format("... incoming[%d] (<%f,%f> ... %s) += %.4f, susp += %.4f", 
+									p.index, x2, y2, p, fluxMap[i], map.waterflow.suspended[i]));
 		}
 		
 		// push all of these changes back to the map

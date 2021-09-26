@@ -40,25 +40,42 @@ public class SubRegion {
 		String[] oldNames = map.getNameMap();
 		LinkedList<TradeRoute> oldTrade = map.tradeRoutes();
 		
+		// figure out the relative width/height of the new window
+		double x_shrink = width / Parameters.x_extent;
+		double y_shrink = height / Parameters.y_extent;
+		double Ox = x0 + (width/2);
+		double Oy = y0 + (height/2);
+		
 		// locate river entry and exit points
 		ArrayList<MeshPoint> entries = new ArrayList();
-		entries.add(new MeshPoint(-0.4999, -0.25));	// FIX WIP
-		entries.add(new MeshPoint(-0.4999, 0.0));
-		entries.add(new MeshPoint(-0.4999, 0.25));
-		entries.add(new MeshPoint(0.4999, -0.25));
-		entries.add(new MeshPoint(0.4999, 0.0));
-		entries.add(new MeshPoint(0.4999, 0.25));
-		entries.add(new MeshPoint(-0.25, -0.4999));
-		entries.add(new MeshPoint(0.0, -0.4999));
-		entries.add(new MeshPoint(0.25, -0.4999));
-		entries.add(new MeshPoint(-0.25, 0.4999));
-		entries.add(new MeshPoint(0.0, 0.4999));
-		entries.add(new MeshPoint(0.25, 0.4999));
+		for(int i = 0; i < oldMesh.vertices.length; i++) {
+			// find out-of-the-box points that flow into the box
+			if (fluxMap[i] <= 0)
+				continue;
+			MeshPoint p1 = oldMesh.vertices[i];
+			if (window.inTheBox(p1.x, p1.y))
+				continue;
+			int d = map.getDrainage().downHill[i];
+			if (d < 0)
+				continue;
+			MeshPoint p2 = oldMesh.vertices[d];
+			if (!window.inTheBox(p2.x,p2.y))
+				continue;
+			
+			// compute old coordinates of where river crosses box
+			MeshPoint p = MeshPoint.interpolate(p1, p2, x0, y0, width, height);
+			
+			// add new map coordinates of that point to new mesh
+			entries.add(new MeshPoint((p.x - Ox)/x_shrink, (p.y - Oy)/y_shrink));
+		}
 		
 		// create a new mesh
 		Mesh newMesh = new Mesh();
+		int save = parms.debug_level;	// FIX 86
+		parms.debug_level = 3;			// FIX 86
 		MeshPoint[] points = newMesh.makePoints(numPoints, entries);
 		newMesh.makeMesh(points);
+		parms.debug_level = save;	// FIX 86
 
 		// allocate new per-point attribute maps
 		int newlen = newMesh.vertices.length;
@@ -73,12 +90,6 @@ public class SubRegion {
 		double[] ef = new double[newlen];	// erosion scaling factors
 		double[] sf = new double[newlen];	// sedimentation scaling factors
 		
-		// figure out the relative width/height of the new window
-		double x_shrink = width / Parameters.x_extent;
-		double y_shrink = height / Parameters.y_extent;
-		double Ox = x0 + (width/2);
-		double Oy = y0 + (height/2);
-
 		// interpolate per-point attributes for each mesh point
 		for(int i = 0; i < newlen; i++) {
 			// find the corresponding previous-map coordinates

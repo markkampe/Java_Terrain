@@ -92,7 +92,6 @@ public class Mesh {
 		
 		// add in any seeded points
 		if (seeds != null && seeds.size() > 0) {
-			// FIX these points are in the list, but won't be in the voronoi mesh
 			MeshPoint[] newPoints = new MeshPoint[points.length + seeds.size()];
 			int i;
 			for(i = 0; i < points.length; i++)
@@ -366,7 +365,7 @@ public class Mesh {
 		VoronoiDiagram vd = new VoronoiDiagram();
 		for (int i = 0; i < points.length; i++) {
 			vd.insert_point_site(new Point(points[i].x, points[i].y));
-			if (parms.debug_level >= MESH_DEBUG)
+			if (parms.debug_level > MESH_DEBUG)
 				System.out.println("makeMesh inserting " + points[i]);
 		}
 		HalfEdgeDiagram g = vd.get_graph_reference();
@@ -400,13 +399,13 @@ public class Mesh {
 			
 			// ignore paths originating outside the box
 			if (!inTheBox(p1)) {
-				if (parms.debug_level >= MESH_DEBUG)
+				if (parms.debug_level > MESH_DEBUG)
 					System.out.println("ignoring out-of-the-box from <" +
 										p1.x + "," + p1.y + "> to <" + p2.x + "," + p2.y + ">");
 				continue;
 			}
 			if (!inTheBox(p2)) {
-				if (parms.debug_level >= MESH_DEBUG)
+				if (parms.debug_level > MESH_DEBUG)
 					System.out.println("ignoring out-of-the-box from <" +
 							p1.x + "," + p1.y + "> to <" + p2.x + "," + p2.y + ">");
 				continue;
@@ -415,7 +414,7 @@ public class Mesh {
 			// assign/get the vertex ID of each end
 			MeshPoint mp1 = pointhash.findPoint(p1.x, p1.y);
 			MeshPoint mp2 = pointhash.findPoint(p2.x, p2.y);
-			if (parms.debug_level >= MESH_DEBUG)
+			if (parms.debug_level > MESH_DEBUG)
 				System.out.println("Adding path from " + mp1 + " to " + mp2);
 			
 			// note that each is a neighbor of the other

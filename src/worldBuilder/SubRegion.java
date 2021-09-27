@@ -63,7 +63,7 @@ public class SubRegion {
 				continue;
 			
 			// compute old coordinates of where river crosses box
-			MeshPoint p = MeshPoint.interpolate(p1, p2, x0, y0, width, height);
+			MeshPoint p = MeshPoint.crossingPoint(p1, p2, x0, y0, width, height);
 			
 			// add new map coordinates of that point to new mesh
 			entries.add(new MeshPoint((p.x - Ox)/x_shrink, (p.y - Oy)/y_shrink));
@@ -123,7 +123,7 @@ public class SubRegion {
 				continue;
 			
 			// compute old coordinates of where river crosses box
-			MeshPoint p = MeshPoint.interpolate(p1, p2, x0, y0, width, height);
+			MeshPoint p = MeshPoint.crossingPoint(p1, p2, x0, y0, width, height);
 	
 			// direct flow to corresponding point in new Map
 			double x2 = (p.x - Ox) / x_shrink;
@@ -132,8 +132,8 @@ public class SubRegion {
 			w[p.index] += fluxMap[i];
 			s[p.index] = map.waterflow.suspended[i];
 			if (parms.debug_level >= INFLUX_DEBUG)
-				System.out.println(String.format("... incoming[%d] (<%f,%f> ... %s) += %.4f, susp += %.4f", 
-									p.index, x2, y2, p, fluxMap[i], map.waterflow.suspended[i]));
+				System.out.println(String.format("... incoming[%d] (%s) += %.4f, susp += %.4f", 
+									p.index, p, fluxMap[i], map.waterflow.suspended[i]));
 		}
 		
 		// push all of these changes back to the map

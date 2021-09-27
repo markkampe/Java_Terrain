@@ -116,6 +116,49 @@ public class MeshPoint {
 	}
 	
 	/**
+	 * Find the point where a river/route enters/exits a box
+	 * @param p1 source
+	 * @param p2 destination
+	 * @param x left edge of box
+	 * @param y top of box
+	 * @param width of box
+	 * @param height of box
+	 * @return MeshPoint for the interpoated point
+	 */
+	static public MeshPoint crossingPoint(MeshPoint p1, MeshPoint p2, double x, double y, double width, double height) {
+		// FIX actually solve for the intersection
+		
+		// see how much of the x range is inside the box
+		double min = (p1.x < p2.x) ? p1.x : p2.x;
+		double max = (p1.x < p2.x) ? p2.x : p1.x;
+		double left = x;
+		double right = x + width;
+		double x_range = 1.0;
+		if (min < left && max >= left)
+			x_range = (max - left)/(max - min);
+		else if (min <= right && max > right)
+			x_range = (right-min)/(max - min);
+		// see how much of the y range is inside the box
+		min = (p1.y < p2.y) ? p1.y : p2.y;
+		max = (p1.y < p2.y) ? p2.y : p1.y;
+		double top = y;
+		double bot = y + height;
+		double y_range = 1.0;
+		if (min < top && max >= top)
+			y_range = (max - top)/(max - min);
+		else if (min <= bot && max > bot)
+			y_range = (bot-min)/(max - min);
+			
+		// use the lesser of those as our interpolation factor
+		double dx = p2.x - p1.x;
+		double dy = p2.y - p1.y;
+		double inside = (x_range < y_range) ? x_range : y_range;
+		
+		// our estimate of where the line crosses the border
+		return new MeshPoint(p1.x + (dx * inside), p1.y + (dy * inside));
+	}
+	
+	/**
 	 * (recursive) QuickSort an array of MapPoints
 	 * @param arr ... array to be sorted
 	 * @param left ... left most index of sort region

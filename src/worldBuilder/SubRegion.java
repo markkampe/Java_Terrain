@@ -46,7 +46,7 @@ public class SubRegion {
 		double Ox = x0 + (width/2);
 		double Oy = y0 + (height/2);
 		
-		// locate river entry and exit points
+		// ensure river border-crossing points are in new Mesh
 		ArrayList<MeshPoint> entries = new ArrayList();
 		for(int i = 0; i < oldMesh.vertices.length; i++) {
 			// find points that deliver flux downhill
@@ -67,7 +67,7 @@ public class SubRegion {
 				MeshPoint n = new MeshPoint((p.x - Ox)/x_shrink, (p.y - Oy)/y_shrink);
 				entries.add(n);
 				if (parms.debug_level >= INFLUX_DEBUG)
-					System.out.println(String.format("... river %s box at %s -> %s",
+					System.out.println(String.format("... river %s box at (old) %s -> (new) %s",
 							in ? "enters" : "exits", p, n));
 				}
 		}

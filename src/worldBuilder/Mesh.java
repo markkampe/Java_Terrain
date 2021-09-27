@@ -339,12 +339,11 @@ public class Mesh {
 			}
 			newPoints[i++] = new MeshPoint(x_sum/numPoints, y_sum/numPoints);
 			
-			if (parms.debug_level  >= MESH_DEBUG)
+			if (parms.debug_level  > MESH_DEBUG)
 				System.out.println("initial point <" + v.position + "> -> " + newPoints[i-1]);
 		}
 		return(newPoints);
 	}
-	
 	
 	/**
 	 * turn a set of points into a mesh

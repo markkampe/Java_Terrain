@@ -608,6 +608,31 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 	}
 	
 	/**
+	 * return whether or not path between two points enters the box
+	 * 
+	 * @param x1 - outgoing x coordinate
+	 * @param y1 - outgoing y coordinate
+	 * @param x2 - incoming x coordinate
+	 * @param y2 - incoming y coordinate
+	 */
+	public boolean entersBox(double x1, double y1, double x2, double y2) {
+		return !inTheBox(x1, y1) && inTheBox(x2, y2);
+	}
+	
+	/**
+	 * return whether or not path between two points exits the box
+	 * 
+	 * @param x1 - outgoing x coordinate
+	 * @param y1 - outgoing y coordinate
+	 * @param x2 - incoming x coordinate
+	 * @param y2 - incoming y coordinate
+	 */
+	public boolean exitsBox(double x1, double y1, double x2, double y2) {
+		return inTheBox(x1, y1) && !inTheBox(x2, y2);
+	}
+	
+	
+	/**
 	 * highlight points (typically for diagnostic purposes
 	 * 
 	 * @param point number (-1 = reset)

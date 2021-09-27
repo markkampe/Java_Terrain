@@ -49,24 +49,27 @@ public class SubRegion {
 		// locate river entry and exit points
 		ArrayList<MeshPoint> entries = new ArrayList();
 		for(int i = 0; i < oldMesh.vertices.length; i++) {
-			// find out-of-the-box points that flow into the box
+			// find points that deliver flux downhill
 			if (fluxMap[i] <= 0)
-				continue;
-			MeshPoint p1 = oldMesh.vertices[i];
-			if (window.inTheBox(p1.x, p1.y))
 				continue;
 			int d = map.getDrainage().downHill[i];
 			if (d < 0)
 				continue;
+			
+			// does that flow enter or exit the box
+			MeshPoint p1 = oldMesh.vertices[i];
 			MeshPoint p2 = oldMesh.vertices[d];
-			if (!window.inTheBox(p2.x,p2.y))
-				continue;
-			
-			// compute old coordinates of where river crosses box
-			MeshPoint p = MeshPoint.crossingPoint(p1, p2, x0, y0, width, height);
-			
-			// add new map coordinates of that point to new mesh
-			entries.add(new MeshPoint((p.x - Ox)/x_shrink, (p.y - Oy)/y_shrink));
+			boolean in = window.entersBox(p1.x, p1.y, p2.x, p2.y);
+			boolean out = window.exitsBox(p1.x, p1.y, p2.x, p2.y);
+			if (in || out) {
+				// find crossing point, and add it to new Mesh
+				MeshPoint p = MeshPoint.crossingPoint(p1, p2, x0, y0, width, height);
+				MeshPoint n = new MeshPoint((p.x - Ox)/x_shrink, (p.y - Oy)/y_shrink);
+				entries.add(n);
+				if (parms.debug_level >= INFLUX_DEBUG)
+					System.out.println(String.format("... river %s box at %s -> %s",
+							in ? "enters" : "exits", p, n));
+				}
 		}
 		
 		// create a new mesh
@@ -109,31 +112,28 @@ public class SubRegion {
 		
 		// reproduce all water flows into the box
 		for(int i = 0; i < oldMesh.vertices.length; i++) {
-			// find out-of-the-box points that flow into the box
+			// find all old Mesh points that deliver water downhill
 			if (fluxMap[i] <= 0)
-				continue;
-			MeshPoint p1 = oldMesh.vertices[i];
-			if (window.inTheBox(p1.x, p1.y))
 				continue;
 			int d = map.getDrainage().downHill[i];
 			if (d < 0)
 				continue;
-			MeshPoint p2 = oldMesh.vertices[d];
-			if (!window.inTheBox(p2.x,p2.y))
-				continue;
 			
-			// compute old coordinates of where river crosses box
-			MeshPoint p = MeshPoint.crossingPoint(p1, p2, x0, y0, width, height);
-	
-			// direct flow to corresponding point in new Map
-			double x2 = (p.x - Ox) / x_shrink;
-			double y2 = (p.y - Oy) / y_shrink;
-			p = newMesh.choosePoint(x2, y2);
-			w[p.index] += fluxMap[i];
-			s[p.index] = map.waterflow.suspended[i];
-			if (parms.debug_level >= INFLUX_DEBUG)
-				System.out.println(String.format("... incoming[%d] (%s) += %.4f, susp += %.4f", 
-									p.index, p, fluxMap[i], map.waterflow.suspended[i]));
+			// does that flow enter the new Mesh box
+			MeshPoint p1 = oldMesh.vertices[i];
+			MeshPoint p2 = oldMesh.vertices[d];
+			if (window.entersBox(p1.x, p1.y, p2.x, p2.y)) {
+				// create incoming flow at crossing point on new map
+				MeshPoint p = MeshPoint.crossingPoint(p1, p2, x0, y0, width, height);
+				double x2 = (p.x - Ox) / x_shrink;
+				double y2 = (p.y - Oy) / y_shrink;
+				p = newMesh.choosePoint(x2, y2);	// closest point in new Mesh
+				w[p.index] += fluxMap[i];
+				s[p.index] = map.waterflow.suspended[i];
+				if (parms.debug_level >= INFLUX_DEBUG)
+					System.out.println(String.format("... incoming[%d] (<%.5f,%.5f> -> %s) += %.4f, susp += %.4f", 
+										p.index, x2, y2, p, fluxMap[i], map.waterflow.suspended[i]));
+			}	
 		}
 		
 		// push all of these changes back to the map

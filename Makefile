@@ -78,6 +78,7 @@ $(PACKAGE).jar: bin/worldBuilder/*.class
 	# copy in the non-standard libraries we need
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/OpenVoronoi.jar
 	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/javax.json-1.0.2.jar
+	cd $(WORK)/$(BINARIES); jar -xf $(CURDIR)/lib/commons-math3-3.4.1.jar
 	# create a manifest and jar
 	echo "Manifest-Version: 1.0" > $(WORK)/manifest
 	echo "Main-Class: $(PACKAGE).WorldBuilder" >> $(WORK)/manifest

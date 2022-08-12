@@ -47,7 +47,7 @@ public class SubRegion {
 		double Oy = y0 + (height/2);
 		
 		// ensure river border-crossing points are in new Mesh
-		ArrayList<MeshPoint> entries = new ArrayList();
+		ArrayList<MeshPoint> entries = new ArrayList<MeshPoint>();
 		for(int i = 0; i < oldMesh.vertices.length; i++) {
 			// find points that deliver flux downhill
 			if (fluxMap[i] <= 0)

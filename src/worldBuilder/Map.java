@@ -200,23 +200,23 @@ public class Map {
 			case VALUE_STRING:
 			case VALUE_NUMBER:
 				if (inSteps) {
-					route_steps[num_steps++] = new Integer(parser.getString());
+					route_steps[num_steps++] = Integer.valueOf(parser.getString());
 					break;
 				}
 				switch(thisKey) {
 					case "length":
-						length = new Integer(parser.getString());
+						length = Integer.valueOf(parser.getString());
 						break;
 
 					// per point attributes
 					case "x":
-						x = new Double(parser.getString());
+						x = Double.valueOf(parser.getString());
 						break;
 					case "y":
-						y = new Double(parser.getString());
+						y = Double.valueOf(parser.getString());
 						break;
 					case "z":
-						z = new Double(parser.getString());
+						z = Double.valueOf(parser.getString());
 						break;
 						
 					case "soil":
@@ -236,7 +236,7 @@ public class Map {
 						int u = s.indexOf(Parameters.unit_r);
 						if (u != -1)
 							s = s.substring(0, u);
-						rain = new Double(s);
+						rain = Double.valueOf(s);
 						break;
 						
 					case "influx":
@@ -244,19 +244,19 @@ public class Map {
 						u = s.indexOf(Parameters.unit_f);
 						if (u != -1)
 							s = s.substring(0, u);
-						influx = new Double(s);
+						influx = Double.valueOf(s);
 						break;
 						
 					case "erosion":
-						erosion = new Double(parser.getString());
+						erosion = Double.valueOf(parser.getString());
 						break;
 						
 					case "e_factor":
-						e_factor = new Double(parser.getString());
+						e_factor = Double.valueOf(parser.getString());
 						break;
 						
 					case "s_factor":
-						s_factor = new Double(parser.getString());
+						s_factor = Double.valueOf(parser.getString());
 						break;
 						
 					case "suspended":
@@ -264,7 +264,7 @@ public class Map {
 						u = s.indexOf(Parameters.unit_f);
 						if (u != -1)
 							s = s.substring(0, u);
-						suspended = new Double(s);
+						suspended = Double.valueOf(s);
 						break;
 						
 					case "name":
@@ -273,7 +273,7 @@ public class Map {
 					
 					// route attributes
 					case "cost":
-						route_cost = new Double(parser.getString());
+						route_cost = Double.valueOf(parser.getString());
 						break;
 						
 					// world attributes
@@ -282,7 +282,7 @@ public class Map {
 						u = s.indexOf(Parameters.unit_z);
 						if (u != -1)
 							s = s.substring(0, u);
-						parms.sea_level = new Double(s) / parms.z_range;
+						parms.sea_level = Double.valueOf(s) / parms.z_range;
 						break;
 						
 					case "amount":
@@ -290,11 +290,11 @@ public class Map {
 						u = s.indexOf(Parameters.unit_r);
 						if (u != -1)
 							s = s.substring(0, u);
-						parms.dAmount = new Integer(s);
+						parms.dAmount = Integer.valueOf(s);
 						break;
 						
 					case "direction":
-						parms.dDirection = new Integer(parser.getString());
+						parms.dDirection = Integer.valueOf(parser.getString());
 						break;
 						
 					case "radius":
@@ -302,11 +302,11 @@ public class Map {
 						u = s.indexOf(Parameters.unit_xy);
 						if (u != -1)
 							s = s.substring(0, u);
-						parms.radius = new Integer(s);
+						parms.radius = Integer.valueOf(s);
 						break;
 						
 					case "tilt":
-						parms.tilt = new Double(parser.getString());
+						parms.tilt = Double.valueOf(parser.getString());
 						break;
 						
 					case "xy_range":
@@ -314,7 +314,7 @@ public class Map {
 						u = s.indexOf(Parameters.unit_xy);
 						if (u != -1)
 							s = s.substring(0, u);
-						parms.xy_range = new Integer(s);
+						parms.xy_range = Integer.valueOf(s);
 						break;
 						
 					case "z_range":
@@ -322,15 +322,15 @@ public class Map {
 						u = s.indexOf(Parameters.unit_z);
 						if (u != -1)
 							s = s.substring(0, u);
-						parms.z_range = new Integer(s);
+						parms.z_range = Integer.valueOf(s);
 						break;
 						
 					case "latitude":
-						parms.latitude = new Double(parser.getString());
+						parms.latitude = Double.valueOf(parser.getString());
 						break;
 						
 					case "longitude":
-						parms.longitude = new Double(parser.getString());
+						parms.longitude = Double.valueOf(parser.getString());
 						break;
 						
 					case "map_name":

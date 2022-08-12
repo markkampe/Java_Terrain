@@ -416,7 +416,7 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 					sel_type = Selection.NONE;
 		} else if (sel_mode == Selection.POINTS) {
 			selectPoints(x_start, y_start, e.getX(), e.getY(),
-					(e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+					(e.getModifiersEx() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 			if (listener != null && !listener.groupSelected(sel_points, selected))
 				sel_type = Selection.NONE;
 		} else if (sel_mode == Selection.SQUARE) {

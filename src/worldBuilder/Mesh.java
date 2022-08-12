@@ -160,7 +160,7 @@ public class Mesh {
 			case VALUE_STRING:
 			case VALUE_NUMBER:
 				if (inNeighbors) {
-					int n = new Integer(parser.getString());
+					int n = Integer.valueOf(parser.getString());
 					vertices[points].addNeighbor(vertices[n]);
 					if (points < n)	// a path only counts once
 						paths++;
@@ -169,16 +169,16 @@ public class Mesh {
 				
 				switch(thisKey) {
 					case "length":
-						length = new Integer(parser.getString());
+						length = Integer.valueOf(parser.getString());
 						vertices = new MeshPoint[length];
 						break;
 						
 					case "x":
-						x = new Double(parser.getString());
+						x = Double.valueOf(parser.getString());
 						break;
 						
 					case "y":
-						y = new Double(parser.getString());
+						y = Double.valueOf(parser.getString());
 						break;
 				}
 				break;

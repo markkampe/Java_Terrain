@@ -770,9 +770,9 @@ public class WorldBuilder  extends JFrame
 			if (args[i].startsWith(SWITCH_CHAR)) {	
 				if (args[i].startsWith("-d")) {
 					if (args[i].length() > 2)
-						debug = new Integer(args[i].substring(2));
+						debug = Integer.valueOf(args[i].substring(2));
 					else
-						debug = new Integer(args[++i]);
+						debug = Integer.valueOf(args[++i]);
 				} else if (args[i].startsWith("-c")) {
 					if (args[i].length() > 2)
 						configname = args[i].substring(2);

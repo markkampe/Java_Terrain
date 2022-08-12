@@ -87,11 +87,11 @@ public class MapReader {
 					break;
 					
 				case "height":
-					height = new Integer(parser.getString());
+					height = Integer.valueOf(parser.getString());
 					break;
 					
 				case "width":
-					width = new Integer(parser.getString());
+					width = Integer.valueOf(parser.getString());
 					break;
 					
 				case "tilesize":
@@ -99,15 +99,15 @@ public class MapReader {
 					int x = s.indexOf('m');
 					if (x != -1)
 						s = s.substring(0, x-1);
-					tileSize = new Integer(s);
+					tileSize = Integer.valueOf(s);
 					break;
 					
 				case "latitude":
-					lat = new Double(parser.getString());
+					lat = Double.valueOf(parser.getString());
 					break;
 					
 				case "longitude":
-					lon = new Double(parser.getString());
+					lon = Double.valueOf(parser.getString());
 					break;
 					
 				case "altitude":
@@ -115,7 +115,7 @@ public class MapReader {
 					x = s.indexOf('m');
 					if (x != -1)
 						s = s.substring(0, x);
-					altitude[row][col] = new Double(s);
+					altitude[row][col] = Double.valueOf(s);
 					break;
 					
 				case "rainfall":
@@ -123,7 +123,7 @@ public class MapReader {
 					x = s.indexOf("cm");
 					if (x != -1)
 						s = s.substring(0, x);
-					rainfall[row][col] = new Integer(s);
+					rainfall[row][col] = Integer.valueOf(s);
 					break;
 					
 				case "depth":
@@ -131,7 +131,7 @@ public class MapReader {
 					x = s.indexOf('m');
 					if (x != -1)
 						s = s.substring(0, x);
-					depth[row][col] = new Double(s);
+					depth[row][col] = Double.valueOf(s);
 					break;
 					
 				case "soil":
@@ -144,21 +144,21 @@ public class MapReader {
 					x = s.indexOf('C');
 					if (x != -1)
 						s = s.substring(0, x-1);
-					mean_temp = new Double(s);
+					mean_temp = Double.valueOf(s);
 					break;
 				case "summer":
 					s = parser.getString();
 					x = s.indexOf('C');
 					if (x != -1)
 						s = s.substring(0, x-1);
-					summer_temp = new Double(s);
+					summer_temp = Double.valueOf(s);
 					break;
 				case "winter":
 					s = parser.getString();
 					x = s.indexOf('C');
 					if (x != -1)
 						s = s.substring(0, x-1);
-					winter_temp = new Double(s);
+					winter_temp = Double.valueOf(s);
 					break;
 				}
 				break;

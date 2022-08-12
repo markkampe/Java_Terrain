@@ -60,14 +60,14 @@ public class RPGMdump extends JFrame {
 			if (args[i].startsWith(SWITCH_CHAR)) {	
 				if (args[i].startsWith("-l")) {
 					if (args[i].length() > 2)
-						level = new Integer(args[i].substring(2));
+						level = Integer.valueOf(args[i].substring(2));
 					else
-						level = new Integer(args[++i]);
+						level = Integer.valueOf(args[++i]);
 				} else if (args[i].startsWith("-w")) {
 					if (args[i].length() > 2)
-						width = new Integer(args[i].substring(2));
+						width = Integer.valueOf(args[i].substring(2));
 					else
-						width = new Integer(args[++i]);
+						width = Integer.valueOf(args[++i]);
 				} else if (args[i].startsWith("-s")) {
 					suppress = true;
 				} else {

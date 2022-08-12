@@ -415,146 +415,146 @@ public class Parameters {
 				switch (thisKey) {
 				// default window parameters
 				case "height":
-					height = new Integer(parser.getString());
+					height = Integer.valueOf(parser.getString());
 					break;
 				case "width":
-					width = new Integer(parser.getString());
+					width = Integer.valueOf(parser.getString());
 					break;
 				case "border":
-					border = new Integer(parser.getString());
+					border = Integer.valueOf(parser.getString());
 					break;
 
 				case "dialog_border":
-					dialogBorder = new Integer(parser.getString());
+					dialogBorder = Integer.valueOf(parser.getString());
 					break;
 
 				// default planetary parameters
 				case "latitude":
-					latitude = new Double(parser.getString());
+					latitude = Double.valueOf(parser.getString());
 					break;
 				case "longitude":
-					longitude = new Double(parser.getString());
+					longitude = Double.valueOf(parser.getString());
 					break;
 				case "radius":
-					radius = new Integer(parser.getString());
+					radius = Integer.valueOf(parser.getString());
 					break;
 				case "tilt":
-					tilt = new Double(parser.getString());
+					tilt = Double.valueOf(parser.getString());
 					break;
 
 				// limits on configuration sliders
 				case "diameter_unit":
-					diam_scale = new Integer(parser.getString());
+					diam_scale = Integer.valueOf(parser.getString());
 					break;
 				case "diameter_max":
-					diameter_max = new Integer(parser.getString());
+					diameter_max = Integer.valueOf(parser.getString());
 					break;
 				case "diameter_grain":
-					diam_grain = new Integer(parser.getString());
+					diam_grain = Integer.valueOf(parser.getString());
 					break;
 				case "mountain_fraction":
-					m_width_divisor = new Integer(parser.getString());
+					m_width_divisor = Integer.valueOf(parser.getString());
 					break;
 				case "altitude_unit":
-					alt_scale = new Integer(parser.getString());
+					alt_scale = Integer.valueOf(parser.getString());
 					break;
 				case "altitude_max":
-					alt_max = new Integer(parser.getString());
+					alt_max = Integer.valueOf(parser.getString());
 					break;
 				case "msl_range":
-					msl_range = new Integer(parser.getString());
+					msl_range = Integer.valueOf(parser.getString());
 					break;
 				case "tribute_max":
-					tribute_max = new Integer(parser.getString());
+					tribute_max = Integer.valueOf(parser.getString());
 					break;
 				case "tiles_max":
-					tiles_max = new Integer(parser.getString());
+					tiles_max = Integer.valueOf(parser.getString());
 					break;
 				case "slope_min":
-					slope_init = new Double(parser.getString());
+					slope_init = Double.valueOf(parser.getString());
 					break;
 
 				// physical process parameters
 				case "Ve": // critical velocity for erosion
-					Ve = new Double(parser.getString());
+					Ve = Double.valueOf(parser.getString());
 					break;
 				case "Vd": // critical velocity for deposition
-					Vd = new Double(parser.getString());
+					Vd = Double.valueOf(parser.getString());
 					break;
 				case "Vmin": // lowest water velocity
-					Vmin = new Double(parser.getString());
+					Vmin = Double.valueOf(parser.getString());
 				case "Vmax": // highest water velocity
-					Vmax = new Double(parser.getString());
+					Vmax = Double.valueOf(parser.getString());
 				case "Dp": // rain penetration depth (m)
-					Dp = new Double(parser.getString());
+					Dp = Double.valueOf(parser.getString());
 					break;
 				case "Ce": // per-point erosion coefficient
-					Ce = new Double(parser.getString());
+					Ce = Double.valueOf(parser.getString());
 					break;
 				case "Cd": // per-point deposition coefficient
-					Cd = new Double(parser.getString());
+					Cd = Double.valueOf(parser.getString());
 					break;
 				case "Cs": // per-point silting coefficient
-					Cs = new Double(parser.getString());
+					Cs = Double.valueOf(parser.getString());
 					break;
 				case "evt_mult": // evapo-transpiration coefficient
-					evt_mult = new Double(parser.getString());
+					evt_mult = Double.valueOf(parser.getString());
 					break;
 				case "evt_base": // evapo-transpiration offset
-					evt_base = new Double(parser.getString());
+					evt_base = Double.valueOf(parser.getString());
 					break;
 				case "EVT": 	// evapo-transpiration scaling factor
-					evt_scale = new Double(parser.getString());
+					evt_scale = Double.valueOf(parser.getString());
 					break;
 				case "sediment": // sedimentary layer thickness
-					sediment = new Double(parser.getString());
+					sediment = Double.valueOf(parser.getString());
 					break;
 
 				// map rendering parameters
 				case "topo_major":
-					topo_major = new Integer(parser.getString());
+					topo_major = Integer.valueOf(parser.getString());
 					break;
 				case "topo_minor":
-					topo_minor = new Integer(parser.getString());
+					topo_minor = Integer.valueOf(parser.getString());
 					break;
 				case "stream":
-					stream_flux = new Double(parser.getString());
+					stream_flux = Double.valueOf(parser.getString());
 					break;
 				case "river":
-					river_flux = new Double(parser.getString());
+					river_flux = Double.valueOf(parser.getString());
 					break;
 				case "artery":
-					artery_flux = new Double(parser.getString());
+					artery_flux = Double.valueOf(parser.getString());
 					break;
 				case "deep":
-					deep_threshold = new Integer(parser.getString());
+					deep_threshold = Integer.valueOf(parser.getString());
 					break;
 					
 				// export parameters
 					
 				// mesh creation parameters
 				case "points":
-					points = new Integer(parser.getString());
+					points = Integer.valueOf(parser.getString());
 					break;
 				case "improvements":
-					improvements = new Integer(parser.getString());
+					improvements = Integer.valueOf(parser.getString());
 					break;
 					
 				// trade route parameters
 				case "flat km":
-					dTimeTravel = new Integer(parser.getString());
+					dTimeTravel = Integer.valueOf(parser.getString());
 					break;
 				case "climb 1000m":
-					dTimeClimb = new Integer(parser.getString());
+					dTimeClimb = Integer.valueOf(parser.getString());
 					break;
 				case "cross 1m3/s":
-					dTimeCross = new Integer(parser.getString());
+					dTimeCross = Integer.valueOf(parser.getString());
 					break;
 				case "min/day":
-					dTravelDay = new Integer(parser.getString());
+					dTravelDay = Integer.valueOf(parser.getString());
 					break;
 				case "max days":
-					dTravelMax = new Double(parser.getString());
+					dTravelMax = Double.valueOf(parser.getString());
 					break;
 
 				default:

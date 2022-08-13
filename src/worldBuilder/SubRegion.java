@@ -64,7 +64,7 @@ public class SubRegion {
 			if (in || out) {
 				// find crossing point, and add it to new Mesh
 				MeshPoint p = MeshPoint.crossingPoint(p1, p2, x0, y0, width, height);
-				MeshPoint n = new MeshPoint((p.x - Ox)/x_shrink, (p.y - Oy)/y_shrink);
+				MeshPoint n = new MeshPoint(inBox((p.x - Ox)/x_shrink), inBox((p.y - Oy)/y_shrink));
 				entries.add(n);
 				if (parms.debug_level >= INFLUX_DEBUG)
 					System.out.println(String.format("... river %s box at (old) %s -> (new) %s",
@@ -125,8 +125,8 @@ public class SubRegion {
 			if (window.entersBox(p1.x, p1.y, p2.x, p2.y)) {
 				// create incoming flow at crossing point on new map
 				MeshPoint p = MeshPoint.crossingPoint(p1, p2, x0, y0, width, height);
-				double x2 = (p.x - Ox) / x_shrink;
-				double y2 = (p.y - Oy) / y_shrink;
+				double x2 = inBox((p.x - Ox) / x_shrink);
+				double y2 = inBox((p.y - Oy) / y_shrink);
 				p = newMesh.choosePoint(x2, y2);	// closest point in new Mesh
 				w[p.index] += fluxMap[i];
 				s[p.index] = map.waterflow.suspended[i];
@@ -216,5 +216,21 @@ public class SubRegion {
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * ensure an x/y coordinate to be entirely within the map
+	 * 
+	 * @param v	input value
+	 * @return 	corrected value
+	 */
+	private static final double EPSILON = 0.00001;
+	private double inBox(double v) {
+		if (v <= -Parameters.x_extent/2)
+			return -Parameters.x_extent/2 + EPSILON;
+		else if (v >= Parameters.x_extent/2)
+			return Parameters.x_extent/2 - EPSILON;
+		else
+			return v;
 	}
 }

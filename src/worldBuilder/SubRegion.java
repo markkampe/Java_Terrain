@@ -72,6 +72,8 @@ public class SubRegion {
 				}
 		}
 		
+		// TODO - create entries for trade route entry/exit points
+	
 		// create a new mesh
 		Mesh newMesh = new Mesh();
 		MeshPoint[] points = newMesh.makePoints(numPoints, entries);

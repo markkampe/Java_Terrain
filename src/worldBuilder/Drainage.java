@@ -95,6 +95,17 @@ public class Drainage {
 		recompute();
 	}
 	
+	/**
+	 * recompute the down-hill-drainage topography
+	 *    1. determine which points are oceanic (hence irrelevant)
+	 *    2. identify the down-hill neighbor of every non-oceanic point
+	 *    3. identify the ultimate sink-point of every non-oceanic point
+	 *    4. for each sink-point
+	 *           find its escape point (lowest neighbor not in same sink)
+	 *           a) reroute flow from sink-point to escape-point
+	 *           b) move all points in this sink to escape-point's sink
+	 *           c) escape points on edge of map are considered to drain off-map
+	 */
 	public void recompute() {
 		// reload the maps that are likely to have changed
 		this.heightMap = map.getHeightMap();
@@ -266,7 +277,7 @@ public class Drainage {
 						debug_log.write(msg + "\n");
 					}
 					
-					// 1. route downhill flow from sink bottom to escape point
+					// 4a. route downhill flow from sink bottom to escape point
 					if (escapeTo == escapeThru) {	// escape point in another sink
 						downHill[s] = escapeTo;
 						references[escapeTo] += 1;
@@ -280,7 +291,7 @@ public class Drainage {
 						references[escapeTo] += 1;
 					}
 					
-					// 2. move all points in this sink to escape point's sink
+					// 4b move all points in this sink to escape point's sink
 					for(int i = 0; i < mesh.vertices.length; i++) {
 						if (sinkMap[i] == s) {
 							sinkMap[i] = sinkMap[escapeTo];
@@ -289,7 +300,7 @@ public class Drainage {
 						}
 					}
 					
-					// 3. consider escape point on edge part of the lake
+					// 4c consider escape point on edge part of the lake
 					if (escapeTo == escapeThru) {
 						outlet[escapeTo] = escapeHeight;
 						// if it is an edge point, it drains off map

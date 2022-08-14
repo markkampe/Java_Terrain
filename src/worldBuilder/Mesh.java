@@ -96,6 +96,7 @@ public class Mesh {
 			int i;
 			for(i = 0; i < points.length; i++)
 				newPoints[i] = points[i];
+			// FIX - seeded points do not make it into the final mesh (makeMesh note V)
 			for(MeshPoint p: seeds) {
 				newPoints[i++] = p;
 				if (parms.debug_level >= MESH_DEBUG)
@@ -354,8 +355,12 @@ public class Mesh {
 	 * 			add each new end to our vertex list
 	 * 			add the edge as path in/out of each vertex
 	 * 
-	 * NOTE: that the original points are replaced with the
+	 * NOTE V: the inserted points are replaced with the
 	 * 		 vertices of the corresponding Voronoi polygons.
+	 * 		 This may explain why seeded (entry/exit) points
+	 * 		 from makePoints, while correctly inserted into the
+	 * 	     VoronoiDiagram, are not present in the final set
+	 * 		 of virtices.
 	 */
 	public void makeMesh( MeshPoint[] points ) {
 		int numPaths = 0;
@@ -380,7 +385,7 @@ public class Mesh {
 			// ignore APEX (mid-line) points when they are sources
 			Point p1 = e.source.position;
 			if (e.source.type == VertexType.APEX) {
-				if (parms.debug_level >= MESH_DEBUG)
+				if (parms.debug_level > MESH_DEBUG)
 					System.out.println("Ignoring source APEX at <" +
 							p1.x + "," + p1.y + ">");
 				continue;	
@@ -402,13 +407,13 @@ public class Mesh {
 			
 			// ignore paths originating outside the box
 			if (!inTheBox(p1)) {
-				if (parms.debug_level >= MESH_DEBUG)
+				if (parms.debug_level > MESH_DEBUG)
 					System.out.println("ignoring out-of-the-box from <" +
 										p1.x + "," + p1.y + "> to <" + p2.x + "," + p2.y + ">");
 				continue;
 			}
 			if (!inTheBox(p2)) {
-				if (parms.debug_level >= MESH_DEBUG)
+				if (parms.debug_level > MESH_DEBUG)
 					System.out.println("ignoring out-of-the-box from <" +
 							p1.x + "," + p1.y + "> to <" + p2.x + "," + p2.y + ">");
 				continue;
@@ -417,7 +422,7 @@ public class Mesh {
 			// assign/get the vertex ID of each end
 			MeshPoint mp1 = pointhash.findPoint(p1.x, p1.y);
 			MeshPoint mp2 = pointhash.findPoint(p2.x, p2.y);
-			if (parms.debug_level >= MESH_DEBUG)
+			if (parms.debug_level > MESH_DEBUG)
 				System.out.println("Adding path from " + mp1 + " to " + mp2);
 			
 			// note that each is a neighbor of the other

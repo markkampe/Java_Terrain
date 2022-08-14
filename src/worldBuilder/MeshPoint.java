@@ -126,7 +126,7 @@ public class MeshPoint {
 	 * @return MeshPoint for the desired crossing point
 	 */
 	static public MeshPoint crossingPoint(MeshPoint p1, MeshPoint p2, double x, double y, double width, double height) {
-		// SOMEDAY replace interpolation w/solving for intersection
+		// SOMEDAY replace (imprecise) interpolation w/solving for intersection
 		
 		// see how much of the x range is inside the box
 		double min = (p1.x < p2.x) ? p1.x : p2.x;

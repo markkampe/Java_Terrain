@@ -5,7 +5,7 @@ import java.awt.Color;
 public class SoilPreview extends PreviewMap {
 
 	private static final long serialVersionUID = -1;
-	// TODO ... read these in from geotopes.json
+	// TODO ... read these (and preview colors) in from geotopes.json
 	private static String[] soil_types = {
 		"Alluvial", "Sand Stone", "Granite", "Basalt", 
 		"Lime Stone", "Marble",

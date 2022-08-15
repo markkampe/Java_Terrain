@@ -43,13 +43,19 @@ import org.rogach.jopenvoronoi.VoronoiDiagram;
  *
  *         1. He starts by generating N completely randomly chosen points. But
  *         these turn out to be a little to clumpy, so he smoothes them out
- *         (improves them) by finding the Voronoi polygons around those points
- *         and using their vertices.
+ *         (improves them) by using the polygon centroids as next set of points.
  *
  *         2. He uses those (improved) points as the centers for a second
  *         Voronoi tesselation, whose vertices become the map points, and
  *         whose edges become a connected mesh (each internal point has
  *         three neighbors).
+ *      
+ *      A Voronoi diagram is a partition of a plane, based on a set of points,
+ *      such that each polygon is the set of points closest to one of the
+ *      original seed points:
+ *         - each edge is a line that is equidistant from each of two points.
+ *         - a vertex is an intersection of two lines, and thus equidistant
+ *           from three points.
  */
 public class Mesh {
 	/** the MeshPoints in this Mesh */
@@ -98,6 +104,7 @@ public class Mesh {
 				newPoints[i] = points[i];
 			for(MeshPoint p: seeds) {
 				newPoints[i++] = p;
+				// FIX choose a point equidistant and 180 degrees from nearest
 				if (parms.debug_level >= MESH_DEBUG)
 					System.out.println("seeded MeshPoint " + newPoints[i-1]);
 			}
@@ -431,6 +438,7 @@ public class Mesh {
 		for(int i = 0; i < pointhash.numVertices; i++)
 			vertices[i] = pointhash.vertices[i];
 		
+		// FIX scale the mesh to exactly fill the map
 		/*
 		 * NOTE
 		 * I was irritated by the number of disconnected edge-points and

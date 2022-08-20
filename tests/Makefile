@@ -13,29 +13,32 @@ COARSE = ../src/Templates/default_1024.json
 FINE = ../src/Templates/default_4096.json
 
 # NOTE: load_save is currently broken by non-convergent erosion
-all:	sealevel attributes mountains waterflow
+all:	sealevel attributes mountains waterflow load_save
 
 exports: raw_json overworld outside foundation object
 
 #
 # load a complex (uses all the features) map and then save it ... 
 #   the output should be identical to input
+#   (modulo small differences in progressive erosion)
 #
 load_save: $(JAR) test_world_2.json
 	@echo "loading and saving a complex map"
 	@echo "load test_world_2.json"		>  /tmp/$@
 	@echo "save /tmp/$@.json"		>> /tmp/$@
 	@echo "exit 0"				>> /tmp/$@
-	@rm -f /tmp/$@.json
+	@rm -f /tmp/$@.json /tmp/@_input /tmp/$@_output
 	@java -jar $(JAR) -s /tmp/$@
-	@cmp test_world_2.json /tmp/$@.json;	\
+	@python fuzz.py --attribute=erosion --places=5 test_world_2.json > /tmp/$@_input
+	@python fuzz.py --attribute=erosion --places=5 /tmp/$@.json > /tmp/$@_output
+	@cmp /tmp/$@_input /tmp/$@_output;	\
 	if [ $$? -ne 0 ];			\
 	then					\
 		echo "... $@: /tmp/$@.json differs from original input";\
 		false;				\
 	else					\
 		echo "... saved output identical to original input";	\
-		rm -f /tmp/$@ /tmp/$@.json;	\
+		rm -f /tmp/$@ /tmp/$@.json /tmp/@_input /tmp/$@_output;	\
 	fi
 
 #

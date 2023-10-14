@@ -13,6 +13,10 @@ JsonDump.jar
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+# Ephemeral TODO lists and debug output
+TODO_WB.txt
+WB_DEBUG
+
 # Package Files #
 *.war
 *.ear

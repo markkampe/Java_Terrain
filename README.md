@@ -5,3 +5,11 @@ We have ideas for additional features (natural resources, villages and cities, t
 
 I started with a fork of MEWO2's Terrain builder, where I will continue to do commenting and refactoring, for my own education, and as a service to others who might be interested in this code.  But in working with it, I have realized that Javascript is a poor choice for a program that will operate on local files.  While this program has very different goals than O'Leary's, it greatly benefits form his thoughts on inexpensive generation of satisfying terrain.
 
+This has been created as an Eclipse Java project (configured by the .project, .classpath and .settings) files).  To import it into Eclipse:
+ - choose a (Java project) work-space directory (new mkdir fine)
+ - import project from files, this directory
+ - build and run: src/worldBuilder/WorldBuilder.java
+ - after class files have been built (in bin sub-directory):
+    - make (jars) ... create jars for the (3) programs
+    - make debian ... create a .deb package for the jars
+ - cd tests; make ... run basic test suite on the WorldBuilder jar

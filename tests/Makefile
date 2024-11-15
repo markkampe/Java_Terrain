@@ -29,8 +29,8 @@ load_save: $(JAR) test_world_2.json
 	@echo "exit 0"				>> /tmp/$@
 	@rm -f /tmp/$@.json /tmp/@_input /tmp/$@_output
 	@java -jar $(JAR) -s /tmp/$@
-	@python fuzz.py --attribute=erosion --places=5 test_world_2.json > /tmp/$@_input
-	@python fuzz.py --attribute=erosion --places=5 /tmp/$@.json > /tmp/$@_output
+	@python3 fuzz.py --attribute=erosion --places=5 test_world_2.json > /tmp/$@_input
+	@python3 fuzz.py --attribute=erosion --places=5 /tmp/$@.json > /tmp/$@_output
 	@cmp /tmp/$@_input /tmp/$@_output;	\
 	if [ $$? -ne 0 ];			\
 	then					\

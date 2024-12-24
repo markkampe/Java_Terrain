@@ -206,3 +206,4 @@ clobber: clean
 
 clean:
 	rm -f $(PACKAGE)-$(VERSION).deb $(PACKAGE).rpm $(PACKAGE).App $(PACKAGE).wnx
+	rm -f $(BINARIES)/$(PACKAGE)/*.class $(BINARIES)/$(RPGMDUMP)/*.class $(BINARIES)/$(JSONDUMP)/*.class

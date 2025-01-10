@@ -23,6 +23,7 @@ WB_DEBUG
 *.zip
 *.tar.gz
 *.rar
+*.deb
 
 # Javadoc output
 /docs/*.png

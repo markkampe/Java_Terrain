@@ -240,7 +240,7 @@ public class Script {
 			case "display":		// display-options
 				if (tokens[1] != null) {
 					window.display = 0;
-					window.setDisplay(displayOptions(tokens[1]), true);
+					parms.display_options = window.setDisplay(displayOptions(tokens[1]), true);
 				} else {
 					window.repaint();
 				}

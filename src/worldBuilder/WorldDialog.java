@@ -26,8 +26,9 @@ public class WorldDialog extends JFrame implements ActionListener, ChangeListene
 		private JTextField region_name;
 		private JTextField author_name;
 		
-		private static final int minor_choices[] = {1, 5, 10, 50, 100, 500, 1000};
-		private static final int major_choices[] = {5, 10, 20};
+		// these parameters can only have limited range of values
+		private static final int minor_choices[] = {1, 5, 10, 25, 50, 100, 250, 500, 1000};
+		private static final int major_choices[] = {4, 5, 10, 20};
 		
 		private static final long serialVersionUID = 1L;
 		

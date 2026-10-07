@@ -123,6 +123,14 @@ public class Script {
 						double m = num_w_unit(tokens[2], "m", tokens[1]);
 						parms.z_range = (int) m;
 						break;
+					case "min/maj":	// minor lines per major
+						double l = num_w_unit(tokens[2], null, tokens[1]);
+						parms.topo_major = (int) l;
+						break;
+					case "z_minor":	// meters per minor line
+						m = num_w_unit(tokens[2], "m", tokens[1]);
+						parms.topo_minor = (int) m;
+						break;
 					case "lat":
 						double lat = num_w_unit(tokens[2], null, tokens[1]);
 						parms.latitude = lat;

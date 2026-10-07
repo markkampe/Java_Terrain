@@ -1,0 +1,121 @@
+# TODO
+# Problems:
+#	- two region strings not showing
+#	_ rivers end at 0 rather than sea_level
+#	_ sea level not being set on slider from script
+#	_ when is the view menu being recomputed?
+
+# map identification
+set region "Scripting Examples"
+set author "Sagredo"
+set description "worldBuilder script, illustrating all supported commands"
+
+# land-mass location and orientation
+set lat 34.05
+set lon 118.24
+set z_scale 4000m	# +/- 2000m
+set xy_scale 250km	# 250km on a side
+
+# continental elevation and slope
+raise <-0.5,-0.5>-<0.5,0.5> 100m
+slope 45 0.001		# axis, dz/dx
+
+# FIX ... doesn't set slider, rivers ignore
+#sealevel -100m	
+
+# display options
+#   Topo, Rain, Water, Erode, Minerals, Flora, Animals, Cities
+set z_minor 25		# minor topo-line / 25m
+set min/maj 4		# major topo-lines every 100m
+display CAFMWRT
+
+# a few rain bands (to provide contrast)
+rainfall <-0.50,-0.50>-<0.50,-0.30>  100
+region <0.40,-0.40> "rainfall 100cm/y"
+
+rainfall <-0.50,-0.25>-<0.50,-0.05>  200cm/y
+region <0.40,-0.150> "rainfall 200cm/y"
+
+rainfall <-0.50,0.00>-<0.50,0.20>  300cm/y
+region <0.35,0.10> "rainfall 300cm/y"
+
+rainfall <-0.50,0.25>-<0.50,0.45>  400cm/y
+region <0.10,0.35> "rainfall 400cm/y"
+
+# mountain <x,y> height radius [profile]
+outline square
+mountain <-0.35,-0.35> 0.10 0.10 round
+region <-0.40,-0.35> "mountain: h=200m, r=25km"
+
+# ridge <x1,y1>-<x2,y2> height radius [profile]
+outline elipse
+ridge <-0.10,-0.45>-<-0.10,-0.25> 200m 10km cone
+region <-0.20,-0.35> "conical ridge: h=200m, r=10km"
+
+# mountain <x,y> height radius [profile]
+outline square
+mountain <0.15,-0.35> .1km 20000m flat
+region <0.10,-0.35> "plateau: h=100m, r=20km"
+
+# pit <x,y> height radius profile
+outline square
+pit <-0.35,-0.15> -0.05 0.04 round
+region <-0.35,-0.10> "pit: h=-100m, r=10km"
+# FIX string not showing properly
+
+# valley <x1,y1>-<x2,y2> height radius [profile]
+valley <-0.20,-0.15>-<0.00,-0.15> -150m 10km cone
+region <-0.20,-0.10> "conical valley: h=-150m, r=10km"
+# FIX string not showing properly
+
+# civilization <x,y> name description
+region	<0.12,-0.20> "Region Name"	"created region"
+capital	<0.1,-0.17> Capital		"created capital"
+city	<0.2,-0.17> City		"created city"
+town	<0.1,-0.12> Town		"created town"
+village	<0.2,-0.12> Village		"created village"
+
+# river <x,y> flow-rate
+river <-0.5,0.0> 200m3/s
+region <-0.5,0.05> "river: 200m3/s"
+
+# minerals <x1,y1>-<x2,y2> type
+minerals <-0.45,0.0>-<-0.40,0.1>   "Sand Stone"
+minerals <-0.35,0.0>-<-0.30,0.1>   "Lime Stone"
+minerals <-0.25,0.0>-<-0.20,0.1>   Marble
+minerals <-0.15,0.0>-<-0.10,0.1>   Granite
+minerals <-0.05,0.0>-<0.00,0.1>    Basalt
+minerals  <0.05,0.0>-<0.10,0.1>	   "Copper Ore"
+minerals  <0.15,0.0>-<0.20,0.1>	   "Iron Ore"
+minerals  <0.25,0.0>-<0.30,0.1>	   Silver
+minerals  <0.35,0.0>-<0.40,0.1>	   Gold
+
+# flora <x1,y1>-<x2,y2> type
+flora <-0.45,0.15>-<-0.40,0.25>   Taiga
+flora <-0.35,0.15>-<-0.30,0.25>   Temperate_Rainforest
+flora <-0.25,0.15>-<-0.20,0.25>   Tropical_Rainforest
+flora <-0.15,0.15>-<-0.10,0.25>   Tropical_Forest
+flora <-0.05,0.15>-<0.00,0.25>    Riperian
+flora  <0.05,0.15>-<0.10,0.25>    Marsh
+flora  <0.15,0.15>-<0.20,0.25>    Savanna
+flora  <0.25,0.15>-<0.30,0.25>    Grassland
+flora  <0.35,0.15>-<0.40,0.25>    Tundra
+flora  <0.45,0.15>-<0.50,0.25>    Desert
+
+# fauna <x1,y1>-<x2,y2> type
+#   Fish, Birds, Rabbits, Foxes, Deer, Bear
+fauna <-0.35,0.30>-<-0.30,0.40>   Fish
+fauna <-0.25,0.30>-<-0.20,0.40>   Birds
+fauna <-0.15,0.30>-<-0.10,0.40>   Rabbits
+fauna <-0.05,0.30>-<0.00,0.40>    Foxes
+fauna  <0.05,0.30>-<0.10,0.40>    Deer
+fauna  <0.15,0.30>-<0.20,0.40>    Bear
+
+# entrypoint ... not yet implemented
+# exitpoint ...	 not yet implemented
+# other operations:
+#   entrypoint exitpoint
+#   raise       <>-<> height
+#   lower       <>-<> height
+#   exaggerate  <>-<> multiple
+#   how to create trade routes

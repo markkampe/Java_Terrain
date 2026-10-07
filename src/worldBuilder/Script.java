@@ -77,17 +77,20 @@ public class Script {
 				return(DO_NOT_EXIT);
 			}
 
-			lex(line);
-
-			// skip comments and blank lines
-			if (tokens[0] == null)
+			// ignore blank lines
+			if (line.length() < 2)
 				continue;
-
-			cmdNum++;
+			
+			lex(line);
 			if (parms.debug_level >= SCRIPT_DEBUG)
 				System.out.println(" ... " + line);
 
+			// ignore lines containing only comments
+			if (tokens[0] == null)
+				continue;
+
 			// process the command
+			cmdNum++;
 			switch(tokens[0]) {
 			case "sleep":	// seconds
 				int seconds = (tokens[1] == null) ? 5 : (int) num_w_unit(tokens[1], "s", "sleep");
@@ -469,8 +472,11 @@ public class Script {
 				in_token = false;
 				continue;
 			}
+			// a # comment ends a line
+			if (c == '#' && !in_token)
+				break;
 			
-			// slash-slash ends a line
+			// a slash-slash comment ends a line
 			if (c == '/' && line.charAt(pos+1) == '/' && !in_token)
 				break;
 

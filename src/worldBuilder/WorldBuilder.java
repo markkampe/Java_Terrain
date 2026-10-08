@@ -490,6 +490,11 @@ public class WorldBuilder  extends JFrame
 				filename = d.getSelectedFile().getPath();
 				Script run = new Script(filename);
 				run.process(map);
+
+				// script may have changed menus and sliders
+				updateDisplayMenus(parms.display_options);
+				seaLevel.setValue((int) (parms.sea_level * parms.z_range));
+
 				// XXX support exit from a manually run script?
 				//if (ret != Script.DO_NOT_EXIT)
 				// 	System.exit(ret);
@@ -807,13 +812,16 @@ public class WorldBuilder  extends JFrame
 		
 		// initialize the display type and options menus
 		w.window.setDisplay(parms.display_options, true);
-		w.updateDisplayMenus(parms.display_options);
 		
 		// see if we were given a script to run
 		if (run != null) {
 			int result = run.process(w.map);
 			if (result != Script.DO_NOT_EXIT)
 				System.exit(result);
+
+			// it may have changed sea level slider
+			w.seaLevel.setValue((int) (parms.sea_level * parms.z_range));
 		}
+		w.updateDisplayMenus(parms.display_options);
 	}
 }

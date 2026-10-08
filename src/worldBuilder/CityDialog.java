@@ -180,15 +180,17 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 * @param s
 		 */
 		public static String lexName(String s) {
-			// type: name - description
-			int dash = s.indexOf('-');
-			if (dash > 1) {
-				int colon = s.indexOf(':');
-				if (colon > 0 && dash > colon)
-					return s.substring(colon + 2, dash - 1);
+			// type: name; description
+			int colon = s.indexOf(':');
+			int semicolon = s.indexOf(';');
+			if (colon > 0)
+				if (semicolon > colon)
+					return s.substring(colon + 2, semicolon);
 				else
-					return s.substring(0, dash - 1);
-			} else
+					return s.substring(colon + 2);
+			if (semicolon > 0)
+				return s.substring(0, semicolon);
+			else
 				return(s);
 		}
 		
@@ -198,9 +200,9 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		 */
 		public static String lexDesc(String s) {
 			// type: name - description
-			int dash = s.indexOf('-');
-			if (dash > 1)
-				return s.substring(dash + 2);
+			int semicolon = s.indexOf(';');
+			if (semicolon > 1)
+				return s.substring(semicolon + 2);
 			else
 				return s;
 		}
@@ -211,8 +213,8 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		private void confirmPoint() {
 			String s = type.getText();
 			nameMap[chosenPoint] = s.equals("") ? 
-					String.format("%s - %s", name.getText(), descr.getText()) :
-					String.format("%s: %s - %s", s, name.getText(), descr.getText());
+					String.format("%s; %s", name.getText(), descr.getText()) :
+					String.format("%s: %s; %s", s, name.getText(), descr.getText());
 					window.repaint();
 		}
 		

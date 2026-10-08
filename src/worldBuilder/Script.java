@@ -434,7 +434,7 @@ public class Script {
 					String entry = tokens[0].equals("region") ? "" : tokens[0] + ": ";
 					entry += tokens[2];
 					if (tokens[3] != null)
-						entry += " - " +  tokens[3];
+						entry += "; " +  tokens[3];
 					map.addName(entry, xy.x, xy.y);
 					
 					if (parms.debug_level > 0)

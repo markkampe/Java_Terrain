@@ -59,14 +59,14 @@ region <0.02,-0.35> "plateau: h=100m, r=20km"
 # pit <x,y> height radius profile
 outline square
 pit <-0.35,-0.15> -0.05 0.04 round
-region <-0.40,-0.15> "pit: h=100m, r=10km"
+region <-0.40,-0.15> "pit: h=-100m, r=10km"
 
 # valley <x1,y1>-<x2,y2> height radius [profile]
 valley <-0.20,-0.15>-<0.00,-0.15> -150m 10km cone
-region <-0.15,-0.15> "valley: h=150m, r=10km"
+region <-0.15,-0.15> "valley: h-=150m, r=10km"
 
 # points-of-interest <x,y> name description
-region	<0.12,-0.20> "Points of Interest"
+region	<0.12,-0.20> "Points of Interest" "just a title"
 capital	<0.10,-0.17> Metropolis		"capital of the empire"
 city	<0.20,-0.17> Gotham		"the big city"
 town	<0.10,-0.12> Inverness		"a nice town"

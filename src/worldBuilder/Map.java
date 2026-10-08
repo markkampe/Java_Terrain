@@ -50,7 +50,7 @@ public class Map {
 	public String faunaNames[];	// import/export name for each fauna type
 
 	// per MeshPoint information
-	private String nameMap[];	// name/description of each mesh POint
+	private String nameMap[];	// name/description of each mesh Point
 	private double heightMap[]; // Height of each mesh point (z)
 	private double soilMap[];	// Soil type of each mesh point
 	private double rainMap[];	// Rainfall of each mesh point (cm/y)

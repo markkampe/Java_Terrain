@@ -1,9 +1,10 @@
-# TODO
-# Problems:
-#	- two region strings not showing
-#	_ rivers end at 0 rather than sea_level
-#	_ sea level not being set on slider from script
-#	_ when is the view menu being recomputed?
+#
+# Sample map creation script, illustraing all of the supported commands
+#
+# Note:
+#       x/y coordinates are given as a fraction of the xy_scale
+#	x/y sizes can be in 'm', 'km' or fraction of the xy_scale
+#	z sizes can be in 'm', 'km' or a fraction of the z_scale
 
 # map identification
 set region "Scripting Examples"
@@ -19,15 +20,13 @@ set xy_scale 250km	# 250km on a side
 # continental elevation and slope
 raise <-0.5,-0.5>-<0.5,0.5> 100m
 slope 45 0.001		# axis, dz/dx
-
-# FIX ... doesn't set slider, rivers ignore
-#sealevel -100m	
+# sealevel -1m		# probably better done with "raise/lower"
 
 # display options
 #   Topo, Rain, Water, Erode, Minerals, Flora, Animals, Cities
 set z_minor 25		# minor topo-line / 25m
 set min/maj 4		# major topo-lines every 100m
-display CAFMWRT
+display TRWMFAC
 
 # a few rain bands (to provide contrast)
 rainfall <-0.50,-0.50>-<0.50,-0.30>  100
@@ -37,36 +36,34 @@ rainfall <-0.50,-0.25>-<0.50,-0.05>  200cm/y
 region <0.40,-0.150> "rainfall 200cm/y"
 
 rainfall <-0.50,0.00>-<0.50,0.20>  300cm/y
-region <0.35,0.10> "rainfall 300cm/y"
+region <0.32,0.12> "rainfall 300cm/y"
 
 rainfall <-0.50,0.25>-<0.50,0.45>  400cm/y
-region <0.10,0.35> "rainfall 400cm/y"
+region <0.15,0.27> "rainfall 400cm/y"
 
 # mountain <x,y> height radius [profile]
 outline square
 mountain <-0.35,-0.35> 0.10 0.10 round
-region <-0.40,-0.35> "mountain: h=200m, r=25km"
+region <-0.43,-0.35> "mountain: h=200m, r=25km"
 
 # ridge <x1,y1>-<x2,y2> height radius [profile]
 outline elipse
 ridge <-0.10,-0.45>-<-0.10,-0.25> 200m 10km cone
-region <-0.20,-0.35> "conical ridge: h=200m, r=10km"
+region <-0.18,-0.35> "conical ridge: h=200m, r=10km"
 
 # mountain <x,y> height radius [profile]
 outline square
-mountain <0.15,-0.35> .1km 20000m flat
-region <0.10,-0.35> "plateau: h=100m, r=20km"
+mountain <0.10,-0.35> .1km 20000m flat
+region <0.02,-0.35> "plateau: h=100m, r=20km"
 
 # pit <x,y> height radius profile
 outline square
 pit <-0.35,-0.15> -0.05 0.04 round
-region <-0.35,-0.10> "pit: h=-100m, r=10km"
-# FIX string not showing properly
+region <-0.40,-0.15> "pit: h=100m, r=10km"
 
 # valley <x1,y1>-<x2,y2> height radius [profile]
 valley <-0.20,-0.15>-<0.00,-0.15> -150m 10km cone
-region <-0.20,-0.10> "conical valley: h=-150m, r=10km"
-# FIX string not showing properly
+region <-0.15,-0.15> "valley: h=150m, r=10km"
 
 # civilization <x,y> name description
 region	<0.12,-0.20> "Region Name"	"created region"
@@ -77,7 +74,7 @@ village	<0.2,-0.12> Village		"created village"
 
 # river <x,y> flow-rate
 river <-0.5,0.0> 200m3/s
-region <-0.5,0.05> "river: 200m3/s"
+region <-0.49,0.01> "river: 200m3/s"
 
 # minerals <x1,y1>-<x2,y2> type
 minerals <-0.45,0.0>-<-0.40,0.1>   "Sand Stone"
@@ -89,6 +86,16 @@ minerals  <0.05,0.0>-<0.10,0.1>	   "Copper Ore"
 minerals  <0.15,0.0>-<0.20,0.1>	   "Iron Ore"
 minerals  <0.25,0.0>-<0.30,0.1>	   Silver
 minerals  <0.35,0.0>-<0.40,0.1>	   Gold
+
+region <-0.45,0.05> "Sand Stone"
+region <-0.35,0.05> "Lime Stone"
+region <-0.25,0.05> "Marble"
+region <-0.15,0.05> "Granite"
+region <-0.05,0.05> "Basalt"
+region  <0.05,0.05> "Copper"
+region  <0.15,0.05> "Iron"
+region  <0.25,0.05> "Silver"
+region  <0.35,0.05> "Gold"
 
 # flora <x1,y1>-<x2,y2> type
 flora <-0.45,0.15>-<-0.40,0.25>   Taiga
@@ -102,6 +109,17 @@ flora  <0.25,0.15>-<0.30,0.25>    Grassland
 flora  <0.35,0.15>-<0.40,0.25>    Tundra
 flora  <0.45,0.15>-<0.50,0.25>    Desert
 
+region <-0.45,0.20>	"Taiga"
+region <-0.35,0.20>	"Temperate"
+region <-0.25,0.20>	"Rainforest"
+region <-0.15,0.20>	"Tropical"
+region <-0.05,0.20>	"Riperian"
+region  <0.05,0.20>	"Marsh"
+region  <0.15,0.20>	"Savanna"
+region  <0.25,0.20>	"Grassland"
+region  <0.35,0.20>	"Tundra"
+region  <0.45,0.20>	"Desert"
+
 # fauna <x1,y1>-<x2,y2> type
 #   Fish, Birds, Rabbits, Foxes, Deer, Bear
 fauna <-0.35,0.30>-<-0.30,0.40>   Fish
@@ -111,11 +129,14 @@ fauna <-0.05,0.30>-<0.00,0.40>    Foxes
 fauna  <0.05,0.30>-<0.10,0.40>    Deer
 fauna  <0.15,0.30>-<0.20,0.40>    Bear
 
+region <-0.35,0.35> Fish
+region <-0.25,0.35> Birds
+region <-0.15,0.35> Rabbits
+region <-0.05,0.35> Foxes
+region  <0.05,0.35> Deer
+region  <0.15,0.35> Bear
+
 # entrypoint ... not yet implemented
 # exitpoint ...	 not yet implemented
-# other operations:
-#   entrypoint exitpoint
-#   raise       <>-<> height
-#   lower       <>-<> height
 #   exaggerate  <>-<> multiple
 #   how to create trade routes

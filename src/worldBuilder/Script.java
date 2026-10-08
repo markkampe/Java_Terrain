@@ -443,6 +443,20 @@ public class Script {
 				}
 				break;
 
+			case "traderoute":	// traderoute <x1,y1>-<x2,y2>
+				if (tokens[1] == null)
+					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. traderoute <x,y>-<x,y>", filename, lineNum, line));
+				else {
+					XY_pos xy = position(tokens[1], "end-points");
+					if (xy.x == xy.x2 && xy.y == xy.y2)
+						System.err.println(String.format("Error: %s[%d] \"%s\" - two end-points required", filename, lineNum, line));
+					else {
+						System.err.println(String.format("FIX traderoute from <%.5f,%.5f> - <%.5f,%.5f>",
+							xy.x, xy.y, xy.x2, xy.y2));
+					}
+				}
+				break;
+					
 			case "exit":	// [optional code]
 				if (parms.debug_level > 0)
 					System.out.println("Processed " + cmdNum + " commands from " + filename + " (and exiting)");

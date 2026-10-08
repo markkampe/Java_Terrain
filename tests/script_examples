@@ -65,12 +65,19 @@ region <-0.40,-0.15> "pit: h=100m, r=10km"
 valley <-0.20,-0.15>-<0.00,-0.15> -150m 10km cone
 region <-0.15,-0.15> "valley: h=150m, r=10km"
 
-# civilization <x,y> name description
-region	<0.12,-0.20> "Region Name"	"created region"
-capital	<0.1,-0.17> Capital		"created capital"
-city	<0.2,-0.17> City		"created city"
-town	<0.1,-0.12> Town		"created town"
-village	<0.2,-0.12> Village		"created village"
+# points-of-interest <x,y> name description
+region	<0.12,-0.20> "Points of Interest"
+capital	<0.10,-0.17> Metropolis		"capital of the empire"
+city	<0.20,-0.17> Gotham		"the big city"
+town	<0.10,-0.12> Inverness		"a nice town"
+village	<0.20,-0.12> Willowmere		"in the boonies"
+entrypoint <0.10,-0.09> "Eintrit"	"teleport pad"
+exitpoint  <0.20,-0.09>	"Ausgang"	"dimensional gate"
+
+# trade routes between points of interest
+traderoute <0.10,-0.17>-<0.20,-0.17>	# Metropolis->Gotham
+traderoute <0.10,-0.17>-<0.10,-0.22>	# Metropolis->Invernes
+traderoute <0.10,-0.12>-<0.20,-0.12>	# Inverness->Willowmere
 
 # river <x,y> flow-rate
 river <-0.5,0.0> 200m3/s
@@ -136,7 +143,5 @@ region <-0.05,0.35> Foxes
 region  <0.05,0.35> Deer
 region  <0.15,0.35> Bear
 
-# entrypoint ... not yet implemented
-# exitpoint ...	 not yet implemented
 #   exaggerate  <>-<> multiple
 #   how to create trade routes

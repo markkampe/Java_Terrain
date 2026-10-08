@@ -30,43 +30,43 @@ display TRWMFAC
 
 # a few rain bands (to provide contrast)
 rainfall <-0.50,-0.50>-<0.50,-0.30>  100
-region <0.40,-0.40> "rainfall 100cm/y"
+region <0.40,-0.40> "rainfall 100cm/y"		# caption
 
 rainfall <-0.50,-0.25>-<0.50,-0.05>  200cm/y
-region <0.40,-0.150> "rainfall 200cm/y"
+region <0.40,-0.150> "rainfall 200cm/y"		# caption
 
 rainfall <-0.50,0.00>-<0.50,0.20>  300cm/y
-region <0.32,0.12> "rainfall 300cm/y"
+region <0.32,0.12> "rainfall 300cm/y"		# caption
 
 rainfall <-0.50,0.25>-<0.50,0.45>  400cm/y
-region <0.15,0.27> "rainfall 400cm/y"
+region <0.15,0.27> "rainfall 400cm/y"		# caption
 
 # mountain <x,y> height radius [profile]
 outline square
 mountain <-0.35,-0.35> 0.10 0.10 round
-region <-0.43,-0.35> "mountain: h=200m, r=25km"
+region <-0.43,-0.35> "mountain: h=200m, r=25km"	# caption
 
 # ridge <x1,y1>-<x2,y2> height radius [profile]
 outline elipse
 ridge <-0.10,-0.45>-<-0.10,-0.25> 200m 10km cone
-region <-0.18,-0.35> "conical ridge: h=200m, r=10km"
+region <-0.18,-0.35> "conical ridge: h=200m, r=10km"	# caption
 
 # mountain <x,y> height radius [profile]
 outline square
 mountain <0.10,-0.35> .1km 20000m flat
-region <0.02,-0.35> "plateau: h=100m, r=20km"
+region <0.02,-0.35> "plateau: h=100m, r=20km"	# caption
 
 # pit <x,y> height radius profile
 outline square
 pit <-0.35,-0.15> -0.05 0.04 round
-region <-0.40,-0.15> "pit: h=-100m, r=10km"
+region <-0.40,-0.15> "pit: h=-100m, r=10km"	# caption
 
 # valley <x1,y1>-<x2,y2> height radius [profile]
 valley <-0.20,-0.15>-<0.00,-0.15> -150m 10km cone
-region <-0.15,-0.15> "valley: h-=150m, r=10km"
+region <-0.15,-0.15> "valley: h=-150m, r=10km"	# caption
 
 # points-of-interest <x,y> name description
-region	<0.12,-0.20> "Points of Interest" "just a title"
+region	<0.12,-0.20> "Points of Interest" "caption"
 capital	<0.10,-0.17> Metropolis		"capital of the empire"
 city	<0.20,-0.17> Gotham		"the big city"
 town	<0.10,-0.12> Inverness		"a nice town"
@@ -94,15 +94,15 @@ minerals  <0.15,0.0>-<0.20,0.1>	   "Iron Ore"
 minerals  <0.25,0.0>-<0.30,0.1>	   Silver
 minerals  <0.35,0.0>-<0.40,0.1>	   Gold
 
-region <-0.45,0.05> "Sand Stone"
-region <-0.35,0.05> "Lime Stone"
-region <-0.25,0.05> "Marble"
-region <-0.15,0.05> "Granite"
-region <-0.05,0.05> "Basalt"
-region  <0.05,0.05> "Copper"
-region  <0.15,0.05> "Iron"
-region  <0.25,0.05> "Silver"
-region  <0.35,0.05> "Gold"
+region <-0.45,0.05> "Sand Stone"	# caption
+region <-0.35,0.05> "Lime Stone"	# caption
+region <-0.25,0.05> "Marble"		# caption
+region <-0.15,0.05> "Granite"		# caption
+region <-0.05,0.05> "Basalt"		# caption
+region  <0.05,0.05> "Copper"		# caption
+region  <0.15,0.05> "Iron"		# caption
+region  <0.25,0.05> "Silver"		# caption
+region  <0.35,0.05> "Gold"		# caption
 
 # flora <x1,y1>-<x2,y2> type
 flora <-0.45,0.15>-<-0.40,0.25>   Taiga
@@ -116,16 +116,16 @@ flora  <0.25,0.15>-<0.30,0.25>    Grassland
 flora  <0.35,0.15>-<0.40,0.25>    Tundra
 flora  <0.45,0.15>-<0.50,0.25>    Desert
 
-region <-0.45,0.20>	"Taiga"
-region <-0.35,0.20>	"Temperate"
-region <-0.25,0.20>	"Rainforest"
-region <-0.15,0.20>	"Tropical"
-region <-0.05,0.20>	"Riperian"
-region  <0.05,0.20>	"Marsh"
-region  <0.15,0.20>	"Savanna"
-region  <0.25,0.20>	"Grassland"
-region  <0.35,0.20>	"Tundra"
-region  <0.45,0.20>	"Desert"
+region <-0.45,0.20>	"Taiga"		# caption
+region <-0.35,0.20>	"Temperate"	# caption
+region <-0.25,0.20>	"Rainforest"	# caption
+region <-0.15,0.20>	"Tropical"	# caption
+region <-0.05,0.20>	"Riperian"	# caption
+region  <0.05,0.20>	"Marsh"		# caption
+region  <0.15,0.20>	"Savanna"	# caption
+region  <0.25,0.20>	"Grassland"	# caption
+region  <0.35,0.20>	"Tundra"	# caption
+region  <0.45,0.20>	"Desert"	# caption
 
 # fauna <x1,y1>-<x2,y2> type
 #   Fish, Birds, Rabbits, Foxes, Deer, Bear
@@ -136,12 +136,13 @@ fauna <-0.05,0.30>-<0.00,0.40>    Foxes
 fauna  <0.05,0.30>-<0.10,0.40>    Deer
 fauna  <0.15,0.30>-<0.20,0.40>    Bear
 
-region <-0.35,0.35> Fish
-region <-0.25,0.35> Birds
-region <-0.15,0.35> Rabbits
-region <-0.05,0.35> Foxes
-region  <0.05,0.35> Deer
-region  <0.15,0.35> Bear
+region <-0.35,0.35> Fish		# caption
+region <-0.25,0.35> Birds		# caption
+region <-0.15,0.35> Rabbits		# caption
+region <-0.05,0.35> Foxes		# caption
+region  <0.05,0.35> Deer		# caption
+region  <0.15,0.35> Bear		# caption
 
+# yet unused operations
 #   exaggerate  <>-<> multiple
-#   how to create trade routes
+#   lower <>-<> height			# but just like "raise"

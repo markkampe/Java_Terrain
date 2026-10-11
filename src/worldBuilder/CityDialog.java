@@ -30,7 +30,8 @@ public class CityDialog extends JFrame implements WindowListener, MapListener, A
 		private JButton delete;
 		private JButton cancel;
 		
-		public static final String[] typeList = {"capital", "city", "town", "village" };
+		public static final String[] typeList = {"capital", "city", "town", 
+												"village", "entrance", "exit" };
 		private JMenuItem typeMenuItems[];
 		
 		private static final long serialVersionUID = 1L;

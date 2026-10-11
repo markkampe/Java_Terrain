@@ -424,7 +424,7 @@ public class Script {
 			case "city":	// city <x1,y1> name [description]
 			case "town":	// town <x1,y1> name [description]
 			case "village":	// village <x1,y1> name [description]
-			case "entrypoint":	// entrypoint <x1,y1> name [description]
+			case "entrance":	// entrance <x1,y1> name [description]
 			case "exitpoint":	// exitpoint <x1,y1> name [description]
 				if (tokens[1] == null || tokens[2] == null)
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. %s <x,y> name [description]", 

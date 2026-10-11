@@ -118,11 +118,12 @@ public class MapWindow extends JPanel implements MouseListener, MouseMotionListe
 					InputStream s = getClass().getResourceAsStream(parms.icon_dir + "/" + filename);
 					if (s == null)
 						throw new IOException("not available to class loader");
-					else
+					else {
 						iconImages[i] = ImageIO.read(s);
+					}
 				}
 			} catch (IOException x) {
-				System.err.println("unable to open icon image " + filename);
+				System.err.println("unable to open icon image " + filename + " (" + x + ")");
 			}
 		}
 	}

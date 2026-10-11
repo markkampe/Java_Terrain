@@ -71,7 +71,7 @@ capital	<0.10,-0.17> Metropolis		"capital of the empire"
 city	<0.20,-0.17> Gotham		"the big city"
 town	<0.10,-0.12> Inverness		"a nice town"
 village	<0.20,-0.12> Willowmere		"in the boonies"
-entrance <0.10,-0.09> "Eintrit"	"teleport pad"
+entrypoint <0.10,-0.09> "Eintrit"	"teleport pad"
 exitpoint <0.20,-0.09>  "Ausgang"	"dimensional gate"
 
 # trade routes between points of interest

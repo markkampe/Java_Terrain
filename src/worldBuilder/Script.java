@@ -53,6 +53,7 @@ public class Script {
 		MapWindow window = map.window;
 		parms = Parameters.getInstance();
 		TerrainEngine t = new TerrainEngine(map);
+		TerritoryEngine te = new TerritoryEngine(map);
 		AttributeEngine a = new AttributeEngine(map);
 		
 		// auto-placement rules
@@ -444,17 +445,37 @@ public class Script {
 				break;
 
 			case "traderoute":	// traderoute <x1,y1>-<x2,y2>
-				if (tokens[1] == null)
+				if (tokens[1] == null) {
 					System.err.println(String.format("Error: %s[%d] \"%s\" - s.b. traderoute <x,y>-<x,y>", filename, lineNum, line));
-				else {
-					XY_pos xy = position(tokens[1], "end-points");
-					if (xy.x == xy.x2 && xy.y == xy.y2)
-						System.err.println(String.format("Error: %s[%d] \"%s\" - two end-points required", filename, lineNum, line));
-					else {
-						System.err.println(String.format("FIX traderoute from <%.5f,%.5f> - <%.5f,%.5f>",
-							xy.x, xy.y, xy.x2, xy.y2));
-					}
+					break;
 				}
+				XY_pos xy = position(tokens[1], "end-points");
+				if (xy.x == xy.x2 && xy.y == xy.y2) {
+					System.err.println(String.format("Error: %s[%d] \"%s\" - two end-points required", filename, lineNum, line));
+					break;
+				} 
+				
+				// compute cost of expanding out from each end-point
+				int terrestrial = 0;
+				te.reset();
+				int startpoint = map.mesh.choosePoint(xy.x, xy.y).index;
+				if (te.startFrom(startpoint))
+					terrestrial++;
+				int endpoint = map.mesh.choosePoint(xy.x2,  xy.y2).index;
+				if (te.startFrom(endpoint))
+					terrestrial++;
+				if (terrestrial == 0) {
+					System.err.println("Error: traderoutes cannot connect oceanic points");
+					break;
+				}
+				// find the lowest-cost path between them 
+				TradeRoute added = te.outwards(1,  terrestrial == 1);
+				if (added == null) {
+					System.err.println(String.format("failure to add traderoute from <%.5f,%.5f> - <%.5f,%.5f>",
+										xy.x, xy.y, xy.x2, xy.y2));
+					break;
+				}
+				window.repaint();
 				break;
 					
 			case "exit":	// [optional code]

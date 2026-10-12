@@ -71,13 +71,14 @@ capital	<0.10,-0.17> Metropolis		"capital of the empire"
 city	<0.20,-0.17> Gotham		"the big city"
 town	<0.10,-0.12> Inverness		"a nice town"
 village	<0.20,-0.12> Willowmere		"in the boonies"
-entrypoint <0.10,-0.09> "Eintrit"	"teleport pad"
-exitpoint <0.20,-0.09>  "Ausgang"	"dimensional gate"
+entrypoint <0.10,-0.08> "Eintrit"	"teleport pad"
+exitpoint  <0.20,-0.08> "Ausgang"	"dimensional gate"
 
 # trade routes between points of interest
 traderoute <0.10,-0.17>-<0.20,-0.17>	# Metropolis->Gotham
-traderoute <0.10,-0.17>-<0.10,-0.22>	# Metropolis->Invernes
+traderoute <0.10,-0.17>-<0.10,-0.12>	# Metropolis->Invernes
 traderoute <0.10,-0.12>-<0.20,-0.12>	# Inverness->Willowmere
+traderoute <0.205,-0.080>-<0.41,0.144>	# Ausgang->Ocean
 
 # river <x,y> flow-rate
 river <-0.5,0.0> 200m3/s
